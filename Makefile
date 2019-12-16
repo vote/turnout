@@ -10,6 +10,9 @@ migrate:
 shell:
 	docker-compose exec server /bin/bash
 
+clientshell:
+	docker-compose exec client /bin/bash
+
 lint:
 	docker-compose exec server bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive /app/ && \

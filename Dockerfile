@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y \
 ENV APP_DIR=/app \
     PYTHONBUFFERED=1
 WORKDIR $APP_DIR
-COPY requirements.txt $APP_DIR
+COPY app/requirements.txt $APP_DIR
 RUN pip install -r requirements.txt && rm -rf /root/.cache
 COPY app/ $APP_DIR/
 EXPOSE 8000

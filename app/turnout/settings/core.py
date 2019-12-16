@@ -93,6 +93,15 @@ TEMPLATES = [
 #### END TEMPLATE CONFIGURATION
 
 
+#### STATIC ASSET CONFIGURATION
+
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+STATICFILES_DIRS = (
+    os.path.join(BASE_PATH, 'dist'),
+)
+
+#### END ASSET CONFIGURATION
+
 #### AUTH CONFIGURATION
 
 AUTH_PASSWORD_VALIDATORS = [

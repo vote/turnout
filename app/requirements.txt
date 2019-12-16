@@ -11,3 +11,6 @@ black==19.10b0
 isort==4.3.*
 autoflake==1.3.*
 ipython==7.10.*
+django-smalluuid==1.1.*
+django_sekizai==1.0.*
+django-crispy-forms==1.8.*

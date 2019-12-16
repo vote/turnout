@@ -36,6 +36,15 @@ services:
       - postgres
       - redis
 
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile-client-dev
+    command: npm run develop
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+
 volumes:
   pgdata_turnout:
   redisdata_turnout:

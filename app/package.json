@@ -1,0 +1,28 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bootstrap": "^4.4.1",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^9.7.3",
+    "css-loader": "^3.3.2",
+    "exports-loader": "^0.7.0",
+    "node-sass": "^4.13.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.1",
+    "webpack": "^4.41.3",
+    "webpack-cli": "^3.3.10"
+  },
+  "scripts": {
+    "develop": "node_modules/webpack-cli/bin/cli.js --watch --env development"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
