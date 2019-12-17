@@ -15,8 +15,8 @@ clientshell:
 
 lint:
 	docker-compose exec server bash -c "autoflake \
-		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive /app/ && \
-		isort --recursive /app/ && black /app/"
+		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude */migrations/* /app/ && \
+		isort --recursive --skip */migrations/* /app/ && black --exclude */migrations/* /app/"
 
 ecrpush:
 	scripts/local_ecr_push.sh
