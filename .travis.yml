@@ -1,0 +1,21 @@
+language: python
+python:
+  - "3.7"
+cache:
+  directories:
+    - $HOME/.cache/pip
+env:
+  PIP_DOWNLOAD_CACHE=$HOME/.cache/pip
+before_install:
+  - pip install --upgrade pip
+script:
+  - echo "Run Test Here"
+notifications:
+  email: false
+deploy:
+  provider: script
+  script: bash scripts/travis_ecr_push.sh
+  on:
+    tags: true
+    all_branches: true
+    repo: vote/turnout
