@@ -14,3 +14,6 @@ ipython==7.10.*
 django-smalluuid==1.1.*
 django_sekizai==1.0.*
 django-crispy-forms==1.8.*
+django-reversion==3.0.*
+markdown==3.1.*
+djangorestframework==3.11.*

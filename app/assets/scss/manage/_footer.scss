@@ -1,0 +1,25 @@
+footer{
+    background: $black;
+    color: $medium-gray;
+    font-family: $worksans;
+    text-align: center;
+    height: 60px;
+    a{
+        color: $medium-gray;
+        &:active,
+        &:focus,
+        &:hover{
+            color: $white;
+            text-decoration: none;
+        }
+    }
+    padding: 20px 0;
+    @include media-breakpoint-down(sm){
+        padding: 30px 0;
+    }
+    font-size: 16px;
+    @include media-breakpoint-down(sm){
+        height: auto;
+        margin-bottom: 0;
+    }
+}

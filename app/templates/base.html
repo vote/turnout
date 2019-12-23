@@ -1,0 +1,28 @@
+{% load static sekizai_tags %}<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Turnout</title>
+
+    <meta name="robots" content="noindex">
+    <meta name="robots" content="noarchive">
+    {% block head %}
+    {% endblock head %}
+    <script src="{% static "bundle.js" %}"></script>
+</head>
+
+{# Body Class #}
+{% with_data "body-class" as body_classes %}
+
+<body {% block extrabody %}{% endblock %} class="{% for body_class in body_classes %}{{ body_class }} {% endfor %}">
+    {% end_with_data %}
+
+    {# Main Body #}
+    {% block body %}
+    {% endblock %}
+
+</body>
+
+</html>

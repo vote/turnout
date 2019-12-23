@@ -1,0 +1,51 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}{{ state }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state.name }}</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">{{ state.name }}</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Current Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in state_information %}
+                            <tr>
+                                <td scope="row">
+                                    <a href="{% url 'manage:election:update_information' state.pk field.field_type.slug %}">{{ field.field_type.slug }}</a>
+                                </td>
+                                <td scope="row">
+                                    {{ field.html|safe }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "manage/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static sekizai_tags crispy_forms_tags %}
+
+{% block body %}
+<div id="wrap" class="wrap">
+    {% block content %}
+    <div class="container" id="main">
+        {% block subnav %}{% endblock subnav %}
+        <div class="row">
+            <div class="col-md-6 offset-md-3 public-page-wrap">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Turnout</h2>
+                        <p class="subheading">Login to Turnout.</p>
+                        <form role="form" method="POST" action="">
+                            {{ form|crispy }}
+                            <button type="submit" class="btn btn-block btn-primary">Login</button>
+                            {% csrf_token %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content%}
+</div>
+{% endblock %}

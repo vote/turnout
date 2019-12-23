@@ -1,0 +1,29 @@
+/* Colors */
+$black: #272931;
+$blue: #00afd5;
+$gray: #f7f7f7;
+$medium-gray: #b2b2b5;
+$dark-gray: #1f2b39;
+$white: #ffffff;
+
+/* Typography settings */
+$base-font-size: 18px;
+
+$worksans: 'Work Sans', 'Helvetica Neue', Helvetica, Arial, Sans-Serif;
+
+$headings-font-family: $worksans;
+$headings-font-weight: 700;
+$headings-line-height: 1.05;
+$body-font-family: 'Source Sans Pro', serif;
+$body-line-height: 1.44;
+
+/* Link style variables */
+$link-color: $blue;
+$link-hover-color: darken($blue, 20%);
+$link-hover-decoration: none;
+
+/* Navbar */
+$navbar-light-color: lighten($black, 30%);
+
+$dropdown-border-radius: none;
+$dropdown-border-width: 1px;

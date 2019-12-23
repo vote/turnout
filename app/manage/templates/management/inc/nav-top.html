@@ -1,0 +1,46 @@
+{% load static %}
+<header class="container-fluid">
+    <div class="row position-relative">
+
+        <div class="col-md-2">
+            <div class="logo">
+                <a href="">
+                    <span class="sr-only">Turnout</span>
+                </a>
+            </div>
+
+        </div>
+        <div class="col-md-8">
+
+            <nav class="navbar-center">
+                <ul class="nav navbar-nav">
+                    <li class="nav-main-item nav-item">
+                    <li class="nav-main-item nav-item">
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
+                            Elections</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
+                            <a class="dropdown-item" href="">Information</a>
+                        </div>
+                    </li>
+                    <li class="nav-main-item nav-item">
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-settings-box"></span> Settings</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'admin:password_change' %}">Change Password</a>
+                            </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-md-2">
+            <nav class="navbar-right">
+                <ul class="nav navbar-nav">
+                    <li class="nav-main-item nav-item">
+                        <a class="" href=""><span class="mdi mdi-logout"></span></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+</header>

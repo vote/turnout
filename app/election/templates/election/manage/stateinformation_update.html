@@ -1,0 +1,30 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}{{ state_information.state }} {{ state_information.field_type }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <div class="card-header"><a href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a> {{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</div>
+            <div class="card-body">
+
+
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-block btn-primary">Update</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

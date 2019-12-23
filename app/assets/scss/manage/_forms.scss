@@ -1,0 +1,38 @@
+input {
+    font-family: "Work Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+
+form {
+    .textInput, .urlinput, .numberinput {
+        font-size: 20px;
+    }
+    input[type="file"] {
+        border: 0 !important;
+        outline: none;
+    }
+    .form-control {
+        &:focus {
+            box-shadow: none;
+            border: 1px solid #999 !important;
+        }
+        color: #000;
+        border-radius: 0;
+        -webkit-appearance: none;
+        -webkit-border-radius: 0px;
+    }
+    input[type="submit"], textarea {
+        &:focus {
+            border: 0 !important;
+        }
+    }
+    select.form-control:not([size]):not([multiple]) {
+        font-size: 20px;
+        height: 44px;
+    }
+    // Django crispy forms doesn't add all the relevant classes for errors on
+    // file inputs.
+    .invalid-feedback {
+        display: block;
+    }
+}

@@ -1,0 +1,15 @@
+.content-wrapper, .messages-list {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+.form-page {
+    .content-wrapper, .messages-list {
+        max-width: 1200px;
+    }
+}
+
+.alert {
+    margin-bottom: 20px;
+    margin-left: 15px;
+    margin-right: 15px;
+}

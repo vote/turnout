@@ -44,6 +44,8 @@ services:
     volumes:
       - ./app:/app
       - /app/node_modules
+    ports:
+      - "35729:35729"
 
 volumes:
   pgdata_turnout:

@@ -1,3 +1,5 @@
+import os
+
 import environs
 
 env = environs.Env()
@@ -5,7 +7,7 @@ env = environs.Env()
 
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = True
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
@@ -48,9 +50,9 @@ DJANGO_APPS = [
 ]
 
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = ["sekizai", "crispy_forms", "reversion", "rest_framework"]
 
-FIRST_PARTY_APPS = []
+FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
@@ -77,33 +79,34 @@ MIDDLEWARE = [
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
+                "sekizai.context_processors.sekizai",
                 "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 #### END TEMPLATE CONFIGURATION
 
 
 #### STATIC ASSET CONFIGURATION
 
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
-STATICFILES_DIRS = (
-    os.path.join(BASE_PATH, 'dist'),
-)
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
 
 #### END ASSET CONFIGURATION
 
 #### AUTH CONFIGURATION
 
+AUTH_USER_MODEL = "accounts.User"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -112,6 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
+LOGIN_URL = "/manage/login/"
 
 #### END AUTH CONFIGURATION
 

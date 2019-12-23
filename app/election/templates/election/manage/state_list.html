@@ -1,0 +1,39 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags %}
+
+{% block title %}List of States | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">States</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for state in states %}
+                        <tr>
+                            <td scope="row"><a
+                                    href="{% url 'manage:election:state' state.pk %}">{{ state.name }}</a>
+                            </td>                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+                {% include "manage/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

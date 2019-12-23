@@ -1,0 +1,14 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}{{ user.first_name }}'s Control Panel | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        Hey. This is where our control panel will be for the website and apps.
+    </div>
+
+</div>
+{% endblock %}

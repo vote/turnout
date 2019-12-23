@@ -3,12 +3,14 @@
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
 
+@import "variables";
+
 // Optional
 @import "~bootstrap/scss/root";
 @import "~bootstrap/scss/reboot";
 @import "~bootstrap/scss/type";
-@import "~bootstrap/scss/images";
-@import "~bootstrap/scss/code";
+//@import "~bootstrap/scss/images";
+//@import "~bootstrap/scss/code";
 @import "~bootstrap/scss/grid";
 @import "~bootstrap/scss/tables";
 @import "~bootstrap/scss/forms";
@@ -33,6 +35,27 @@
 @import "~bootstrap/scss/modal";
 @import "~bootstrap/scss/tooltip";
 @import "~bootstrap/scss/popover";
-@import "~bootstrap/scss/carousel";
+//@import "~bootstrap/scss/carousel";
 @import "~bootstrap/scss/utilities";
-@import "~bootstrap/scss/print";
+//@import "~bootstrap/scss/print";
+
+@import "common/sticky-footer";
+@import "common/base";
+
+.manage {
+    @import "manage/header";
+    @import "manage/typography";
+    @import "manage/core";
+    @import "manage/cards";
+    @import "manage/footer";
+    @import "manage/forms";
+    @import "manage/widgets";
+    @import "manage/pagination";
+    @import "manage/breadcrumb";
+}
+
+$mdi-font-path: "~@mdi/font/fonts/";
+@import "~@mdi/font/scss/materialdesignicons";
+
+$simple-line-font-path: "~simple-line-icons/fonts/";
+@import "~simple-line-icons/scss/simple-line-icons";

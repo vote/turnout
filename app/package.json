@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@mdi/font": "^4.7.95",
     "bootstrap": "^4.4.1",
+    "file-loader": "^5.0.2",
     "jquery": "^3.4.1",
-    "popper.js": "^1.16.0"
+    "popper.js": "^1.16.0",
+    "simple-line-icons": "^2.4.1"
   },
   "devDependencies": {
     "autoprefixer": "^9.7.3",
@@ -17,10 +20,11 @@
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.1",
     "webpack": "^4.41.3",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "webpack-livereload-plugin": "^2.2.0"
   },
   "scripts": {
-    "develop": "node_modules/webpack-cli/bin/cli.js --watch --env development"
+    "develop": "node_modules/webpack-cli/bin/cli.js --watch --env production"
   },
   "keywords": [],
   "author": "",
