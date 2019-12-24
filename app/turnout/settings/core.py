@@ -1,13 +1,13 @@
 import os
 
 import environs
-import requests
 
 env = environs.Env()
 
 
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = True
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
@@ -15,21 +15,6 @@ USE_I18N = True
 USE_L10N = True
 WSGI_APPLICATION = "turnout.wsgi.application"
 ROOT_URLCONF = "turnout.urls"
-
-
-##### ALLOWED HOSTS CONFIGURATION
-
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
-
-# From https://stackoverflow.com/questions/27720254/django-allowed-hosts-with-elb-healthcheck
-ALLOWED_HOSTS.append("localhost")
-try:
-    EC2_IP = requests.get("http://169.254.169.254/latest/meta-data/local-ipv4").text
-    ALLOWED_HOSTS.append(EC2_IP)
-except requests.exceptions.RequestException:
-    pass
-
-##### END HOSTS CONFIGURATION
 
 
 ##### DATABASE CONFIGURATION
@@ -69,7 +54,13 @@ DJANGO_APPS = [
 ]
 
 
-THIRD_PARTY_APPS = ["sekizai", "crispy_forms", "reversion", "rest_framework"]
+THIRD_PARTY_APPS = [
+    "sekizai",
+    "crispy_forms",
+    "reversion",
+    "rest_framework",
+    "django_alive",
+]
 
 FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
 
@@ -81,6 +72,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 ##### MIDDLEWARE CONFIGURATION
 
 MIDDLEWARE = [
+    "django_alive.middleware.healthcheck_bypass_host_check",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -145,3 +137,13 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_PATH, "static")
 
 #### END FILE CONFIGURATION
+
+
+#### DJANGO-ALIVE CONFIGURATION
+
+ALIVE_CHECKS = {
+    "django_alive.checks.check_database": {},
+    "django_alive.checks.check_migrations": {},
+}
+
+#### END ALIVE CONFIGURATION
