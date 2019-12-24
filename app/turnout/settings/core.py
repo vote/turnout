@@ -7,7 +7,7 @@ env = environs.Env()
 
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = True
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
@@ -19,7 +19,7 @@ ROOT_URLCONF = "turnout.urls"
 
 ##### DATABASE CONFIGURATION
 
-DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
+DATABASES = {"default": env.dj_db_url("DATABASE_URL", default="pgsql://postgres:turnout@postgres:5432/turnout")}
 
 ##### END DATABASE CONFIGURATION
 
@@ -123,5 +123,6 @@ LOGIN_URL = "/manage/login/"
 #### FILE CONFIGURATION
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_PATH, "static")
 
 #### END FILE CONFIGURATION
