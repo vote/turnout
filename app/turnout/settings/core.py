@@ -1,13 +1,13 @@
 import os
 
 import environs
+import requests
 
 env = environs.Env()
 
 
 SECRET_KEY = env.str("SECRET_KEY")
 DEBUG = True
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
@@ -17,9 +17,28 @@ WSGI_APPLICATION = "turnout.wsgi.application"
 ROOT_URLCONF = "turnout.urls"
 
 
+##### ALLOWED HOSTS CONFIGURATION
+
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
+
+# From https://stackoverflow.com/questions/27720254/django-allowed-hosts-with-elb-healthcheck
+ALLOWED_HOSTS.append("localhost")
+try:
+    EC2_IP = requests.get("http://169.254.169.254/latest/meta-data/local-ipv4").text
+    ALLOWED_HOSTS.append(EC2_IP)
+except requests.exceptions.RequestException:
+    pass
+
+##### END HOSTS CONFIGURATION
+
+
 ##### DATABASE CONFIGURATION
 
-DATABASES = {"default": env.dj_db_url("DATABASE_URL", default="pgsql://postgres:turnout@postgres:5432/turnout")}
+DATABASES = {
+    "default": env.dj_db_url(
+        "DATABASE_URL", default="pgsql://postgres:turnout@postgres:5432/turnout"
+    )
+}
 
 ##### END DATABASE CONFIGURATION
 

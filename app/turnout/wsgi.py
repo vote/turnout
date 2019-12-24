@@ -7,4 +7,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "turnout.settings")
 
 application = get_wsgi_application()
 application = WhiteNoise(application)
-application.add_files('/app/static', prefix='static/')
+application.add_files("/app/static", prefix="static/")

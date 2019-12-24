@@ -18,3 +18,4 @@ django-reversion==3.0.*
 markdown==3.1.*
 djangorestframework==3.11.*
 whitenoise==5.0.*
+requests==2.7.*
