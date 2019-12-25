@@ -34,6 +34,7 @@ services:
       - DJANGO_SETTINGS_MODULE=turnout.settings
       - DATABASE_URL=pgsql://postgres:turnout@postgres:5432/turnout
       - ALLOWED_HOSTS=*
+      - DEBUG=True
     depends_on:
       - postgres
       - redis

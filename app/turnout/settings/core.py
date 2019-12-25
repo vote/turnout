@@ -6,7 +6,7 @@ env = environs.Env()
 
 
 SECRET_KEY = env.str("SECRET_KEY")
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
