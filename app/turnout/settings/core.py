@@ -1,5 +1,6 @@
 import os
 
+import ddtrace.filters
 import environs
 
 env = environs.Env()
@@ -60,7 +61,7 @@ THIRD_PARTY_APPS = [
     "reversion",
     "rest_framework",
     "django_alive",
-    "ddtrace.contrib.django"
+    "ddtrace.contrib.django",
 ]
 
 FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
@@ -143,8 +144,14 @@ STATIC_ROOT = os.path.join(BASE_PATH, "static")
 #### DJANGO-ALIVE CONFIGURATION
 
 ALIVE_CHECKS = {
-    "django_alive.checks.check_database": {},
     "django_alive.checks.check_migrations": {},
 }
 
 #### END ALIVE CONFIGURATION
+
+
+#### DATADOG CONFIGURATION
+
+DATADOG_TRACE = {"FILTERS": {ddtrace.filters.FilterRequestsOnUrl(r".+/-/health/$")}}
+
+#### END DATADOG CONFIGURATION
