@@ -60,6 +60,7 @@ THIRD_PARTY_APPS = [
     "reversion",
     "rest_framework",
     "django_alive",
+    "ddtrace.contrib.django"
 ]
 
 FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
