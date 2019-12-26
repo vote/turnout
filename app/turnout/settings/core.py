@@ -152,6 +152,6 @@ ALIVE_CHECKS = {
 
 #### DATADOG CONFIGURATION
 
-DATADOG_TRACE = {"FILTERS": {ddtrace.filters.FilterRequestsOnUrl(r".+/-/health/$")}}
+DATADOG_TRACE = {"FILTERS": [ddtrace.filters.FilterRequestsOnUrl(r".+/-/health/$")]}
 
 #### END DATADOG CONFIGURATION
