@@ -1,6 +1,5 @@
 import os
 
-import ddtrace.filters
 import environs
 
 env = environs.Env()
@@ -152,6 +151,8 @@ ALIVE_CHECKS = {
 
 #### DATADOG CONFIGURATION
 
-DATADOG_TRACE = {"FILTERS": [ddtrace.filters.FilterRequestsOnUrl(r".+/-/health/$")]}
+DATADOG_TRACE = {
+    "TRACER": "turnout.tracer.tracer",
+}
 
 #### END DATADOG CONFIGURATION
