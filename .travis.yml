@@ -14,7 +14,7 @@ notifications:
   email: false
 deploy:
   provider: script
-  script: bash scripts/travis_ecr_push.sh
+  script: bash scripts/travis_deploy.sh
   on:
     tags: true
     all_branches: true
