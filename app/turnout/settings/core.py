@@ -1,6 +1,8 @@
 import os
 
 import environs
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 env = environs.Env()
 
@@ -153,6 +155,22 @@ ALIVE_CHECKS = {
 
 DATADOG_TRACE = {
     "TRACER": "turnout.tracer.tracer",
+    "TAGS": {"build": env.str("BUILD", default="")},
 }
 
 #### END DATADOG CONFIGURATION
+
+
+#### SENTRY CONFIGURATION
+
+RELEASE_TAG = env.str("TAG", default="")
+SENTRY_DSN = env.str("SENTRY_DSN", default="")
+if RELEASE_TAG and SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        send_default_pii=True,
+        release=f"turnout@{RELEASE_TAG}",
+    )
+
+#### END SENTRY CONFIGURATION
