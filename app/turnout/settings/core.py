@@ -171,6 +171,15 @@ if RELEASE_TAG and SENTRY_DSN:
         integrations=[DjangoIntegration()],
         send_default_pii=True,
         release=f"turnout@{RELEASE_TAG}",
+        environment=env.str("SERVER_GROUP", default=None),
     )
+
+    with sentry_sdk.configure_scope() as scope:
+        scope.set_tag("SERVER_GROUP", env.str("SERVER_GROUP", default=""))
+        scope.set_tag("CLOUD_DETAIL", env.str("CLOUD_DETAIL", default=""))
+        scope.set_tag("CLOUD_STACK", env.str("CLOUD_STACK", default=""))
+        scope.set_tag("build", env.str("BUILD", default=""))
+        scope.set_tag("tag", env.str("TAG", default=""))
+        scope.set_tag("allowed_hosts", ALLOWED_HOSTS)
 
 #### END SENTRY CONFIGURATION
