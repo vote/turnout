@@ -19,5 +19,5 @@ curl https://sentry.io/api/0/organizations/${SENTRY_ORG}/releases/ \
         \"repository\":\"vote/turnout\",
         \"commit\":\"${TRAVIS_COMMIT}\"
     }],
-    \"projects\":[\"turnout-staging\", \"turnout-prod\"]
+    \"projects\":[\"turnout\"]
 }"
