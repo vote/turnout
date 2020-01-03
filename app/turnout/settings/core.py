@@ -1,13 +1,16 @@
 import os
 
 import environs
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 env = environs.Env()
 
 
 SECRET_KEY = env.str("SECRET_KEY")
-DEBUG = True
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
@@ -19,7 +22,11 @@ ROOT_URLCONF = "turnout.urls"
 
 ##### DATABASE CONFIGURATION
 
-DATABASES = {"default": env.dj_db_url("DATABASE_URL")}
+DATABASES = {
+    "default": env.dj_db_url(
+        "DATABASE_URL", default="pgsql://postgres:turnout@postgres:5432/turnout"
+    )
+}
 
 ##### END DATABASE CONFIGURATION
 
@@ -50,7 +57,14 @@ DJANGO_APPS = [
 ]
 
 
-THIRD_PARTY_APPS = ["sekizai", "crispy_forms", "reversion", "rest_framework"]
+THIRD_PARTY_APPS = [
+    "sekizai",
+    "crispy_forms",
+    "reversion",
+    "rest_framework",
+    "django_alive",
+    "ddtrace.contrib.django",
+]
 
 FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
 
@@ -62,6 +76,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 ##### MIDDLEWARE CONFIGURATION
 
 MIDDLEWARE = [
+    "django_alive.middleware.healthcheck_bypass_host_check",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -123,5 +138,49 @@ LOGIN_URL = "/manage/login/"
 #### FILE CONFIGURATION
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_PATH, "static")
 
 #### END FILE CONFIGURATION
+
+
+#### DJANGO-ALIVE CONFIGURATION
+
+ALIVE_CHECKS = {
+    "django_alive.checks.check_migrations": {},
+}
+
+#### END ALIVE CONFIGURATION
+
+
+#### DATADOG CONFIGURATION
+
+DATADOG_TRACE = {
+    "TRACER": "turnout.tracer.tracer",
+    "TAGS": {"build": env.str("BUILD", default="")},
+}
+
+#### END DATADOG CONFIGURATION
+
+
+#### SENTRY CONFIGURATION
+
+RELEASE_TAG = env.str("TAG", default="")
+SENTRY_DSN = env.str("SENTRY_DSN", default="")
+if RELEASE_TAG and SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration(), RedisIntegration()],
+        send_default_pii=True,
+        release=f"turnout@{RELEASE_TAG}",
+        environment=env.str("CLOUD_STACK", default=None),
+    )
+
+    with sentry_sdk.configure_scope() as scope:
+        scope.set_tag("SERVER_GROUP", env.str("SERVER_GROUP", default=""))
+        scope.set_tag("CLOUD_DETAIL", env.str("CLOUD_DETAIL", default=""))
+        scope.set_tag("CLOUD_STACK", env.str("CLOUD_STACK", default=""))
+        scope.set_tag("build", env.str("BUILD", default=""))
+        scope.set_tag("tag", env.str("TAG", default=""))
+        scope.set_extra("allowed_hosts", ALLOWED_HOSTS)
+
+#### END SENTRY CONFIGURATION

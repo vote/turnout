@@ -6,4 +6,3 @@ WORKDIR $APP_DIR
 COPY app/package.json $APP_DIR
 COPY app/package-lock.json $APP_DIR
 RUN npm install
-CMD ["node_modules/webpack-cli/bin/cli.js"]

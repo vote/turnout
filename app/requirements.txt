@@ -2,9 +2,7 @@ django==2.2.*
 psycopg2==2.8.*
 environs==7.1.*
 dj-database-url==0.5.*
-gunicorn[gevent]==20.0.*
-psycogreen==1.0.*
-django-db-geventpool==3.1.*
+gunicorn==20.0.*
 django-redis==4.11.*
 ddtrace==0.31.*
 black==19.10b0
@@ -17,3 +15,6 @@ django-crispy-forms==1.8.*
 django-reversion==3.0.*
 markdown==3.1.*
 djangorestframework==3.11.*
+whitenoise==5.0.*
+django-alive==1.1.*
+sentry-sdk==0.13.*
