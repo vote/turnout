@@ -3,6 +3,7 @@ import os
 import environs
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 env = environs.Env()
 
@@ -168,7 +169,7 @@ SENTRY_DSN = env.str("SENTRY_DSN", default="")
 if RELEASE_TAG and SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(), RedisIntegration()],
         send_default_pii=True,
         release=f"turnout@{RELEASE_TAG}",
         environment=env.str("CLOUD_STACK", default=None),
