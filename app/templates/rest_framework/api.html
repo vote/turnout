@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load rest_framework sekizai_tags %}
+
+{% block title %}Turnout API{% endblock %}
+
+{% block body %}
+{% add_data "body-class" "api_browse" %}
+
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <div class="form-group">
+                <textarea class="form-control form-control-sm">{{ content|urlize_quoted_links }}</textarea>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

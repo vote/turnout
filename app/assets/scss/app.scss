@@ -54,6 +54,10 @@
     @import "manage/breadcrumb";
 }
 
+.api_browse {
+    @import "api/api";
+}
+
 $mdi-font-path: "~@mdi/font/fonts/";
 @import "~@mdi/font/scss/materialdesignicons";
 
