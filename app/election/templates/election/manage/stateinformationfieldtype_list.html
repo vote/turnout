@@ -1,0 +1,41 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags %}
+
+{% block title %}List of Fields | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">Field Information Types</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Slug</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in fieldtypes %}
+                        <tr>
+                            <td scope="row"><a href="{% url 'manage:election:fieldinformationtype' field.slug %}">{{ field.long_name }}</a>
+                            </td>
+                            <td scope="row">{{ field.slug }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "manage/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

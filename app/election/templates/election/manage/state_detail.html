@@ -24,6 +24,7 @@
                         <tr>
                             <th>Field</th>
                             <th>Current Value</th>
+                            <th>Notes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,6 +35,9 @@
                                 </td>
                                 <td scope="row">
                                     {{ field.html|safe }}
+                                </td>
+                                <td scope="row">
+                                    {{ field.notes|linebreaks }}
                                 </td>
                             </tr>
                         {% endfor %}

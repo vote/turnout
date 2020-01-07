@@ -1,20 +1,31 @@
 {% extends "management/manage_base.html" %}
 {% load sekizai_tags crispy_forms_tags %}
 
-{% block title %}{{ state_information.state }} {{ state_information.field_type }} | {{ block.super }}{% endblock title %}
+{% block title %}{{ state_information.state }} {{ state_information.field_type.long_name }} | {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="content-wrapper">
     <div class="col-lg-12">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
+                {% if request.GET.ref == "fieldinformationtype" %}
+                <li class="breadcrumb-item"><a href="{% url 'manage:election:fieldinformationtype_list' %}">Field Information Types</a>
+                </li>
+                <li class="breadcrumb-item"><a
+                        href="{% url 'manage:election:fieldinformationtype' state_information.field_type.slug %}">{{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state_information.state.name }}</li>
+                {% else %}
                 <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</li>
+                <li class="breadcrumb-item"><a
+                        href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state_information.field_type.long_name }} (
+                    {{ state_information.field_type.slug }} )</li>
+                {% endif %}
+
             </ol>
         </nav>
         <div class="card">
-            <div class="card-header"><a href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a> {{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</div>
+            <div class="card-header">{{ state_information.state.name }} {{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</div>
             <div class="card-body">
 
 

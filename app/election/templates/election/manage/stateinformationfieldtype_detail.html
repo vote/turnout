@@ -1,0 +1,56 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}{{ fieldtype }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:election:fieldinformationtype_list' %}">Field Information Types</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ fieldtype.long_name }} ( {{ fieldtype.slug }} )</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">{{ fieldtype.long_name }} ( {{ fieldtype.slug }} )</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Current Value</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for field in state_information %}
+                        <tr>
+                            <td scope="row">
+                                <a
+                                    href="{% url 'manage:election:update_information' field.state.pk field.field_type.slug %}?ref=fieldinformationtype">{{ field.state.name }}</a>
+                            </td>
+                            <td scope="row">
+                                {{ field.html|safe }}
+                            </td>
+                            <td scope="row">
+                                {{ field.notes|linebreaks }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "manage/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

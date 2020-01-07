@@ -12,7 +12,9 @@ class StateInfoSerializer(serializers.ModelSerializer):
 
 
 class StateSerializer(serializers.ModelSerializer):
-    state_information = serializers.SerializerMethodField(method_name="stateinformation_flat")
+    state_information = serializers.SerializerMethodField(
+        method_name="stateinformation_flat"
+    )
 
     def stateinformation_flat(self, obj):
         flat = {}

@@ -4,7 +4,7 @@
 
         <div class="col-md-2">
             <div class="logo">
-                <a href="">
+                <a href="{% url 'manage:home' %}">
                     <span class="sr-only">Turnout</span>
                 </a>
             </div>
@@ -20,7 +20,7 @@
                             Elections</a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
-                            <a class="dropdown-item" href="">Information</a>
+                            <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">State Information Fields</a>
                         </div>
                     </li>
                     <li class="nav-main-item nav-item">

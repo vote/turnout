@@ -5,7 +5,7 @@ from reversion.views import RevisionMixin
 
 from manage.mixins import ManageViewMixin
 
-from .models import State, StateInformation
+from .models import State, StateInformation, StateInformationFieldType
 
 
 class ElectionView(TemplateView):
@@ -33,6 +33,27 @@ class StateDetailView(ManageViewMixin, DetailView):
         return context
 
 
+class FieldInformationTypeListView(ManageViewMixin, ListView):
+    model = StateInformationFieldType
+    context_object_name = "fieldtypes"
+    template_name = "election/manage/stateinformationfieldtype_list.html"
+
+
+class FieldInformationTypeDetailView(ManageViewMixin, DetailView):
+    model = StateInformationFieldType
+    context_object_name = "fieldtype"
+    template_name = "election/manage/stateinformationfieldtype_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["state_information"] = StateInformation.objects.select_related().filter(
+            field_type=kwargs["object"]
+        )
+
+        return context
+
+
 class StateInformationUpdateView(ManageViewMixin, RevisionMixin, UpdateView):
     model = StateInformation
     queryset = StateInformation.objects.select_related()
@@ -48,4 +69,9 @@ class StateInformationUpdateView(ManageViewMixin, RevisionMixin, UpdateView):
         )
 
     def get_success_url(self):
+        if self.request.GET.get("ref") == "fieldinformationtype":
+            return reverse(
+                "manage:election:fieldinformationtype",
+                args=[self.object.field_type.slug],
+            )
         return reverse("manage:election:state", args=[self.object.state.pk])

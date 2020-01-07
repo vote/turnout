@@ -12,4 +12,14 @@ urlpatterns = [
         manage_views.StateInformationUpdateView.as_view(),
         name="update_information",
     ),
+    path(
+        "fieldinformationtype/",
+        manage_views.FieldInformationTypeListView.as_view(),
+        name="fieldinformationtype_list",
+    ),
+    path(
+        "fieldinformationtype/<slug:slug>/",
+        manage_views.FieldInformationTypeDetailView.as_view(),
+        name="fieldinformationtype",
+    ),
 ]
