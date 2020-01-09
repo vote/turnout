@@ -24,5 +24,11 @@ lint:
 dbshell:
 	bash scripts/rds_psql.sh
 
+shellprod:
+	ENVIRONMENT=prod bash scripts/remote_run.sh ${TAG}
+
+shellstaging:
+	ENVIRONMENT=staging bash scripts/remote_run.sh ${TAG}
+
 ecrpush:
 	scripts/local_ecr_push.sh
