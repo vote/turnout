@@ -33,7 +33,6 @@ class Command(BaseCommand):
             state = State.objects.filter(name__iexact=state_name).first()
             if not state:
                 self.stdout.write(f"Not Found {row['State']}")
-                print(f"Not Found {row['State']}")
                 continue
 
             fields = StateInformation.objects.filter(
