@@ -2,6 +2,8 @@ import os
 
 import environs
 import sentry_sdk
+from kombu import Queue
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
@@ -36,7 +38,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env.str("REDIS_URL", default="redis://localhost:6379"),
+        "LOCATION": env.str("REDIS_URL", default="redis://redis:6379"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": env.str("REDIS_KEY_PREFIX", default="turnout"),
     }
@@ -64,6 +66,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_alive",
     "ddtrace.contrib.django",
+    "django_celery_results",
 ]
 
 FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
@@ -137,6 +140,23 @@ REST_FRAMEWORK = {
 #### END REST FRAMEWORK CONFIGURATION
 
 
+#### CELERY CONFIGURATION
+
+CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_WORKER_CONCURRENCY = 6
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_QUEUES = {
+    Queue("default", routing_key="task.#"),
+}
+CELERY_BEAT_SCHEDULE = {}
+CELERY_TIMEZONE = "UTC"
+
+#### END CELERY CONFIGURATION
+
+
 #### AUTH CONFIGURATION
 
 AUTH_USER_MODEL = "accounts.User"
@@ -187,7 +207,7 @@ SENTRY_DSN = env.str("SENTRY_DSN", default="")
 if RELEASE_TAG and SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), RedisIntegration()],
+        integrations=[DjangoIntegration(), RedisIntegration(), CeleryIntegration()],
         send_default_pii=True,
         release=f"turnout@{RELEASE_TAG}",
         environment=env.str("CLOUD_STACK", default=None),
