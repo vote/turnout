@@ -12,15 +12,7 @@ class StateInfoSerializer(serializers.ModelSerializer):
 
 
 class StateSerializer(serializers.ModelSerializer):
-    state_information = serializers.SerializerMethodField(
-        method_name="stateinformation_flat"
-    )
-
-    def stateinformation_flat(self, obj):
-        flat = {}
-        for field in obj.stateinformation_set.select_related("field_type").all():
-            flat[field.field_type.slug] = field.text
-        return flat
+    state_information = StateInfoSerializer(source="stateinformation_set", many=True)
 
     class Meta:
         model = State
