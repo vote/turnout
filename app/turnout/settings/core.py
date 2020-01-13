@@ -67,9 +67,17 @@ THIRD_PARTY_APPS = [
     "django_alive",
     "ddtrace.contrib.django",
     "django_celery_results",
+    "phonenumber_field",
 ]
 
-FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
+FIRST_PARTY_APPS = [
+    "accounts",
+    "common",
+    "manage",
+    "multi_tenant",
+    "election",
+    "people",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
