@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import State, StateInformation
+from .models import State, StateInformation, StateInformationFieldType
 
 
 class StateInfoSerializer(serializers.ModelSerializer):
@@ -21,3 +21,8 @@ class StateSerializer(serializers.ModelSerializer):
             "name",
             "state_information",
         )
+
+class StateFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StateInformationFieldType
+        fields = ("slug", "long_name")
