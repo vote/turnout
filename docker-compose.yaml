@@ -36,6 +36,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - ALLOWED_HOSTS=*
       - DEBUG=True
+    env_file:
+      - .env
     depends_on:
       - postgres
       - redis
@@ -55,6 +57,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - ALLOWED_HOSTS=*
       - DEBUG=True
+    env_file:
+      - .env
     depends_on:
       - postgres
       - redis
@@ -74,6 +78,8 @@ services:
       - REDIS_URL=redis://redis:6379
       - ALLOWED_HOSTS=*
       - DEBUG=True
+    env_file:
+      - .env
     depends_on:
       - postgres
       - redis
@@ -89,6 +95,8 @@ services:
       - /app/node_modules
     ports:
       - "35729:35729"
+    env_file:
+      - .env
 
 volumes:
   pgdata_turnout:

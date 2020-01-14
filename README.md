@@ -5,6 +5,9 @@ The commands generally require `gnumake` and `docker` to be installed locally.
 
 ### General Development
 
+To launch you'll need a `.env` file in your project root. Review `.env.example` for examples of
+variables you can include in your file.
+
 To build run `make build`
 
 To run locally run `make up` then (while the server is up) in another shell run `make migrate`

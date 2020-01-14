@@ -8,6 +8,7 @@ celery-redbeat==0.13.*
 django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.31.*
+requests==2.22.*
 black==19.10b0
 isort==4.3.*
 autoflake==1.3.*

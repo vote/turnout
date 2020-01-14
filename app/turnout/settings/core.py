@@ -77,6 +77,7 @@ FIRST_PARTY_APPS = [
     "multi_tenant",
     "election",
     "people",
+    "verifier",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -148,6 +149,23 @@ REST_FRAMEWORK = {
 #### END REST FRAMEWORK CONFIGURATION
 
 
+#### CATALIST VERIFICATION SETTINGS
+
+CATALIST_ENABLED = env.bool("CATALIST_ENABLED", default=False)
+CATALIST_ID = env.str("CATALIST_ID", default="")
+CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
+CATALIST_URL_AUTH_TOKEN = env.str(
+    "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
+)
+CATALIST_URL_API_VERIFY = env.str(
+    "CATALIST_URL_API_VERIFY", default="http://catalist.local/api"
+)
+CATALIST_AUDIENCE_VERIFY = env.str("CATALIST_AUDIENCE_VERIFY", default="none")
+CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
+
+#### END CATALIST VERIFICATION SETTINGS
+
+
 #### CELERY CONFIGURATION
 
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
@@ -159,7 +177,12 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
-CELERY_BEAT_SCHEDULE = {}
+CELERY_BEAT_SCHEDULE = {
+    "sync-catalist-token": {
+        "task": "verifier.tasks.sync_catalist_token",
+        "schedule": 30,
+    },
+}
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION
@@ -230,3 +253,25 @@ if RELEASE_TAG and SENTRY_DSN:
         scope.set_extra("allowed_hosts", ALLOWED_HOSTS)
 
 #### END SENTRY CONFIGURATION
+
+
+#### LOGGING CONFIGURATION
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler",},},
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+        },
+        "verifier": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+    },
+}
+
+#### END LOGGING CONFIGURATION
