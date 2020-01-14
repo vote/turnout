@@ -26,3 +26,4 @@ whitenoise==5.0.*
 django-alive==1.1.*
 sentry-sdk==0.13.*
 watchdog==0.9.*
+pytest-django==3.8.*

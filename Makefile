@@ -16,6 +16,10 @@ shell:
 clientshell:
 	docker-compose exec client /bin/bash
 
+
+testpy:
+	docker-compose exec server pytest /app/
+
 lint:
 	docker-compose exec server bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \
