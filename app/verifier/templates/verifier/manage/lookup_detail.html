@@ -1,0 +1,17 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags pretty_json %}
+
+{% block title %}{{ lookup }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">{{ lookup }}</div>
+            <div class="card-body">
+                <pre>{{ lookup.response|pretty_json }}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

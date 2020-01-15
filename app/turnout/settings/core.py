@@ -135,15 +135,15 @@ STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
 #### REST FRAMEWORK CONFIGURATION
 
 DEFAULT_RENDERER_CLASSES = (
-    'rest_framework.renderers.JSONRenderer',
-    'rest_framework.renderers.BrowsableAPIRenderer',
+    "rest_framework.renderers.JSONRenderer",
+    "rest_framework.renderers.BrowsableAPIRenderer",
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
-    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
 }
 
 #### END REST FRAMEWORK CONFIGURATION
@@ -157,10 +157,10 @@ CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
 CATALIST_URL_AUTH_TOKEN = env.str(
     "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
 )
-CATALIST_URL_API_VERIFY = env.str(
-    "CATALIST_URL_API_VERIFY", default="http://catalist.local/api"
+CATALIST_URL_API_MATCH = env.str(
+    "CATALIST_URL_API_MATCH", default="http://catalist.local/api"
 )
-CATALIST_AUDIENCE_VERIFY = env.str("CATALIST_AUDIENCE_VERIFY", default="none")
+CATALIST_AUDIENCE_MATCH = env.str("CATALIST_AUDIENCE_MATCH", default="none")
 CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
 
 #### END CATALIST VERIFICATION SETTINGS
@@ -177,12 +177,14 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
-CELERY_BEAT_SCHEDULE = {
-    "sync-catalist-token": {
+CELERY_BEAT_SCHEDULE = {}
+
+if CATALIST_ENABLED:
+    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
         "task": "verifier.tasks.sync_catalist_token",
         "schedule": 30,
-    },
-}
+    }
+
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION

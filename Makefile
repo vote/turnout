@@ -10,6 +10,9 @@ makemigrations:
 migrate:
 	docker-compose exec server python manage.py migrate
 
+createsuperuser:
+	docker-compose exec server python manage.py createsuperuser
+
 shell:
 	docker-compose exec server /bin/bash
 
@@ -27,6 +30,9 @@ lint:
 
 dbshell:
 	bash scripts/rds_psql.sh
+
+dblocalrestore:
+	bash scripts/rds_localrestore.sh
 
 shellprod:
 	ENVIRONMENT=prod bash scripts/remote_run.sh ${TAG}

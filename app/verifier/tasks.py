@@ -4,14 +4,14 @@ from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
 
-from .utils import audience_cachekey, fetch_catalist_token
+from .catalist import audience_cachekey, fetch_catalist_token
 
 logger = logging.getLogger("verifier")
 
 
 @shared_task
 def sync_catalist_token(return_token=False):
-    audience = settings.CATALIST_AUDIENCE_VERIFY
+    audience = settings.CATALIST_AUDIENCE_MATCH
     token = fetch_catalist_token(audience=audience)
 
     # OAuth tokens on the server expire after 24 hours, so we can expire our

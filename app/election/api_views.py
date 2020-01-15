@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .models import State, StateInformationFieldType
-from .serializers import StateSerializer, StateFieldSerializer
+from .serializers import StateFieldSerializer, StateSerializer
 
 
 class StateViewSet(ReadOnlyModelViewSet):
