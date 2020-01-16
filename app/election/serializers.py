@@ -22,6 +22,7 @@ class StateSerializer(serializers.ModelSerializer):
             "state_information",
         )
 
+
 class StateFieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = StateInformationFieldType

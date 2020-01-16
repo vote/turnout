@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from election.api_views import StateViewSet, StateFieldsViewSet
+from election.api_views import StateFieldsViewSet, StateViewSet
 
 router = routers.SimpleRouter()
 router.register(r"states", StateViewSet)

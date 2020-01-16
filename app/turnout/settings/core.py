@@ -135,15 +135,15 @@ STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
 #### REST FRAMEWORK CONFIGURATION
 
 DEFAULT_RENDERER_CLASSES = (
-    'rest_framework.renderers.JSONRenderer',
-    'rest_framework.renderers.BrowsableAPIRenderer',
+    "rest_framework.renderers.JSONRenderer",
+    "rest_framework.renderers.BrowsableAPIRenderer",
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
-    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
 }
 
 #### END REST FRAMEWORK CONFIGURATION
