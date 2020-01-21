@@ -177,12 +177,14 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
-CELERY_BEAT_SCHEDULE = {
-    "sync-catalist-token": {
+CELERY_BEAT_SCHEDULE = {}
+
+if CATALIST_ENABLED:
+    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
         "task": "verifier.tasks.sync_catalist_token",
         "schedule": 30,
-    },
-}
+    }
+
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION
