@@ -12,6 +12,8 @@ To build run `make build`
 
 To run locally run `make up` then (while the server is up) in another shell run `make migrate`
 
+To create a new superuser run `make createsuperuser` (while server is running)
+
 To run python tests, run `make testpy` (while server is running)
 
 To clean python files run `make lint` (while the server is running)

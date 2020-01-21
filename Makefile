@@ -10,6 +10,9 @@ makemigrations:
 migrate:
 	docker-compose exec server python manage.py migrate
 
+createsuperuser:
+	docker-compose exec server python manage.py createsuperuser
+
 shell:
 	docker-compose exec server /bin/bash
 
