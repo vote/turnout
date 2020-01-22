@@ -31,6 +31,9 @@ lint:
 dbshell:
 	bash scripts/rds_psql.sh
 
+dblocalrestore:
+	bash scripts/rds_localrestore.sh
+
 shellprod:
 	ENVIRONMENT=prod bash scripts/remote_run.sh ${TAG}
 
