@@ -17,7 +17,6 @@
                         <tr>
                             <th>Name</th>
                             <th>State</th>
-                            <th>Status</th>
                             <th>Lookup Time</th>
                         </tr>
                     </thead>
@@ -29,9 +28,6 @@
                             </td>
                             <td>
                                 {{ lookup.state.pk }}
-                            </td>
-                            <td>
-                                {% if lookup.total_matches == 0 %}No Matches{% else %}{{ lookup.voter_status }}{% endif %}
                             </td>
                             <td>
                                 {{ lookup.created_at }}

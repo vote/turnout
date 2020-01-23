@@ -149,23 +149,6 @@ REST_FRAMEWORK = {
 #### END REST FRAMEWORK CONFIGURATION
 
 
-#### CATALIST VERIFICATION SETTINGS
-
-CATALIST_ENABLED = env.bool("CATALIST_ENABLED", default=False)
-CATALIST_ID = env.str("CATALIST_ID", default="")
-CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
-CATALIST_URL_AUTH_TOKEN = env.str(
-    "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
-)
-CATALIST_URL_API_MATCH = env.str(
-    "CATALIST_URL_API_MATCH", default="http://catalist.local/api"
-)
-CATALIST_AUDIENCE_MATCH = env.str("CATALIST_AUDIENCE_MATCH", default="none")
-CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
-
-#### END CATALIST VERIFICATION SETTINGS
-
-
 #### CELERY CONFIGURATION
 
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
@@ -178,13 +161,6 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
 CELERY_BEAT_SCHEDULE = {}
-
-if CATALIST_ENABLED:
-    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
-        "task": "verifier.tasks.sync_catalist_token",
-        "schedule": 30,
-    }
-
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION
