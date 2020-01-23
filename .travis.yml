@@ -1,17 +1,44 @@
+dist: bionic
 language: python
 python:
   - "3.7"
+
+addons:
+  apt:
+    packages:
+      - postgresql-11
+      - postgresql-client-11
+
+services:
+  - redis
+
 cache:
   directories:
     - $HOME/.cache/pip
+
 env:
-  PIP_DOWNLOAD_CACHE=$HOME/.cache/pip
+  global:
+    - PIP_DOWNLOAD_CACHE=$HOME/.cache/pip
+    - PGPORT=5433
+    - DATABASE_URL=pgsql://postgres:turnout@localhost:5433/turnout
+    - REDIS_URL=redis://localhost:6379
+    - SECRET_KEY=turnoutallthepeople
+    - DJANGO_SETTINGS_MODULE=turnout.settings
+
 before_install:
   - pip install --upgrade pip
+  - sudo pg_ctlcluster 11 main start
+  - sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'turnout'"
+
+install:
+  - pip install -r $TRAVIS_BUILD_DIR/app/requirements.txt
+
 script:
-  - echo "Run Test Here"
+  - pytest $TRAVIS_BUILD_DIR/app
+
 notifications:
   email: false
+
 deploy:
   provider: script
   script: bash scripts/travis_deploy.sh

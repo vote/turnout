@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import State, StateInformation
+from .models import State, StateInformation, StateInformationFieldType
 
 
 class StateInfoSerializer(serializers.ModelSerializer):
@@ -12,15 +12,7 @@ class StateInfoSerializer(serializers.ModelSerializer):
 
 
 class StateSerializer(serializers.ModelSerializer):
-    state_information = serializers.SerializerMethodField(
-        method_name="stateinformation_flat"
-    )
-
-    def stateinformation_flat(self, obj):
-        flat = {}
-        for field in obj.stateinformation_set.select_related("field_type").all():
-            flat[field.field_type.slug] = field.text
-        return flat
+    state_information = StateInfoSerializer(source="stateinformation_set", many=True)
 
     class Meta:
         model = State
@@ -29,3 +21,9 @@ class StateSerializer(serializers.ModelSerializer):
             "name",
             "state_information",
         )
+
+
+class StateFieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StateInformationFieldType
+        fields = ("slug", "long_name")

@@ -2,6 +2,8 @@ import os
 
 import environs
 import sentry_sdk
+from kombu import Queue
+from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
@@ -36,7 +38,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env.str("REDIS_URL", default="redis://localhost:6379"),
+        "LOCATION": env.str("REDIS_URL", default="redis://redis:6379"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         "KEY_PREFIX": env.str("REDIS_KEY_PREFIX", default="turnout"),
     }
@@ -64,9 +66,19 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_alive",
     "ddtrace.contrib.django",
+    "django_celery_results",
+    "phonenumber_field",
 ]
 
-FIRST_PARTY_APPS = ["accounts", "common", "manage", "multi_tenant", "election"]
+FIRST_PARTY_APPS = [
+    "accounts",
+    "common",
+    "manage",
+    "multi_tenant",
+    "election",
+    "people",
+    "verifier",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
@@ -123,18 +135,59 @@ STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
 #### REST FRAMEWORK CONFIGURATION
 
 DEFAULT_RENDERER_CLASSES = (
-    'rest_framework.renderers.JSONRenderer',
-    'rest_framework.renderers.BrowsableAPIRenderer',
+    "rest_framework.renderers.JSONRenderer",
+    "rest_framework.renderers.BrowsableAPIRenderer",
 )
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
-    'DEFAULT_RENDERER_CLASSES': DEFAULT_RENDERER_CLASSES
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
 }
 
 #### END REST FRAMEWORK CONFIGURATION
+
+
+#### CATALIST VERIFICATION SETTINGS
+
+CATALIST_ENABLED = env.bool("CATALIST_ENABLED", default=False)
+CATALIST_ID = env.str("CATALIST_ID", default="")
+CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
+CATALIST_URL_AUTH_TOKEN = env.str(
+    "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
+)
+CATALIST_URL_API_VERIFY = env.str(
+    "CATALIST_URL_API_VERIFY", default="http://catalist.local/api"
+)
+CATALIST_AUDIENCE_VERIFY = env.str("CATALIST_AUDIENCE_VERIFY", default="none")
+CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
+
+#### END CATALIST VERIFICATION SETTINGS
+
+
+#### CELERY CONFIGURATION
+
+CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_WORKER_CONCURRENCY = 6
+CELERY_TASK_SERIALIZER = "json"
+
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_QUEUES = {
+    Queue("default", routing_key="task.#"),
+}
+CELERY_BEAT_SCHEDULE = {}
+
+if CATALIST_ENABLED:
+    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
+        "task": "verifier.tasks.sync_catalist_token",
+        "schedule": 30,
+    }
+
+CELERY_TIMEZONE = "UTC"
+
+#### END CELERY CONFIGURATION
 
 
 #### AUTH CONFIGURATION
@@ -187,7 +240,7 @@ SENTRY_DSN = env.str("SENTRY_DSN", default="")
 if RELEASE_TAG and SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), RedisIntegration()],
+        integrations=[DjangoIntegration(), RedisIntegration(), CeleryIntegration()],
         send_default_pii=True,
         release=f"turnout@{RELEASE_TAG}",
         environment=env.str("CLOUD_STACK", default=None),
@@ -202,3 +255,25 @@ if RELEASE_TAG and SENTRY_DSN:
         scope.set_extra("allowed_hosts", ALLOWED_HOSTS)
 
 #### END SENTRY CONFIGURATION
+
+
+#### LOGGING CONFIGURATION
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler",},},
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+        },
+        "verifier": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+    },
+}
+
+#### END LOGGING CONFIGURATION

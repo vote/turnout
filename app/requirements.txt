@@ -3,13 +3,20 @@ psycopg2==2.8.*
 environs==7.1.*
 dj-database-url==0.5.*
 gunicorn==20.0.*
+celery[redis]==4.4.*
+celery-redbeat==0.13.*
+django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.31.*
+requests==2.22.*
 black==19.10b0
 isort==4.3.*
 autoflake==1.3.*
 ipython==7.10.*
 django-smalluuid==1.1.*
+django-enumfields==1.0.*
+django-phonenumber-field==4.0.*
+phonenumbers==8.11.*
 django_sekizai==1.0.*
 django-crispy-forms==1.8.*
 django-reversion==3.0.*
@@ -18,3 +25,5 @@ djangorestframework==3.11.*
 whitenoise==5.0.*
 django-alive==1.1.*
 sentry-sdk==0.13.*
+watchdog==0.9.*
+pytest-django==3.8.*
