@@ -16,6 +16,10 @@ def query_targetsmart(serializer_data):
         "zip_code": serializer_data["zipcode"],
     }
 
+    # only use year to match date_of_birth as some states have 1/1 for unknown dates
+    if "date_of_birth" in serializer_data:
+        query["dob"] = serializer_data["date_of_birth"].strftime("%Y**")
+
     logger.info(query)
 
     response = requests.get(
