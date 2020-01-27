@@ -17,6 +17,7 @@
                         <tr>
                             <th>Name</th>
                             <th>State</th>
+                            <th>Status</th>
                             <th>Lookup Time</th>
                         </tr>
                     </thead>
@@ -29,6 +30,9 @@
                             <td>
                                 {{ lookup.state.pk }}
                             </td>
+                            <td>
+                                 {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
+                             </td>
                             <td>
                                 {{ lookup.created_at }}
                             </td>

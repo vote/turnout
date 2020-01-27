@@ -1,8 +1,10 @@
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from common import enums
 from election.models import State
 
 from .models import Lookup
@@ -20,19 +22,42 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        query_targetsmart(serializer.validated_data)
+        targetsmart_response = query_targetsmart(serializer.validated_data)
+
+        if targetsmart_response["error"]:
+            return Response(
+                 {"error": "Error from data provider"},
+                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
+             )
+            # log this?
 
         # set the state to a real model from the code
         serializer.validated_data["state"] = State.objects.get(
             code=serializer.validated_data["state"]
         )
 
-        serializer.validated_data["response"] = {}
-        serializer.validated_data["registered"] = False
-        serializer.validated_data["too_many"] = False
+        serializer.validated_data["response"] = targetsmart_response
+
+        registered = False
+
+        if targetsmart_response["result"]:
+            # if result is true, there is a single matching record
+            targetsmart_record = targetsmart_response["result_set"][0]
+            if targetsmart_record["vb.voterbase_registration_status"] == "Registered":
+                registered = True
+
+            if targetsmart_record["vb.vf_voter_status"] == "Active":
+                serializer.validated_data["voter_status"] = enums.VoterStatus.ACTIVE
+            elif targetsmart_record["vb.vf_voter_status"] == "Inactive":
+                serializer.validated_data["voter_status"] = enums.VoterStatus.INACTIVE
+            else:
+                serializer.validated_data["voter_status"] = enums.VoterStatus.UNKNOWN
+
+        serializer.validated_data["too_many"] = targetsmart_response["too_many"]
+        serializer.validated_data["registered"] = registered
 
         self.perform_create(serializer)
 
-        response = {"registered": False}
+        response = {"registered": registered}
 
         return Response(response)

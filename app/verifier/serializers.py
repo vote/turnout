@@ -2,6 +2,7 @@ from enumfields.drf.serializers import EnumSupportSerializerMixin
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
+from common import enums
 from election.choices import STATES
 from election.models import state_code_validator
 
