@@ -1,4 +1,3 @@
-from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -8,6 +7,7 @@ from election.models import State
 
 from .models import Lookup
 from .serializers import LookupSerializer
+from .targetsmart import query_targetsmart
 
 
 class LookupViewSet(CreateModelMixin, GenericViewSet):
@@ -19,6 +19,8 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        query_targetsmart(serializer.validated_data)
 
         # set the state to a real model from the code
         serializer.validated_data["state"] = State.objects.get(
