@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = [
     "reversion",
     "rest_framework",
     "django_alive",
+    "corsheaders",
     "ddtrace.contrib.django",
     "django_celery_results",
     "phonenumber_field",
@@ -89,6 +90,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
 MIDDLEWARE = [
     "django_alive.middleware.healthcheck_bypass_host_check",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -197,6 +199,17 @@ ALIVE_CHECKS = {
 }
 
 #### END ALIVE CONFIGURATION
+
+#### CORS CONFIGURATION
+
+CORS_ORIGIN_REGEX_WHITELIST = [
+    r"^https:\/\/turnout2020.us$", #production
+    r"^https:\/\/\w*.turnout2020.us$", # staging
+    r"^https:\/\/\w+--turnout2020.netlify.com$", # branch builds
+    r"^http:\/\/localhost:8000$", # local
+]
+
+#### END CORS CONFIGURATION
 
 
 #### DATADOG CONFIGURATION
