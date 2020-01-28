@@ -1,0 +1,51 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags %}
+
+{% block title %}List of Lookups | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">Lookups</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>State</th>
+                            <th>Status</th>
+                            <th>Lookup Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lookup in lookups %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'manage:verifier:lookup_detail' lookup.pk %}">{{ lookup.first_name }} {{ lookup.last_name }}</a>
+                            </td>
+                            <td>
+                                {{ lookup.state.pk }}
+                            </td>
+                            <td>
+                                 {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
+                             </td>
+                            <td>
+                                {{ lookup.created_at }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "manage/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

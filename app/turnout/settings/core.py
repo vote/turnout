@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = [
     "reversion",
     "rest_framework",
     "django_alive",
+    "corsheaders",
     "ddtrace.contrib.django",
     "django_celery_results",
     "phonenumber_field",
@@ -89,6 +90,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
 MIDDLEWARE = [
     "django_alive.middleware.healthcheck_bypass_host_check",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -149,23 +151,6 @@ REST_FRAMEWORK = {
 #### END REST FRAMEWORK CONFIGURATION
 
 
-#### CATALIST VERIFICATION SETTINGS
-
-CATALIST_ENABLED = env.bool("CATALIST_ENABLED", default=False)
-CATALIST_ID = env.str("CATALIST_ID", default="")
-CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
-CATALIST_URL_AUTH_TOKEN = env.str(
-    "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
-)
-CATALIST_URL_API_VERIFY = env.str(
-    "CATALIST_URL_API_VERIFY", default="http://catalist.local/api"
-)
-CATALIST_AUDIENCE_VERIFY = env.str("CATALIST_AUDIENCE_VERIFY", default="none")
-CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
-
-#### END CATALIST VERIFICATION SETTINGS
-
-
 #### CELERY CONFIGURATION
 
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
@@ -178,13 +163,6 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
 CELERY_BEAT_SCHEDULE = {}
-
-if CATALIST_ENABLED:
-    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
-        "task": "verifier.tasks.sync_catalist_token",
-        "schedule": 30,
-    }
-
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION
@@ -221,6 +199,17 @@ ALIVE_CHECKS = {
 }
 
 #### END ALIVE CONFIGURATION
+
+#### CORS CONFIGURATION
+
+CORS_ORIGIN_REGEX_WHITELIST = [
+    r"^https:\/\/turnout2020.us$",  # production
+    r"^https:\/\/\w*.turnout2020.us$",  # staging
+    r"^https:\/\/\w+--turnout2020.netlify.com$",  # branch builds
+    r"^http:\/\/localhost:8000$",  # local
+]
+
+#### END CORS CONFIGURATION
 
 
 #### DATADOG CONFIGURATION
@@ -277,3 +266,10 @@ LOGGING = {
 }
 
 #### END LOGGING CONFIGURATION
+
+
+#### TARGETSMART CONFIGURATION
+
+TARGETSMART_KEY = env.str("TARGETSMART_KEY", default=None)
+
+#### END TARGETSMART CONFIGURATION
