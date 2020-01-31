@@ -28,3 +28,4 @@ sentry-sdk==0.13.*
 watchdog==0.9.*
 pytest-django==3.8.*
 django-cors-headers==3.2.1
+redis==3.3.*
