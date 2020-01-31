@@ -33,6 +33,10 @@ class LookupSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
             "too_many",
             "registered",
             "response",
+            "utm_campaign",
+            "utm_source",
+            "utm_medium",
+            "source",
         )
         extra_kwargs = {
             "first_name": {"required": True},

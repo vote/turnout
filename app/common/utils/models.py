@@ -15,3 +15,13 @@ class UUIDModel(models.Model):
 
     class Meta(object):
         abstract = True
+
+
+class TrackingModel(models.Model):
+    utm_campaign = models.TextField(null=True, blank=True)
+    utm_source = models.TextField(null=True, blank=True)
+    utm_medium = models.TextField(null=True, blank=True)
+    source = models.TextField(null=True, blank=True)
+
+    class Meta(object):
+        abstract = True
