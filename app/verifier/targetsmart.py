@@ -13,7 +13,7 @@ def query_targetsmart(serializer_data):
         "first_name": serializer_data["first_name"],
         "last_name": serializer_data["last_name"],
         "state": serializer_data["state"],
-        "zip_code": serializer_data["zipcode"],
+        "zip_code": serializer_data.get("zipcode"),
     }
 
     # only use year to match date_of_birth as some states have 1/1 for unknown dates

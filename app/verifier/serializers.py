@@ -11,7 +11,7 @@ from .models import Lookup, zip_validator
 
 class LookupSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
     phone = PhoneNumberField(required=False)
-    zipcode = serializers.CharField(validators=[zip_validator])
+    zipcode = serializers.CharField(validators=[zip_validator], required=False)
     state = serializers.ChoiceField(
         choices=STATES, required=True, validators=[state_code_validator]
     )
