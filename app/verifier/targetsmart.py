@@ -20,7 +20,12 @@ def query_targetsmart(serializer_data):
     if "date_of_birth" in serializer_data:
         query["dob"] = serializer_data["date_of_birth"].strftime("%Y**")
 
-    logger.info(query)
+    if "unparsed_full_address" in serializer_data:
+        # per targetsmart docs, if using unparsed full address you should only send that
+        del query["zip_code"]
+        query["unparsed_full_address"] = serializer_data["unparsed_full_address"]
+    # else, handle standardized fields appropriately
+    # TODO
 
     response = requests.get(
         TARGETSMART_ENDPOINT,
