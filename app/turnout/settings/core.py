@@ -103,12 +103,21 @@ MIDDLEWARE = [
 #### END MIDDLEWARE CONFIGURATION
 
 
+#### STATIC ASSET CONFIGURATION
+
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
+
+#### END ASSET CONFIGURATION
+
+
 #### TEMPLATE CONFIGURATION
 
+TEMPLATES_DIRS = [os.path.join(BASE_PATH, "templates")]
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": TEMPLATES_DIRS,
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -124,14 +133,6 @@ TEMPLATES = [
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 #### END TEMPLATE CONFIGURATION
-
-
-#### STATIC ASSET CONFIGURATION
-
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
-
-#### END ASSET CONFIGURATION
 
 
 #### REST FRAMEWORK CONFIGURATION
@@ -180,6 +181,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 LOGIN_URL = "/manage/login/"
+INVITE_EXPIRATION_DAYS = env.int("INVITE_EXPIRATION_DAYS", default=7)
 
 #### END AUTH CONFIGURATION
 

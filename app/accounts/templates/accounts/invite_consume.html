@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static sekizai_tags crispy_forms_tags %}
+
+{% block body %}
+<div id="wrap" class="wrap">
+    {% block content %}
+    <div class="container" id="main">
+        {% block subnav %}{% endblock subnav %}
+        <div class="row">
+            <div class="col-md-6 offset-md-3 public-page-wrap">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Turnout</h2>
+                        <p class="subheading">Signup for Turnout.</p>
+                        {% if invite.expired %}
+                        <p>This link has expired. Contact an admin for another inivitation link.</p>
+                        {% else %}
+                        <p>Your username will be <strong>{{ invite.email }}</strong></p>
+                        <form role="form" method="POST" action="">
+                            {{ form|crispy }}
+                            <button type="submit" class="btn btn-block btn-primary">Signup</button>
+                            {% csrf_token %}
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content%}
+</div>
+{% endblock %}

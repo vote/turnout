@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static sekizai_tags crispy_forms_tags %}
+
+{% block body %}
+<div id="wrap" class="wrap">
+    {% block content %}
+    <div class="container" id="main">
+        {% block subnav %}{% endblock subnav %}
+        <div class="row">
+            <div class="col-md-6 offset-md-3 public-page-wrap">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Turnout</h2>
+                        <p class="subheading">Signup for Turnout.</p>
+                        <p>Your account has been created. Your username is <strong>{{ invite.user.email }}</strong></p>
+                        <a class="btn btn-primary" href="{% url 'manage:login' %}">Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content%}
+</div>
+{% endblock %}

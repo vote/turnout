@@ -8,6 +8,8 @@ class UUIDSlugMixin(object):
         except ValueError as value_error:
             if str(value_error) == "bytes is not a 16-char string":
                 raise Http404
+            if str(value_error).startswith("Invalid base64-encoded string"):
+                raise Http404
             raise
         except TypeError as type_error:
             if str(type_error) == "Incorrect padding":
