@@ -54,5 +54,6 @@ class InviteConsumeFormView(UUIDSlugMixin, SingleObjectMixin, FormView):
 class InviteConsumeThanksView(UUIDSlugMixin, DetailView):
     template_name = "accounts/invite_consume_success.html"
     model = Invite
+    queryset = Invite.objects.exclude(user__isnull=True)
     slug_field = "token"
     context_object_name = "invite"
