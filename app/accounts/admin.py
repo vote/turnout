@@ -37,8 +37,20 @@ class InviteAssociationInline(admin.TabularInline):
 
 @admin.register(models.Invite)
 class InviteAdmin(admin.ModelAdmin):
-    list_display = ("email", "token", "consumed_at", "expires", "expired", "primary_client")
+    list_display = (
+        "email",
+        "token",
+        "consumed_at",
+        "expires",
+        "expired",
+        "primary_client",
+    )
     inlines = (InviteAssociationInline,)
-    fieldsets = ((None, {"fields": ("token", "email", "expires", "primary_client", "consumed_at",)}),)
+    fieldsets = (
+        (
+            None,
+            {"fields": ("token", "email", "expires", "primary_client", "consumed_at",)},
+        ),
+    )
     form = ArticleAdminForm
     readonly_fields = ["token", "consumed_at"]

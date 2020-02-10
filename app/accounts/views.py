@@ -1,5 +1,4 @@
 from django.http import Http404
-from django.utils.timezone import now
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic.detail import DetailView, SingleObjectMixin
