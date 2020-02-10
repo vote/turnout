@@ -8,4 +8,5 @@ urlpatterns = [
     path("v1/", include(router.urls)),
     path("manage/admin/", admin.site.urls),
     path("manage/", include("manage.urls", namespace="manage")),
+    path("account/", include("accounts.urls", namespace="accounts")),
 ]
