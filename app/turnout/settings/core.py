@@ -224,6 +224,20 @@ DATADOG_TRACE = {
 #### END DATADOG CONFIGURATION
 
 
+#### STATSD CONFIGURATION
+
+STATSD_TAGS = [
+    f'env:{env.str("CLOUD_STACK", default="")}',
+    f'spinnaker_detail:{env.str("CLOUD_DETAIL", default="")}',
+    f'spinnaker_servergroup:{env.str("SERVER_GROUP", default="")}',
+    f'spinnaker_stack:{env.str("CLOUD_STACK", default="")}',
+    f'image_tag:{env.str("TAG", default="")}',
+    f'build:{env.str("BUILD", default="")}',
+]
+
+#### END STATSD CONFIGURATION
+
+
 #### SENTRY CONFIGURATION
 
 RELEASE_TAG = env.str("TAG", default="")
