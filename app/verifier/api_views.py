@@ -1,6 +1,5 @@
 import logging
 
-from datadog import statsd
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
@@ -8,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from common import enums
+from common.analytics import statsd
 from election.models import State
 
 from .models import Lookup

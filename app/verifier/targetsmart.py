@@ -1,8 +1,9 @@
 import logging
 
 import requests
-from datadog import statsd
 from django.conf import settings
+
+from common.analytics import statsd
 
 logger = logging.getLogger("verifier")
 
