@@ -1,3 +1,4 @@
+from django.contrib.auth import login
 from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -43,6 +44,7 @@ class InviteConsumeFormView(UUIDSlugMixin, SingleObjectMixin, FormView):
         user.save()
 
         self.object.consume_invite(user)
+        login(self.request, user)
         return super().form_valid(form)
 
     def get_success_url(self):
