@@ -1,5 +1,6 @@
 import logging
 
+from datadog import statsd
 import requests
 from django.conf import settings
 
@@ -8,6 +9,7 @@ logger = logging.getLogger("verifier")
 TARGETSMART_ENDPOINT = "https://api.targetsmart.com/voter/voter-registration-check"
 
 
+@statsd.timed("turnout.verifier.ts_query")
 def query_targetsmart(serializer_data):
     # TS is pretty conservative, so we'll only pass in the bare minimum needed for a
     # match.
