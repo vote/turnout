@@ -1,5 +1,6 @@
 import os
 
+import datadog
 import environs
 import sentry_sdk
 from kombu import Queue
@@ -220,6 +221,16 @@ DATADOG_TRACE = {
     "TRACER": "turnout.tracer.tracer",
     "TAGS": {"build": env.str("BUILD", default="")},
 }
+STATSD_TAGS = [
+    f'env:{env.str("CLOUD_STACK", default="")}',
+    f'spinnaker_detail:{env.str("CLOUD_DETAIL", default="")}',
+    f'spinnaker_servergroup:{env.str("SERVER_GROUP", default="")}',
+    f'spinnaker_stack:{env.str("CLOUD_STACK", default="")}',
+    f'image_tag:{env.str("TAG", default="")}',
+    f'build:{env.str("BUILD", default="")}',
+]
+DATADOG_OPTIONS = {"statsd_constant_tags": STATSD_TAGS}
+datadog.initialize(**DATADOG_OPTIONS)
 
 #### END DATADOG CONFIGURATION
 
