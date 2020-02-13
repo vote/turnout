@@ -69,6 +69,7 @@ THIRD_PARTY_APPS = [
     "ddtrace.contrib.django",
     "django_celery_results",
     "phonenumber_field",
+    "django_otp",
 ]
 
 FIRST_PARTY_APPS = [
@@ -79,6 +80,7 @@ FIRST_PARTY_APPS = [
     "election",
     "people",
     "verifier",
+    "multifactor",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -96,6 +98,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -184,6 +187,18 @@ LOGIN_URL = "/manage/login/"
 INVITE_EXPIRATION_DAYS = env.int("INVITE_EXPIRATION_DAYS", default=7)
 
 #### END AUTH CONFIGURATION
+
+
+#### MULTIFACTOR CONFIGURATION
+
+MULTIFACTOR_ENABLED = env.bool("MULTIFACTOR_ENABLED", default=True)
+MULTIFACTOR_DIGITS_DEFAULT = env.int("MULTIFACTOR_DIGITS_DEFAULT", default=6)
+MULTIFACTOR_TOLERANCE = env.int("MULTIFACTOR_TOLERANCE", default=1)
+MULTIFACTOR_STEP_LENGTH = env.int("MULTIFACTOR_STEP_LENGTH", default=30)
+MULTIFACTOR_THROTTLE_FACTOR = env.int("MULTIFACTOR_THROTTLE_FACTOR", default=1)
+MULTIFACTOR_ISSUER = env.str("MULTIFACTOR_ISSUER", default="Turnout")
+
+#### END MULTIFACTOR CONFIGURATION
 
 
 #### FILE CONFIGURATION

@@ -1,8 +1,11 @@
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic.base import RedirectView
+from django_otp.admin import OTPAdminSite
 
 from .api_routes import router
+
+admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
     path("-/", include("django_alive.urls")),
@@ -18,4 +21,5 @@ urlpatterns = [
     path("manage/admin/", admin.site.urls),
     path("manage/", include("manage.urls", namespace="manage")),
     path("account/", include("accounts.urls", namespace="accounts")),
+    path("multifactor/", include("multifactor.urls", namespace="multifactor")),
 ]
