@@ -14,11 +14,16 @@ TARGETSMART_ENDPOINT = "https://api.targetsmart.com/voter/voter-registration-che
 def query_targetsmart(serializer_data):
     # TS is pretty conservative, so we'll only pass in the bare minimum needed for a
     # match.
+    address_line = f'{serializer_data["address1"]} {serializer_data.get("address2")}'.strip()
+    full_address = (f'{address_line}, {serializer_data["city"]}, {serializer_data["state"]} '
+                    f'{serializer_data["zipcode"]}')
+
     query = {
         "first_name": serializer_data["first_name"],
         "last_name": serializer_data["last_name"],
         "state": serializer_data["state"],
         "zip_code": serializer_data["zipcode"],
+        "unparsed_full_address": full_address,
         # only use year to match date_of_birth as some states have 1/1 for unknown dates
         "dob": serializer_data["date_of_birth"].strftime("%Y**"),
     }

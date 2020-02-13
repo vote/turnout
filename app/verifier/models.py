@@ -23,8 +23,8 @@ class Lookup(TrackingModel, UUIDModel, TimestampModel):
 
     date_of_birth = models.DateField(null=True, blank=True)
     unparsed_full_address = models.TextField(null=True, blank=True)
-    street_number = models.TextField(null=True, blank=True)
-    street_name = models.TextField(null=True, blank=True)
+    address1 = models.TextField(null=True, blank=True)
+    address2 = models.TextField(null=True, blank=True)
     city = models.TextField(null=True, blank=True)
     zipcode = models.TextField(null=True, blank=True, validators=[zip_validator])
     age = models.IntegerField(null=True, blank=True)
