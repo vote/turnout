@@ -1,0 +1,52 @@
+{
+  "error": null,
+  "input": {
+    "dob": "1961**",
+    "state": "IL",
+    "zip_code": "60626",
+    "last_name": "Obama",
+    "first_name": "Barack",
+    "unparsed_full_address": "1600 N Penn Ave, Chicago, IL 60657"
+  },
+  "result": true,
+  "too_many": false,
+  "gateway_id": "52e2461a-07c3-4c71-aa9c-492277ef7637",
+  "result_set": [
+    {
+      "vb.voterid": "12345",
+      "vb.vf_party": "Democrat",
+      "vb.tsmart_zip": "60657",
+      "vb.smartvan_id": "28471588",
+      "vb.tsmart_city": "CHICAGO",
+      "vb.tsmart_zip4": "0000",
+      "vb.tsmart_state": "CA",
+      "vb.voterbase_id": "IL-12345",
+      "vb.voterbase_age": "60",
+      "vb.voterbase_dob": "19610804",
+      "vb.vf_county_code": "001",
+      "vb.vf_county_name": "COOK",
+      "vb.vf_reg_cass_zip": "60657",
+      "vb.vf_source_state": "IL",
+      "vb.vf_voter_status": "Unknown",
+      "vb.tsmart_last_name": "OBAMA",
+      "vb.vf_reg_cass_city": "CHICAGO",
+      "vb.vf_reg_cass_zip4": "0000",
+      "vb.voterbase_gender": "Male",
+      "vb.tsmart_first_name": "BARACK",
+      "vb.vf_reg_cass_state": "IL",
+      "vb.tsmart_county_code": "001",
+      "vb.tsmart_county_name": "COOK",
+      "vb.tsmart_middle_name": "",
+      "vb.tsmart_name_suffix": "",
+      "vb.tsmart_full_address": "1600 Penn Avenue",
+      "vb.vf_registration_date": "20190201",
+      "vb.voterbase_registration_status": "Registered"
+    }
+  ],
+  "function_id": "9426e2a9-94e8-4723-900b-f30f25695335",
+  "parsed_address": {
+    "zip_code": "60657",
+    "street_name": "Penn",
+    "street_number": "1600"
+  }
+}

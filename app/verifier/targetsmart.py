@@ -14,9 +14,12 @@ TARGETSMART_ENDPOINT = "https://api.targetsmart.com/voter/voter-registration-che
 def query_targetsmart(serializer_data):
     # TS is pretty conservative, so we'll only pass in the bare minimum needed for a
     # match.
-    address_line = f'{serializer_data["address1"]} {serializer_data.get("address2")}'.strip()
-    full_address = (f'{address_line}, {serializer_data["city"]}, {serializer_data["state"]} '
-                    f'{serializer_data["zipcode"]}')
+    address2 = serializer_data.get("address2", "")
+    address_line = f'{serializer_data["address1"]} {address2}'.strip()
+    full_address = (
+        f'{address_line}, {serializer_data["city"]}, {serializer_data["state"]} '
+        f'{serializer_data["zipcode"]}'
+    )
 
     query = {
         "first_name": serializer_data["first_name"],

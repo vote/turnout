@@ -1,0 +1,16 @@
+{
+  "input": {
+    "state": "IL",
+    "first_name": "Bar😀ck",
+    "last_name": "Obama",
+    "zip_code": "60626",
+    "dob": "1961**",
+    "unparsed_full_address": "1600 N Penn Ave, Chicago, IL 60657"
+  },
+  "error": "Validation Error: Invalid character in first_name",
+  "result": false,
+  "result_set": [],
+  "too_many": false,
+  "gateway_id": "670d64ef-8bda-4fc1-9059-c8a6b9cdd615",
+  "function_id": "69daa059-49e8-4043-8f08-a7d7a82222f7"
+}

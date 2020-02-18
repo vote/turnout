@@ -10,4 +10,4 @@ class TargetSmartGender(Enum):
 class VoterStatus(Enum):
     ACTIVE = "Active"
     INACTIVE = "Inactive"
-    UNKNOWN = ""
+    UNKNOWN = "Unknown"

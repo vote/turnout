@@ -50,11 +50,9 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         if targetsmart_response["result"]:
             # if result is true, there is a single matching record
             targetsmart_record = targetsmart_response["result_set"][0]
-            if targetsmart_record["vb.voterbase_registration_status"] == "Registered":
-                registered = True
-
             if targetsmart_record["vb.vf_voter_status"] == "Active":
                 serializer.validated_data["voter_status"] = enums.VoterStatus.ACTIVE
+                registered = True
             elif targetsmart_record["vb.vf_voter_status"] == "Inactive":
                 serializer.validated_data["voter_status"] = enums.VoterStatus.INACTIVE
             else:
