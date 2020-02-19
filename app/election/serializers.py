@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from common.enums import StateFieldFormats
+
 from .models import State, StateInformation, StateInformationFieldType
 
 
@@ -9,6 +11,12 @@ class StateInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = StateInformation
         fields = ("text", "field_type")
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        if instance.field_type.field_format == StateFieldFormats.BOOLEAN:
+            result["text"] = instance.text.lower() == "true"
+        return result
 
 
 class StateSerializer(serializers.ModelSerializer):

@@ -5,6 +5,7 @@ from reversion.views import RevisionMixin
 
 from manage.mixins import ManageViewMixin
 
+from .forms import StateInformationManageForm
 from .models import State, StateInformation, StateInformationFieldType
 
 
@@ -59,7 +60,12 @@ class StateInformationUpdateView(ManageViewMixin, RevisionMixin, UpdateView):
     queryset = StateInformation.objects.select_related()
     context_object_name = "state_information"
     template_name = "election/manage/stateinformation_update.html"
-    fields = ["text", "notes"]
+    form_class = StateInformationManageForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["field_format"] = self.object.field_type.field_format
+        return kwargs
 
     def get_object(self):
         return get_object_or_404(

@@ -4,7 +4,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from enumfields import EnumField
 
+from common import enums
 from common.utils.models import TimestampModel, UUIDModel
 
 from .choices import STATES
@@ -39,12 +41,20 @@ class State(TimestampModel):
 class StateInformationFieldType(UUIDModel, TimestampModel):
     slug = models.SlugField("Name", max_length=50, unique=True)
     long_name = models.CharField("Long Name", max_length=200)
+    field_format = EnumField(
+        enums.StateFieldFormats, null=True, default=enums.StateFieldFormats.MARKDOWN
+    )
 
     class Meta(object):
         ordering = ["slug"]
 
     def __str__(self):
         return self.slug
+
+
+class StateInformationManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().select_related("field_type")
 
 
 @reversion.register()
@@ -55,6 +65,8 @@ class StateInformation(UUIDModel, TimestampModel):
     )
     text = models.TextField(blank=True, default="")
     notes = models.TextField(blank=True, default="")
+
+    objects = StateInformationManager()
 
     class Meta(object):
         unique_together = ["state", "field_type"]

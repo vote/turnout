@@ -16,4 +16,4 @@ class StateAdmin(admin.ModelAdmin):
 
 @admin.register(models.StateInformationFieldType)
 class FieldTypeAdmin(admin.ModelAdmin):
-    list_display = ("slug", "long_name")
+    list_display = ("slug", "long_name", "field_format")
