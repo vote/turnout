@@ -1,0 +1,20 @@
+{
+  "error": null,
+  "input": {
+    "dob": "1961**",
+    "state": "IL",
+    "zip_code": "60626",
+    "last_name": "Obama",
+    "first_name": "Barack",
+    "unparsed_full_address": "1600 N Penn Ave, Chicago, IL 60657"
+  },
+  "result": false,
+  "too_many": false,
+  "gateway_id": "6127c6d0-f785-482b-a0ae-1eb7d6aa6a8a",
+  "result_set": [],
+  "function_id": "df7a74ce-7443-49b7-882b-9976e36980bf",
+  "parsed_address": {
+    "zip_code": "60626",
+    "street_number": "1600"
+  }
+}

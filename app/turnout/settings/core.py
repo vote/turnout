@@ -65,9 +65,11 @@ THIRD_PARTY_APPS = [
     "reversion",
     "rest_framework",
     "django_alive",
+    "corsheaders",
     "ddtrace.contrib.django",
     "django_celery_results",
     "phonenumber_field",
+    "django_otp",
 ]
 
 FIRST_PARTY_APPS = [
@@ -78,6 +80,7 @@ FIRST_PARTY_APPS = [
     "election",
     "people",
     "verifier",
+    "multifactor",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -89,11 +92,13 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 
 MIDDLEWARE = [
     "django_alive.middleware.healthcheck_bypass_host_check",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -101,12 +106,21 @@ MIDDLEWARE = [
 #### END MIDDLEWARE CONFIGURATION
 
 
+#### STATIC ASSET CONFIGURATION
+
+BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
+
+#### END ASSET CONFIGURATION
+
+
 #### TEMPLATE CONFIGURATION
 
+TEMPLATES_DIRS = [os.path.join(BASE_PATH, "templates")]
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": TEMPLATES_DIRS,
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -122,14 +136,6 @@ TEMPLATES = [
 CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 #### END TEMPLATE CONFIGURATION
-
-
-#### STATIC ASSET CONFIGURATION
-
-BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
-
-#### END ASSET CONFIGURATION
 
 
 #### REST FRAMEWORK CONFIGURATION
@@ -149,23 +155,6 @@ REST_FRAMEWORK = {
 #### END REST FRAMEWORK CONFIGURATION
 
 
-#### CATALIST VERIFICATION SETTINGS
-
-CATALIST_ENABLED = env.bool("CATALIST_ENABLED", default=False)
-CATALIST_ID = env.str("CATALIST_ID", default="")
-CATALIST_SECRET = env.str("CATALIST_SECRET", default="")
-CATALIST_URL_AUTH_TOKEN = env.str(
-    "CATALIST_URL_AUTH_TOKEN", default="http://catalist.local/auth/token"
-)
-CATALIST_URL_API_VERIFY = env.str(
-    "CATALIST_URL_API_VERIFY", default="http://catalist.local/api"
-)
-CATALIST_AUDIENCE_VERIFY = env.str("CATALIST_AUDIENCE_VERIFY", default="none")
-CATALIST_REFRESH_FREQUENCY = env.int("CATALIST_REFRESH_FREQUENCY", default=60 * 60 * 23)
-
-#### END CATALIST VERIFICATION SETTINGS
-
-
 #### CELERY CONFIGURATION
 
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
@@ -178,13 +167,6 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
 CELERY_BEAT_SCHEDULE = {}
-
-if CATALIST_ENABLED:
-    CELERY_BEAT_SCHEDULE["sync-catalist-token"] = {
-        "task": "verifier.tasks.sync_catalist_token",
-        "schedule": 30,
-    }
-
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION
@@ -202,8 +184,21 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 LOGIN_URL = "/manage/login/"
+INVITE_EXPIRATION_DAYS = env.int("INVITE_EXPIRATION_DAYS", default=7)
 
 #### END AUTH CONFIGURATION
+
+
+#### MULTIFACTOR CONFIGURATION
+
+MULTIFACTOR_ENABLED = env.bool("MULTIFACTOR_ENABLED", default=True)
+MULTIFACTOR_DIGITS_DEFAULT = env.int("MULTIFACTOR_DIGITS_DEFAULT", default=6)
+MULTIFACTOR_TOLERANCE = env.int("MULTIFACTOR_TOLERANCE", default=1)
+MULTIFACTOR_STEP_LENGTH = env.int("MULTIFACTOR_STEP_LENGTH", default=30)
+MULTIFACTOR_THROTTLE_FACTOR = env.int("MULTIFACTOR_THROTTLE_FACTOR", default=1)
+MULTIFACTOR_ISSUER = env.str("MULTIFACTOR_ISSUER", default="Turnout")
+
+#### END MULTIFACTOR CONFIGURATION
 
 
 #### FILE CONFIGURATION
@@ -222,6 +217,17 @@ ALIVE_CHECKS = {
 
 #### END ALIVE CONFIGURATION
 
+#### CORS CONFIGURATION
+
+CORS_ORIGIN_REGEX_WHITELIST = [
+    r"^https:\/\/turnout2020.us$",  # production
+    r"^https:\/\/\w*.turnout2020.us$",  # staging
+    r"^https:\/\/\w+--turnout2020.netlify.com$",  # branch builds
+    r"^http:\/\/localhost:8000$",  # local
+]
+
+#### END CORS CONFIGURATION
+
 
 #### DATADOG CONFIGURATION
 
@@ -231,6 +237,20 @@ DATADOG_TRACE = {
 }
 
 #### END DATADOG CONFIGURATION
+
+
+#### STATSD CONFIGURATION
+
+STATSD_TAGS = [
+    f'env:{env.str("CLOUD_STACK", default="")}',
+    f'spinnaker_detail:{env.str("CLOUD_DETAIL", default="")}',
+    f'spinnaker_servergroup:{env.str("SERVER_GROUP", default="")}',
+    f'spinnaker_stack:{env.str("CLOUD_STACK", default="")}',
+    f'image_tag:{env.str("TAG", default="")}',
+    f'build:{env.str("BUILD", default="")}',
+]
+
+#### END STATSD CONFIGURATION
 
 
 #### SENTRY CONFIGURATION
@@ -277,3 +297,10 @@ LOGGING = {
 }
 
 #### END LOGGING CONFIGURATION
+
+
+#### TARGETSMART CONFIGURATION
+
+TARGETSMART_KEY = env.str("TARGETSMART_KEY", default=None)
+
+#### END TARGETSMART CONFIGURATION

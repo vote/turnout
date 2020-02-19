@@ -1,5 +1,6 @@
 import markdown
 import reversion
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -7,6 +8,12 @@ from django.dispatch import receiver
 from common.utils.models import TimestampModel, UUIDModel
 
 from .choices import STATES
+
+
+def state_code_validator(code):
+    """Validate states by code"""
+    if code not in dict(STATES).keys():
+        raise ValidationError(f"{code} is not a valid state code")
 
 
 class State(TimestampModel):

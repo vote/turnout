@@ -1,8 +1,15 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.db import models
+from django.urls import reverse
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django_smalluuid.models import SmallUUIDField, uuid_default
 
 from common.utils.models import TimestampModel, UUIDModel
+from multi_tenant.models import Association
 
 
 class TurnoutUserManager(auth_models.UserManager):
@@ -66,3 +73,47 @@ class User(
         if self.first_name:
             return self.first_name
         return self.email
+
+
+def expire_date_time():
+    return now() + timedelta(days=settings.INVITE_EXPIRATION_DAYS)
+
+
+class Invite(UUIDModel, TimestampModel):
+    email = models.EmailField()
+    token = SmallUUIDField(default=uuid_default(), editable=False)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, editable=False)
+    expires = models.DateTimeField(default=expire_date_time)
+    consumed_at = models.DateTimeField(null=True, editable=False)
+    clients = models.ManyToManyField(
+        "multi_tenant.Client", through="multi_tenant.InviteAssociation"
+    )
+    primary_client = models.ForeignKey(
+        "multi_tenant.Client", related_name="invited_client", on_delete=models.PROTECT,
+    )
+
+    class Meta(object):
+        verbose_name = _("Invite")
+        verbose_name_plural = _("Invites")
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.email} {self.token}"
+
+    @property
+    def expired(self):
+        return self.expires <= now()
+
+    def consume_invite(self, user):
+        new_associations = []
+        new_associations.append(Association(client=self.primary_client, user=user))
+        for client in self.clients.exclude(pk=self.primary_client.pk):
+            new_associations.append(Association(client=client.pk, user=user))
+        Association.objects.bulk_create(new_associations)
+
+        Invite.objects.filter(email__iexact=user.email).update(
+            user=user, consumed_at=now()
+        )
+
+    def get_absolute_url(self):
+        return reverse("accounts:consume_invite", kwargs={"slug": self.token})

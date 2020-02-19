@@ -16,6 +16,13 @@
                 <ul class="nav navbar-nav">
                     <li class="nav-main-item nav-item">
                     <li class="nav-main-item nav-item">
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span>
+                            Voters</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' %}">Registration Verifications</a>
+                        </div>
+                    </li>
+                    <li class="nav-main-item nav-item">
                         <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
                             Elections</a>
                         <div class="dropdown-menu">
@@ -36,7 +43,7 @@
             <nav class="navbar-right">
                 <ul class="nav navbar-nav">
                     <li class="nav-main-item nav-item">
-                        <a class="" href=""><span class="mdi mdi-logout"></span></a>
+                        <a class="" href="{% url 'manage:logout' %}"><span class="mdi mdi-logout"></span></a>
                     </li>
                 </ul>
             </nav>

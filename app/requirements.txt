@@ -8,6 +8,7 @@ celery-redbeat==0.13.*
 django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.31.*
+datadog==0.34.*
 requests==2.22.*
 black==19.10b0
 isort==4.3.*
@@ -27,3 +28,10 @@ django-alive==1.1.*
 sentry-sdk==0.13.*
 watchdog==0.9.*
 pytest-django==3.8.*
+django-cors-headers==3.2.1
+redis==3.3.*
+model-bakery==1.1.*
+# Use version of django-otp that suppors devices having UUID primary keys
+git+https://github.com/nickcatal/django-otp.git@b1d1a36008da5e2e161d3e550a91ae230fc67bb5#egg=django_otp
+qrcode==6.*
+requests-mock==1.7.*
