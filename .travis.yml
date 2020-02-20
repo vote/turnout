@@ -40,9 +40,14 @@ notifications:
   email: false
 
 deploy:
-  provider: script
-  script: bash scripts/travis_deploy.sh
-  on:
-    tags: true
-    all_branches: true
-    repo: vote/turnout
+  - provider: script
+    script: bash scripts/travis_deploy_tags.sh
+    on:
+      tags: true
+      all_branches: true
+      repo: vote/turnout
+  - provider: script
+    script: bash scripts/travis_deploy_master.sh
+    on:
+      branch: master
+      repo: vote/turnout
