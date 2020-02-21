@@ -220,9 +220,10 @@ ALIVE_CHECKS = {
 #### CORS CONFIGURATION
 
 CORS_ORIGIN_REGEX_WHITELIST = [
-    r"^https:\/\/turnout2020.us$",  # production
-    r"^https:\/\/\w*.turnout2020.us$",  # staging
-    r"^https:\/\/\w+--turnout2020.netlify.com$",  # branch builds
+    r"^https:\/\/turnout2020.us$",  # root
+    r"^https:\/\/\w*.?turnout2020.us$",  # production and staging
+    r"^https:\/\/[\w-]+--turnout2020.netlify.com$",  # branch builds
+    r"^https:\/\/[\w-]+--turnout2020.netlify.app$",  # branch builds
     r"^http:\/\/localhost:8000$",  # local
 ]
 
