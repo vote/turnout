@@ -70,7 +70,7 @@ class StateInformation(UUIDModel, TimestampModel):
 
     class Meta(object):
         unique_together = ["state", "field_type"]
-        ordering = ["created_at"]
+        ordering = ["field_type__slug", "state"]
 
     def __str__(self):
         return f"{self.state} -- {self.field_type}"

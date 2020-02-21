@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'unique_together': {('state', 'field_type')},
-                'ordering': ['created_at']
+                'ordering': ['field_type__slug', 'state']
             },
         ),
         migrations.AddField(

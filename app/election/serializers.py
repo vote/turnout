@@ -15,7 +15,7 @@ class StateInfoSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         result = super().to_representation(instance)
         if instance.field_type.field_format == StateFieldFormats.BOOLEAN:
-            result["text"] = instance.text.lower() == "true"
+            result["value"] = instance.text.lower() == "true"
         return result
 
 
