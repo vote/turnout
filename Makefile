@@ -40,5 +40,11 @@ shellprod:
 shellstaging:
 	ENVIRONMENT=staging bash scripts/remote_run.sh ${TAG}
 
+shelldev:
+	ENVIRONMENT=dev DOCKER_REPO_NAME=turnoutdev bash scripts/remote_run.sh ${TAG}
+
+localtodev:
+	bash scripts/local_to_dev.sh
+
 ecrpush:
 	scripts/local_ecr_push.sh

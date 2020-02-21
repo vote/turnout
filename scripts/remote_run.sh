@@ -13,6 +13,7 @@ export DATABASE_URL=$(aws ssm get-parameter --region $REGION --with-decryption -
 export SECRET_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.secret_key | jq '.Parameter["Value"]' -r)
 export REDIS_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.redis_url | jq '.Parameter["Value"]' -r)
 export SENTRY_DSN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sentry_dsn | jq '.Parameter["Value"]' -r)
+export TARGETSMART_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.targetsmart_key | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -37,6 +38,7 @@ docker run -i -t \
            -e SECRET_KEY \
            -e REDIS_URL \
            -e SENTRY_DSN \
+           -e TARGETSMART_KEY \
            -e DEBUG=$DEBUG \
            -p 8000:8000 \
            $IMAGE \
