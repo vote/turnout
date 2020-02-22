@@ -17,6 +17,7 @@ class StateListView(ManageViewMixin, ListView):
     model = State
     context_object_name = "states"
     template_name = "election/manage/state_list.html"
+    ordering = ["name"]
 
 
 class StateDetailView(ManageViewMixin, DetailView):
@@ -50,7 +51,7 @@ class FieldInformationTypeDetailView(ManageViewMixin, DetailView):
 
         context["state_information"] = StateInformation.objects.select_related().filter(
             field_type=kwargs["object"]
-        )
+        ).order_by('state__name')
 
         return context
 
