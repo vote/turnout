@@ -1,5 +1,5 @@
 {% extends "management/manage_base.html" %}
-{% load sekizai_tags %}
+{% load sekizai_tags tz %}
 
 {% block title %}List of Lookups | {{ block.super }}{% endblock title %}
 
@@ -34,7 +34,7 @@
                                  {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
                              </td>
                             <td>
-                                {{ lookup.created_at }}
+                                {{ lookup.created_at|timezone:"America/Los_Angeles" }}
                             </td>
                         </tr>
                         {% endfor %}
@@ -42,7 +42,7 @@
                 </table>
             </div>
             {% if is_paginated %}
-            {% include "manage/inc/pagination.html" %}
+            {% include "management/inc/pagination.html" %}
             {% endif %}
         </div>
     </div>

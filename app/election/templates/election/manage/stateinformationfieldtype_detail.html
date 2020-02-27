@@ -1,5 +1,5 @@
 {% extends "management/manage_base.html" %}
-{% load sekizai_tags crispy_forms_tags %}
+{% load sekizai_tags crispy_forms_tags tz %}
 
 {% block title %}{{ fieldtype }} | {{ block.super }}{% endblock title %}
 
@@ -25,6 +25,7 @@
                             <th>State</th>
                             <th>Current Value</th>
                             <th>Notes</th>
+                            <th>Last Updated</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,6 +41,9 @@
                             <td scope="row">
                                 {{ field.notes|linebreaks }}
                             </td>
+                            <td scope="row">
+                                {{ field.modified_at|timezone:"America/Los_Angeles" }}
+                            </td>
                         </tr>
                         {% endfor %}
 
@@ -47,7 +51,7 @@
                 </table>
             </div>
             {% if is_paginated %}
-            {% include "manage/inc/pagination.html" %}
+            {% include "management/inc/pagination.html" %}
             {% endif %}
         </div>
     </div>

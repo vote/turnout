@@ -10,6 +10,7 @@ class LookupListView(ManageViewMixin, ListView):
     model = Lookup
     context_object_name = "lookups"
     template_name = "verifier/manage/lookup_list.html"
+    paginate_by = 25
 
 
 class LookupDetailView(UUIDSlugMixin, ManageViewMixin, DetailView):
