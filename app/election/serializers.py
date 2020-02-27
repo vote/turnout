@@ -10,7 +10,7 @@ class StateInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StateInformation
-        fields = ("text", "field_type")
+        fields = ("text", "field_type", "modified_at")
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
