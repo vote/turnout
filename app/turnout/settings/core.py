@@ -2,6 +2,7 @@ import os
 
 import environs
 import sentry_sdk
+from celery.schedules import crontab
 from kombu import Queue
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -166,7 +167,12 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
-CELERY_BEAT_SCHEDULE = {}
+CELERY_BEAT_SCHEDULE = {
+    "trigger-netlify-updated-information": {
+        "task": "election.tasks.trigger_netlify_if_updates",
+        "schedule": crontab(minute=0, hour="*"),
+    },
+}
 CELERY_TIMEZONE = "UTC"
 
 #### END CELERY CONFIGURATION

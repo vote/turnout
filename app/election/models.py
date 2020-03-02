@@ -79,6 +79,29 @@ class StateInformation(UUIDModel, TimestampModel):
         return markdown.markdown(self.text)
 
 
+class UpdateNotificationWebhookManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .exclude(type__isnull=True)
+            .exclude(trigger_url__isnull=True)
+        )
+
+
+class UpdateNotificationWebhook(UUIDModel, TimestampModel):
+    name = models.TextField(null=True)
+    type = EnumField(enums.NotificationWebhookTypes, null=True)
+    trigger_url = models.URLField(null=True, max_length=200)
+    last_triggered = models.DateTimeField(null=True, blank=True)
+    active = models.BooleanField(null=True, default=True)
+
+    objects = UpdateNotificationWebhookManager()
+
+    def __str__(self):
+        return self.name
+
+
 @receiver(post_save, sender=StateInformationFieldType)
 def process_new_information_field(sender, instance, **kwargs):
     if kwargs["created"]:

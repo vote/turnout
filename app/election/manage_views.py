@@ -49,9 +49,11 @@ class FieldInformationTypeDetailView(ManageViewMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["state_information"] = StateInformation.objects.select_related().filter(
-            field_type=kwargs["object"]
-        ).order_by('state__name')
+        context["state_information"] = (
+            StateInformation.objects.select_related()
+            .filter(field_type=kwargs["object"])
+            .order_by("state__name")
+        )
 
         return context
 

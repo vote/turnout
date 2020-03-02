@@ -35,4 +35,6 @@ model-bakery==1.1.*
 git+https://github.com/nickcatal/django-otp.git@b1d1a36008da5e2e161d3e550a91ae230fc67bb5#egg=django_otp
 qrcode==6.*
 requests-mock==1.7.*
+pytest-mock==2.0.*
+pytest-freezegun==0.4.*
 netifaces==0.10.*

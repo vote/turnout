@@ -24,3 +24,7 @@ class StateFieldFormats(Enum):
         BOOLEAN = "Boolean"
         URL = "URL"
         DATE = "Date"
+
+
+class NotificationWebhookTypes(Enum):
+    NETLIFY = "Netlify"

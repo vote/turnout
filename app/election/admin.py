@@ -17,3 +17,8 @@ class StateAdmin(admin.ModelAdmin):
 @admin.register(models.StateInformationFieldType)
 class FieldTypeAdmin(admin.ModelAdmin):
     list_display = ("slug", "long_name", "field_format")
+
+
+@admin.register(models.UpdateNotificationWebhook)
+class UpdateNotificationWebhookAdmin(admin.ModelAdmin):
+    list_display = ("name", "active", "last_triggered")
