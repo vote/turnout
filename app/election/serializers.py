@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from enumfields.drf.serializers import EnumSupportSerializerMixin
 
 from common.enums import StateFieldFormats
 
@@ -31,7 +32,7 @@ class StateSerializer(serializers.ModelSerializer):
         )
 
 
-class StateFieldSerializer(serializers.ModelSerializer):
+class StateFieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = StateInformationFieldType
-        fields = ("slug", "long_name")
+        fields = ("slug", "long_name", "field_format")
