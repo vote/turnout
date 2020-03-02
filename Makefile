@@ -13,6 +13,9 @@ migrate:
 createsuperuser:
 	docker-compose exec server python manage.py createsuperuser
 
+importfromprod:
+	docker-compose exec server python manage.py importfromprod
+
 shell:
 	docker-compose exec server /bin/bash
 
