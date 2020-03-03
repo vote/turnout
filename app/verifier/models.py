@@ -1,13 +1,11 @@
 from django.contrib.postgres.fields import JSONField
-from django.core.validators import RegexValidator
 from django.db import models
 from enumfields import EnumField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from common import enums
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
-
-zip_validator = RegexValidator(r"^[0-9]{5}$", "Zip codes are 5 digits")
+from common.validators import zip_validator
 
 
 class Lookup(TrackingModel, UUIDModel, TimestampModel):

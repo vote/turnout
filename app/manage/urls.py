@@ -8,5 +8,6 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("election/", include("election.manage_urls")),
     path("verifier/", include("verifier.manage_urls")),
+    path("register/", include("register.manage_urls")),
     path("", views.ManageView.as_view(), name="home"),
 ]

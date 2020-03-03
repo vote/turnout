@@ -1,0 +1,47 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}List of Registrations | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header">Registrations</div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>State</th>
+                            <th>Start Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registration in registrations %}
+                        <tr>
+                            <td>
+                                {{ registration.first_name }} {{ registration.last_name }}
+                            </td>
+                            <td>
+                                {{ registration.state.pk }}
+                            </td>
+                            <td>
+                                {{ registration.created_at|timezone:"America/Los_Angeles" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "management/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

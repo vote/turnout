@@ -7,6 +7,42 @@ class TargetSmartGender(Enum):
     UNKNOWN = "Unknown Gender"
 
 
+class RegistrationGender(Enum):
+    MALE = "Male"
+    FEMALE = "Female"
+    NON_BINARY = "NonBinary"
+    OTHER = "Other"
+
+    class Labels:
+        NON_BINARY = "Non Binary"
+
+
+class PoliticalParties(Enum):
+    NONE = "None"
+    DEMOCRATIC = "Democratic"
+    REPUBLICAN = "Republican"
+    GREEN = "Green"
+    LIBERTARIAN = "Libertarian"
+    OTHER = "Other"
+
+
+class RaceEthnicity(Enum):
+    AMERICAN_INDIAN_ALASKA_NATIVE = "IndianNative"
+    ASIAN_PACIFIC_ISLANDER = "AsianPacificIslander"
+    BLACK = "Black"
+    HISPANIC = "Hispanic"
+    MULTI = "Multi"
+    WHITE = "White"
+    OTHER = "Other"
+
+    class Labels:
+        AMERICAN_INDIAN_ALASKA_NATIVE = "American Indian / Alaskan Native"
+        ASIAN_PACIFIC_ISLANDER = "Asian / Pacific Islander"
+        BLACK = "Black (not Hispanic)"
+        MULTI = "Multi Racial"
+        WHITE = "White (not Hispanic)"
+
+
 class VoterStatus(Enum):
     ACTIVE = "Active"
     INACTIVE = "Inactive"
