@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from enumfields.drf.serializers import EnumSupportSerializerMixin
+from rest_framework import serializers
 
 from common.enums import StateFieldFormats
 
