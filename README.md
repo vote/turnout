@@ -1,9 +1,40 @@
-# Turnout App
+# Turnout
+
+Turnout is a multi-tenant voter notification, verification, registration, and Get Out The Vote app
+built to get as many people as possible to the polls.
+
+Turnout was created in-house at [Turnout2020](https://www.turnout2020.us), who is the primary user.
+
+Turnout's code is publicly available under the
+[Business Source License v1.1](https://github.com/vote/turnout/blob/master/LICENSE).
+
+## Architecture
+
+Turnout is written entirely in Python using the Django and Celery frameworks and relies on Postgres
+as a data backend and Redis as a cache and message broker.
+
+API views are written entirely using Django Rest Framework, while the administrative interface is
+built using Django generic views and static assets compiled using webpack.
+
+Local development is done entirely inside docker using docker-compose, orchestrated on the command
+line using gnumake, and deployment is done by creating Docker images and deploying them using a
+container orchestration system such as Kubernetes or (in the case of Turnout2020) Elastic Container
+Service.
+
+For production deployments, Turnout's web interface assumes it's behind a caching and web firewall
+layer, such as Cloudflare, and is configured respond to health checks sent from a load balancer
+such as an AWS Application Load Balancer.
+
+This repository contains utilities specific to Turnout2020's deployment of Turnout on AWS. Commits
+to master as well as new git tags trigger [Travis](https://travis-ci.com/vote/turnout) to build
+docker images and upload those images to container repositories within the Turnout2020 AWS account.
+A Turnout2020-hosted version of Spinnakerlaunches ECS tasks with this new image (using the Fargate
+launch type) using a Red/Black deployment strategy. Turnout2020 uses Postgres on RDS and Redis on
+ElastiCache.
+
+## General Development
 
 The commands generally require `gnumake` and `docker` to be installed locally.
-
-
-### General Development
 
 To launch you'll need a `.env` file in your project root. Review `.env.example` for examples of
 variables you can include in your file.
