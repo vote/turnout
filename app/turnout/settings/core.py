@@ -22,6 +22,13 @@ USE_L10N = True
 WSGI_APPLICATION = "turnout.wsgi.application"
 ROOT_URLCONF = "turnout.urls"
 
+# Useful analytics and tracking tags
+CLOUD_DETAIL = env.str("CLOUD_DETAIL", default="")
+SERVER_GROUP = env.str("SERVER_GROUP", default="")
+CLOUD_STACK = env.str("CLOUD_STACK", default="local")
+ENV = env.str("ENV", default=CLOUD_STACK)
+TAG = env.str("TAG", default="")
+BUILD = env.str("BUILD", default="0")
 
 ##### DATABASE CONFIGURATION
 
@@ -83,6 +90,7 @@ FIRST_PARTY_APPS = [
     "verifier",
     "multifactor",
     "register",
+    "mailer",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -241,7 +249,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 
 DATADOG_TRACE = {
     "TRACER": "turnout.tracer.tracer",
-    "TAGS": {"build": env.str("BUILD", default="")},
+    "TAGS": {"build": BUILD},
 }
 
 #### END DATADOG CONFIGURATION
@@ -250,36 +258,47 @@ DATADOG_TRACE = {
 #### STATSD CONFIGURATION
 
 STATSD_TAGS = [
-    f'env:{env.str("CLOUD_STACK", default="")}',
-    f'spinnaker_detail:{env.str("CLOUD_DETAIL", default="")}',
-    f'spinnaker_servergroup:{env.str("SERVER_GROUP", default="")}',
-    f'spinnaker_stack:{env.str("CLOUD_STACK", default="")}',
-    f'image_tag:{env.str("TAG", default="")}',
-    f'build:{env.str("BUILD", default="")}',
+    f"env:{ENV}",
+    f"spinnaker_detail:{CLOUD_DETAIL}",
+    f"spinnaker_servergroup:{SERVER_GROUP}",
+    f"spinnaker_stack:{CLOUD_STACK}",
+    f"image_tag:{TAG}",
+    f"build:{BUILD}",
 ]
 
 #### END STATSD CONFIGURATION
 
 
+#### SENDGRID CONFIGURATION
+
+SENDGRID_API_KEY = env.str("SENDGRID_API_KEY", default="")
+SENDGRID_SANDBOX_MODE_IN_DEBUG = env.bool(
+    "SENDGRID_SANDBOX_MODE_IN_DEBUG", default=False
+)
+EMAIL_SEND_TIMEOUT = env.int("EMAIL_SEND_TIMEOUT", default=60 * 60 * 24)
+EMAIL_BACKEND = "mailer.backend.TurnoutBackend"
+
+#### END SENDGRID CONFIGURATION
+
+
 #### SENTRY CONFIGURATION
 
-RELEASE_TAG = env.str("TAG", default="")
 SENTRY_DSN = env.str("SENTRY_DSN", default="")
-if RELEASE_TAG and SENTRY_DSN:
+if TAG and SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(), RedisIntegration(), CeleryIntegration()],
         send_default_pii=True,
-        release=f"turnout@{RELEASE_TAG}",
-        environment=env.str("CLOUD_STACK", default=None),
+        release=f"turnout@{TAG}",
+        environment=ENV,
     )
 
     with sentry_sdk.configure_scope() as scope:
-        scope.set_tag("SERVER_GROUP", env.str("SERVER_GROUP", default=""))
-        scope.set_tag("CLOUD_DETAIL", env.str("CLOUD_DETAIL", default=""))
-        scope.set_tag("CLOUD_STACK", env.str("CLOUD_STACK", default=""))
-        scope.set_tag("build", env.str("BUILD", default=""))
-        scope.set_tag("tag", env.str("TAG", default=""))
+        scope.set_tag("SERVER_GROUP", SERVER_GROUP)
+        scope.set_tag("CLOUD_DETAIL", CLOUD_DETAIL)
+        scope.set_tag("CLOUD_STACK", CLOUD_STACK)
+        scope.set_tag("build", BUILD)
+        scope.set_tag("tag", TAG)
         scope.set_extra("allowed_hosts", ALLOWED_HOSTS)
 
 #### END SENTRY CONFIGURATION
@@ -302,6 +321,11 @@ LOGGING = {
             "propagate": False,
         },
         "election": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+        "mailer": {
             "handlers": ["console"],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,

@@ -9,6 +9,8 @@ django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.31.*
 datadog==0.34.*
+sendgrid==6.1.*
+django-sendgrid-v5==0.8.*
 requests==2.22.*
 black==19.10b0
 isort==4.3.*
