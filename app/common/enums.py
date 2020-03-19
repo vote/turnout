@@ -43,6 +43,23 @@ class RaceEthnicity(Enum):
         WHITE = "White (not Hispanic)"
 
 
+class PersonTitle(Enum):
+    MR = "Mr"
+    MRS = "Mrs"
+    MISS = "Miss"
+    MS = "Ms"
+
+    class Labels:
+        MR = "Mr."
+        MRS = "Mrs."
+        MS = "Ms."
+
+
+class TurnoutRegistrationStatus(Enum):
+    INCOMPLETE = "Incomplete"
+    PENDING = "Pending"
+
+
 class VoterStatus(Enum):
     ACTIVE = "Active"
     INACTIVE = "Inactive"

@@ -325,6 +325,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "register": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
         "mailer": {
             "handlers": ["console"],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
