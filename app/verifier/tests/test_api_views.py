@@ -10,7 +10,7 @@ from common.enums import VoterStatus
 from election.models import State
 from verifier.models import Lookup
 
-LOOKUP_API_ENDPOINT = "/v1/lookup/"
+LOOKUP_API_ENDPOINT = "/v1/verification/verify/"
 VALID_LOOKUP = {
     "first_name": "Barack",
     "last_name": "Obama",

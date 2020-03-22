@@ -3,13 +3,11 @@ from django.urls import include, path
 from django.views.generic.base import RedirectView
 from django_otp.admin import OTPAdminSite
 
-from .api_routes import router
-
 admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
     path("-/", include("django_alive.urls")),
-    path("v1/", include(router.urls)),
+    path("v1/", include("turnout.api_urls")),
     path(
         "manage/admin/login/",
         RedirectView.as_view(url="/manage/login/", query_string=True),
