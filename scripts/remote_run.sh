@@ -14,8 +14,24 @@ export SECRET_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --n
 export REDIS_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.redis_url | jq '.Parameter["Value"]' -r)
 export SENTRY_DSN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sentry_dsn | jq '.Parameter["Value"]' -r)
 export TARGETSMART_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.targetsmart_key | jq '.Parameter["Value"]' -r)
+export MULTIFACTOR_ISSUER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.multifactor_issuer | jq '.Parameter["Value"]' -r)
+export ATTACHMENT_USE_S3=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.use_s3 | jq '.Parameter["Value"]' -r)
+export AWS_STORAGE_BUCKET_NAME=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.public_storage_bucket | jq '.Parameter["Value"]' -r)
+export AWS_STORAGE_PRIVATE_BUCKET_NAME=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.private_storage_bucket | jq '.Parameter["Value"]' -r)
+export SENDGRID_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sendgrid_api_key | jq '.Parameter["Value"]' -r)
+export FILE_TOKEN_RESET_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_reset_url | jq '.Parameter["Value"]' -r)
+export PRIMARY_ORIGIN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.primary_origin | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
+
+
+AWS_CRED_DETAILS=$(aws sts get-session-token --duration-seconds 86400)
+export AWS_ACCESS_KEY_ID=$(echo $AWS_CRED_DETAILS | jq '.Credentials["AccessKeyId"]' -r)
+export AWS_SECRET_ACCESS_KEY=$(echo $AWS_CRED_DETAILS | jq '.Credentials["SecretAccessKey"]' -r)
+export AWS_DEFAULT_REGION=$REGION
+
+echo "AWS Credentials Acquired"
+
 
 if [ $1 ]; then
 
@@ -39,6 +55,16 @@ docker run -i -t \
            -e REDIS_URL \
            -e SENTRY_DSN \
            -e TARGETSMART_KEY \
+           -e MULTIFACTOR_ISSUER \
+           -e ATTACHMENT_USE_S3 \
+           -e AWS_STORAGE_BUCKET_NAME \
+           -e AWS_STORAGE_PRIVATE_BUCKET_NAME \
+           -e SENDGRID_API_KEY \
+           -e FILE_TOKEN_RESET_URL \
+           -e PRIMARY_ORIGIN \
+           -e AWS_ACCESS_KEY_ID \
+           -e AWS_SECRET_ACCESS_KEY \
+           -e AWS_DEFAULT_REGION \
            -e DEBUG=$DEBUG \
            -p 8000:8000 \
            $IMAGE \
