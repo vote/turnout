@@ -20,4 +20,5 @@ urlpatterns = [
     path("manage/", include("manage.urls", namespace="manage")),
     path("account/", include("accounts.urls", namespace="accounts")),
     path("multifactor/", include("multifactor.urls", namespace="multifactor")),
+    path("download/", include("storage.urls", namespace="storage")),
 ]

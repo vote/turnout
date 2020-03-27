@@ -81,3 +81,10 @@ class StateFieldFormats(Enum):
 
 class NotificationWebhookTypes(Enum):
     NETLIFY = "Netlify"
+
+
+class FileType(Enum):
+    REGISTRATION_FORM = "RegForm"
+
+    class Labels:
+        REGISTRATION_FORM = "Registration Form"
