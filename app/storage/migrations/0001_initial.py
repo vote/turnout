@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('uuid', django_smalluuid.models.SmallUUIDField(default=django_smalluuid.models.UUIDDefault(), editable=False, primary_key=True, serialize=False, unique=True)),
                 ('token', django_smalluuid.models.SmallUUIDField(default=django_smalluuid.models.UUIDDefault(), unique=True)),
                 ('app', enumfields.fields.EnumField(enum=common.enums.FileType, max_length=10)),
-                ('file', models.FileField(storage=storage.backends.HighValueStorage(), upload_to='')),
+                ('file', models.FileField(storage=storage.backends.HighValueDownloadStorage(), upload_to='')),
                 ('email', models.EmailField(blank=True, max_length=254, null=True)),
                 ('expires', models.DateTimeField(default=storage.models.storage_expire_date_time)),
                 ('first_download', models.DateTimeField(blank=True, null=True)),

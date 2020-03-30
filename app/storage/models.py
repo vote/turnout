@@ -11,7 +11,7 @@ from enumfields import EnumField
 from common import enums
 from common.utils.models import TimestampModel, UUIDModel
 
-from .backends import HighValueStorage
+from .backends import HighValueDownloadStorage
 
 
 def storage_expire_date_time():
@@ -21,7 +21,7 @@ def storage_expire_date_time():
 class StorageItem(UUIDModel, TimestampModel):
     token = SmallUUIDField(default=uuid_default())
     app = EnumField(enums.FileType)
-    file = models.FileField(storage=HighValueStorage())
+    file = models.FileField(storage=HighValueDownloadStorage())
     email = models.EmailField(blank=True, null=True)
     expires = models.DateTimeField(default=storage_expire_date_time)
     first_download = models.DateTimeField(blank=True, null=True)

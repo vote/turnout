@@ -58,3 +58,15 @@ class HighValueStorage(AttachmentStorage):
 
     querystring_expire = querystring_expire
     querystring_auth = True
+
+
+class HighValueDownloadStorage(HighValueStorage):
+    def get_available_name(self, name: str, max_length: Optional[int] = None):
+        self.original_name = name
+        return super().get_available_name(name, max_length)
+
+    def get_object_parameters(self, name: str):
+        params = super().get_object_parameters(name)
+        filename = self.original_name.split("/")[-1]
+        params.update({"ContentDisposition": f'attachment; filename="{filename}"'})
+        return params
