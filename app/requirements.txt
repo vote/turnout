@@ -42,3 +42,4 @@ requests-mock==1.7.*
 pytest-mock==2.0.*
 pytest-freezegun==0.4.*
 netifaces==0.10.*
+pdfrw==0.4

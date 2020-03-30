@@ -57,7 +57,7 @@ class RegistrationViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
             serializer.validated_data["status"] = TurnoutRegistrationStatus.PENDING
 
         # do not pass is_18_or_over or state_id_number to model, we are not storing it
-        serializer.validated_data.pop("is_18_or_over", None)
+        is_18_or_over = serializer.validated_data.pop("is_18_or_over", None)
         state_id_number = serializer.validated_data.pop("state_id_number", None)
 
         registration = serializer.save()
@@ -65,6 +65,8 @@ class RegistrationViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
         response = {"uuid": registration.uuid}
 
         if not serializer.incomplete:
-            process_registration_submission.delay(registration.uuid, state_id_number)
+            process_registration_submission.delay(
+                registration.uuid, state_id_number, is_18_or_over
+            )
 
         return Response(response)

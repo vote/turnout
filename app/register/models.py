@@ -27,6 +27,7 @@ class Registration(TrackingModel, UUIDModel, TimestampModel):
     )
     zipcode = models.TextField(null=True, validators=[zip_validator])
 
+    previous_title = EnumField(enums.PersonTitle, null=True, blank=True)
     previous_first_name = models.TextField(null=True, blank=True)
     previous_middle_name = models.TextField(null=True, blank=True)
     previous_last_name = models.TextField(null=True, blank=True)
@@ -68,4 +69,8 @@ class Registration(TrackingModel, UUIDModel, TimestampModel):
         enums.TurnoutRegistrationStatus,
         default=enums.TurnoutRegistrationStatus.PENDING,
         null=True,
+    )
+
+    result_item = models.ForeignKey(
+        "storage.StorageItem", null=True, on_delete=models.SET_NULL
     )
