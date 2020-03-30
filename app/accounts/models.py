@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import List
 
 from django.conf import settings
 from django.contrib.auth import models as auth_models
@@ -60,7 +61,7 @@ class User(
     objects = TurnoutUserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS: List[str] = []
 
     class Meta(object):
         verbose_name = _("User")

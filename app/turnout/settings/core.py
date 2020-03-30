@@ -1,4 +1,5 @@
 import os
+from typing import Dict, Optional
 
 import environs
 import sentry_sdk
@@ -11,7 +12,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 env = environs.Env()
 
 
-SECRET_KEY = env.str("SECRET_KEY")
+SECRET_KEY = env.str("SECRET_KEY", default="SET_THIS_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default="localhost")
 LANGUAGE_CODE = "en-us"
@@ -224,7 +225,7 @@ MULTIFACTOR_ISSUER = env.str("MULTIFACTOR_ISSUER", default="Turnout")
 
 #### DJANGO-ALIVE CONFIGURATION
 
-ALIVE_CHECKS = {
+ALIVE_CHECKS: Dict[str, Dict[Optional[str], Optional[str]]] = {
     "django_alive.checks.check_migrations": {},
 }
 

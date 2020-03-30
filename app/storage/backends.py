@@ -1,30 +1,31 @@
 # Swiped from EveryVoter, which was swiped from Connect
 import secrets
 import string
+from typing import Any, Optional
 
 from django.conf import settings
 from django.core.files.storage import get_storage_class
 from django.utils.timezone import now
 from pytz import timezone
 
-AttachmentStorageEngine = get_storage_class(
+AttachmentStorageEngine: Any = get_storage_class(
     import_path=settings.ATTACHMENT_STORAGE_ENGINE
 )
 
 
-def uniqify_filename(existing_filename):
+def uniqify_filename(existing_filename: str) -> str:
     alphabet = string.ascii_letters + string.digits
     string_length = secrets.choice(range(5, 12))
     unique_code = "".join(secrets.choice(alphabet) for _ in range(string_length))
     return f"{unique_code}.{existing_filename}"
 
 
-private_bucket_name = getattr(settings, "AWS_STORAGE_PRIVATE_BUCKET_NAME", "")
-querystring_expire = getattr(settings, "AWS_STORAGE_PRIVATE_URL_EXPIRATION", 60)
+private_bucket_name: str = getattr(settings, "AWS_STORAGE_PRIVATE_BUCKET_NAME", "")
+querystring_expire: int = getattr(settings, "AWS_STORAGE_PRIVATE_URL_EXPIRATION", 60)
 
 
-class AttachmentStorage(AttachmentStorageEngine):
-    def get_available_name(self, name, max_length=None):
+class AttachmentStorage(AttachmentStorageEngine):  # noqa
+    def get_available_name(self, name: str, max_length: Optional[int] = None) -> str:
         # If the storage engine is S3, call _clean_name() to clean the name
         try:
             clean_name = self._clean_name(name)

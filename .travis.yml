@@ -29,8 +29,12 @@ before_install:
 install:
   - pip install -r $TRAVIS_BUILD_DIR/app/requirements.txt
 
+before_script:
+  - export PYTHONPATH=$PYTHONPATH:/$TRAVIS_BUILD_DIR/app
+
 script:
   - pytest $TRAVIS_BUILD_DIR/app
+  - mypy --config-file $TRAVIS_BUILD_DIR/app/setup.cfg $TRAVIS_BUILD_DIR/app
 
 notifications:
   email: false
