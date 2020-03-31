@@ -10,6 +10,7 @@ from enumfields import EnumField
 
 from common import enums
 from common.utils.models import TimestampModel, UUIDModel
+from multi_tenant.mixins_models import PartnerModel
 
 from .backends import HighValueDownloadStorage
 
@@ -18,7 +19,7 @@ def storage_expire_date_time():
     return now() + datetime.timedelta(hours=settings.FILE_EXPIRATION_HOURS)
 
 
-class StorageItem(UUIDModel, TimestampModel):
+class StorageItem(PartnerModel, UUIDModel, TimestampModel):
     token = SmallUUIDField(default=uuid_default())
     app = EnumField(enums.FileType)
     file = models.FileField(storage=HighValueDownloadStorage())

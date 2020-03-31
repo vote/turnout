@@ -9,6 +9,7 @@ from rest_framework.fields import empty
 from common.utils.fields import RequiredBooleanField
 from common.validators import state_code_validator, zip_validator
 from election.choices import STATES
+from multi_tenant.mixins_serializers import PartnerSerializerMixin
 
 from .models import Registration
 
@@ -28,6 +29,7 @@ MINIMUM_NECESSARY_FIELDS = [
 ]
 NATIONALLY_REQUIRED_FIELDS = ["state_id_number", "us_citizen", "is_18_or_over"]
 OPTIONAL_FIELDS = [
+    "partner",
     "suffix",
     "phone",
     "address2",
@@ -56,7 +58,9 @@ OPTIONAL_FIELDS = [
 ]
 
 
-class RegistrationSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
+class RegistrationSerializer(
+    PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
+):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator], required=True)
     previous_zipcode = serializers.CharField(validators=[zip_validator], required=False)

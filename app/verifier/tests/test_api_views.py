@@ -4,10 +4,12 @@ import os
 from copy import copy
 
 import pytest
+from model_bakery import baker
 from rest_framework.test import APIClient
 
 from common.enums import VoterStatus
 from election.models import State
+from multi_tenant.models import Client
 from verifier.models import Lookup
 
 LOOKUP_API_ENDPOINT = "/v1/verification/verify/"
@@ -122,6 +124,66 @@ def test_lookup_object_created(requests_mock):
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.response == {"result": [], "too_many": False}
+    first_partner = Client.objects.first()
+    assert lookup.partner == first_partner
+
+
+@pytest.mark.django_db
+def test_default_partner(requests_mock):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
+
+    first_partner = Client.objects.first()
+    baker.make_recipe("multi_tenant.client")
+    assert Client.objects.count() == 2
+
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    assert response.status_code == 200
+    assert response.json() == {"registered": False}
+
+    lookup = Lookup.objects.first()
+    assert lookup.partner == first_partner
+
+
+@pytest.mark.django_db
+def test_custom_partner(requests_mock):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
+
+    second_partner = baker.make_recipe("multi_tenant.client")
+    assert Client.objects.count() == 2
+
+    url = f"{LOOKUP_API_ENDPOINT}?partner={second_partner.pk}"
+    response = client.post(url, VALID_LOOKUP)
+    assert response.status_code == 200
+    assert response.json() == {"registered": False}
+
+    lookup = Lookup.objects.first()
+    assert lookup.partner == second_partner
+
+
+@pytest.mark.django_db
+def test_invalid_partner_key(requests_mock):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
+
+    first_partner = Client.objects.first()
+    baker.make_recipe("multi_tenant.client")
+    assert Client.objects.count() == 2
+
+    url = f"{LOOKUP_API_ENDPOINT}?partner=INVALID"
+    response = client.post(url, VALID_LOOKUP)
+    assert response.status_code == 200
+    assert response.json() == {"registered": False}
+
+    lookup = Lookup.objects.first()
+    assert lookup.partner == first_partner
 
 
 def test_invalid_zipcode(requests_mock):

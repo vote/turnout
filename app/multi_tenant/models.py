@@ -7,6 +7,9 @@ class Client(UUIDModel, TimestampModel):
     name = models.CharField(max_length=200)
     url = models.URLField()
 
+    class Meta:
+        ordering = ["created_at"]
+
     def __str__(self):
         return self.name
 

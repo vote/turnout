@@ -4,11 +4,14 @@ from rest_framework import serializers
 
 from common.validators import state_code_validator
 from election.choices import STATES
+from multi_tenant.mixins_serializers import PartnerSerializerMixin
 
 from .models import Lookup, zip_validator
 
 
-class LookupSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
+class LookupSerializer(
+    PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
+):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator])
     state = serializers.ChoiceField(
@@ -18,6 +21,7 @@ class LookupSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Lookup
         fields = (
+            "partner",
             "first_name",
             "last_name",
             "address1",

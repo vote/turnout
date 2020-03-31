@@ -384,6 +384,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "multi_tenant": {
+            "handlers": ["console"],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
         "storage": {
             "handlers": ["console"],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),

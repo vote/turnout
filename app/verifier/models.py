@@ -6,9 +6,10 @@ from phonenumber_field.modelfields import PhoneNumberField
 from common import enums
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
+from multi_tenant.mixins_models import PartnerModel
 
 
-class Lookup(TrackingModel, UUIDModel, TimestampModel):
+class Lookup(PartnerModel, TrackingModel, UUIDModel, TimestampModel):
     person = models.ForeignKey("people.Person", null=True, on_delete=models.PROTECT)
 
     first_name = models.TextField()

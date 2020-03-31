@@ -120,7 +120,11 @@ def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
 
     filled_pdf = generate_pdf(form_data)
-    item = StorageItem(app=enums.FileType.REGISTRATION_FORM, email=registration.email)
+    item = StorageItem(
+        app=enums.FileType.REGISTRATION_FORM,
+        email=registration.email,
+        partner=registration.partner,
+    )
     item.file.save(generate_name(registration), File(filled_pdf), True)
 
     registration.result_item = item
