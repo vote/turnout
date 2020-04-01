@@ -11,6 +11,8 @@ from common.pdf import fill_form, join_files
 from election.models import StateInformation
 from storage.models import StorageItem
 
+from .tasks import send_registration_notification
+
 logger = logging.getLogger("register")
 
 
@@ -129,6 +131,8 @@ def process_registration(registration, state_id_number, is_18_or_over):
 
     registration.result_item = item
     registration.save(update_fields=["result_item"])
+
+    send_registration_notification.delay(registration.pk)
 
     logger.info(f"New PDF Created: Registration {item.pk}")
 

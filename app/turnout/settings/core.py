@@ -73,6 +73,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "sekizai",
     "crispy_forms",
+    "markdownify",
     "reversion",
     "rest_framework",
     "django_alive",

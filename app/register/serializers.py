@@ -32,6 +32,7 @@ OPTIONAL_FIELDS = [
     "partner",
     "suffix",
     "phone",
+    "sms_opt_in",
     "address2",
     "previous_title",
     "previous_first_name",

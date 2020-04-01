@@ -25,6 +25,7 @@ django-phonenumber-field==4.0.*
 phonenumbers==8.11.*
 django_sekizai==1.0.*
 django-crispy-forms==1.8.*
+django-markdownify==0.8.*
 django-reversion==3.0.*
 markdown==3.1.*
 djangorestframework==3.11.*

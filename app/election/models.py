@@ -1,8 +1,12 @@
+import datetime
+from typing import Dict, Union
+
 import markdown
 import reversion
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.functional import cached_property
 from enumfields import EnumField
 
 from common import enums
@@ -29,6 +33,15 @@ class State(TimestampModel):
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def data(self) -> Dict[(str, Union[datetime.date, str, bool, None])]:
+        data = {}
+        for item in self.stateinformation_set.only(
+            "field_type__slug", "text", "field_type__field_format"
+        ):
+            data[item.field_type.slug] = item.formal_format
+        return data
 
 
 class StateInformationFieldType(UUIDModel, TimestampModel):
@@ -70,6 +83,22 @@ class StateInformation(UUIDModel, TimestampModel):
 
     def html(self):
         return markdown.markdown(self.text)
+
+    @cached_property
+    def formal_format(self) -> Union[datetime.date, str, bool, None]:
+        content: Union[datetime.date, str, bool, None] = None
+        if self.text == "":
+            content = None
+        elif self.field_type.field_format == enums.StateFieldFormats.BOOLEAN:
+            content = self.text.lower() == "true"
+        elif self.field_type.field_format == enums.StateFieldFormats.DATE:
+            try:
+                content = datetime.date.fromisoformat(self.text)
+            except ValueError:
+                content = None
+        else:
+            content = self.text
+        return content
 
 
 class UpdateNotificationWebhookManager(models.Manager):

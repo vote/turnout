@@ -23,6 +23,7 @@ VALID_LOOKUP = {
     "date_of_birth": "1961-08-04",
     "zipcode": "60657",
     "phone": "+13129289292",
+    "sms_opt_in": True,
 }
 EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
@@ -123,6 +124,7 @@ def test_lookup_object_created(requests_mock):
     assert lookup.date_of_birth == datetime.date(year=1961, month=8, day=4)
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
+    assert lookup.sms_opt_in == True
     assert lookup.response == {"result": [], "too_many": False}
     first_partner = Client.objects.first()
     assert lookup.partner == first_partner

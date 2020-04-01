@@ -32,6 +32,7 @@ class LookupSerializer(
             "state",
             "phone",
             "email",
+            "sms_opt_in",
             "date_of_birth",
             "too_many",
             "registered",

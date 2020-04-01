@@ -15,14 +15,14 @@ class Command(BaseCommand):
             "--api-url",
             nargs=1,
             type=str,
-            default=["https://api.voteamerica.us/v1"],
+            default=["https://api.voteamerica.com/v1"],
             help="API to import from",
         )
 
     def handle(self, *args, **options):
         API_URL = options["api_url"][0]
 
-        fields = requests.get(f"{API_URL}/fields").json()
+        fields = requests.get(f"{API_URL}/election/field/").json()
         for obj in fields:
             # ensure StateInformationFieldTypes exist and match format
             field, created = StateInformationFieldType.objects.get_or_create(
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(f"Unchanged {field}")
 
-        data = requests.get(f"{API_URL}/states").json()
+        data = requests.get(f"{API_URL}/election/state/").json()
         for state in data:
             data_dictionary = dict(
                 [(x["field_type"], x["text"]) for x in state["state_information"]]
