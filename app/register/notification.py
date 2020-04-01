@@ -11,7 +11,7 @@ SUBJECT = "Here's your voter registration form!"
 
 @statsd.timed("turnout.register.compile_email")
 def compile_email(registration: Registration) -> str:
-    preheader_text = f"{registration.first_name} we've generated a personalized document for you to send to election officials. You must submit this document to be registered for future elections."
+    preheader_text = f"{registration.first_name}, we've generated a personalized document for you to send to election officials. You must submit this document to be registered for future elections."
     recipient = {
         "first_name": registration.first_name,
         "last_name": registration.last_name,

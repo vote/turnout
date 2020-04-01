@@ -34,12 +34,15 @@ form.<br><br>
 <![endif]-->
 
 Once it's printed, follow the instructions on the form to sign, fold and mail it to this address:<br><br>
-{{ state_info.registration_nvrf_submission_address|markdownify }}<br><br>
+
+<center>
+{{ state_info.registration_nvrf_submission_address|markdownify|linebreaksbr }}<br><br>
+</center>
 
 If you do not have a printer, you can print the form out at any local library. If you do not have a stamp, you can buy
 one from any grocery store: just ask the cashier to sell you one.<br><br>
 
-Your voter registration form must be {{ state_info.registration_deadline_mail|markdownify }}.<br><br>
+Your voter registration form must be <strong>{{ state_info.registration_deadline_mail|markdownify|lower }}</strong>.<br><br>
 
 For complete state-by-state instructions on how to fill out the form, see the <a href="https://www.voteamerica.com/pdf/Federal_Voter_Registration_ENG.pdf">full federal form</a>.<br><br>
 

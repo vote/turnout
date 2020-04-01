@@ -5,7 +5,9 @@ from common.analytics import statsd
 
 @shared_task
 @statsd.timed("turnout.register.process_registration_submission")
-def process_registration_submission(registration_pk: str, state_id_number: str, is_18_or_over: bool) -> None:
+def process_registration_submission(
+    registration_pk: str, state_id_number: str, is_18_or_over: bool
+) -> None:
     from .models import Registration
     from .generateform import process_registration
 
