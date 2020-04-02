@@ -283,12 +283,10 @@ else:
 #### CORS CONFIGURATION
 
 CORS_ORIGIN_REGEX_WHITELIST = [
-    r"^https:\/\/turnout2020.us$",  # TO2020 root
-    r"^https:\/\/\w*.?turnout2020.us$",  # TO2020 production and staging
     r"^https:\/\/voteamerica.com$",  # root
     r"^https:\/\/\w*.?voteamerica.com$",  # production and staging
-    r"^https:\/\/[\w-]+--turnout2020.netlify.com$",  # branch builds
-    r"^https:\/\/[\w-]+--turnout2020.netlify.app$",  # branch builds
+    r"^https:\/\/[\w-]+--voteamerica.netlify.com$",  # branch builds
+    r"^https:\/\/[\w-]+--voteamerica.netlify.app$",  # branch builds
     r"^http:\/\/localhost:8000$",  # local
 ]
 
