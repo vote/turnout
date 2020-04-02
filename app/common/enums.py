@@ -27,8 +27,8 @@ class PoliticalParties(Enum):
 
 
 class RaceEthnicity(Enum):
-    AMERICAN_INDIAN_ALASKA_NATIVE = "IndianNative"
-    ASIAN_PACIFIC_ISLANDER = "AsianPacificIslander"
+    AMERICAN_INDIAN_ALASKA_NATIVE = "Native"
+    ASIAN_PACIFIC_ISLANDER = "AAPI"
     BLACK = "Black"
     HISPANIC = "Hispanic"
     MULTI = "Multi"
