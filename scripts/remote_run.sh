@@ -6,6 +6,13 @@ DOCKER_REPO_NAME=${DOCKER_REPO_NAME:-turnout}
 DEBUG=${DEBUG:-true}
 ACCOUNT_ID=$(aws sts get-caller-identity | jq -r ".Account")
 
+if [ $1 ]; then
+
+echo "Logging into ECR"
+eval $(aws ecr get-login --no-include-email --region $REGION)
+
+fi
+
 echo "Account ID: $ACCOUNT_ID"
 
 export ALLOWED_HOSTS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.allowed_hosts | jq '.Parameter["Value"]' -r)
@@ -35,8 +42,6 @@ echo "AWS Credentials Acquired"
 
 if [ $1 ]; then
 
-echo "Logging into ECR"
-eval $(aws ecr get-login --no-include-email --region $REGION)
 IMAGE=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$DOCKER_REPO_NAME:$1
 
 else
