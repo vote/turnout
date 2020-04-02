@@ -298,7 +298,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 #### DATADOG CONFIGURATION
 
 DATADOG_TRACE = {
-    "TRACER": "turnout.tracer.tracer",
+    "TRACER": "common.apm.tracer",
     "TAGS": {"build": BUILD},
 }
 
