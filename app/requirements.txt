@@ -9,6 +9,7 @@ django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.31.*
 datadog==0.34.*
+python-json-logger==0.1.11
 sendgrid==6.1.*
 django-sendgrid-v5==0.8.*
 requests==2.22.*

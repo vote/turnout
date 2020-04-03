@@ -354,42 +354,48 @@ if TAG and SENTRY_DSN:
 
 #### LOGGING CONFIGURATION
 
+handler = "console" if DEBUG else "json"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler",},},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler",},
+        "json": {"class": "logging.StreamHandler", "formatter": "json"},
+    },
+    "formatters": {"json": {"()": "pythonjsonlogger.jsonlogger.JsonFormatter"}},
     "loggers": {
         "django": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
         },
         "verifier": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
         "election": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
         "register": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
         "mailer": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
         "multi_tenant": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
         "storage": {
-            "handlers": ["console"],
+            "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },

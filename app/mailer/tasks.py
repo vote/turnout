@@ -26,8 +26,12 @@ def send_sendgrid_mail(key):
     finally:
         cache.delete(key)
 
-    subject = mail["subject"]
-    sent_from = mail["from"]["email"]
-    sent_to = mail["personalizations"][0]["to"]
-    logger.info(f"Email Sent {subject} from {sent_from} to {sent_to}")
+    extra = {
+        "subject": mail["subject"],
+        "sent_from": mail["from"]["email"],
+        "sent_to": [d["email"] for d in mail["personalizations"][0]["to"]],
+    }
+    logger.info(
+        "Email Sent %(subject)s from %(sent_from)s to %(sent_to)s", extra, extra=extra
+    )
     logger.debug(mail)
