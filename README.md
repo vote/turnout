@@ -3,7 +3,7 @@
 Turnout is a multi-tenant voter notification, verification, registration, and Get Out The Vote app
 built to get as many people as possible to the polls.
 
-Turnout was created in-house at [Turnout2020](https://www.turnout2020.us), who is the primary user.
+Turnout was created in-house at [VoteAmerica](https://www.voteamerica.com), who is the primary user.
 
 Turnout's code is publicly available under the
 [Business Source License v1.1](https://github.com/vote/turnout/blob/master/LICENSE).
@@ -18,18 +18,18 @@ built using Django generic views and static assets compiled using webpack.
 
 Local development is done entirely inside docker using docker-compose, orchestrated on the command
 line using gnumake, and deployment is done by creating Docker images and deploying them using a
-container orchestration system such as Kubernetes or (in the case of Turnout2020) Elastic Container
+container orchestration system such as Kubernetes or (in the case of VoteAmerica) Elastic Container
 Service.
 
 For production deployments, Turnout's web interface assumes it's behind a caching and web firewall
 layer, such as Cloudflare, and is configured respond to health checks sent from a load balancer
 such as an AWS Application Load Balancer.
 
-This repository contains utilities specific to Turnout2020's deployment of Turnout on AWS. Commits
+This repository contains utilities specific to VoteAmerica's deployment of Turnout on AWS. Commits
 to master as well as new git tags trigger [Travis](https://travis-ci.com/vote/turnout) to build
-docker images and upload those images to container repositories within the Turnout2020 AWS account.
-A Turnout2020-hosted version of Spinnakerlaunches ECS tasks with this new image (using the Fargate
-launch type) using a Red/Black deployment strategy. Turnout2020 uses Postgres on RDS and Redis on
+docker images and upload those images to container repositories within the VoteAmerica AWS account.
+A VoteAmerica-hosted version of Spinnakerlaunches ECS tasks with this new image (using the Fargate
+launch type) using a Red/Black deployment strategy. VoteAmerica uses Postgres on RDS and Redis on
 ElastiCache.
 
 ## General Development
@@ -170,7 +170,7 @@ functionality of Turnout.
     with the date that file was uploaded. The date will be based on the current date in the
     specified timezone.
 * `FILE_TOKEN_RESET_URL` (str, optional, default
-    `https://www.turnout2020.us/download/?id={item_id}`) -- The URL that a user should be
+    `https://www.voteamerica.com/download/?id={item_id}`) -- The URL that a user should be
     redirected to if they visit the download endpoint but either do not have a valid token or if
     their token has exired. **Must include `{item_id}` where the primary key of the file will be
     inserted**

@@ -37,6 +37,10 @@ lint:
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \
 		isort --recursive --skip migrations /app/ && black --exclude /*/migrations/* /app/"
 
+openapi:
+	docker-compose exec server python manage.py generateschema --format openapi openapi.yaml
+
+
 dbshell:
 	bash scripts/rds_psql.sh
 

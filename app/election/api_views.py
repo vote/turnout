@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from .models import State, StateInformationFieldType
-from .serializers import StateFieldSerializer, StateSerializer
+from .serializers import StateFieldSerializer, StateSerializer, FieldSerializer
 
 
 class StateViewSet(ReadOnlyModelViewSet):
@@ -9,8 +9,16 @@ class StateViewSet(ReadOnlyModelViewSet):
     serializer_class = StateSerializer
     queryset = State.objects.all()
 
-
 class StateFieldsViewSet(ReadOnlyModelViewSet):
     model = StateInformationFieldType
-    serializer_class = StateFieldSerializer
+    
     queryset = StateInformationFieldType.objects.all()
+    lookup_field = 'slug'
+
+    def list(self, request):
+        self.serializer_class = FieldSerializer
+        return super().list(request)
+
+    def retrieve(self, request, slug=None):
+        self.serializer_class = StateFieldSerializer
+        return super().retrieve(request, slug)

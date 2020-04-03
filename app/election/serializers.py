@@ -19,6 +19,17 @@ class StateInfoSerializer(serializers.ModelSerializer):
             result["value"] = instance.text.lower() == "true"
         return result
 
+class FieldStateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StateInformation
+        fields = ("state", "text", "modified_at")
+
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        if instance.field_type.field_format == StateFieldFormats.BOOLEAN:
+            result["value"] = instance.text.lower() == "true"
+        return result
+
 
 class StateSerializer(serializers.ModelSerializer):
     state_information = StateInfoSerializer(source="stateinformation_set", many=True)
@@ -32,7 +43,15 @@ class StateSerializer(serializers.ModelSerializer):
         )
 
 
-class StateFieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
+class FieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = StateInformationFieldType
         fields = ("slug", "long_name", "field_format")
+
+
+class StateFieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
+    states =  FieldStateSerializer(source="stateinformation_set", many=True)
+
+    class Meta:
+        model = StateInformationFieldType
+        fields = ("slug", "long_name", "field_format", "states")
