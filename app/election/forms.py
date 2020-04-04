@@ -28,8 +28,10 @@ class StateInformationManageForm(forms.ModelForm):
         else:
             self.fields["text"].help_text = "Markdown allowed"
 
-    def clean_text(self):
+    def clean_text(self) -> str:
         text = self.cleaned_data["text"]
+        if text == '':
+            return ''
         if self.field_format == StateFieldFormats.URL:
             validator = URLValidator()
             validator(text)

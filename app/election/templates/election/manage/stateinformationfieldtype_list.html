@@ -15,16 +15,15 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Name</th>
                             <th>Slug</th>
+                            <th>Name</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for field in fieldtypes %}
                         <tr>
-                            <td scope="row"><a href="{% url 'manage:election:fieldinformationtype' field.slug %}">{{ field.long_name }}</a>
-                            </td>
-                            <td scope="row">{{ field.slug }}</td>
+                            <td scope="row"><a href="{% url 'manage:election:fieldinformationtype' field.slug %}">{{ field.slug }}</a></td>
+                            <td scope="row">{{ field.long_name }}</td>
                         </tr>
                         {% endfor %}
 
