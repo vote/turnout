@@ -77,6 +77,9 @@ class Registration(PartnerModel, TrackingModel, UUIDModel, TimestampModel):
         "storage.StorageItem", null=True, on_delete=models.SET_NULL
     )
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
         return f"Registration - {self.first_name} {self.last_name}, {self.state.pk}".strip()
 
