@@ -45,6 +45,7 @@ git+https://github.com/nickcatal/django-otp.git@b1d1a36008da5e2e161d3e550a91ae23
 qrcode==6.*
 requests-mock==1.7.*
 pytest-mock==2.0.*
+pytest-socket==0.3.*
 pytest-freezegun==0.4.*
 netifaces==0.10.*
 pdfrw==0.4

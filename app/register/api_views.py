@@ -77,4 +77,3 @@ class StatusViewSet(UpdateModelMixin, GenericViewSet):
     model = Registration
     serializer_class = StatusSerializer
     queryset = Registration.objects.filter(status=TurnoutRegistrationStatus.INCOMPLETE)
-

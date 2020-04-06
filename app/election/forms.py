@@ -30,8 +30,8 @@ class StateInformationManageForm(forms.ModelForm):
 
     def clean_text(self) -> str:
         text = self.cleaned_data["text"]
-        if text == '':
-            return ''
+        if text == "":
+            return ""
         if self.field_format == StateFieldFormats.URL:
             validator = URLValidator()
             validator(text)

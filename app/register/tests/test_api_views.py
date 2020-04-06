@@ -5,7 +5,12 @@ import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 
-from common.enums import TurnoutRegistrationStatus, PersonTitle, PoliticalParties, RaceEthnicity
+from common.enums import (
+    PersonTitle,
+    PoliticalParties,
+    RaceEthnicity,
+    TurnoutRegistrationStatus,
+)
 from election.models import State
 from multi_tenant.models import Client
 from register.models import Registration
@@ -31,12 +36,17 @@ VALID_REGISTRATION = {
     "is_18_or_over": True,
     "state_id_number": "FOUNDER123",
     "party": "Other",
-    "race_ethnicity": "White"
+    "race_ethnicity": "White",
 }
 REGISTER_API_ENDPOINT_INCOMPLETE = "/v1/registration/register/?incomplete=true"
 
 STATUS_API_ENDPOINT = "/v1/registration/status/{uuid}/"
 STATUS_REFER_OVR = {"status": "ReferOVR"}
+
+
+@pytest.fixture()
+def submission_task_patch(mocker):
+    return mocker.patch("register.api_views.process_registration_submission")
 
 
 def test_get_request_disallowed():
@@ -46,7 +56,7 @@ def test_get_request_disallowed():
     assert response.json() == {"detail": 'Method "GET" not allowed.'}
 
 
-def test_blank_api_request(requests_mock):
+def test_blank_api_request():
     client = APIClient()
     response = client.post(REGISTER_API_ENDPOINT, {})
     assert response.status_code == 400
@@ -68,7 +78,7 @@ def test_blank_api_request(requests_mock):
 
 
 @pytest.mark.django_db
-def test_register_object_created(requests_mock):
+def test_register_object_created(submission_task_patch):
     client = APIClient()
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)
@@ -101,9 +111,13 @@ def test_register_object_created(requests_mock):
     first_partner = Client.objects.first()
     assert registration.partner == first_partner
 
+    submission_task_patch.delay.assert_called_once_with(
+        registration.uuid, "FOUNDER123", True
+    )
+
 
 @pytest.mark.django_db
-def test_default_partner(requests_mock):
+def test_default_partner(submission_task_patch):
     client = APIClient()
 
     first_partner = Client.objects.first()
@@ -118,9 +132,13 @@ def test_default_partner(requests_mock):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.partner == first_partner
 
+    submission_task_patch.delay.assert_called_once_with(
+        registration.uuid, "FOUNDER123", True
+    )
+
 
 @pytest.mark.django_db
-def test_custom_partner(requests_mock):
+def test_custom_partner(submission_task_patch):
     client = APIClient()
 
     second_partner = baker.make_recipe("multi_tenant.client")
@@ -135,9 +153,13 @@ def test_custom_partner(requests_mock):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.partner == second_partner
 
+    submission_task_patch.delay.assert_called_once_with(
+        registration.uuid, "FOUNDER123", True
+    )
+
 
 @pytest.mark.django_db
-def test_invalid_partner_key(requests_mock):
+def test_invalid_partner_key(submission_task_patch):
     client = APIClient()
 
     first_partner = Client.objects.first()
@@ -153,8 +175,12 @@ def test_invalid_partner_key(requests_mock):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.partner == first_partner
 
+    submission_task_patch.delay.assert_called_once_with(
+        registration.uuid, "FOUNDER123", True
+    )
 
-def test_not_us_citizen(requests_mock):
+
+def test_not_us_citizen():
     client = APIClient()
     not_citzen_register = copy(VALID_REGISTRATION)
     not_citzen_register["us_citizen"] = False
@@ -163,7 +189,7 @@ def test_not_us_citizen(requests_mock):
     assert response.json() == {"us_citizen": ["Must be true"]}
 
 
-def test_not_18_or_over(requests_mock):
+def test_not_18_or_over():
     client = APIClient()
     not_18_years_old_register = copy(VALID_REGISTRATION)
     not_18_years_old_register["is_18_or_over"] = False
@@ -172,7 +198,7 @@ def test_not_18_or_over(requests_mock):
     assert response.json() == {"is_18_or_over": ["Must be true"]}
 
 
-def test_invalid_zipcode(requests_mock):
+def test_invalid_zipcode():
     client = APIClient()
     bad_zip_register = copy(VALID_REGISTRATION)
     bad_zip_register["zipcode"] = "123"
@@ -181,7 +207,7 @@ def test_invalid_zipcode(requests_mock):
     assert response.json() == {"zipcode": ["Zip codes are 5 digits"]}
 
 
-def test_invalid_phone(requests_mock):
+def test_invalid_phone():
     client = APIClient()
     bad_phone_register = copy(VALID_REGISTRATION)
     bad_phone_register["phone"] = "123"
@@ -190,7 +216,7 @@ def test_invalid_phone(requests_mock):
     assert response.json() == {"phone": ["Enter a valid phone number."]}
 
 
-def test_invalid_state(requests_mock):
+def test_invalid_state():
     client = APIClient()
     bad_state_register = copy(VALID_REGISTRATION)
     bad_state_register["state"] = "ZZ"
@@ -200,9 +226,11 @@ def test_invalid_state(requests_mock):
 
 
 @pytest.mark.django_db
-def test_update_status(requests_mock):
+def test_update_status():
     client = APIClient()
-    register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION)
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
 
@@ -222,9 +250,11 @@ def test_update_status(requests_mock):
 
 
 @pytest.mark.django_db
-def test_invalid_update_status(requests_mock):
+def test_invalid_update_status():
     client = APIClient()
-    register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION)
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
 
@@ -233,19 +263,21 @@ def test_invalid_update_status(requests_mock):
     assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
 
     invalid_update_status = copy(STATUS_REFER_OVR)
-    invalid_update_status['status'] = "Invalid"
+    invalid_update_status["status"] = "Invalid"
 
     status_api_url = STATUS_API_ENDPOINT.format(uuid=registration.uuid)
     status_response = client.patch(status_api_url, invalid_update_status)
     assert status_response.status_code == 400
-    assert status_response.json() == {"status":["\"Invalid\" is not a valid choice."]}
+    assert status_response.json() == {"status": ['"Invalid" is not a valid choice.']}
     assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
 
 
 @pytest.mark.django_db
-def test_bad_update_status(requests_mock):
+def test_bad_update_status():
     client = APIClient()
-    register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION)
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
 
@@ -254,11 +286,12 @@ def test_bad_update_status(requests_mock):
     assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
 
     bad_update_status = copy(STATUS_REFER_OVR)
-    bad_update_status['status'] = "SentPDF"
+    bad_update_status["status"] = "SentPDF"
 
     status_api_url = STATUS_API_ENDPOINT.format(uuid=registration.uuid)
     status_response = client.patch(status_api_url, bad_update_status)
     assert status_response.status_code == 400
-    assert status_response.json() == {"status": ["Registration status can only be ReferOVR"]}
+    assert status_response.json() == {
+        "status": ["Registration status can only be ReferOVR"]
+    }
     assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
-

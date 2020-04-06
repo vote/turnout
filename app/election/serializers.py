@@ -19,6 +19,7 @@ class StateInfoSerializer(serializers.ModelSerializer):
             result["value"] = instance.text.lower() == "true"
         return result
 
+
 class FieldStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StateInformation
@@ -50,7 +51,7 @@ class FieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
 
 
 class StateFieldSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
-    states =  FieldStateSerializer(source="stateinformation_set", many=True)
+    states = FieldStateSerializer(source="stateinformation_set", many=True)
 
     class Meta:
         model = StateInformationFieldType

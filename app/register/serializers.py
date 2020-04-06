@@ -9,7 +9,11 @@ from rest_framework.fields import empty
 
 from common import enums
 from common.utils.fields import RequiredBooleanField
-from common.validators import state_code_validator, zip_validator, must_be_true_validator
+from common.validators import (
+    must_be_true_validator,
+    state_code_validator,
+    zip_validator,
+)
 from election.choices import STATES
 from multi_tenant.mixins_serializers import PartnerSerializerMixin
 
@@ -80,8 +84,12 @@ class RegistrationSerializer(
     title = serializers.CharField(required=True)
     previous_title = serializers.CharField(required=True)
     state_id_number = serializers.CharField(required=False)
-    is_18_or_over = RequiredBooleanField(required=False, validators=[must_be_true_validator])
-    us_citizen = RequiredBooleanField(required=False, validators=[must_be_true_validator])
+    is_18_or_over = RequiredBooleanField(
+        required=False, validators=[must_be_true_validator]
+    )
+    us_citizen = RequiredBooleanField(
+        required=False, validators=[must_be_true_validator]
+    )
 
     class Meta:
         model = Registration
@@ -118,4 +126,3 @@ class StatusSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
                 f"Registration status can only be {enums.TurnoutRegistrationStatus.OVR_REFERRED.value}"
             )
         return value
-
