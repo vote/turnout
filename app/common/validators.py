@@ -1,6 +1,14 @@
 from django.core.validators import RegexValidator
+from rest_framework.serializers import ValidationError
 
 from election.choices import STATES
+
+
+def must_be_true_validator(value):
+    """Requires value to be True"""
+    if value is not True:
+        raise ValidationError("Must be true")
+    return value
 
 
 def state_code_validator(code):

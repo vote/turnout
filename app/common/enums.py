@@ -1,5 +1,8 @@
 from enumfields import Enum
 
+# NB EnumField default max_length=10 in migrations
+# Ensure value lengths are at or below max
+
 
 class TargetSmartGender(Enum):
     MALE = "Male"
@@ -58,6 +61,14 @@ class PersonTitle(Enum):
 class TurnoutRegistrationStatus(Enum):
     INCOMPLETE = "Incomplete"
     PENDING = "Pending"
+    PDF_SENT = "SentPDF"
+    OVR_REFERRED = "ReferOVR"
+
+    class Labels:
+        INCOMPLETE = "Incomplete"
+        PENDING = "Pending"
+        PDF_SENT = "PDF Sent"
+        OVR_REFERRED = "OVR Referred"
 
 
 class VoterStatus(Enum):

@@ -36,4 +36,4 @@ class Lookup(PartnerModel, TrackingModel, UUIDModel, TimestampModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} {self.state.pk}".strip()
+        return f"Verification - {self.first_name} {self.last_name}, {self.state.pk}".strip()

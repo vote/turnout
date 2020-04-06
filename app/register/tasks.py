@@ -1,6 +1,7 @@
 from celery import shared_task
 
 from common.analytics import statsd
+from common.enums import TurnoutRegistrationStatus
 
 
 @shared_task
@@ -22,4 +23,7 @@ def send_registration_notification(registration_pk: str) -> None:
     from .notification import trigger_notification
 
     registration = Registration.objects.select_related().get(pk=registration_pk)
+    registration.status = TurnoutRegistrationStatus.PDF_SENT
+    registration.save(update_fields=["status"])
+
     trigger_notification(registration)

@@ -9,7 +9,7 @@ from common.enums import TurnoutRegistrationStatus
 from election.models import State
 
 from .models import Registration
-from .serializers import RegistrationSerializer
+from .serializers import RegistrationSerializer, StatusSerializer
 from .tasks import process_registration_submission
 
 logger = logging.getLogger("register")
@@ -70,3 +70,11 @@ class RegistrationViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
             )
 
         return Response(response)
+
+
+class StatusViewSet(UpdateModelMixin, GenericViewSet):
+    permission_classes = [AllowAny]
+    model = Registration
+    serializer_class = StatusSerializer
+    queryset = Registration.objects.filter(status=TurnoutRegistrationStatus.INCOMPLETE)
+

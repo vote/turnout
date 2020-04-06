@@ -1,13 +1,15 @@
 import collections
 import logging
 
+from enumfields.drf.fields import EnumField
 from enumfields.drf.serializers import EnumSupportSerializerMixin
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+from common import enums
 from common.utils.fields import RequiredBooleanField
-from common.validators import state_code_validator, zip_validator
+from common.validators import state_code_validator, zip_validator, must_be_true_validator
 from election.choices import STATES
 from multi_tenant.mixins_serializers import PartnerSerializerMixin
 
@@ -78,8 +80,8 @@ class RegistrationSerializer(
     title = serializers.CharField(required=True)
     previous_title = serializers.CharField(required=True)
     state_id_number = serializers.CharField(required=False)
-    is_18_or_over = RequiredBooleanField(required=False)
-    us_citizen = RequiredBooleanField(required=False)
+    is_18_or_over = RequiredBooleanField(required=False, validators=[must_be_true_validator])
+    us_citizen = RequiredBooleanField(required=False, validators=[must_be_true_validator])
 
     class Meta:
         model = Registration
@@ -101,3 +103,19 @@ class RegistrationSerializer(
                 value.required = False
             fields[key] = value
         return fields
+
+
+class StatusSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
+    status = EnumField(enum=enums.TurnoutRegistrationStatus, required=True)
+
+    class Meta:
+        model = Registration
+        fields = ("status",)
+
+    def validate_status(self, value):
+        if not value == enums.TurnoutRegistrationStatus.OVR_REFERRED:
+            raise serializers.ValidationError(
+                f"Registration status can only be {enums.TurnoutRegistrationStatus.OVR_REFERRED.value}"
+            )
+        return value
+
