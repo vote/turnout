@@ -6,12 +6,12 @@ from common.analytics import statsd
 from .models import Registration
 
 NOTIFICATION_TEMPLATE = "register/email/file_notification.html"
-SUBJECT = "Here's your voter registration form!"
+SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
 
 
 @statsd.timed("turnout.register.compile_email")
 def compile_email(registration: Registration) -> str:
-    preheader_text = f"{registration.first_name}, we've generated a personalized document for you to send to election officials. You must submit this document to be registered for future elections."
+    preheader_text = f"{registration.first_name}, just a few more steps to complete your voter registration: print, sign and mail your form."
     recipient = {
         "first_name": registration.first_name,
         "last_name": registration.last_name,

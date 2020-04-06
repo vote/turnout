@@ -4,8 +4,33 @@
 
 
 {{ recipient.first_name }},<br><br>
-This is super important. To complete your voter registration, you <strong>must</strong> print, sign, and mail this voter registration
-form.<br><br>
+Just a few more steps to complete your voter registration.
+<br><br>
+
+<ol>
+    <li><a href="{{ download_url }}">Print your voter registration form.</a></li>
+    <li>Complete all required fields.</li>
+    <li>Sign and date the form.</li>
+    <li>Send your completed form to the address below:</li>
+</ol>
+
+<center>
+{{ state_info.registration_nvrf_submission_address|markdownify|linebreaksbr }}<br><br>
+</center>
+
+Your voter registration form must be <strong>{{ state_info.registration_deadline_mail|markdownify|lower }}</strong>.<br><br>
+
+Helpful hints:
+<ul>
+    <li>If you don’t have a printer, you can print the form out at any local library.</li>
+    <li>If you don’t have a stamp, you can buy one from any grocery store: just ask the cashier to sell you one.</li>
+</ul>
+
+You are not registered to vote until your state processes this form.  You should receive written confirmation within 1-2 weeks. 
+If not, you might want to call your local election office{% if state_info.external_tool_verify_status %} or use the <a href="{{ state_info.external_tool_verify_status }}">State of {{ registration.state }} website</a><br><br>{% endif %} to confirm that you are now registered to vote.<br><br>
+
+Happy voting,<br>
+{{ partner.name }}
 
 <!--[if gte mso 9]>
 <br>
@@ -32,27 +57,5 @@ form.<br><br>
 <!--[if gte mso 9]>
 <br>
 <![endif]-->
-
-Once it's printed, follow the instructions on the form to sign, fold and mail it to this address:<br><br>
-
-<center>
-{{ state_info.registration_nvrf_submission_address|markdownify|linebreaksbr }}<br><br>
-</center>
-
-If you do not have a printer, you can print the form out at any local library. If you do not have a stamp, you can buy
-one from any grocery store: just ask the cashier to sell you one.<br><br>
-
-Your voter registration form must be <strong>{{ state_info.registration_deadline_mail|markdownify|lower }}</strong>.<br><br>
-
-For complete state-by-state instructions on how to fill out the form, see the <a href="https://www.voteamerica.com/pdf/Federal_Voter_Registration_ENG.pdf">full federal form</a>.<br><br>
-
-Finally, this is also very important: do <strong>not</strong> assume your registration was successful until you hear from, or confirm
-with your state.<br><br>
-
-You can look up your status with the State of {{ registration.state }} here: <a href="{{ state_info.external_tool_verify_status }}">{{ state_info.external_tool_verify_status }}</a>
-It may take days or weeks to appear, so keep checking, and contact your state directly if you can’t confirm. National
-systems may be delayed, and your vote is too precious to risk.<br><br>
-
-Thank you for registering with {{ partner.name }}!
 
 {% endblock %}
