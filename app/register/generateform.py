@@ -67,6 +67,10 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
     form_data["is_18_or_over"] = is_18_or_over
     form_data["state_id_number"] = state_id_number
 
+    # remove race_ethnicity, except for states which request it explicitly
+    if registration.state.code not in ["AL", "FL", "GA", "NC", "PA", "SC"]:
+        form_data["race_ethnicity"] = None
+
     if registration.title:
         title_field = registration.title.value.lower()
         form_data[f"title_{title_field}"] = True
