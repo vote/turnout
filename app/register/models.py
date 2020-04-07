@@ -2,13 +2,14 @@ from django.db import models
 from enumfields import EnumField
 from phonenumber_field.modelfields import PhoneNumberField
 
+from action.mixin_models import ActionModel
 from common import enums
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
 from multi_tenant.mixins_models import PartnerModel
 
 
-class Registration(PartnerModel, TrackingModel, UUIDModel, TimestampModel):
+class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel):
     title = EnumField(enums.PersonTitle, null=True)
     first_name = models.TextField(null=True)
     middle_name = models.TextField(null=True)

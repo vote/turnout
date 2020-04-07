@@ -2,6 +2,7 @@ from enumfields.drf.serializers import EnumSupportSerializerMixin
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
+from action.mixin_serializers import ActionSerializerMixin
 from common.validators import state_code_validator
 from election.choices import STATES
 from multi_tenant.mixins_serializers import PartnerSerializerMixin
@@ -10,7 +11,10 @@ from .models import Lookup, zip_validator
 
 
 class LookupSerializer(
-    PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
+    ActionSerializerMixin,
+    PartnerSerializerMixin,
+    EnumSupportSerializerMixin,
+    serializers.ModelSerializer,
 ):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator])

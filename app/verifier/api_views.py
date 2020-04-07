@@ -63,9 +63,9 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         serializer.validated_data["too_many"] = targetsmart_response["too_many"]
         serializer.validated_data["registered"] = registered
 
-        self.perform_create(serializer)
+        instance = serializer.save()
 
-        response = {"registered": registered}
+        response = {"registered": registered, "action_id": instance.action.pk}
 
         if targetsmart_response["too_many"]:
             statsd.increment("turnout.verifier.toomany")

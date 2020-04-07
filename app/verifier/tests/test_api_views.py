@@ -7,6 +7,7 @@ import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 
+from action.models import Action
 from common.enums import VoterStatus
 from election.models import State
 from multi_tenant.models import Client
@@ -75,7 +76,8 @@ def test_proper_targetsmart_request(requests_mock, settings):
     settings.TARGETSMART_KEY = "mytargetsmartkey"
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     assert requests_mock.call_count == 1
     assert targetsmart_call.last_request.headers["x-api-key"] == "mytargetsmartkey"
@@ -93,7 +95,8 @@ def test_targetsmart_request_address2(requests_mock):
     address2_lookup["address2"] = "Unit 2008"
     response = client.post(LOOKUP_API_ENDPOINT, address2_lookup)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     address2_qs = copy(EXPECTED_QUERYSTRING)
     address2_qs["unparsed_full_address"] = [
@@ -111,7 +114,8 @@ def test_lookup_object_created(requests_mock):
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     assert Lookup.objects.count() == 1
     lookup = Lookup.objects.first()
@@ -126,6 +130,7 @@ def test_lookup_object_created(requests_mock):
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.sms_opt_in == True
     assert lookup.response == {"result": [], "too_many": False}
+    assert lookup.action == action
     first_partner = Client.objects.first()
     assert lookup.partner == first_partner
 
@@ -143,7 +148,8 @@ def test_default_partner(requests_mock):
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.partner == first_partner
@@ -162,7 +168,8 @@ def test_custom_partner(requests_mock):
     url = f"{LOOKUP_API_ENDPOINT}?partner={second_partner.pk}"
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.partner == second_partner
@@ -182,7 +189,8 @@ def test_invalid_partner_key(requests_mock):
     url = f"{LOOKUP_API_ENDPOINT}?partner=INVALID"
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.partner == first_partner
@@ -265,11 +273,13 @@ def test_provider_response_voter_not_found(requests_mock):
 
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
     lookup = Lookup.objects.first()
     assert lookup.response == data
     assert lookup.too_many == False
     assert lookup.registered == False
+    assert lookup.action == action
     assert not lookup.voter_status
 
 
@@ -280,12 +290,14 @@ def test_provider_response_active_voter(requests_mock):
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.json() == {"registered": True}
+    action = Action.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(action.pk)}
     lookup = Lookup.objects.first()
     assert lookup.response == data
     assert lookup.too_many == False
     assert lookup.registered == True
     assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.action == action
 
 
 @pytest.mark.django_db
@@ -297,12 +309,14 @@ def test_provider_response_inactive_voter(requests_mock):
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
     lookup = Lookup.objects.first()
     assert lookup.response == data
     assert lookup.too_many == False
     assert lookup.registered == False
     assert lookup.voter_status == VoterStatus.INACTIVE
+    assert lookup.action == action
 
 
 @pytest.mark.django_db
@@ -314,12 +328,14 @@ def test_provider_response_unknown_voter(requests_mock):
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
     lookup = Lookup.objects.first()
     assert lookup.response == data
     assert lookup.too_many == False
     assert lookup.registered == False
     assert lookup.voter_status == VoterStatus.UNKNOWN
+    assert lookup.action == action
 
 
 @pytest.mark.django_db
@@ -331,8 +347,10 @@ def test_provider_response_too_many(requests_mock):
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.json() == {"registered": False}
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
     lookup = Lookup.objects.first()
     assert lookup.response == data
     assert lookup.too_many == True
     assert lookup.registered == False
+    assert lookup.action == action

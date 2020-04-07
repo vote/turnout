@@ -7,6 +7,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+from action.mixin_serializers import ActionSerializerMixin
 from common import enums
 from common.utils.fields import RequiredBooleanField
 from common.validators import (
@@ -66,7 +67,10 @@ OPTIONAL_FIELDS = [
 
 
 class RegistrationSerializer(
-    PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
+    ActionSerializerMixin,
+    PartnerSerializerMixin,
+    EnumSupportSerializerMixin,
+    serializers.ModelSerializer,
 ):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator], required=True)

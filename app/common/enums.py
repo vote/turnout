@@ -99,3 +99,7 @@ class FileType(Enum):
 
     class Labels:
         REGISTRATION_FORM = "Registration Form"
+
+
+class EventType(Enum):
+    OFFICIAL_TOOL_VISIT = "OToolVisit"

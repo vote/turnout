@@ -62,7 +62,7 @@ class RegistrationViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
 
         registration = serializer.save()
 
-        response = {"uuid": registration.uuid}
+        response = {"uuid": registration.uuid, "action_id": registration.action.pk}
 
         if not serializer.incomplete:
             process_registration_submission.delay(

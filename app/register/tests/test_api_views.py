@@ -5,6 +5,7 @@ import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 
+from action.models import Action
 from common.enums import (
     PersonTitle,
     PoliticalParties,
@@ -107,6 +108,7 @@ def test_register_object_created(submission_task_patch):
     assert registration.party == PoliticalParties.OTHER
     assert registration.race_ethnicity == RaceEthnicity.WHITE
     assert registration.status == TurnoutRegistrationStatus.PENDING
+    assert registration.action == Action.objects.first()
 
     first_partner = Client.objects.first()
     assert registration.partner == first_partner
