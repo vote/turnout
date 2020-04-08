@@ -9,6 +9,7 @@ from .models import Client
 
 if TYPE_CHECKING:
     _Base = serializers.ModelSerializer
+    from django.db.models import Model
 else:
     _Base = object
 
@@ -18,7 +19,7 @@ logger = logging.getLogger("multi_tenant")
 class PartnerSerializerMixin(_Base):
     partner = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
 
-    def create(self, validated_data: Dict[(str, Any)]) -> Dict[(str, Any)]:
+    def create(self, validated_data: Dict[(str, Any)]) -> "Model":
         request = self.context.get("request")
         if request and "partner" in request.GET:
             try:
