@@ -83,9 +83,3 @@ class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, Timestam
 
     def __str__(self):
         return f"Registration - {self.first_name} {self.last_name}, {self.state.pk}".strip()
-
-    def get_fields(self):
-        return [
-            (field.verbose_name, field.value_from_object(self))
-            for field in self.__class__._meta.fields
-        ]

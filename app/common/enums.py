@@ -71,6 +71,11 @@ class TurnoutRegistrationStatus(Enum):
         OVR_REFERRED = "OVR Referred"
 
 
+class TurnoutBallotRequestStatus(Enum):
+    INCOMPLETE = "Incomplete"
+    PENDING = "Pending"
+
+
 class VoterStatus(Enum):
     ACTIVE = "Active"
     INACTIVE = "Inactive"
