@@ -5,6 +5,7 @@ urlpatterns = [
     path("registration/", include("register.api_urls")),
     path("verification/", include("verifier.api_urls")),
     path("election/", include("election.api_urls")),
+    path("official/", include("official.api_urls")),
     path("storage/", include("storage.api_urls")),
     path("event/", include("event_tracking.api_urls")),
 ]

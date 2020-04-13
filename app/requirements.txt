@@ -50,3 +50,5 @@ pytest-freezegun==0.4.*
 netifaces==0.10.*
 pdfrw==0.4
 uritemplate==3.0.1
+# Use version of django-nested-inline that supports read only nested formsets
+git+https://github.com/gascarcella/django-nested-inline.git@read-only-change-view
