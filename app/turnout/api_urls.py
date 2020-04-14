@@ -8,4 +8,5 @@ urlpatterns = [
     path("official/", include("official.api_urls")),
     path("storage/", include("storage.api_urls")),
     path("event/", include("event_tracking.api_urls")),
+    path("partner/", include("multi_tenant.api_urls")),
 ]

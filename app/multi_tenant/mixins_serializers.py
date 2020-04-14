@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from common.analytics import statsd
 
-from .models import Client
+from .models import Client, PartnerSlug
 
 if TYPE_CHECKING:
     _Base = serializers.ModelSerializer
@@ -23,8 +23,11 @@ class PartnerSerializerMixin(_Base):
         request = self.context.get("request")
         if request and "partner" in request.GET:
             try:
-                partner = Client.objects.get(pk=request.GET["partner"])
-            except (Client.DoesNotExist, ValueError, TypeError):
+                partner_slug = PartnerSlug.objects.only("partner").get(
+                    slug=request.GET["partner"]
+                )
+                partner = partner_slug.partner
+            except PartnerSlug.DoesNotExist:
                 logger.info(f'Invalid partner {request.GET["partner"]}')
                 statsd.increment("turnout.multi_tenant.unknown_partner_request")
                 partner = Client.objects.first()

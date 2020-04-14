@@ -22,6 +22,11 @@ class Client(UUIDModel, TimestampModel):
         return f'"{clean_name}" <{self.email}>'
 
 
+class PartnerSlug(UUIDModel, TimestampModel):
+    partner = models.ForeignKey(Client, on_delete=models.CASCADE)
+    slug = models.SlugField(unique=True)
+
+
 class Association(UUIDModel, TimestampModel):
     client = models.ForeignKey("multi_tenant.Client", on_delete=models.CASCADE)
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE)

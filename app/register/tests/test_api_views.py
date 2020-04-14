@@ -144,9 +144,12 @@ def test_custom_partner(submission_task_patch):
     client = APIClient()
 
     second_partner = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe(
+        "multi_tenant.partnerslug", partner=second_partner, slug="custompartertwoslug"
+    )
     assert Client.objects.count() == 2
 
-    url = f"{REGISTER_API_ENDPOINT}?partner={second_partner.pk}"
+    url = f"{REGISTER_API_ENDPOINT}?partner=custompartertwoslug"
     response = client.post(url, VALID_REGISTRATION)
     assert response.status_code == 200
     assert "uuid" in response.json()
@@ -165,7 +168,8 @@ def test_invalid_partner_key(submission_task_patch):
     client = APIClient()
 
     first_partner = Client.objects.first()
-    baker.make_recipe("multi_tenant.client")
+    second_partner = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe("multi_tenant.partnerslug", partner=second_partner)
     assert Client.objects.count() == 2
 
     url = f"{REGISTER_API_ENDPOINT}?partner=INVALID"

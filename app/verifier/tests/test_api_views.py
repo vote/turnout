@@ -163,9 +163,12 @@ def test_custom_partner(requests_mock):
     )
 
     second_partner = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe(
+        "multi_tenant.partnerslug", partner=second_partner, slug="verifierslugtwo"
+    )
     assert Client.objects.count() == 2
 
-    url = f"{LOOKUP_API_ENDPOINT}?partner={second_partner.pk}"
+    url = f"{LOOKUP_API_ENDPOINT}?partner=verifierslugtwo"
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
@@ -183,7 +186,8 @@ def test_invalid_partner_key(requests_mock):
     )
 
     first_partner = Client.objects.first()
-    baker.make_recipe("multi_tenant.client")
+    second_partner = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe("multi_tenant.partnerslug", partner=second_partner)
     assert Client.objects.count() == 2
 
     url = f"{LOOKUP_API_ENDPOINT}?partner=INVALID"
