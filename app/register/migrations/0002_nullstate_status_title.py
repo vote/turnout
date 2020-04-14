@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='registration',
             name='status',
-            field=enumfields.fields.EnumField(default='Pending', enum=common.enums.TurnoutRegistrationStatus, max_length=10, null=True),
+            field=enumfields.fields.EnumField(default='Pending', enum=common.enums.TurnoutActionStatus, max_length=10, null=True),
         ),
         migrations.AddField(
             model_name='registration',

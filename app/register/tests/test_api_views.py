@@ -10,10 +10,11 @@ from common.enums import (
     PersonTitle,
     PoliticalParties,
     RaceEthnicity,
-    TurnoutRegistrationStatus,
+    TurnoutActionStatus,
 )
 from election.models import State
 from multi_tenant.models import Client
+from register.api_views import RegistrationViewSet
 from register.models import Registration
 
 REGISTER_API_ENDPOINT = "/v1/registration/register/"
@@ -47,7 +48,7 @@ STATUS_REFER_OVR = {"status": "ReferOVR"}
 
 @pytest.fixture()
 def submission_task_patch(mocker):
-    return mocker.patch("register.api_views.process_registration_submission")
+    return mocker.patch.object(RegistrationViewSet, "task")
 
 
 def test_get_request_disallowed():
@@ -107,7 +108,7 @@ def test_register_object_created(submission_task_patch):
     assert registration.us_citizen == True
     assert registration.party == PoliticalParties.OTHER
     assert registration.race_ethnicity == RaceEthnicity.WHITE
-    assert registration.status == TurnoutRegistrationStatus.PENDING
+    assert registration.status == TurnoutActionStatus.PENDING
     assert registration.action == Action.objects.first()
 
     first_partner = Client.objects.first()
@@ -242,7 +243,7 @@ def test_update_status():
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
-    assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
 
     status_api_url = STATUS_API_ENDPOINT.format(uuid=registration.uuid)
     status_response = client.patch(status_api_url, STATUS_REFER_OVR)
@@ -252,7 +253,7 @@ def test_update_status():
     # refresh from database, make sure it's the same object
     registration.refresh_from_db()
     assert str(registration.uuid) == register_response.json()["uuid"]
-    assert registration.status == TurnoutRegistrationStatus.OVR_REFERRED
+    assert registration.status == TurnoutActionStatus.OVR_REFERRED
 
 
 @pytest.mark.django_db
@@ -266,7 +267,7 @@ def test_invalid_update_status():
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
-    assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
 
     invalid_update_status = copy(STATUS_REFER_OVR)
     invalid_update_status["status"] = "Invalid"
@@ -275,7 +276,7 @@ def test_invalid_update_status():
     status_response = client.patch(status_api_url, invalid_update_status)
     assert status_response.status_code == 400
     assert status_response.json() == {"status": ['"Invalid" is not a valid choice.']}
-    assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
 
 
 @pytest.mark.django_db
@@ -289,7 +290,7 @@ def test_bad_update_status():
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
-    assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
 
     bad_update_status = copy(STATUS_REFER_OVR)
     bad_update_status["status"] = "SentPDF"
@@ -300,4 +301,4 @@ def test_bad_update_status():
     assert status_response.json() == {
         "status": ["Registration status can only be ReferOVR"]
     }
-    assert registration.status == TurnoutRegistrationStatus.INCOMPLETE
+    assert registration.status == TurnoutActionStatus.INCOMPLETE

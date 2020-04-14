@@ -58,7 +58,7 @@ class PersonTitle(Enum):
         MS = "Ms."
 
 
-class TurnoutRegistrationStatus(Enum):
+class TurnoutActionStatus(Enum):
     INCOMPLETE = "Incomplete"
     PENDING = "Pending"
     PDF_SENT = "SentPDF"
@@ -69,11 +69,6 @@ class TurnoutRegistrationStatus(Enum):
         PENDING = "Pending"
         PDF_SENT = "PDF Sent"
         OVR_REFERRED = "OVR Referred"
-
-
-class TurnoutBallotRequestStatus(Enum):
-    INCOMPLETE = "Incomplete"
-    PENDING = "Pending"
 
 
 class VoterStatus(Enum):

@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 
 from common import enums
 from event_tracking.models import Event
+from register.api_views import RegistrationViewSet
 from register.tests.test_api_views import REGISTER_API_ENDPOINT, VALID_REGISTRATION
 
 TRACKING_API_ENDPOINT = "/v1/event/track/"
@@ -10,7 +11,7 @@ TRACKING_API_ENDPOINT = "/v1/event/track/"
 
 @pytest.mark.django_db
 def test_register_object_created(mocker):
-    mocker.patch("register.api_views.process_registration_submission")
+    mocker.patch.object(RegistrationViewSet, "task")
     client = APIClient()
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)

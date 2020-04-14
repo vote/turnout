@@ -1,12 +1,9 @@
 import logging
 
-from enumfields.drf.fields import EnumField
-from enumfields.drf.serializers import EnumSupportSerializerMixin
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from action.serializers import ActionSerializer
-from common import enums
 from common.utils.fields import RequiredBooleanField
 from common.validators import (
     must_be_true_validator,
@@ -15,27 +12,21 @@ from common.validators import (
 )
 from election.choices import STATES
 
-from .models import Registration
+from .models import BallotRequest
 
-logger = logging.getLogger("register")
+logger = logging.getLogger("absentee")
 
 
-class RegistrationSerializer(ActionSerializer):
+class BallotRequestSerializer(ActionSerializer):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator], required=True)
-    previous_zipcode = serializers.CharField(validators=[zip_validator], required=False)
     mailing_zipcode = serializers.CharField(validators=[zip_validator], required=False)
     state = serializers.ChoiceField(
         choices=STATES, validators=[state_code_validator], required=True
     )
-    previous_state = serializers.ChoiceField(
-        choices=STATES, validators=[state_code_validator], required=False
-    )
     mailing_state = serializers.ChoiceField(
         choices=STATES, validators=[state_code_validator], required=False
     )
-    title = serializers.CharField(required=True)
-    previous_title = serializers.CharField(required=True)
     state_id_number = serializers.CharField(required=False)
     is_18_or_over = RequiredBooleanField(
         required=False, validators=[must_be_true_validator]
@@ -45,9 +36,8 @@ class RegistrationSerializer(ActionSerializer):
     )
 
     class Meta:
-        model = Registration
+        model = BallotRequest
         minimum_necessary_fields = [
-            "title",
             "first_name",
             "last_name",
             "address1",
@@ -57,48 +47,22 @@ class RegistrationSerializer(ActionSerializer):
             "date_of_birth",
             "email",
         ]
-        nationally_required_fields = ["state_id_number", "us_citizen", "is_18_or_over"]
+        nationally_required_fields = ["us_citizen", "is_18_or_over", "region"]
         optional_fields = [
+            "state_id_number",
             "partner",
             "suffix",
+            "middle_name",
             "phone",
             "sms_opt_in",
             "address2",
-            "previous_title",
-            "previous_first_name",
-            "previous_middle_name",
-            "previous_last_name",
-            "previous_suffix",
-            "previous_address1",
-            "previous_address2",
-            "previous_city",
-            "previous_state",
-            "previous_zipcode",
             "mailing_address1",
             "mailing_address2",
             "mailing_city",
             "mailing_state",
             "mailing_zipcode",
-            "gender",
-            "race_ethnicity",
-            "party",
             "source",
             "utm_campaign",
             "utm_source",
             "utm_medium",
         ]
-
-
-class StatusSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
-    status = EnumField(enum=enums.TurnoutActionStatus, required=True)
-
-    class Meta:
-        model = Registration
-        fields = ("status",)
-
-    def validate_status(self, value):
-        if not value == enums.TurnoutActionStatus.OVR_REFERRED:
-            raise serializers.ValidationError(
-                f"Registration status can only be {enums.TurnoutActionStatus.OVR_REFERRED.value}"
-            )
-        return value
