@@ -66,7 +66,7 @@ class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, Timestam
     party = EnumField(enums.PoliticalParties, null=True)
 
     us_citizen = models.BooleanField(null=True, default=False)
-    sms_opt_in = models.BooleanField(null=True, default=False)
+    sms_opt_in = models.BooleanField(null=True, blank=True, default=None)
 
     status = EnumField(
         enums.TurnoutActionStatus, default=enums.TurnoutActionStatus.PENDING, null=True,

@@ -31,7 +31,7 @@ class Lookup(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel
     gender = EnumField(enums.TargetSmartGender, null=True)
     phone = PhoneNumberField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
-    sms_opt_in = models.BooleanField(null=True, default=False)
+    sms_opt_in = models.BooleanField(null=True, blank=True, default=None)
 
     class Meta(object):
         ordering = ["-created_at"]
