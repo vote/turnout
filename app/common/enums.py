@@ -96,9 +96,11 @@ class NotificationWebhookTypes(Enum):
 
 class FileType(Enum):
     REGISTRATION_FORM = "RegForm"
+    ABSENTEE_REQUEST_FORM = "AbsForm"
 
     class Labels:
         REGISTRATION_FORM = "Registration Form"
+        ABSENTEE_REQUEST_FORM = "Absentee Request Form"
 
 
 class EventType(Enum):
