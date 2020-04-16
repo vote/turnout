@@ -3,38 +3,12 @@ language: python
 python:
   - "3.7"
 
-addons:
-  postgresql: "11"
-
-services:
-  - redis
-  - postgres
-
-cache:
-  directories:
-    - $HOME/.cache/pip
-
-env:
-  global:
-    - PIP_DOWNLOAD_CACHE=$HOME/.cache/pip
-    - DATABASE_URL=pgsql://postgres:turnout@localhost:5432/turnout
-    - REDIS_URL=redis://localhost:6379
-    - SECRET_KEY=turnoutallthepeople
-    - DJANGO_SETTINGS_MODULE=turnout.settings
-
-before_install:
-  - pip install --upgrade pip
-  - psql -c "ALTER USER postgres WITH PASSWORD 'turnout'"
-
 install:
-  - pip install -r $TRAVIS_BUILD_DIR/app/requirements.txt
-
-before_script:
-  - export PYTHONPATH=$PYTHONPATH:/$TRAVIS_BUILD_DIR/app
+  - touch .env
+  - docker-compose build
 
 script:
-  - pytest $TRAVIS_BUILD_DIR/app
-  - mypy --config-file $TRAVIS_BUILD_DIR/app/setup.cfg $TRAVIS_BUILD_DIR/app
+  - docker-compose run server bash -c "pytest /app/ && mypy /app/"
 
 notifications:
   email: false
