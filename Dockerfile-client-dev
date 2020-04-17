@@ -1,8 +1,0 @@
-FROM python:3.7-buster
-RUN curl -sL https://deb.nodesource.com/setup_12.x \
-    | bash - && apt-get install -y nodejs && apt-get clean
-ENV APP_DIR=/app
-WORKDIR $APP_DIR
-COPY app/package.json $APP_DIR
-COPY app/package-lock.json $APP_DIR
-RUN npm install

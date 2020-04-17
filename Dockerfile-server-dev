@@ -1,9 +1,0 @@
-FROM python:3.7-buster
-RUN apt-get update && \
-    apt-get install -y wait-for-it pdftk-java imagemagick ghostscript && \
-    apt-get clean
-ENV APP_DIR=/app \
-    PYTHONBUFFERED=1
-WORKDIR $APP_DIR
-COPY app/requirements.txt $APP_DIR
-RUN pip install -r requirements.txt && rm -rf /root/.cache

@@ -15,5 +15,5 @@ ACCOUNT_ID=$(aws sts get-caller-identity | jq -r ".Account")
 IMAGE=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$DOCKER_REPO_NAME:$TAG_NAME
 
 eval $(aws ecr get-login --no-include-email --region $REGION)
-docker build --build-arg TAG_ARG=dev --build-arg BUILD_ARG=${TAG_NAME} -t ${IMAGE} .
+docker build --cache-from voteamerica/turnout-ci-cache:latest --build-arg TAG_ARG=dev --build-arg BUILD_ARG=${TAG_NAME} -t ${IMAGE} .
 docker push ${IMAGE}

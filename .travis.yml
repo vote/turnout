@@ -3,12 +3,27 @@ language: python
 python:
   - "3.7"
 
-install:
+env:
+  global:
+    CACHE_IMAGE: voteamerica/turnout-ci-cache
+
+before_install:
   - touch .env
+  - docker pull $CACHE_IMAGE:latest || true
+
+install:
   - docker-compose build
 
+before_script:
+  - docker-compose up -d
+
 script:
-  - docker-compose run server bash -c "pytest /app/ && mypy /app/"
+  - docker-compose exec server pytest /app/
+  - docker-compose exec server mypy /app/
+
+after_success:
+  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+  - docker push $CACHE_IMAGE:latest
 
 notifications:
   email: false
