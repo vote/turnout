@@ -1,13 +1,11 @@
 import pytest
-from django.forms.models import model_to_dict
 from model_bakery import baker
 
-from absentee.contactinfo import (AbsenteeContactInfo,
-                                  NoAbsenteeRequestMailingAddress,
-                                  get_absentee_contact_info)
-from absentee.models import BallotRequest
-from common import enums
-from event_tracking.models import Event
+from absentee.contactinfo import (
+    AbsenteeContactInfo,
+    NoAbsenteeRequestMailingAddress,
+    get_absentee_contact_info,
+)
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 

@@ -1,7 +1,5 @@
 import pytest
-from django_smalluuid.models import uuid_default
 from model_bakery import baker
-from model_bakery.recipe import foreign_key
 
 from absentee.generateform import generate_name, prepare_formdata
 from election.models import State, StateInformation

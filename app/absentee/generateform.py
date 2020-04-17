@@ -1,5 +1,5 @@
 import logging
-from typing import IO, TYPE_CHECKING, Any, Dict, Optional
+from typing import IO, Any, Dict, Optional
 
 from django.core.files import File
 from django.template.defaultfilters import slugify
