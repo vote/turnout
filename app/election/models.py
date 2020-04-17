@@ -7,9 +7,9 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
-from enumfields import EnumField
 
 from common import enums
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 
 from .choices import STATES
@@ -47,7 +47,7 @@ class State(TimestampModel):
 class StateInformationFieldType(UUIDModel, TimestampModel):
     slug = models.SlugField("Name", max_length=50, unique=True)
     long_name = models.CharField("Long Name", max_length=200)
-    field_format = EnumField(
+    field_format = TurnoutEnumField(
         enums.StateFieldFormats, null=True, default=enums.StateFieldFormats.MARKDOWN
     )
 
@@ -113,7 +113,7 @@ class UpdateNotificationWebhookManager(models.Manager):
 
 class UpdateNotificationWebhook(UUIDModel, TimestampModel):
     name = models.TextField(null=True)
-    type = EnumField(enums.NotificationWebhookTypes, null=True)
+    type = TurnoutEnumField(enums.NotificationWebhookTypes, null=True)
     trigger_url = models.URLField(null=True, max_length=200)
     last_triggered = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(null=True, default=True)

@@ -1,7 +1,8 @@
 from django.db import models
-from enumfields import Enum, EnumField
+from enumfields import Enum
 from phonenumber_field.modelfields import PhoneNumberField
 
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 
 
@@ -56,7 +57,7 @@ class PhoneRelationships(PersonRelationshipModel):
 
 
 class Phone(UUIDModel, TimestampModel):
-    phone_type = EnumField(PhoneType, max_length=1, db_index=True)
+    phone_type = TurnoutEnumField(PhoneType, db_index=True)
     phone_number = PhoneNumberField()
 
 

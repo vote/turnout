@@ -1,16 +1,16 @@
 from django.db import models
-from enumfields import EnumField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from action.mixin_models import ActionModel
 from common import enums
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
 from multi_tenant.mixins_models import PartnerModel
 
 
 class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel):
-    title = EnumField(enums.PersonTitle, null=True)
+    title = TurnoutEnumField(enums.PersonTitle, null=True)
     first_name = models.TextField(null=True)
     middle_name = models.TextField(null=True)
     last_name = models.TextField(null=True)
@@ -29,7 +29,7 @@ class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, Timestam
     )
     zipcode = models.TextField(null=True, validators=[zip_validator])
 
-    previous_title = EnumField(enums.PersonTitle, null=True, blank=True)
+    previous_title = TurnoutEnumField(enums.PersonTitle, null=True, blank=True)
     previous_first_name = models.TextField(null=True, blank=True)
     previous_middle_name = models.TextField(null=True, blank=True)
     previous_last_name = models.TextField(null=True, blank=True)
@@ -61,14 +61,14 @@ class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, Timestam
         null=True, validators=[zip_validator], blank=True
     )
 
-    gender = EnumField(enums.RegistrationGender, null=True)
-    race_ethnicity = EnumField(enums.RaceEthnicity, null=True)
-    party = EnumField(enums.PoliticalParties, null=True)
+    gender = TurnoutEnumField(enums.RegistrationGender, null=True)
+    race_ethnicity = TurnoutEnumField(enums.RaceEthnicity, null=True)
+    party = TurnoutEnumField(enums.PoliticalParties, null=True)
 
     us_citizen = models.BooleanField(null=True, default=False)
     sms_opt_in = models.BooleanField(null=True, blank=True, default=None)
 
-    status = EnumField(
+    status = TurnoutEnumField(
         enums.TurnoutActionStatus, default=enums.TurnoutActionStatus.PENDING, null=True,
     )
 

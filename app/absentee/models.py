@@ -1,9 +1,9 @@
 from django.db import models
-from enumfields import EnumField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from action.mixin_models import ActionModel
 from common import enums
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
 from multi_tenant.mixins_models import PartnerModel
@@ -46,7 +46,7 @@ class BallotRequest(
     us_citizen = models.BooleanField(null=True, default=False)
     sms_opt_in = models.BooleanField(null=True, default=False)
 
-    status = EnumField(
+    status = TurnoutEnumField(
         enums.TurnoutActionStatus, default=enums.TurnoutActionStatus.PENDING, null=True,
     )
 

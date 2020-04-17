@@ -6,9 +6,9 @@ from django.db import models
 from django.urls import reverse
 from django.utils.timezone import now
 from django_smalluuid.models import SmallUUIDField, uuid_default
-from enumfields import EnumField
 
 from common import enums
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.mixins_models import PartnerModel
 
@@ -21,7 +21,7 @@ def storage_expire_date_time():
 
 class StorageItem(PartnerModel, UUIDModel, TimestampModel):
     token = SmallUUIDField(default=uuid_default())
-    app = EnumField(enums.FileType)
+    app = TurnoutEnumField(enums.FileType)
     file = models.FileField(storage=HighValueDownloadStorage())
     email = models.EmailField(blank=True, null=True)
     expires = models.DateTimeField(default=storage_expire_date_time)
