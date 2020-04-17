@@ -17,7 +17,7 @@ class RegistrationGender(Enum):
     OTHER = "Other"
 
     class Labels:
-        NON_BINARY = "Non Binary"
+        NON_BINARY = "Non-binary"
 
 
 class PoliticalParties(Enum):
@@ -104,4 +104,19 @@ class FileType(Enum):
 
 
 class EventType(Enum):
-    OFFICIAL_TOOL_VISIT = "OToolVisit"
+    START = "Start"
+    FINISH = "Finish"
+    FINISH_EXTERNAL = "FinishExternal"
+    GENERATE_PDF = "GenerateForm"
+    EMAIL_PDF = "EmailForm"
+    DOWNLOAD_PDF = "DownloadForm"
+    DONATE = "Donate"
+
+    class Labels:
+        START = "Started Form"
+        FINISH = "Finished Form"
+        FINISH_EXTERNAL = "Finished with External Tool"
+        GENERATE_PDF = "Generated Form"
+        EMAIL_PDF = "Emailed Form"
+        DOWNLOAD_PDF = "Downloaded Form"
+        DONATE = "Donated"

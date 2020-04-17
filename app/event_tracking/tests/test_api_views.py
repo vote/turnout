@@ -20,9 +20,9 @@ def test_register_object_created(mocker):
 
     assert Event.objects.count() == 0
     response = client.post(
-        TRACKING_API_ENDPOINT, {"action": action_id, "event_type": "OToolVisit"}
+        TRACKING_API_ENDPOINT, {"action": action_id, "event_type": "FinishExternal"}
     )
 
     latest_event = Event.objects.first()
     assert str(latest_event.action.pk) == action_id
-    assert latest_event.event_type == enums.EventType.OFFICIAL_TOOL_VISIT
+    assert latest_event.event_type == enums.EventType.FINISH_EXTERNAL
