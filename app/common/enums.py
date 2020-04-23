@@ -119,4 +119,3 @@ class EventType(Enum):
         GENERATE_PDF = "Generated Form"
         EMAIL_PDF = "Emailed Form"
         DOWNLOAD_PDF = "Downloaded Form"
-        DONATE = "Donated"

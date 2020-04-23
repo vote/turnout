@@ -13,7 +13,7 @@ def process_ballotrequest_submission(
     from .generateform import process_ballot_request
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
-    process_ballot_request(ballot_request)
+    process_ballot_request(ballot_request, state_id_number, is_18_or_over)
 
 
 @shared_task

@@ -3,24 +3,27 @@ from model_bakery.recipe import Recipe, foreign_key
 
 from common import enums
 from election.models import State
+from official.baker_recipes import region
 from official.models import Region
 
 from .models import BallotRequest
 
-ballot_request_state = Recipe(State, code="XX")
-ballot_request_mailing_state = Recipe(State, code="YY")
-ballot_request_region = Recipe(Region, external_id=431101)  # Cambridge, MA
+state = Recipe(State, code="XX")
+mailing_state = Recipe(State, code="YY")
 
 ballot_request = Recipe(
     BallotRequest,
-    state=foreign_key(ballot_request_state),
-    mailing_state=foreign_key(ballot_request_mailing_state),
+    state=foreign_key(state),
+    mailing_state=foreign_key(mailing_state),
     result_item=None,
     status=enums.TurnoutActionStatus.PENDING,
     phone="+1617555123",
     us_citizen=True,
     sms_opt_in=True,
-    region=foreign_key(ballot_request_region),
+    region=foreign_key(region),
     uuid=uuid_default(),
     _fill_optional=True,
 )
+
+STATE_ID_NUMBER = "123-45-6789"
+IS_18_OR_OVER = True
