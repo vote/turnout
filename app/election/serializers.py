@@ -35,6 +35,15 @@ class FieldStateSerializer(serializers.ModelSerializer):
 class StateSerializer(serializers.ModelSerializer):
     state_information = StateInfoSerializer(source="stateinformation_set", many=True)
 
+    def to_representation(self, instance):
+        result = super().to_representation(instance)
+        if self.context['request'].GET.get('as_object'):
+            state_information_flat = {}
+            for field in result['state_information']:
+                state_information_flat[field['field_type']] = field['text']
+            result['state_information'] = state_information_flat
+        return result
+
     class Meta:
         model = State
         fields = (
