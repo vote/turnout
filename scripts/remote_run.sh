@@ -28,6 +28,9 @@ export AWS_STORAGE_PRIVATE_BUCKET_NAME=$(aws ssm get-parameter --region $REGION 
 export SENDGRID_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sendgrid_api_key | jq '.Parameter["Value"]' -r)
 export FILE_TOKEN_RESET_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_reset_url | jq '.Parameter["Value"]' -r)
 export PRIMARY_ORIGIN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.primary_origin | jq '.Parameter["Value"]' -r)
+export CLOUDFLARE_ZONE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.cloudflare_zone | jq '.Parameter["Value"]' -r)
+export CLOUDFLARE_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.cloudflare_token | jq '.Parameter["Value"]' -r)
+export CLOUDFLARE_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.cloudflare_enabled | jq '.Parameter["Value"]' -r)
 export USVOTEFOUNDATION_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_key | jq '.Parameter["Value"]' -r)
 export ALLOY_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_key | jq '.Parameter["Value"]' -r)
 export ALLOY_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_secret | jq '.Parameter["Value"]' -r)
@@ -70,6 +73,9 @@ docker run -i -t \
            -e SENDGRID_API_KEY \
            -e FILE_TOKEN_RESET_URL \
            -e PRIMARY_ORIGIN \
+           -e CLOUDFLARE_ZONE \
+           -e CLOUDFLARE_TOKEN \
+           -e CLOUDFLARE_ENABLED \
            -e AWS_ACCESS_KEY_ID \
            -e AWS_SECRET_ACCESS_KEY \
            -e AWS_DEFAULT_REGION \

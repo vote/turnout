@@ -112,6 +112,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 ##### MIDDLEWARE CONFIGURATION
 
 MIDDLEWARE = [
+    "cdn.middleware.CDNMiddleware",
     "django_alive.middleware.healthcheck_bypass_host_check",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -163,10 +164,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 #### REST FRAMEWORK CONFIGURATION
 
-DEFAULT_RENDERER_CLASSES = (
-    "rest_framework.renderers.JSONRenderer",
-    "rest_framework.renderers.BrowsableAPIRenderer",
-)
+DEFAULT_RENDERER_CLASSES = ("rest_framework.renderers.JSONRenderer",)
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
@@ -298,6 +296,15 @@ CORS_ORIGIN_REGEX_WHITELIST = [
 #### END CORS CONFIGURATION
 
 
+#### CLOUDFLARE CONFIGURATION
+
+CLOUDFLARE_ENABLED = env.bool("CLOUDFLARE_ENABLED", default=False)
+CLOUDFLARE_TOKEN = env.str("CLOUDFLARE_TOKEN", default="")
+CLOUDFLARE_ZONE = env.str("CLOUDFLARE_ZONE", default="")
+
+#### END CLOUDFLARE CONFIGURATION
+
+
 #### DATADOG CONFIGURATION
 
 DATADOG_TRACE = {
@@ -415,6 +422,11 @@ LOGGING = {
             "propagate": False,
         },
         "pypdftk": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+        "cdn": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,

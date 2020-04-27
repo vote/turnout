@@ -51,3 +51,4 @@ netifaces==0.10.*
 uritemplate==3.0.1
 # Use version of django-nested-inline that supports read only nested formsets
 git+https://github.com/gascarcella/django-nested-inline.git@read-only-change-view
+cloudflare==2.6.*
