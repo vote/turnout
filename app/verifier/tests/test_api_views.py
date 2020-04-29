@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+from base64 import b64encode
 from copy import copy
 
 import pytest
@@ -11,7 +12,9 @@ from action.models import Action
 from common.enums import VoterStatus
 from election.models import State
 from multi_tenant.models import Client
+from verifier.alloy import ALLOY_ENDPOINT
 from verifier.models import Lookup
+from verifier.targetsmart import TARGETSMART_ENDPOINT
 
 LOOKUP_API_ENDPOINT = "/v1/verification/verify/"
 VALID_LOOKUP = {
@@ -26,7 +29,19 @@ VALID_LOOKUP = {
     "phone": "+13129289292",
     "sms_opt_in": True,
 }
-EXPECTED_QUERYSTRING = {
+VALID_LOOKUP_ALLOY = {
+    "first_name": "Donald",
+    "last_name": "Trump",
+    "address1": "1100 S Ocean Blvd",
+    "city": "Palm Beach",
+    "state": "FL",
+    "email": "donald@trump.local",
+    "date_of_birth": "1946-06-14",
+    "zipcode": "33480",
+    "phone": "+15618675309",
+    "sms_opt_in": False,
+}
+TARGETSMART_EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
     "last_name": ["Obama"],
     "dob": ["1961**"],
@@ -34,9 +49,20 @@ EXPECTED_QUERYSTRING = {
     "state": ["IL"],
     "unparsed_full_address": ["1600 Penn Avenue, Chicago, IL 60657"],
 }
-TARGETSMART_ENDPOINT = "https://api.targetsmart.com/voter/voter-registration-check"
-SAMPLE_PROVIDER_RESPONSES_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "sample_provider_responses/")
+ALLOY_EXPECTED_QUERYSTRING = {
+    "first_name": ["Donald"],
+    "last_name": ["Trump"],
+    "birth_date": ["1946-06-14"],
+    "address": ["1100 S Ocean Blvd"],
+    "city": ["Palm Beach"],
+    "state": ["FL"],
+    "zip": ["33480"],
+}
+TARGETSMART_RESPONSES_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "sample_targetsmart_responses/")
+)
+ALLOY_RESPONSES_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "sample_alloy_responses/")
 )
 
 
@@ -81,7 +107,7 @@ def test_proper_targetsmart_request(requests_mock, settings):
 
     assert requests_mock.call_count == 1
     assert targetsmart_call.last_request.headers["x-api-key"] == "mytargetsmartkey"
-    assert targetsmart_call.last_request.qs == EXPECTED_QUERYSTRING
+    assert targetsmart_call.last_request.qs == TARGETSMART_EXPECTED_QUERYSTRING
 
 
 @pytest.mark.django_db
@@ -98,11 +124,33 @@ def test_targetsmart_request_address2(requests_mock):
     action = Action.objects.first()
     assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
-    address2_qs = copy(EXPECTED_QUERYSTRING)
+    address2_qs = copy(TARGETSMART_EXPECTED_QUERYSTRING)
     address2_qs["unparsed_full_address"] = [
         "1600 Penn Avenue Unit 2008, Chicago, IL 60657"
     ]
     assert targetsmart_call.last_request.qs == address2_qs
+
+
+@pytest.mark.django_db
+def test_proper_alloy_request(requests_mock, settings):
+    client = APIClient()
+    alloy_call = requests_mock.register_uri(
+        "GET", ALLOY_ENDPOINT, json={"data": {}, "api_version": "v1"},
+    )
+
+    settings.ALLOY_KEY = "myalloykey"
+    settings.ALLOY_SECRET = "myalloysecret"
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
+    assert response.status_code == 200
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+
+    assert requests_mock.call_count == 1
+    basic_auth_string = (
+        "Basic " + b64encode("myalloykey:myalloysecret".encode()).decode()
+    )
+    assert alloy_call.last_request.headers["authorization"] == basic_auth_string
+    assert alloy_call.last_request.qs == ALLOY_EXPECTED_QUERYSTRING
 
 
 @pytest.mark.django_db
@@ -246,7 +294,7 @@ def test_provider_response_500_error(requests_mock):
 def test_provider_response_missing_parameters(requests_mock):
     client = APIClient()
     with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "missing_required_parameters.json")
+        os.path.join(TARGETSMART_RESPONSES_PATH, "missing_required_parameters.json")
     ) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, status_code=400, json=data)
@@ -258,7 +306,7 @@ def test_provider_response_missing_parameters(requests_mock):
 def test_provider_response_bad_character(requests_mock):
     client = APIClient()
     with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "bad_character_error.json")
+        os.path.join(TARGETSMART_RESPONSES_PATH, "bad_character_error.json")
     ) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, status_code=400, json=data)
@@ -270,9 +318,7 @@ def test_provider_response_bad_character(requests_mock):
 @pytest.mark.django_db
 def test_provider_response_voter_not_found(requests_mock):
     client = APIClient()
-    with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "not_found.json")
-    ) as json_file:
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "not_found.json")) as json_file:
         data = json.load(json_file)
 
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
@@ -288,9 +334,9 @@ def test_provider_response_voter_not_found(requests_mock):
 
 
 @pytest.mark.django_db
-def test_provider_response_active_voter(requests_mock):
+def test_targetsmart_response_active_voter(requests_mock):
     client = APIClient()
-    with open(os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "active.json")) as json_file:
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "active.json")) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -305,11 +351,30 @@ def test_provider_response_active_voter(requests_mock):
 
 
 @pytest.mark.django_db
+def test_alloy_response_active_voter(requests_mock):
+    client = APIClient()
+    with open(os.path.join(ALLOY_RESPONSES_PATH, "active.json")) as json_file:
+        data = json.load(json_file)
+    requests_mock.register_uri("GET", ALLOY_ENDPOINT, json=data)
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
+    action = Action.objects.first()
+    assert response.json() == {
+        "registered": True,
+        "action_id": str(action.pk),
+        "last_updated": "2020-03-03T00:00:00Z"
+    }
+    lookup = Lookup.objects.first()
+    assert lookup.response == data
+    assert lookup.too_many == None
+    assert lookup.registered == True
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.action == action
+
+
+@pytest.mark.django_db
 def test_provider_response_inactive_voter(requests_mock):
     client = APIClient()
-    with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "inactive.json")
-    ) as json_file:
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "inactive.json")) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -326,9 +391,7 @@ def test_provider_response_inactive_voter(requests_mock):
 @pytest.mark.django_db
 def test_provider_response_unknown_voter(requests_mock):
     client = APIClient()
-    with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "unknown.json")
-    ) as json_file:
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "unknown.json")) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -345,9 +408,7 @@ def test_provider_response_unknown_voter(requests_mock):
 @pytest.mark.django_db
 def test_provider_response_too_many(requests_mock):
     client = APIClient()
-    with open(
-        os.path.join(SAMPLE_PROVIDER_RESPONSES_PATH, "too_many.json")
-    ) as json_file:
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "too_many.json")) as json_file:
         data = json.load(json_file)
     requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)

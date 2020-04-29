@@ -4,6 +4,11 @@ import requests
 from django.conf import settings
 
 from common.analytics import statsd
+from common.utils.format import remove_special_characters
+
+# targetsmart says they only allow alphanumerics, but we should still include address punctuation
+# they will throw an error if we include parentheses or apostrophes
+
 
 logger = logging.getLogger("verifier")
 
@@ -22,11 +27,11 @@ def query_targetsmart(serializer_data):
     )
 
     query = {
-        "first_name": serializer_data["first_name"],
-        "last_name": serializer_data["last_name"],
+        "first_name": remove_special_characters(serializer_data["first_name"]),
+        "last_name": remove_special_characters(serializer_data["last_name"]),
         "state": serializer_data["state"],
         "zip_code": serializer_data["zipcode"],
-        "unparsed_full_address": full_address,
+        "unparsed_full_address": remove_special_characters(full_address),
         # only use year to match date_of_birth as some states have 1/1 for unknown dates
         "dob": serializer_data["date_of_birth"].strftime("%Y**"),
     }

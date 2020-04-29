@@ -19,6 +19,7 @@ class Lookup(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel
     registered = models.BooleanField(null=True)
     voter_status = TurnoutEnumField(enums.VoterStatus, null=True)
     too_many = models.BooleanField(null=True)
+    last_updated = models.DateTimeField(null=True, blank=True)
     response = JSONField()
 
     date_of_birth = models.DateField(null=True, blank=True)

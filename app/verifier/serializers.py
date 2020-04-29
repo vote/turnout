@@ -33,6 +33,7 @@ class LookupSerializer(ActionSerializer):
             "phone",
             "sms_opt_in",
             "response",
+            "last_updated",
             "utm_campaign",
             "utm_source",
             "utm_medium",

@@ -1,4 +1,16 @@
 import string
+import unicodedata
+
+ALLOWED_CHARACTERS = string.ascii_letters + string.digits + " -.,#"
+# allow only letters, digits and simple punctuation
+
+
+def remove_special_characters(s):
+    # first convert to ascii (replace accents with plain chars)
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    # then remove anything which is not an allowed character
+    s = "".join(c for c in s if c in ALLOWED_CHARACTERS)
+    return s.strip()
 
 
 class StringFormatter(string.Formatter):
