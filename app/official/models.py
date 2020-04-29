@@ -61,3 +61,18 @@ class Address(USVFModel):
 
     class Meta:
         ordering = ["external_id"]
+
+    @property
+    def full_address(self):
+        return "\n".join(
+        [
+            line
+            for line in [
+                self.address,
+                self.address2,
+                self.address3,
+                f"{self.city.title()}, {self.state.code} {self.zipcode}",
+            ]
+            if line is not None and len(line) > 0
+        ]
+    )

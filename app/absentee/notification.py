@@ -14,7 +14,7 @@ SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
 def compile_email(ballot_request: BallotRequest) -> str:
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
 
-    preheader_text = f"{ballot_request.first_name}, just a few more steps to complete your absentee ballot request: print, sign and mail your form."
+    preheader_text = f"{ballot_request.first_name}, just a few more steps to sign-up for an absentee ballot: print, sign and mail your form."
     recipient = {
         "first_name": ballot_request.first_name,
         "last_name": ballot_request.last_name,
@@ -27,7 +27,7 @@ def compile_email(ballot_request: BallotRequest) -> str:
         "download_url": ballot_request.result_item.download_url,
         "state_info": ballot_request.state.data,
         "preheader_text": preheader_text,
-        "mailing_address": contact_info.mailing_address,
+        "mailing_address": contact_info.full_address,
     }
 
     return render_to_string(NOTIFICATION_TEMPLATE, context)

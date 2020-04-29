@@ -106,7 +106,13 @@ def prepare_formdata(
 
     # find the mailing address and contact info
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
-    form_data["mailto"] = contact_info.mailing_address
+    form_data["mailto"] = contact_info.full_address
+    form_data["mailto_address1"] = contact_info.address1
+    form_data["mailto_address2"] = contact_info.address2
+    form_data["mailto_address3"] = contact_info.address3
+    form_data["mailto_city_state_zip"] = fmt.format(
+            "{city}, {state} {zipcode}", **contact_info.asdict()
+        )
 
     if contact_info.email or contact_info.phone:
         contact_info_lines = []
