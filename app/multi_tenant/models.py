@@ -9,6 +9,10 @@ class Client(UUIDModel, TimestampModel):
     email = models.EmailField(
         max_length=254, null=True, default="turnout@localhost.local"
     )
+    privacy_policy = models.URLField(null=True)
+    terms_of_service = models.URLField(null=True)
+    sms_enabled = models.BooleanField(default=False, null=True)
+    sms_checkbox_default = models.BooleanField(default=False, null=True)
 
     class Meta:
         ordering = ["created_at"]
