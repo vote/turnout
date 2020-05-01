@@ -2,7 +2,8 @@ import os
 import subprocess
 import tempfile
 
-from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection
+from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
+from PIL import Image
 
 
 def relpath(path):
@@ -61,12 +62,25 @@ def test_pdftemplate():
     template = PDFTemplate(
         [
             PDFTemplateSection(path=relpath("test-input-page-1.pdf"), is_form=True),
-            PDFTemplateSection(path=relpath("test-input-page-2-3.pdf"), is_form=True),
-            PDFTemplateSection(path=relpath("test-input-page-4.pdf")),
+            PDFTemplateSection(
+                path=relpath("test-input-page-2-3.pdf"),
+                is_form=True,
+                signature_locations={
+                    1: SignatureBoundingBox(x=300, y=490, width=200, height=37)
+                },
+            ),
+            PDFTemplateSection(
+                path=relpath("test-input-page-4.pdf"),
+                signature_locations={
+                    1: SignatureBoundingBox(x=188, y=50, width=200, height=28)
+                },
+            ),
         ]
     )
 
-    with template.fill(input_data) as output_pdf:
+    with template.fill(
+        input_data, signature=Image.open(relpath("sig.jpeg"))
+    ) as output_pdf:
         tmpdir = tempfile.mkdtemp()
         output_dir = os.path.join(tmpdir, "actual-output-page.png")
 
