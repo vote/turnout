@@ -33,7 +33,7 @@ def query_targetsmart(serializer_data):
         "zip_code": serializer_data["zipcode"],
         "unparsed_full_address": remove_special_characters(full_address),
         # only use year to match date_of_birth as some states have 1/1 for unknown dates
-        "dob": serializer_data["date_of_birth"].strftime("%Y**"),
+        "dob": serializer_data["date_of_birth"].strftime("%Y*"),
     }
 
     response = requests.get(

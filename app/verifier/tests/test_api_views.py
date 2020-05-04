@@ -44,7 +44,7 @@ VALID_LOOKUP_ALLOY = {
 TARGETSMART_EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
     "last_name": ["Obama"],
-    "dob": ["1961**"],
+    "dob": ["1961*"],
     "zip_code": ["60657"],
     "state": ["IL"],
     "unparsed_full_address": ["1600 Penn Avenue, Chicago, IL 60657"],

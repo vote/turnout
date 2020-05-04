@@ -1,7 +1,7 @@
 {
   "error": null,
   "input": {
-    "dob": "1961**",
+    "dob": "1961*",
     "state": "IL",
     "zip_code": "60626",
     "last_name": "Obama",
