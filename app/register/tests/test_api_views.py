@@ -34,6 +34,7 @@ VALID_REGISTRATION = {
     "zipcode": "02108",
     "phone": "+16174567890",
     "sms_opt_in": True,
+    "sms_opt_in_partner": True,
     "us_citizen": True,
     "is_18_or_over": True,
     "state_id_number": "FOUNDER123",
@@ -105,6 +106,7 @@ def test_register_object_created(submission_task_patch):
     assert registration.date_of_birth == datetime.date(year=1737, month=1, day=23)
     assert registration.phone.as_e164 == "+16174567890"
     assert registration.sms_opt_in == True
+    assert registration.sms_opt_in_partner == True
     assert registration.us_citizen == True
     assert registration.party == PoliticalParties.OTHER
     assert registration.race_ethnicity == RaceEthnicity.WHITE

@@ -63,6 +63,7 @@ class RegistrationSerializer(ActionSerializer):
             "suffix",
             "phone",
             "sms_opt_in",
+            "sms_opt_in_partner",
             "address2",
             "previous_title",
             "previous_first_name",

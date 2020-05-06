@@ -5,6 +5,7 @@ from django.db import models
 
 class ActionModel(models.Model):
     action = models.OneToOneField("action.Action", on_delete=models.PROTECT, null=True)
+    sms_opt_in_partner = models.BooleanField(null=True, default=False)
 
     class Meta:
         abstract = True

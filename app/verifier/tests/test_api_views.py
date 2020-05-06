@@ -28,6 +28,7 @@ VALID_LOOKUP = {
     "zipcode": "60657",
     "phone": "+13129289292",
     "sms_opt_in": True,
+    "sms_opt_in_partner": False,
 }
 VALID_LOOKUP_ALLOY = {
     "first_name": "Donald",
@@ -40,6 +41,7 @@ VALID_LOOKUP_ALLOY = {
     "zipcode": "33480",
     "phone": "+15618675309",
     "sms_opt_in": False,
+    "sms_opt_in_partner": True,
 }
 TARGETSMART_EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
@@ -177,6 +179,7 @@ def test_lookup_object_created(requests_mock):
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.sms_opt_in == True
+    assert lookup.sms_opt_in_partner == False
     assert lookup.response == {"result": [], "too_many": False}
     assert lookup.action == action
     first_partner = Client.objects.first()
@@ -369,6 +372,7 @@ def test_alloy_response_active_voter(requests_mock):
     assert lookup.registered == True
     assert lookup.voter_status == VoterStatus.ACTIVE
     assert lookup.action == action
+    assert lookup.sms_opt_in_partner == True
 
 
 @pytest.mark.django_db

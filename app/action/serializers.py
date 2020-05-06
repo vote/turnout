@@ -18,6 +18,7 @@ class ActionSerializer(
     PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
 ):
     action = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
+    sms_opt_in_partner = serializers.BooleanField(required=False)
 
     def __init__(self, instance=None, data=empty, **kwargs) -> None:
         self.incomplete = kwargs.pop("incomplete", False)

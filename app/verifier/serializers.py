@@ -32,7 +32,7 @@ class LookupSerializer(ActionSerializer):
             "age",
             "phone",
             "sms_opt_in",
-            "response",
+            "sms_opt_in_partner",
             "last_updated",
             "utm_campaign",
             "utm_source",

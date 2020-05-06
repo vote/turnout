@@ -24,5 +24,7 @@ class PartnerSlugViewSet(GenericViewSet):
                 "privacy_policy": partner.privacy_policy,
                 "sms_enabled": partner.sms_enabled == True,
                 "sms_checkbox_default": partner.sms_checkbox_default == True,
+                "sms_disclaimer": partner.sms_disclaimer,
+                "sms_checkbox": partner.sms_checkbox == True,
             }
         )

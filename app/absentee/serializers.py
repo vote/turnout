@@ -55,6 +55,7 @@ class BallotRequestSerializer(ActionSerializer):
             "middle_name",
             "phone",
             "sms_opt_in",
+            "sms_opt_in_partner",
             "address2",
             "mailing_address1",
             "mailing_address2",
