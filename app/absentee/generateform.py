@@ -59,6 +59,10 @@ def prepare_formdata(
     form.
     """
     form_data = model_to_dict(ballot_request)
+    # insert state_fields into form_data top-level, without overwriting existing
+    for state_field_key,state_field_value in form_data['state_fields'].items():
+        if not state_field_key in form_data:
+            form_data[state_field_key] = state_field_value
     fmt = StringFormatter(missing="")
 
     # some fields need to be converted to string representation

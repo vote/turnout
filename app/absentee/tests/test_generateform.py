@@ -105,3 +105,32 @@ def test_prepare_formdata_no_first_day_to_apply():
     assert (
         form_data["vbm_first_day_to_apply"] == "At least 55 days before the election."
     )
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_state_fields():
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request", region=addr.office.region, state=state,
+        state_fields={"test_custom_field": "some_value"}
+    )
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+
+    assert form_data["test_custom_field"] == "some_value"
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_state_fields_dont_overwrite():
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request", region=addr.office.region, state=state,
+    )
+    # include a duplicate key in state_fields
+    ballot_request.state_fields = {"us_citizen": "not valid"}
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+
+    assert form_data["us_citizen"] == True

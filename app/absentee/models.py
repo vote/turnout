@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from action.mixin_models import ActionModel
@@ -45,6 +46,8 @@ class BallotRequest(
 
     us_citizen = models.BooleanField(null=True, default=False)
     sms_opt_in = models.BooleanField(null=True, default=False)
+
+    state_fields = JSONField(null=True)
 
     status = TurnoutEnumField(
         enums.TurnoutActionStatus, default=enums.TurnoutActionStatus.PENDING, null=True,

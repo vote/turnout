@@ -62,6 +62,7 @@ class BallotRequestSerializer(ActionSerializer):
             "mailing_city",
             "mailing_state",
             "mailing_zipcode",
+            "state_fields",
             "source",
             "utm_campaign",
             "utm_source",
