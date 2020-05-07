@@ -16,7 +16,8 @@ class Client(UUIDModel, TimestampModel):
     sms_checkbox_default = models.BooleanField(default=False, null=True)
     sms_disclaimer = models.TextField(blank=True, null=True)
     default_slug = models.ForeignKey(
-        "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT)
+        "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT
+    )
 
     class Meta:
         ordering = ["created_at"]

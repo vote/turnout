@@ -1,8 +1,7 @@
 # simple wrappers around pdfrw
 import tempfile
 from dataclasses import dataclass
-from io import BytesIO
-from typing import IO, Any, Dict, List, Optional, Tuple
+from typing import IO, Any, Dict, List, Optional
 
 from django.conf import settings
 from PIL import Image
@@ -63,7 +62,7 @@ class PDFTemplate:
 
         # Create the final output file and track all the temp files we'll have
         # to close at the end
-        final_pdf = tempfile.NamedTemporaryFile("r", delete=not settings.PDF_DEBUG)
+        final_pdf = tempfile.NamedTemporaryFile("rb+", delete=not settings.PDF_DEBUG)
         handles_to_close: List[IO] = []
 
         try:
@@ -135,10 +134,14 @@ class PDFTemplate:
             if page_num in signature_locations:
                 loc = signature_locations[page_num]
 
-                img = signature.copy()
-                img.thumbnail((loc.width, loc.height), Image.BICUBIC)
-
-                stampPDF.drawImage(ImageReader(img), loc.x, loc.y)
+                stampPDF.drawImage(
+                    ImageReader(signature),
+                    loc.x,
+                    loc.y,
+                    loc.width,
+                    loc.height,
+                    preserveAspectRatio=True,
+                )
 
             stampPDF.showPage()
 

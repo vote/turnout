@@ -11,12 +11,38 @@ ALLOY_ENDPOINT = "https://api.alloy.us/v1/verify"
 
 ALLOY_STATES_QUARTERLY = ["AL", "CA", "DC", "IN", "KY", "MN", "SC"]
 ALLOY_STATES_MONTHLY = [
-  "AK", "AZ", "AR", "CO", "CT", "DE", "FL", "GA", "ID", "KS", "LA", "MD", "MI", "MS", "MO",
-  "NE", "NJ", "NM", "NY", "OK", "OR", "RI", "SD", "TN", "TX", "UT", "VT", "WV", "WI", "WY"
+    "AK",
+    "AZ",
+    "AR",
+    "CO",
+    "CT",
+    "DE",
+    "FL",
+    "GA",
+    "ID",
+    "KS",
+    "LA",
+    "MD",
+    "MI",
+    "MS",
+    "MO",
+    "NE",
+    "NJ",
+    "NM",
+    "NY",
+    "OK",
+    "OR",
+    "RI",
+    "SD",
+    "TN",
+    "TX",
+    "UT",
+    "VT",
+    "WV",
+    "WI",
+    "WY",
 ]
-ALLOY_STATES_WEEKLY = [
-  "IA", "MT", "NV", "NC", "OH", "PA", "WA"
-]
+ALLOY_STATES_WEEKLY = ["IA", "MT", "NV", "NC", "OH", "PA", "WA"]
 ALLOY_STATES_ENABLED = ALLOY_STATES_MONTHLY + ALLOY_STATES_WEEKLY
 # update frequencies per https://alloy.us/verify/details/
 

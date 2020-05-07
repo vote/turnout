@@ -56,6 +56,10 @@ class BallotRequest(
         "storage.StorageItem", null=True, on_delete=models.SET_NULL
     )
 
+    signature = models.ForeignKey(
+        "storage.SecureUploadItem", null=True, on_delete=models.SET_NULL
+    )
+
     class Meta:
         ordering = ["-created_at"]
 

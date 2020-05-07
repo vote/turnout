@@ -4,16 +4,18 @@ from typing import IO, Any, Dict, Optional
 from django.core.files import File
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
+from PIL import Image
 
 from common import enums
 from common.analytics import statsd
-from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection
+from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 from common.utils.format import StringFormatter
 from election.models import StateInformation
-from storage.models import StorageItem
+from storage.models import SecureUploadItem, StorageItem
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
+from .state_pdf_data import STATE_DATA
 from .tasks import send_ballotrequest_notification
 
 logger = logging.getLogger("absentee")
@@ -111,8 +113,8 @@ def prepare_formdata(
     form_data["mailto_address2"] = contact_info.address2
     form_data["mailto_address3"] = contact_info.address3
     form_data["mailto_city_state_zip"] = fmt.format(
-            "{city}, {state} {zipcode}", **contact_info.asdict()
-        )
+        "{city}, {state} {zipcode}", **contact_info.asdict()
+    )
 
     if contact_info.email or contact_info.phone:
         contact_info_lines = []
@@ -141,11 +143,41 @@ def prepare_formdata(
         or "At least 55 days before the election."
     )
 
+    # Signatures are handled separately
+    del form_data["signature"]
+
     return form_data
 
 
+def get_signature_locations(
+    state_code: str,
+) -> Optional[Dict[int, SignatureBoundingBox]]:
+    state_data = STATE_DATA.get(state_code.upper())
+    if not state_data:
+        return None
+
+    sig_data = state_data.get("signatures")
+    if not sig_data:
+        return None
+
+    return {
+        page: SignatureBoundingBox(**location) for page, location in sig_data.items()
+    }
+
+
+def load_signature_image(
+    signature_attachment: Optional[SecureUploadItem],
+) -> Optional[Image.Image]:
+    if not signature_attachment:
+        return None
+
+    return Image.open(signature_attachment.file)
+
+
 @statsd.timed("turnout.absentee.absentee_application_pdfgeneration")
-def generate_pdf(form_data: Dict[str, Any], state_code: str) -> IO:
+def generate_pdf(
+    form_data: Dict[str, Any], state_code: str, signature: Optional[Image.Image] = None
+) -> IO:
     return PDFTemplate(
         [
             PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True),
@@ -153,18 +185,20 @@ def generate_pdf(form_data: Dict[str, Any], state_code: str) -> IO:
                 path=f"absentee/templates/pdf/states/{state_code}.pdf",
                 is_form=True,
                 flatten_form=False,
+                signature_locations=get_signature_locations(state_code),
             ),
             PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
         ]
-    ).fill(form_data)
+    ).fill(form_data, signature=signature)
 
 
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
     form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
+    signature = load_signature_image(ballot_request.signature)
 
-    with generate_pdf(form_data, ballot_request.state.code) as filled_pdf:
+    with generate_pdf(form_data, ballot_request.state.code, signature) as filled_pdf:
         item = StorageItem(
             app=enums.FileType.ABSENTEE_REQUEST_FORM,
             email=ballot_request.email,

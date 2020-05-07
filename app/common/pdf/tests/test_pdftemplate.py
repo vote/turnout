@@ -2,8 +2,9 @@ import os
 import subprocess
 import tempfile
 
-from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 from PIL import Image
+
+from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 
 
 def relpath(path):

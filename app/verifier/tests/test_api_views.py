@@ -364,7 +364,7 @@ def test_alloy_response_active_voter(requests_mock):
     assert response.json() == {
         "registered": True,
         "action_id": str(action.pk),
-        "last_updated": "2020-03-03T00:00:00Z"
+        "last_updated": "2020-03-03T00:00:00Z",
     }
     lookup = Lookup.objects.first()
     assert lookup.response == data

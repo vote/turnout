@@ -42,7 +42,7 @@ def test_contact_info_all_in_one_address():
         zipcode=correct_addr.zipcode,
         email=correct_addr.email,
         phone=correct_addr.phone,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS
+        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
     )
 
 
@@ -81,7 +81,7 @@ def test_contact_info_fallback():
         zipcode=first_priority.zipcode,
         email=third_priority.email,
         phone=second_priority.phone,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS
+        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
     )
 
 
@@ -102,7 +102,7 @@ def test_contact_info_no_email_or_phone():
         zipcode=addr.zipcode,
         email=None,
         phone=None,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS
+        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
     )
 
 
@@ -145,5 +145,5 @@ def test_contact_info_address_lines_filtering():
         zipcode=addr.zipcode,
         email=addr.email,
         phone=addr.phone,
-        full_address="Right Office\n123 Main Street\nFoo City, AA 12345"
+        full_address="Right Office\n123 Main Street\nFoo City, AA 12345",
     )

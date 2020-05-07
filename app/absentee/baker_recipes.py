@@ -4,7 +4,6 @@ from model_bakery.recipe import Recipe, foreign_key
 from common import enums
 from election.models import State
 from official.baker_recipes import region
-from official.models import Region
 
 from .models import BallotRequest
 

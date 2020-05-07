@@ -12,7 +12,7 @@ from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.mixins_models import PartnerModel
 
-from .backends import HighValueDownloadStorage
+from .backends import HighValueDownloadStorage, HighValueStorage
 
 
 def storage_expire_date_time():
@@ -50,3 +50,12 @@ class StorageItem(PartnerModel, UUIDModel, TimestampModel):
     @property
     def reset_url(self):
         return settings.FILE_TOKEN_RESET_URL.format(item_id=self.pk)
+
+
+class SecureUploadItem(UUIDModel, TimestampModel):
+    file = models.FileField(storage=HighValueStorage())
+    upload_type = TurnoutEnumField(enums.SecureUploadType)
+    content_type = models.TextField()
+
+    class Meta:
+        ordering = ["-created_at"]
