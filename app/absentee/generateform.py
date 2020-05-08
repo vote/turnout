@@ -89,7 +89,10 @@ def prepare_formdata(
     form_data["county"] = ballot_request.region.county
 
     # combine address fields for states where the form is wonky
-    form_data["address1_2"] = fmt.format("{address1} {address2}", **form_data)
+    form_data["address1_2"] = fmt.format("{address1} {address2}", **form_data).strip()
+    form_data["address1_2_city"] = fmt.format(
+        "{address1_2}, {state}", **form_data
+    )
     form_data["address_city_state_zip"] = fmt.format(
         "{city}, {state} {zipcode}", **form_data
     )
@@ -100,7 +103,7 @@ def prepare_formdata(
         form_data["has_mailing_address"] = True
         form_data["mailing_address1_2"] = fmt.format(
             "{mailing_address1} {mailing_address2}", **form_data
-        )
+        ).strip()
         form_data["mailing_city_state_zip"] = fmt.format(
             "{mailing_city}, {mailing_state} {mailing_zipcode}", **form_data
         )
