@@ -122,6 +122,21 @@ def test_prepare_formdata_state_fields():
 
 
 @pytest.mark.django_db
+def test_prepare_formdata_no_state_fields():
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request", region=addr.office.region, state=state,
+        state_fields=None
+    )
+    add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+
+    assert form_data["vbm_deadline"] == "some deadline"
+
+
+@pytest.mark.django_db
 def test_prepare_formdata_state_fields_dont_overwrite():
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
