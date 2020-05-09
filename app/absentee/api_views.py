@@ -24,7 +24,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             self.get_serializer(data=request.data, incomplete=True)
         )
         absentee_regions = ballot_request.state.region_set
-        if ballot_request.state.state_code in ["MI", "WI"]:
+        if ballot_request.state.code in ["MI", "WI"]:
             # MI and WI process absentee ballots only at the municipality level
             absentee_regions = absentee_regions.exclude(municipality__isnull=True)
 
