@@ -472,3 +472,16 @@ MANAGEMENT_ACTION_PAGINATION_SIZE = env.int(
 PDF_DEBUG = env.bool("PDF_DEBUG", default=DEBUG)
 
 #### END PDF GENERATION CONFIGURATION
+
+#### ABSENTEE CONFIGURATION
+
+ABSENTEE_LEO_EMAIL_OVERRIDE = env.str(
+    "ABSENTEE_LEO_EMAIL_OVERRIDE",
+    default=("blackhole@nowhere.voteamerica.com" if DEBUG else None),
+)
+
+ABSENTEE_LEO_EMAIL_FROM = env.str(
+    "ABSENTEE_LEO_EMAIL_FROM", default="noreply@voteamerica.com"
+)
+
+#### END ABSENTEE CONFIGURATION

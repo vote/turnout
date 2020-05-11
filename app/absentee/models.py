@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.postgres.fields import JSONField
+from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
 from action.mixin_models import ActionModel
@@ -68,3 +68,13 @@ class BallotRequest(
 
     def __str__(self):
         return f"Ballot Request - {self.first_name} {self.last_name}, {self.state.pk}".strip()
+
+
+class AbsenteeLeoEmailOverride(TimestampModel):
+    region = models.OneToOneField(
+        "official.Region", on_delete=models.CASCADE, primary_key=True
+    )
+    email = models.EmailField(null=False)
+
+    class Meta:
+        ordering = ["-created_at"]

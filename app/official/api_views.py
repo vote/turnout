@@ -1,6 +1,6 @@
 from rest_framework import mixins, viewsets
 
-from .models import Region, Office, Address
+from .models import Address, Office, Region
 from .serializers import RegionDetailSerializer, RegionNameSerializer
 
 
@@ -25,10 +25,12 @@ class StateRegionsViewSet(
         absentee = self.request.query_params.get("absentee", False)
         if absentee:
             # return only regions with office addresses which process absentee ballots
-            absentee_addresses =  Address.objects.filter(process_absentee_requests=True)
-            absentee_office_ids = absentee_addresses.values_list('office')
-            absentee_offices = Office.objects.filter(external_id__in=absentee_office_ids)
-            absentee_region_ids = absentee_offices.values_list('region')
+            absentee_addresses = Address.objects.filter(process_absentee_requests=True)
+            absentee_office_ids = absentee_addresses.values_list("office")
+            absentee_offices = Office.objects.filter(
+                external_id__in=absentee_office_ids
+            )
+            absentee_region_ids = absentee_offices.values_list("region")
             queryset = queryset.filter(external_id__in=absentee_region_ids)
 
             # this should work, but does not for MI/WI because of data quality issues

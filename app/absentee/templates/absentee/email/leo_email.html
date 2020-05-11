@@ -1,0 +1,26 @@
+{% extends "email/base.html" %}
+{% block content %}
+
+To the local election official for {{ballot_request.region.name}},
+<br><br>
+Attached please find an absentee ballot application from
+{{ballot_request.first_name}} {{ballot_request.last_name}}. If you have any
+questions, please do not hesitate to contact
+{{ballot_request.first_name}} {{ballot_request.last_name}} at
+{{ballot_request.email}} (cc'd on this email).
+<br><br>
+Thank you.
+<br><br>
+--
+<br><br>
+Email services provided by VoteAmerica.com. VoteAmerica is a nonpartisan,
+nonprofit organization that works to increase turnout in all 50 states.  If you
+have any questions, please contact
+<a href="mailto:legal@voteamerica.com">legal@voteamerica.com</a>
+{% if debug %}
+<br><br>
+--
+<br><br>
+This email would have been sent to {{leo_email}}
+{% endif %}
+{% endblock %}

@@ -13,10 +13,10 @@ from common.utils.format import StringFormatter
 from election.models import StateInformation
 from storage.models import SecureUploadItem, StorageItem
 
-from .contactinfo import get_absentee_contact_info
+from .contactinfo import AbsenteeContactInfo, get_absentee_contact_info
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
-from .tasks import send_ballotrequest_notification
+from .tasks import send_ballotrequest_leo_email, send_ballotrequest_notification
 
 logger = logging.getLogger("absentee")
 
@@ -52,7 +52,10 @@ def state_text_property(state_code: str, slug: str, lower=False) -> Optional[str
 
 
 def prepare_formdata(
-    ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
+    ballot_request: BallotRequest,
+    contact_info: AbsenteeContactInfo,
+    state_id_number: str,
+    is_18_or_over: bool,
 ) -> Dict[str, Any]:
     """
     Assembles all the form data we need to fill out an absentee ballot request
@@ -60,9 +63,9 @@ def prepare_formdata(
     """
     form_data = model_to_dict(ballot_request)
     # insert state_fields into form_data top-level, without overwriting existing
-    state_fields = form_data.get('state_fields',{})
+    state_fields = form_data.get("state_fields", {})
     if state_fields:
-        for state_field_key,state_field_value in state_fields.items():
+        for state_field_key, state_field_value in state_fields.items():
             if not state_field_key in form_data:
                 form_data[state_field_key] = state_field_value
     fmt = StringFormatter(missing="")
@@ -92,9 +95,7 @@ def prepare_formdata(
 
     # combine address fields for states where the form is wonky
     form_data["address1_2"] = fmt.format("{address1} {address2}", **form_data).strip()
-    form_data["address1_2_city"] = fmt.format(
-        "{address1_2}, {state}", **form_data
-    )
+    form_data["address1_2_city"] = fmt.format("{address1_2}, {state}", **form_data)
     form_data["address_city_state_zip"] = fmt.format(
         "{city}, {state} {zipcode}", **form_data
     )
@@ -116,7 +117,6 @@ def prepare_formdata(
         form_data["same_mailing_address"] = True
 
     # find the mailing address and contact info
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
     form_data["mailto"] = contact_info.full_address
     form_data["mailto_address1"] = contact_info.address1
     form_data["mailto_address2"] = contact_info.address2
@@ -185,29 +185,47 @@ def load_signature_image(
 
 @statsd.timed("turnout.absentee.absentee_application_pdfgeneration")
 def generate_pdf(
-    form_data: Dict[str, Any], state_code: str, signature: Optional[Image.Image] = None
+    form_data: Dict[str, Any],
+    state_code: str,
+    signature: Optional[Image.Image] = None,
+    include_cover_sheet=True,
 ) -> IO:
-    return PDFTemplate(
-        [
-            PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True),
-            PDFTemplateSection(
-                path=f"absentee/templates/pdf/states/{state_code}.pdf",
-                is_form=True,
-                flatten_form=False,
-                signature_locations=get_signature_locations(state_code),
-            ),
-            PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
-        ]
-    ).fill(form_data, signature=signature)
+    sections = [
+        PDFTemplateSection(
+            path=f"absentee/templates/pdf/states/{state_code}.pdf",
+            is_form=True,
+            flatten_form=False,
+            signature_locations=get_signature_locations(state_code),
+        ),
+        PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
+    ]
+
+    if include_cover_sheet:
+        sections.insert(0, PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True))
+
+    return PDFTemplate(sections).fill(form_data, signature=signature)
+
+
+def ballot_request_is_emailable(ballot_request: BallotRequest):
+    return ballot_request.state.code == "GA"
 
 
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
-    form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
+    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+    form_data = prepare_formdata(
+        ballot_request, contact_info, state_id_number, is_18_or_over
+    )
     signature = load_signature_image(ballot_request.signature)
+    is_emailable = ballot_request_is_emailable(ballot_request)
 
-    with generate_pdf(form_data, ballot_request.state.code, signature) as filled_pdf:
+    with generate_pdf(
+        form_data,
+        ballot_request.state.code,
+        signature,
+        include_cover_sheet=not is_emailable,
+    ) as filled_pdf:
         item = StorageItem(
             app=enums.FileType.ABSENTEE_REQUEST_FORM,
             email=ballot_request.email,
@@ -222,6 +240,9 @@ def process_ballot_request(
     ballot_request.result_item = item
     ballot_request.save(update_fields=["result_item"])
 
-    send_ballotrequest_notification.delay(ballot_request.pk)
+    if is_emailable:
+        send_ballotrequest_leo_email.delay(ballot_request.pk)
+    else:
+        send_ballotrequest_notification.delay(ballot_request.pk)
 
     logger.info(f"New PDF Created: Ballot Request {item.pk}")

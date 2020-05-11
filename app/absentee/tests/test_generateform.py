@@ -2,6 +2,7 @@ import pytest
 from model_bakery import baker
 
 from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
+from absentee.contactinfo import get_absentee_contact_info
 from absentee.generateform import generate_name, prepare_formdata
 from election.models import State, StateInformation
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
@@ -32,7 +33,12 @@ def test_prepare_formdata():
     add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
     add_state_info(state, "vbm_first_day_to_apply", "Some DATE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
     assert form_data["mailto"] == ABSENTEE_BALLOT_MAILING_ADDRESS
     assert form_data["vbm_deadline"] == "some deadline"
     assert form_data["vbm_first_day_to_apply"] == "some date"
@@ -50,7 +56,12 @@ def test_prepare_formdata_just_phone():
     add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
     add_state_info(state, "vbm_first_day_to_apply", "Some DATE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
     assert form_data["leo_contact_info"] == f"Phone: {addr.phone}"
 
 
@@ -65,7 +76,12 @@ def test_prepare_formdata_no_phone_or_email():
     add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
     add_state_info(state, "vbm_first_day_to_apply", "Some DATE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert (
         form_data["leo_contact_info"]
@@ -83,7 +99,12 @@ def test_prepare_formdata_no_deadline():
 
     add_state_info(state, "vbm_first_day_to_apply", "Some DATE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert form_data["vbm_deadline"] == "As soon as possible."
     assert form_data["vbm_first_day_to_apply"] == "some date"
@@ -99,7 +120,12 @@ def test_prepare_formdata_no_first_day_to_apply():
 
     add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert form_data["vbm_deadline"] == "some deadline"
     assert (
@@ -112,11 +138,18 @@ def test_prepare_formdata_state_fields():
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
-        "absentee.ballot_request", region=addr.office.region, state=state,
-        state_fields={"test_custom_field": "some_value"}
+        "absentee.ballot_request",
+        region=addr.office.region,
+        state=state,
+        state_fields={"test_custom_field": "some_value"},
     )
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert form_data["test_custom_field"] == "some_value"
 
@@ -126,12 +159,19 @@ def test_prepare_formdata_no_state_fields():
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
-        "absentee.ballot_request", region=addr.office.region, state=state,
-        state_fields=None
+        "absentee.ballot_request",
+        region=addr.office.region,
+        state=state,
+        state_fields=None,
     )
     add_state_info(state, "vbm_deadline_mail", "Some DEADLINE")
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert form_data["vbm_deadline"] == "some deadline"
 
@@ -146,6 +186,11 @@ def test_prepare_formdata_state_fields_dont_overwrite():
     # include a duplicate key in state_fields
     ballot_request.state_fields = {"us_citizen": "not valid"}
 
-    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER)
+    form_data = prepare_formdata(
+        ballot_request,
+        get_absentee_contact_info(ballot_request.region.external_id),
+        STATE_ID_NUMBER,
+        IS_18_OR_OVER,
+    )
 
     assert form_data["us_citizen"] == True
