@@ -52,7 +52,7 @@ def get_absentee_contact_info(region_external_id: int) -> AbsenteeContactInfo:
     )
 
     absentee_mailing_addresses = [
-        addr for addr in office_addresses if absentee_address_score(addr) == 1
+        addr for addr in office_addresses
     ]
 
     if len(absentee_mailing_addresses) == 0:
