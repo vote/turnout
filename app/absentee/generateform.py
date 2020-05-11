@@ -13,7 +13,7 @@ from common.utils.format import StringFormatter
 from election.models import StateInformation
 from storage.models import SecureUploadItem, StorageItem
 
-from .contactinfo import get_absentee_contact_info
+from .contactinfo import get_absentee_contact_info, NoAbsenteeRequestMailingAddress
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
 from .tasks import send_ballotrequest_notification
@@ -116,27 +116,29 @@ def prepare_formdata(
         form_data["same_mailing_address"] = True
 
     # find the mailing address and contact info
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
-    form_data["mailto"] = contact_info.full_address
-    form_data["mailto_address1"] = contact_info.address1
-    form_data["mailto_address2"] = contact_info.address2
-    form_data["mailto_address3"] = contact_info.address3
-    form_data["mailto_city_state_zip"] = fmt.format(
-        "{city}, {state} {zipcode}", **contact_info.asdict()
-    )
+    try:
+        contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+        form_data["mailto"] = contact_info.full_address
+        form_data["mailto_address1"] = contact_info.address1
+        form_data["mailto_address2"] = contact_info.address2
+        form_data["mailto_address3"] = contact_info.address3
+        form_data["mailto_city_state_zip"] = fmt.format(
+            "{city}, {state} {zipcode}", **contact_info.asdict()
+        )
 
-    if contact_info.email or contact_info.phone:
-        contact_info_lines = []
-        if contact_info.email:
-            contact_info_lines.append(f"Email: {contact_info.email}")
-        if contact_info.phone:
-            contact_info_lines.append(f"Phone: {contact_info.phone}")
+        if contact_info.email or contact_info.phone:
+            contact_info_lines = []
+            if contact_info.email:
+                contact_info_lines.append(f"Email: {contact_info.email}")
+            if contact_info.phone:
+                contact_info_lines.append(f"Phone: {contact_info.phone}")
 
-        form_data["leo_contact_info"] = "\n".join(contact_info_lines)
-    else:
-        form_data[
-            "leo_contact_info"
-        ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+            form_data["leo_contact_info"] = "\n".join(contact_info_lines)
+        else:
+            form_data["leo_contact_info"] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+    except NoAbsenteeRequestMailingAddress:
+        form_data["leo_contact_info"] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+
 
     # Find state-specific info
     form_data["vbm_deadline"] = (
