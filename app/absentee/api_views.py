@@ -31,6 +31,6 @@ class BallotRequestViewSet(IncompleteActionViewSet):
         response = {
             "uuid": ballot_request.uuid,
             "action_id": ballot_request.action.pk,
-            "regions": absentee_regions.values("name", "external_id"),
+            "regions": absentee_regions.order_by("name").values("name", "external_id"),
         }
         return Response(response)

@@ -12,7 +12,7 @@ class StateRegionsViewSet(
 
     def get_queryset(self):
         state_code = self.kwargs["state"]
-        queryset = Region.objects.filter(state__code=state_code)
+        queryset = Region.objects.filter(state__code=state_code).order_by("name")
 
         county = self.request.query_params.get("county", None)
         if county:
