@@ -111,19 +111,7 @@ def test_contact_info_no_mailing_address():
     office = baker.make_recipe("official.office")
 
     with pytest.raises(NoAbsenteeRequestMailingAddress):
-        wrong_addr1 = baker.make_recipe(
-            "official.address",
-            office=office,
-            process_absentee_requests=True,
-            is_regular_mail=False,
-        )
-
-        wrong_addr2 = baker.make_recipe(
-            "official.address",
-            office=office,
-            process_absentee_requests=False,
-            is_regular_mail=True,
-        )
+        office.address_set.set([])
 
         get_absentee_contact_info(office.region.external_id)
 

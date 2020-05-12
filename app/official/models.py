@@ -64,6 +64,9 @@ class Address(USVFModel):
 
     @property
     def full_address(self):
+        city = self.city.title() if self.city else ""
+        state = self.state.code if self.state else ""
+
         return "\n".join(
             [
                 line
@@ -71,7 +74,7 @@ class Address(USVFModel):
                     self.address,
                     self.address2,
                     self.address3,
-                    f"{self.city.title()}, {self.state.code} {self.zipcode}",
+                    f"{city}, {state} {self.zipcode}",
                 ]
                 if line is not None and len(line) > 0
             ]

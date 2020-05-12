@@ -66,14 +66,16 @@ def get_absentee_contact_info(region_external_id: int) -> AbsenteeContactInfo:
     # Find contact info
     email = next((addr.email for addr in office_addresses if addr.email), None)
     phone = next((addr.phone for addr in office_addresses if addr.phone), None)
+    city = absentee_mailing_address.city.title() if absentee_mailing_address.city else None
+    state = absentee_mailing_address.state.code if absentee_mailing_address.state else None
 
     return AbsenteeContactInfo(
         full_address=absentee_mailing_address.full_address,
         address1=absentee_mailing_address.address,
         address2=absentee_mailing_address.address2,
         address3=absentee_mailing_address.address3,
-        city=absentee_mailing_address.city.title(),
-        state=absentee_mailing_address.state.code,
+        city=city,
+        state=state,
         zipcode=absentee_mailing_address.zipcode,
         email=email,
         phone=phone,
