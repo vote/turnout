@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 
 from common.analytics import statsd
 
-from .contactinfo import get_absentee_contact_info
+from .contactinfo import get_absentee_contact_info, NoAbsenteeRequestMailingAddress
 from .models import BallotRequest
 
 NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
@@ -12,7 +12,11 @@ SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
 
 @statsd.timed("turnout.absentee.compile_email")
 def compile_email(ballot_request: BallotRequest) -> str:
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+    try:
+        contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+        mailing_address = contact_info.full_address
+    except NoAbsenteeRequestMailingAddress:
+        mailing_address = "We were unable to find your local election official mailing address"
 
     preheader_text = f"{ballot_request.first_name}, just a few more steps to sign-up for an absentee ballot: print, sign and mail your form."
     recipient = {
@@ -27,7 +31,7 @@ def compile_email(ballot_request: BallotRequest) -> str:
         "download_url": ballot_request.result_item.download_url,
         "state_info": ballot_request.state.data,
         "preheader_text": preheader_text,
-        "mailing_address": contact_info.full_address,
+        "mailing_address": mailing_address,
     }
 
     return render_to_string(NOTIFICATION_TEMPLATE, context)
