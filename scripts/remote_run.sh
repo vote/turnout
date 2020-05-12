@@ -34,6 +34,12 @@ export CLOUDFLARE_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryp
 export USVOTEFOUNDATION_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_key | jq '.Parameter["Value"]' -r)
 export ALLOY_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_key | jq '.Parameter["Value"]' -r)
 export ALLOY_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_secret | jq '.Parameter["Value"]' -r)
+export ABSENTEE_LEO_EMAIL_DISABLE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.leo_email_disable | jq '.Parameter["Value"]' -r)
+export ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.leo_email_override_address | jq '.Parameter["Value"]' -r)
+export ABSENTEE_LEO_EMAIL_FROM=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.leo_email_from | jq '.Parameter["Value"]' -r)
+export TWILIO_ACCOUNT_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_account_sid | jq '.Parameter["Value"]' -r)
+export TWILIO_AUTH_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_auth_token | jq '.Parameter["Value"]' -r)
+export TWILIO_MESSAGING_SERVICE_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_messaging_service_sid | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -82,6 +88,12 @@ docker run -i -t \
            -e USVOTEFOUNDATION_KEY \
            -e ALLOY_KEY \
            -e ALLOY_SECRET \
+           -e ABSENTEE_LEO_EMAIL_DISABLE \
+           -e ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS \
+           -e ABSENTEE_LEO_EMAIL_FROM \
+           -e TWILIO_ACCOUNT_SID \
+           -e TWILIO_AUTH_TOKEN \
+           -e TWILIO_MESSAGING_SERVICE_SID \
            -e DEBUG=$DEBUG \
            -p 8000:8000 \
            $IMAGE \

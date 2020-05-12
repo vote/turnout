@@ -475,11 +475,12 @@ PDF_DEBUG = env.bool("PDF_DEBUG", default=DEBUG)
 
 #### END PDF GENERATION CONFIGURATION
 
+
 #### ABSENTEE CONFIGURATION
 
-ABSENTEE_LEO_EMAIL_OVERRIDE = env.str(
-    "ABSENTEE_LEO_EMAIL_OVERRIDE",
-    default=("blackhole@nowhere.voteamerica.com" if DEBUG else None),
+ABSENTEE_LEO_EMAIL_DISABLE = env.bool("ABSENTEE_LEO_EMAIL_DISABLE", default=True)
+ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS = env.str(
+    "ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS", default="blackhole@nowhere.voteamerica.com"
 )
 
 ABSENTEE_LEO_EMAIL_FROM = env.str(

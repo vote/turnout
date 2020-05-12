@@ -14,7 +14,8 @@ NOTIFICATION_TEMPLATE = "absentee/email/leo_email.html"
 
 FROM_EMAIL = settings.ABSENTEE_LEO_EMAIL_FROM
 
-OVERRIDE_EMAIL = settings.ABSENTEE_LEO_EMAIL_OVERRIDE
+OVERRIDE_EMAIL = settings.ABSENTEE_LEO_EMAIL_DISABLE
+OVERRIDE_EMAIL_ADDRESS = settings.ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS
 
 
 class NoAbsenteeRequestEmailAddress(Exception):
@@ -41,7 +42,7 @@ def compile_email(ballot_request: BallotRequest) -> Tuple[str, str]:
     leo_email = real_leo_email
     was_debug_mail = False
     if OVERRIDE_EMAIL:
-        leo_email = OVERRIDE_EMAIL
+        leo_email = OVERRIDE_EMAIL_ADDRESS
         was_debug_mail = True
 
     recipient = {
