@@ -4,7 +4,7 @@
 
         <div class="col-md-2">
             <div class="logo">
-                <a href="{% url 'manage:home' %}">
+                <a href="{% url 'manage:home' user.active_client_slug %}">
                     <span class="sr-only">Turnout</span>
                 </a>
             </div>
@@ -16,16 +16,16 @@
                 <ul class="nav navbar-nav">
                     <li class="nav-main-item nav-item">
                     <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span>
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
                             Voters</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:register:registration_list' %}">Registrations</a>
-                            <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' %}">Ballot Requests</a>
-                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' %}">Verifications</a>
+                            <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Registrations</a>
+                            <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Ballot Requests</a>
+                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verifications</a>
                         </div>
                     </li>
                     <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-checkbox-marked-outline"></span>
                             Elections</a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
@@ -33,11 +33,12 @@
                         </div>
                     </li>
                     <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-settings-box"></span> Settings</a>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="{% url 'admin:password_change' %}">Change Password</a>
-                            </div>
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-rocket"></span> {{ user.active_client }}</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Code</a>
+                        </div>
                     </li>
+
                 </ul>
             </nav>
         </div>
@@ -45,7 +46,12 @@
             <nav class="navbar-right">
                 <ul class="nav navbar-nav">
                     <li class="nav-main-item nav-item">
-                        <a class="" href="{% url 'manage:logout' %}"><span class="mdi mdi-logout"></span></a>
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span> {{ user }}</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'manage:profile:change_partner_list' %}">Change Partner</a>
+                            <a class="dropdown-item" href="{% url 'admin:password_change' %}">Change Password</a>
+                            <a class="dropdown-item" href="{% url 'manage:logout' %}">Logout</a>
+                        </div>
                     </li>
                 </ul>
             </nav>

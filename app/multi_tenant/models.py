@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 
 from common.utils.models import TimestampModel, UUIDModel
 
@@ -15,8 +16,9 @@ class Client(UUIDModel, TimestampModel):
     sms_checkbox = models.BooleanField(default=True, null=True)
     sms_checkbox_default = models.BooleanField(default=False, null=True)
     sms_disclaimer = models.TextField(blank=True, null=True)
+    # In order to create this in the admin, we need blank=True
     default_slug = models.ForeignKey(
-        "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT
+        "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT, blank=True
     )
 
     class Meta:
@@ -24,6 +26,10 @@ class Client(UUIDModel, TimestampModel):
 
     def __str__(self):
         return self.name
+
+    @cached_property
+    def slug(self):
+        return self.default_slug.slug
 
     @property
     def full_email_address(self) -> str:

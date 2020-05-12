@@ -1,0 +1,26 @@
+{% extends "management/manage_base.html" %}
+
+{% block title %}Embed Code | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Select A Partner To Use</h1>
+                <p>Select which partner you wish to view the dashboard for.</p>
+                <div class="list-group">
+                    {% for partner in partners %}
+                    <a href="{% url 'manage:profile:change_partner' partner.slug %}"
+                    class="list-group-item list-group-item-action {% if user.active_client == partner %}active{% endif %}">
+                        {{ partner }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

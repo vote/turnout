@@ -1,0 +1,68 @@
+{% extends "management/manage_base.html" %}
+
+{% block title %}Embed Code | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>{{ user.active_client }} Embed Code</h1>
+                <p>Insert the following snippets of code into your website to embed VoteAmerica's tools.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Register To Vote</div>
+                    <div class="card-body">
+                        <code>
+                            &lt;script src="https://cdn.voteamerica.com/embed/partner.js" async&gt;&lt;/script&gt;<br>
+                            &lt;div class="voteamerica-embed" data-partner="{{ user.active_client_slug }}" data-tool="register"&gt;&lt;/div&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Vote By Mail Request</div>
+                    <div class="card-body">
+                        <code>
+                            &lt;script src="https://cdn.voteamerica.com/embed/partner.js" async&gt;&lt;/script&gt;<br>
+                            &lt;div class="voteamerica-embed" data-partner="{{ user.active_client_slug }}" data-tool="absentee"&gt;&lt;/div&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Voter Registration Verification</div>
+                    <div class="card-body">
+                        <code>
+                            &lt;script src="https://cdn.voteamerica.com/embed/partner.js" async&gt;&lt;/script&gt;<br>
+                            &lt;div class="voteamerica-embed" data-partner="{{ user.active_client_slug }}" data-tool="verify"&gt;&lt;/div&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Polling Place Locator</div>
+                    <div class="card-body">
+                        <code>
+                            &lt;script src="https://cdn.voteamerica.com/embed/partner.js" async&gt;&lt;/script&gt;<br>
+                            &lt;div class="voteamerica-embed" data-partner="{{ user.active_client_slug }}" data-tool="locate"&gt;&lt;/div&gt;
+                        </code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django_smalluuid.models import SmallUUIDField, uuid_default
@@ -68,12 +69,16 @@ class User(
         verbose_name_plural = _("Users")
         ordering = ["created_at"]
 
-    def __unicode__(self):
+    def __str__(self):
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
         if self.first_name:
             return self.first_name
         return self.email
+
+    @cached_property
+    def active_client_slug(self):
+        return self.active_client.slug
 
 
 def expire_date_time():

@@ -25,8 +25,8 @@
                         {% for registration in registrations %}
                         <tr>
                             <td>
-                                <a href="{% url 'manage:register:registration_detail' registration.pk %}">{{ registration.first_name }} {{ registration.last_name }}</a>
-                                
+                                <a href="{% url 'manage:register:registration_detail' user.active_client_slug registration.pk %}">{{ registration.first_name }} {{ registration.last_name }}</a>
+
                             </td>
                             <td>
                                 {{ registration.state.pk }}

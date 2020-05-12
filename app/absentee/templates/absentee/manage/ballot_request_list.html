@@ -25,7 +25,7 @@
                         {% for ballot_request in ballot_requests %}
                         <tr>
                             <td>
-                                <a href="{% url 'manage:absentee:ballot_request_detail' ballot_request.pk %}">{{ ballot_request.first_name }} {{ ballot_request.last_name }}</a>
+                                <a href="{% url 'manage:absentee:ballot_request_detail' user.active_client_slug ballot_request.pk %}">{{ ballot_request.first_name }} {{ ballot_request.last_name }}</a>
 
                             </td>
                             <td>
