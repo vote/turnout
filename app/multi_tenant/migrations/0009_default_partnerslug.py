@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='client',
             name='default_slug',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='multi_tenant.PartnerSlug'),
+            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.PROTECT, to='multi_tenant.PartnerSlug'),
         ),
         migrations.RunPython(set_default_slug, lambda x,y: None),
     ]

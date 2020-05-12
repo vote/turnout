@@ -21,6 +21,9 @@ class Client(UUIDModel, TimestampModel):
         "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT, blank=True
     )
 
+    # Passed to Civis to determine if a partner's data should be synced to TMC
+    sync_tmc = models.BooleanField(default=False, null=True)
+
     class Meta:
         ordering = ["created_at"]
 
