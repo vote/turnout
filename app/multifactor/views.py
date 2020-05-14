@@ -39,7 +39,7 @@ class TOTPVerifyView(LoginRequiredMixin, UUIDSlugMixin, SingleObjectMixin, FormV
     template_name = "multifactor/totp.html"
     context_object_name = "device"
     form_class = TokenForm
-    success_url = reverse_lazy("manage:home")
+    success_url = reverse_lazy("manage:home_redirect")
 
     def get_object(self, queryset=None):
         if not queryset:

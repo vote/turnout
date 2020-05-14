@@ -11,7 +11,7 @@ from .mixins import ManageViewMixin
 class LoginView(DjangoLoginView):
     form_class = AuthenticationForm
     template_name = "management/auth/login.html"
-    next_page = reverse_lazy("manage:home")
+    next_page = reverse_lazy("manage:home_redirect")
     redirect_authenticated_user = True
 
     def get_success_url(self):
