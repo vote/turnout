@@ -13,7 +13,11 @@ from common.utils.format import StringFormatter
 from election.models import StateInformation
 from storage.models import SecureUploadItem, StorageItem
 
-from .contactinfo import AbsenteeContactInfo, get_absentee_contact_info, NoAbsenteeRequestMailingAddress
+from .contactinfo import (
+    AbsenteeContactInfo,
+    NoAbsenteeRequestMailingAddress,
+    get_absentee_contact_info,
+)
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
 from .tasks import send_ballotrequest_leo_email, send_ballotrequest_notification
@@ -136,10 +140,13 @@ def prepare_formdata(
 
             form_data["leo_contact_info"] = "\n".join(contact_info_lines)
         else:
-            form_data["leo_contact_info"] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+            form_data[
+                "leo_contact_info"
+            ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
     except NoAbsenteeRequestMailingAddress:
-        form_data["leo_contact_info"] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
-
+        form_data[
+            "leo_contact_info"
+        ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
 
     # Find state-specific info
     form_data["vbm_deadline"] = (
@@ -210,7 +217,7 @@ def generate_pdf(
 
 
 def ballot_request_is_emailable(ballot_request: BallotRequest):
-    return ballot_request.state.code == "GA"
+    return ballot_request.state.code == "GA" and ballot_request.signature is not None
 
 
 def process_ballot_request(
