@@ -9,8 +9,9 @@ from model_bakery import baker
 from rest_framework.test import APIClient
 
 from action.models import Action
-from common.enums import VoterStatus
+from common.enums import EventType, VoterStatus
 from election.models import State
+from event_tracking.models import Event
 from multi_tenant.models import Client
 from verifier.alloy import ALLOY_ENDPOINT
 from verifier.models import Lookup
@@ -184,6 +185,10 @@ def test_lookup_object_created(requests_mock):
     assert lookup.action == action
     first_partner = Client.objects.first()
     assert lookup.partner == first_partner
+    assert (
+        Event.objects.filter(action=lookup.action, event_type=EventType.FINISH).count()
+        == 1
+    )
 
 
 @pytest.mark.django_db

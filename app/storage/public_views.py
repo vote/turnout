@@ -1,6 +1,5 @@
 import logging
 
-from django.utils.timezone import now
 from django.views.generic import RedirectView
 from django.views.generic.detail import SingleObjectMixin
 
@@ -20,9 +19,7 @@ class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
         token = self.request.GET.get("token")
         if token and item.validate_token(token):
             logger.info(f"Valid token {item.pk}. Redirecting to file url.")
-            if not item.first_download:
-                item.first_download = now()
-                item.save(update_fields=["first_download"])
+            item.track_download()
             return item.file.url
         logger.info(f"Invalid token {item.pk}. Redirecting to reset URL.")
         statsd.increment("turnout.storage.download_token_invalid")

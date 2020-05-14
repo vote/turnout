@@ -8,6 +8,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from common import enums
 from common.analytics import statsd
+from common.enums import EventType
 from election.models import State
 
 from .alloy import ALLOY_STATES_ENABLED, query_alloy
@@ -115,6 +116,7 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         serializer.validated_data["registered"] = registered
 
         instance = serializer.save()
+        instance.action.track_event(EventType.FINISH)
 
         response = {"registered": registered, "action_id": instance.action.pk}
         if serializer.validated_data.get("last_updated"):

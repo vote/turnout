@@ -105,20 +105,21 @@ class FileType(Enum):
 
 class EventType(Enum):
     START = "Start"
-    FINISH = "Finish"
+    FINISH_SELF_PRINT = "FinishPrint"
     FINISH_EXTERNAL = "FinishExternal"
-    GENERATE_PDF = "GenerateForm"
-    EMAIL_PDF = "EmailForm"
-    DOWNLOAD_PDF = "DownloadForm"
+    FINISH_LEO = "FinishLEO"
+    FINISH = "Finish"
+    DOWNLOAD = "Download"
     DONATE = "Donate"
 
     class Labels:
         START = "Started Form"
-        FINISH = "Finished Form"
+        FINISH_SELF_PRINT = "Finished via Print and Mail"
         FINISH_EXTERNAL = "Finished with External Tool"
-        GENERATE_PDF = "Generated Form"
-        EMAIL_PDF = "Emailed Form"
-        DOWNLOAD_PDF = "Downloaded Form"
+        FINISH_LEO = "Finish via direct LEO submission"
+        FINISH = "Completed Action"
+        DOWNLOAD_PDF = "Downloaded File"
+        DONATE_CLICK = "Donate Click"
 
 
 class SecureUploadType(Enum):

@@ -7,10 +7,12 @@ from django.urls import reverse
 from django.utils.timezone import now
 from django_smalluuid.models import SmallUUIDField, uuid_default
 
+from absentee.models import BallotRequest
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.mixins_models import PartnerModel
+from register.models import Registration
 
 from .backends import HighValueDownloadStorage, HighValueStorage
 
@@ -50,6 +52,17 @@ class StorageItem(PartnerModel, UUIDModel, TimestampModel):
     @property
     def reset_url(self):
         return settings.FILE_TOKEN_RESET_URL.format(item_id=self.pk)
+
+    def track_download(self):
+        if self.app == enums.FileType.REGISTRATION_FORM:
+            registration = Registration.objects.get(result_item=self)
+            registration.action.track_event(enums.EventType.DOWNLOAD)
+        if self.app == enums.FileType.ABSENTEE_REQUEST_FORM:
+            ballot_request = BallotRequest.objects.get(result_item=self)
+            ballot_request.action.track_event(enums.EventType.DOWNLOAD)
+        if not self.first_download:
+            self.first_download = now()
+            self.save(update_fields=["first_download"])
 
 
 class SecureUploadItem(UUIDModel, TimestampModel):

@@ -1,7 +1,7 @@
 from celery import shared_task
 
 from common.analytics import statsd
-from common.enums import TurnoutActionStatus
+from common.enums import EventType
 
 
 @shared_task
@@ -23,8 +23,7 @@ def send_ballotrequest_notification(ballotrequest_pk: str) -> None:
     from .notification import trigger_notification
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
-    ballot_request.status = TurnoutActionStatus.PDF_SENT
-    ballot_request.save(update_fields=["status"])
+    ballot_request.action.track_event(EventType.FINISH_SELF_PRINT)
 
     trigger_notification(ballot_request)
 
@@ -36,7 +35,6 @@ def send_ballotrequest_leo_email(ballotrequest_pk: str) -> None:
     from .leo_email import trigger_leo_email
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
-    ballot_request.status = TurnoutActionStatus.PDF_SENT
-    ballot_request.save(update_fields=["status"])
+    ballot_request.action.track_event(EventType.FINISH_LEO)
 
     trigger_leo_email(ballot_request)

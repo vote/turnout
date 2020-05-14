@@ -17,7 +17,6 @@
                         <tr>
                             <th>Name</th>
                             <th>State</th>
-                            <th>Status</th>
                             <th>Start Time</th>
                         </tr>
                     </thead>
@@ -30,9 +29,6 @@
                             </td>
                             <td>
                                 {{ registration.state.pk }}
-                            </td>
-                            <td>
-                                {{ registration.status }}
                             </td>
                             <td>
                                 {{ registration.created_at|timezone:"America/Los_Angeles" }}

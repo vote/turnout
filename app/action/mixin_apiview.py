@@ -3,6 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from common import enums
 from common.enums import TurnoutActionStatus
 from election.models import State
 
@@ -54,6 +55,9 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         state_id_number = serializer.validated_data.pop("state_id_number", None)
 
         action_object = serializer.save()
+
+        if serializer.incomplete:
+            action_object.action.track_event(enums.EventType.START)
 
         if not serializer.incomplete:
             self.task.delay(action_object.uuid, state_id_number, is_18_or_over)

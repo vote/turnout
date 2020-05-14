@@ -7,12 +7,14 @@ from rest_framework.test import APIClient
 
 from action.models import Action
 from common.enums import (
+    EventType,
     PersonTitle,
     PoliticalParties,
     RaceEthnicity,
     TurnoutActionStatus,
 )
 from election.models import State
+from event_tracking.models import Event
 from multi_tenant.models import Client
 from register.api_views import RegistrationViewSet
 from register.models import Registration
@@ -246,6 +248,12 @@ def test_update_status():
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
     assert registration.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
 
     status_api_url = STATUS_API_ENDPOINT.format(uuid=registration.uuid)
     status_response = client.patch(status_api_url, STATUS_REFER_OVR)
