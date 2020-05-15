@@ -19,7 +19,12 @@ class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
         token = self.request.GET.get("token")
         if token and item.validate_token(token):
             logger.info(f"Valid token {item.pk}. Redirecting to file url.")
-            item.track_download()
+
+            try:
+                item.track_download()
+            except Exception:
+                logger.exception(f"Unable to track download of {item.pk}")
+
             return item.file.url
         logger.info(f"Invalid token {item.pk}. Redirecting to reset URL.")
         statsd.increment("turnout.storage.download_token_invalid")
