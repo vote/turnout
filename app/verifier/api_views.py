@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
@@ -10,6 +11,7 @@ from common import enums
 from common.analytics import statsd
 from common.enums import EventType
 from election.models import State
+from smsbot.tasks import send_welcome_sms
 
 from .alloy import ALLOY_STATES_ENABLED, query_alloy
 from .models import Lookup
@@ -117,6 +119,11 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
 
         instance = serializer.save()
         instance.action.track_event(EventType.FINISH)
+
+        if instance.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
+            send_welcome_sms.apply_async(
+                args=(str(instance.phone),), countdown=settings.SMS_OPTIN_REMINDER_DELAY
+            )
 
         response = {"registered": registered, "action_id": instance.action.pk}
         if serializer.validated_data.get("last_updated"):

@@ -124,3 +124,8 @@ class EventType(Enum):
 
 class SecureUploadType(Enum):
     SIGNATURE = "Signature"
+
+
+class MessageDirectionType(Enum):
+    IN = "in"
+    OUT = "out"

@@ -55,3 +55,4 @@ cloudflare==2.6.*
 reportlab==3.5.*
 Pillow==7.1.*
 pyyaml==5.3.*
+twilio==6.39.*
