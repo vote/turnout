@@ -75,12 +75,12 @@ def send_email(ballot_request: BallotRequest, content: str, leo_email: str) -> N
 
     attachment = ballot_request.result_item.file
     with attachment.open() as f:
+        basename = slugify(
+            f"ballot request {ballot_request.last_name} {ballot_request.first_name}"
+        )
+
         msg.attach(
-            slugify(
-                f"ballot request {ballot_request.last_name} {ballot_request.first_name}"
-            ),
-            f.read(),
-            "application/pdf",
+            f"{basename}.pdf", f.read(), "application/pdf",
         )
 
     msg.content_subtype = "html"
