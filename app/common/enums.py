@@ -51,11 +51,14 @@ class PersonTitle(Enum):
     MRS = "Mrs"
     MISS = "Miss"
     MS = "Ms"
+    MX = "Mx"
 
     class Labels:
         MR = "Mr."
         MRS = "Mrs."
         MS = "Ms."
+        MISS = "Miss"
+        MX = "Mx."
 
 
 class TurnoutActionStatus(Enum):
