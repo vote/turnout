@@ -56,10 +56,7 @@ def state_text_property(state_code: str, slug: str, lower=False) -> Optional[str
 
 
 def prepare_formdata(
-    ballot_request: BallotRequest,
-    contact_info: AbsenteeContactInfo,
-    state_id_number: str,
-    is_18_or_over: bool,
+    ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool,
 ) -> Dict[str, Any]:
     """
     Assembles all the form data we need to fill out an absentee ballot request
@@ -223,10 +220,7 @@ def ballot_request_is_emailable(ballot_request: BallotRequest):
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
-    form_data = prepare_formdata(
-        ballot_request, contact_info, state_id_number, is_18_or_over
-    )
+    form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
     signature = load_signature_image(ballot_request.signature)
     is_emailable = ballot_request_is_emailable(ballot_request)
 
