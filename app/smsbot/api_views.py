@@ -11,6 +11,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from common.enums import MessageDirectionType
 from smsbot.models import Number, SMSMessage
 
+
 """
 Twilio's advanced opt-in should be configured with these messages:
 
@@ -38,6 +39,7 @@ Default keywords: help
 
 """
 
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def twilio(request):
@@ -50,7 +52,7 @@ def twilio(request):
     if not validator.validate(
         request.build_absolute_uri(),
         request.data,
-        request.headers.get("X-Twilio-Signature", ''),
+        request.headers.get("X-Twilio-Signature", ""),
     ):
         return HttpResponse("Bad twilio signature", status=status.HTTP_403_FORBIDDEN)
 
@@ -59,7 +61,9 @@ def twilio(request):
     except ObjectDoesNotExist:
         n = None
 
-    SMSMessage.objects.create(phone=number, direction=MessageDirectionType.IN, message=body,)
+    SMSMessage.objects.create(
+        phone=number, direction=MessageDirectionType.IN, message=body,
+    )
 
     cmd = body.lower().strip()
     if cmd in ["help"]:
@@ -128,7 +132,9 @@ def twilio(request):
             )
 
     if reply:
-        SMSMessage.objects.create(phone=number, direction=MessageDirectionType.OUT, message=reply,)
+        SMSMessage.objects.create(
+            phone=number, direction=MessageDirectionType.OUT, message=reply,
+        )
 
     resp = MessagingResponse()
     if reply:

@@ -67,5 +67,7 @@ class BallotRequestSerializer(ActionSerializer):
             "utm_campaign",
             "utm_source",
             "utm_medium",
+            "utm_term",
+            "utm_content",
             "signature",
         ]

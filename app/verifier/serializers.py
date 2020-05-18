@@ -37,5 +37,7 @@ class LookupSerializer(ActionSerializer):
             "utm_campaign",
             "utm_source",
             "utm_medium",
+            "utm_term",
+            "utm_content",
             "source",
         ]

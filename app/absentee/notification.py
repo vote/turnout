@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 
 from common.analytics import statsd
 
-from .contactinfo import get_absentee_contact_info, NoAbsenteeRequestMailingAddress
+from .contactinfo import NoAbsenteeRequestMailingAddress, get_absentee_contact_info
 from .models import BallotRequest
 
 NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
@@ -16,7 +16,9 @@ def compile_email(ballot_request: BallotRequest) -> str:
         contact_info = get_absentee_contact_info(ballot_request.region.external_id)
         mailing_address = contact_info.full_address
     except NoAbsenteeRequestMailingAddress:
-        mailing_address = "We were unable to find your local election official mailing address"
+        mailing_address = (
+            "We were unable to find your local election official mailing address"
+        )
 
     preheader_text = f"{ballot_request.first_name}, just a few more steps to sign-up for an absentee ballot: print, sign and mail your form."
     recipient = {

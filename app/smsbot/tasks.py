@@ -38,6 +38,7 @@ def send_welcome_sms(number: str) -> None:
         phone=number, direction=MessageDirectionType.OUT, message=msg,
     )
 
+
 @shared_task
 @statsd.timed("turnout.smsbot.tasks.send_reminder_sms")
 def send_reminder_sms(number: str) -> None:

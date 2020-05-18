@@ -30,6 +30,12 @@ VALID_LOOKUP = {
     "phone": "+13129289292",
     "sms_opt_in": True,
     "sms_opt_in_partner": False,
+    "source": "mysource",
+    "utm_campaign": "mycampaign",
+    "utm_medium": "test",
+    "utm_source": "django",
+    "utm_content": "this-is-a-test",
+    "utm_term": "voteamerica",
 }
 VALID_LOOKUP_ALLOY = {
     "first_name": "Donald",
@@ -69,6 +75,20 @@ ALLOY_RESPONSES_PATH = os.path.abspath(
 )
 
 
+@pytest.fixture(autouse=True)
+def apikey_override(settings):
+    settings.TARGETSMART_KEY = "mytargetsmartkey"
+    settings.ALLOY_KEY = "myalloykey"
+    settings.ALLOY_SECRET = "myalloysecret"
+
+
+@pytest.fixture()
+def smsbot_patch(settings, mocker):
+    settings.SMS_OPTIN_REMINDER_DELAY = 150
+    settings.SMS_POST_SIGNUP_ALERT = True
+    return mocker.patch("verifier.api_views.send_welcome_sms")
+
+
 def test_get_request_disallowed():
     client = APIClient()
     response = client.get(LOOKUP_API_ENDPOINT)
@@ -96,17 +116,12 @@ def test_blank_api_request(requests_mock):
 
 
 @pytest.mark.django_db
-def test_proper_targetsmart_request(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_proper_targetsmart_request(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
     )
 
-    settings.TARGETSMART_KEY = "mytargetsmartkey"
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
@@ -115,17 +130,24 @@ def test_proper_targetsmart_request(requests_mock, mocker, settings):
     assert requests_mock.call_count == 1
     assert targetsmart_call.last_request.headers["x-api-key"] == "mytargetsmartkey"
     assert targetsmart_call.last_request.qs == TARGETSMART_EXPECTED_QUERYSTRING
-    patched_sms_send.apply_async.assert_called_once_with(
+
+
+@pytest.mark.django_db
+def test_smsbot_trigger(requests_mock, smsbot_patch):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
+
+    client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+
+    smsbot_patch.apply_async.assert_called_once_with(
         args=("(312) 928-9292",), countdown=150
     )
 
 
 @pytest.mark.django_db
-def test_targetsmart_request_address2(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_targetsmart_request_address2(requests_mock, mocker, settings, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
@@ -143,20 +165,15 @@ def test_targetsmart_request_address2(requests_mock, mocker, settings):
         "1600 Penn Avenue Unit 2008, Chicago, IL 60657"
     ]
     assert targetsmart_call.last_request.qs == address2_qs
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_proper_alloy_request(requests_mock, settings):
+def test_proper_alloy_request(requests_mock):
     client = APIClient()
     alloy_call = requests_mock.register_uri(
         "GET", ALLOY_ENDPOINT, json={"data": {}, "api_version": "v1"},
     )
 
-    settings.ALLOY_KEY = "myalloykey"
-    settings.ALLOY_SECRET = "myalloysecret"
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
     assert response.status_code == 200
     action = Action.objects.first()
@@ -171,11 +188,7 @@ def test_proper_alloy_request(requests_mock, settings):
 
 
 @pytest.mark.django_db
-def test_lookup_object_created(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
@@ -207,17 +220,31 @@ def test_lookup_object_created(requests_mock, mocker, settings):
         Event.objects.filter(action=lookup.action, event_type=EventType.FINISH).count()
         == 1
     )
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_default_partner(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
+def test_sourcing(requests_mock, mocker, smsbot_patch):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
 
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    assert response.status_code == 200
+
+    assert Lookup.objects.count() == 1
+    lookup = Lookup.objects.first()
+
+    assert lookup.source == "mysource"
+    assert lookup.utm_campaign == "mycampaign"
+    assert lookup.utm_medium == "test"
+    assert lookup.utm_source == "django"
+    assert lookup.utm_content == "this-is-a-test"
+    assert lookup.utm_term == "voteamerica"
+
+
+@pytest.mark.django_db
+def test_default_partner(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
@@ -234,17 +261,10 @@ def test_default_partner(requests_mock, mocker, settings):
 
     lookup = Lookup.objects.first()
     assert lookup.partner == first_partner
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_custom_partner(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_custom_partner(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
@@ -264,17 +284,10 @@ def test_custom_partner(requests_mock, mocker, settings):
 
     lookup = Lookup.objects.first()
     assert lookup.partner == second_partner
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_invalid_partner_key(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_invalid_partner_key(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
@@ -293,9 +306,6 @@ def test_invalid_partner_key(requests_mock, mocker, settings):
 
     lookup = Lookup.objects.first()
     assert lookup.partner == first_partner
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 def test_invalid_zipcode(requests_mock):
@@ -366,11 +376,7 @@ def test_provider_response_bad_character(requests_mock):
 
 
 @pytest.mark.django_db
-def test_provider_response_voter_not_found(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_provider_response_voter_not_found(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(TARGETSMART_RESPONSES_PATH, "not_found.json")) as json_file:
         data = json.load(json_file)
@@ -385,17 +391,10 @@ def test_provider_response_voter_not_found(requests_mock, mocker, settings):
     assert lookup.registered == False
     assert lookup.action == action
     assert not lookup.voter_status
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_targetsmart_response_active_voter(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_targetsmart_response_active_voter(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(TARGETSMART_RESPONSES_PATH, "active.json")) as json_file:
         data = json.load(json_file)
@@ -409,9 +408,6 @@ def test_targetsmart_response_active_voter(requests_mock, mocker, settings):
     assert lookup.registered == True
     assert lookup.voter_status == VoterStatus.ACTIVE
     assert lookup.action == action
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
@@ -437,11 +433,7 @@ def test_alloy_response_active_voter(requests_mock):
 
 
 @pytest.mark.django_db
-def test_provider_response_inactive_voter(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_provider_response_inactive_voter(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(TARGETSMART_RESPONSES_PATH, "inactive.json")) as json_file:
         data = json.load(json_file)
@@ -455,17 +447,10 @@ def test_provider_response_inactive_voter(requests_mock, mocker, settings):
     assert lookup.registered == False
     assert lookup.voter_status == VoterStatus.INACTIVE
     assert lookup.action == action
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_provider_response_unknown_voter(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-
+def test_provider_response_unknown_voter(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(TARGETSMART_RESPONSES_PATH, "unknown.json")) as json_file:
         data = json.load(json_file)
@@ -479,16 +464,10 @@ def test_provider_response_unknown_voter(requests_mock, mocker, settings):
     assert lookup.registered == False
     assert lookup.voter_status == VoterStatus.UNKNOWN
     assert lookup.action == action
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )
 
 
 @pytest.mark.django_db
-def test_provider_response_too_many(requests_mock, mocker, settings):
-    patched_sms_send = mocker.patch("verifier.api_views.send_welcome_sms")
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
+def test_provider_response_too_many(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(TARGETSMART_RESPONSES_PATH, "too_many.json")) as json_file:
         data = json.load(json_file)
@@ -501,6 +480,3 @@ def test_provider_response_too_many(requests_mock, mocker, settings):
     assert lookup.too_many == True
     assert lookup.registered == False
     assert lookup.action == action
-    patched_sms_send.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
-    )

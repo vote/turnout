@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from common.utils.models import TimestampModel, UUIDModel
 from event_tracking.models import Event
