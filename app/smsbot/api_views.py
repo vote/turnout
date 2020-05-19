@@ -49,10 +49,13 @@ def twilio(request):
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
     validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
+    if settings.TWILIO_ENDPOINT_IS_HTTPS:
+        url = "https://"
+    else:
+        url = "http://"
+    url += request.META["HTTP_HOST"] + request.get_full_path()
     if not validator.validate(
-        request.build_absolute_uri(),
-        request.data,
-        request.headers.get("X-Twilio-Signature", ""),
+        url, request.data, request.headers.get("X-Twilio-Signature", ""),
     ):
         return HttpResponse("Bad twilio signature", status=status.HTTP_403_FORBIDDEN)
 
