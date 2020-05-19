@@ -54,7 +54,10 @@ def twilio(request):
         request.data,
         request.headers.get("X-Twilio-Signature", ""),
     ):
-        return HttpResponse("Bad twilio signature", status=status.HTTP_403_FORBIDDEN)
+        return HttpResponse(
+            f"Bad twilio signature, url '{request.build_absolute_uri()}', data {request.data}, sig header {request.headers.get('X-TWilio-Signature')}",
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     try:
         n = Number.objects.get(phone=number)
