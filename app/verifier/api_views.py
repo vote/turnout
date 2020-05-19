@@ -38,7 +38,9 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
 
             if alloy_response.get("error"):
                 statsd.increment("turnout.verifier.alloy_error")
-                logger.error(f"Alloy Error {alloy_response['error']['message']}")
+                alloy_error_message = alloy_response.get("error")
+
+                logger.error(f"Alloy Error {alloy_error_message}")
                 return Response(
                     {"error": "Error from data provider"},
                     status=status.HTTP_503_SERVICE_UNAVAILABLE,
