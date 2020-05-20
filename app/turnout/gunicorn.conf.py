@@ -1,7 +1,11 @@
+import multiprocessing
+
 timeout = 75
 keepalive = 75
 accesslog = "-"
 errorlog = "-"
+num_proc = multiprocessing.cpu_count()
+workers = (num_proc * 2) + 1
 access_log_format = (
     '{"message":"%(h)s %({x-forwarded-for}i)s %(l)s %(u)s %(t)s \'%(r)s\' %(s)s %(b)s %(f)s %(a)s",'
     '"remote_ip":"%(h)s","request_id":"%({X-Request-Id}i)s","response_code":"%(s)s",'
