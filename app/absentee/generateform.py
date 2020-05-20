@@ -127,6 +127,9 @@ def prepare_formdata(
         form_data["mailto_city_state_zip"] = fmt.format(
             "{city}, {state} {zipcode}", **contact_info.asdict()
         )
+        # split by linebreaks, because each line is a separate field in the envelope PDF
+        for num, line in enumerate(form_data["mailto"].splitlines()):
+            form_data[f"mailto_line_{num+1}"] = line
 
         if contact_info.email or contact_info.phone:
             contact_info_lines = []
