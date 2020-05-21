@@ -10,17 +10,23 @@ export PGHOST=$(aws rds describe-db-instances --filters "Name=db-instance-id,Val
 export PGPASSWORD="$(aws rds generate-db-auth-token --hostname $PGHOST --port 5432 --region $REGION --username $USERNAME)"
 
 echo "Dumping $DATABASE"
-pg_dump -Fc --no-acl --no-owner -d $DATABASE > dump.backup
+pg_dump -v -Fc --no-acl --no-owner -d $DATABASE > dump.backup
 
-export PGUSER=postgres
-export PGHOST=localhost
-export PGPASSWORD=turnout
-export PGPORT=5432
+if [ -s "dump.backup" ]
+then
+	echo "dump.backup has some data."
+    export PGUSER=postgres
+    export PGHOST=localhost
+    export PGPASSWORD=turnout
+    export PGPORT=5432
 
-echo "Dropping Schema"
-psql -d turnout -c 'DROP SCHEMA public CASCADE;CREATE SCHEMA public;'
+    echo "Dropping Schema"
+    psql -d turnout -c 'DROP SCHEMA public CASCADE;CREATE SCHEMA public;'
 
-echo "Restoring"
-pg_restore --verbose --no-owner -d turnout dump.backup
+    echo "Restoring"
+    pg_restore --verbose --no-owner -d turnout dump.backup
+else
+	echo "dump.backup is empty."
+fi
 
 rm dump.backup
