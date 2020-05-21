@@ -89,6 +89,7 @@ class RegistrationSerializer(ActionSerializer):
             "utm_medium",
             "utm_term",
             "utm_content",
+            "referring_tool",
         ]
 
 

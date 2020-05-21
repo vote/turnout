@@ -132,3 +132,18 @@ class SecureUploadType(Enum):
 class MessageDirectionType(Enum):
     IN = "in"
     OUT = "out"
+
+
+class ToolName(Enum):
+    VERIFY = "verify"
+    REGISTER = "register"
+    ABSENTEE = "absentee"
+    LOCATE = "locate"
+    LEO = "leo"
+
+    class Labels:
+        VERIFY = "Verify"
+        REGISTER = "Register"
+        ABSENTEE = "Vote-By-Mail"
+        LOCATE = "Locate"
+        LEO = "LEO"

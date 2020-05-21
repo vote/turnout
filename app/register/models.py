@@ -76,6 +76,8 @@ class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, Timestam
         "storage.StorageItem", null=True, on_delete=models.SET_NULL
     )
 
+    referring_tool = TurnoutEnumField(enums.ToolName, null=True, blank=True)
+
     class Meta:
         ordering = ["-created_at"]
 
