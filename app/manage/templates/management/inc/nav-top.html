@@ -22,6 +22,7 @@
                             <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Registrations</a>
                             <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Ballot Requests</a>
                             <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verifications</a>
+                            <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Request an export</a>
                         </div>
                     </li>
                     <li class="nav-main-item nav-item">

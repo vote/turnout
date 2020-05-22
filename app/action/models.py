@@ -16,7 +16,7 @@ class Action(UUIDModel, TimestampModel):
 
 class ActionDetails(models.Model):
     action = models.OneToOneField(
-        "action.Action", on_delete=models.DO_NOTHING, primary_key=True
+        "action.Action", on_delete=models.DO_NOTHING, primary_key=True, related_name='details'
     )
     finished = models.BooleanField()
     self_print = models.BooleanField(null=True, db_column="self_print")

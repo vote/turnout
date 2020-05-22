@@ -100,6 +100,7 @@ class NotificationWebhookTypes(Enum):
 class FileType(Enum):
     REGISTRATION_FORM = "RegForm"
     ABSENTEE_REQUEST_FORM = "AbsForm"
+    REPORT = "Report"
 
     class Labels:
         REGISTRATION_FORM = "Registration Form"
@@ -147,3 +148,19 @@ class ToolName(Enum):
         ABSENTEE = "Vote-By-Mail"
         LOCATE = "Locate"
         LEO = "LEO"
+
+
+class ReportType(Enum):
+    VERIFY = "verify"
+    REGISTER = "register"
+    ABSENTEE = "absentee"
+
+    class Labels:
+        VERIFY = "Verify Tool Export"
+        REGISTER = "Register Tool Export"
+        ABSENTEE = "Absentee Tool Export"
+
+
+class ReportStatus(Enum):
+    PENDING = "Pending"
+    COMPLETE = "Complete"

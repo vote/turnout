@@ -1,0 +1,22 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}Request an export | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">Export Request Form</div>
+            <div class="card-body">
+                Please use the form below to request an export of all of your data.
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-block btn-primary">Request</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

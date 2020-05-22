@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ActionDetails',
             fields=[
-                ('action', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='action.Action')),
+                ('action', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='action.Action', related_name='details')),
                 ('finished', models.BooleanField()),
                 ('self_print', models.BooleanField(db_column='self_print', null=True)),
                 ('finished_external_service', models.BooleanField(db_column='finish_external', null=True)),
