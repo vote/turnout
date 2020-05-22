@@ -1,9 +1,16 @@
 FROM python:3.7-buster
+
 ENV APP_DIR=/app
 WORKDIR $APP_DIR
+
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs pdftk-java && apt-get clean
-COPY app/requirements.txt app/package.json app/package-lock.json $APP_DIR/
-RUN pip install -r requirements.txt && npm install && rm -rf /root/.cache
-RUN apt-get update && apt-get install -y imagemagick ghostscript wait-for-it && \
+    apt-get update && \
+    apt-get install -y nodejs pdftk-java imagemagick ghostscript wait-for-it && \
     apt-get clean
+
+COPY app/package.json app/package-lock.json $APP_DIR/
+RUN npm install
+
+COPY app/requirements.txt $APP_DIR/
+RUN pip install -r requirements.txt
+

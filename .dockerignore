@@ -1,0 +1,13 @@
+app/uploads
+app/static
+
+dump*
+
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+
+.vscode
+.venv
+
+**/node_modules

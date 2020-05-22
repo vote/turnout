@@ -3,8 +3,13 @@ ENV APP_DIR=/app
 WORKDIR $APP_DIR
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get install -y nodejs pdftk-java && apt-get clean
-COPY app/requirements.txt app/package.json app/package-lock.json $APP_DIR/
-RUN pip install -r requirements.txt && npm install && rm -rf /root/.cache
+
+COPY app/package.json app/package-lock.json $APP_DIR/
+RUN npm install
+
+COPY app/requirements.txt $APP_DIR/
+RUN pip install -r requirements.txt
+
 COPY scripts/docker_build_step2.sh /root/
 COPY app/ $APP_DIR/
 RUN bash /root/docker_build_step2.sh
