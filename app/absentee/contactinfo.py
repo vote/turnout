@@ -3,25 +3,39 @@ from typing import Optional
 
 from official.models import Address
 
+from .models import LeoContactOverride
+
 
 @dataclass
 class AbsenteeContactInfo:
-    address1: str
-    city: str
-    state: str
-    zipcode: str
-    address2: Optional[str] = None
-    address3: Optional[str] = None
-    full_address: Optional[str] = None
+    address: Optional[Address] = None
     email: Optional[str] = None
     phone: Optional[str] = None
+    fax: Optional[str] = None
 
-    def asdict(self):
-        return asdict(self)
+    @property
+    def full_address(self):
+        return self.address.full_address if self.address else None
 
+    @property
+    def address1(self):
+        return self.address.address if self.address else None
 
-class NoAbsenteeRequestMailingAddress(Exception):
-    pass
+    @property
+    def address2(self):
+        return self.address.address2 if self.address else None
+
+    @property
+    def address3(self):
+        return self.address.address3 if self.address else None
+
+    @property
+    def city_state_zip(self):
+        return (
+            f"{self.address.city.title()}, {self.address.state.code} {self.address.zipcode}"
+            if self.address
+            else None
+        )
 
 
 def absentee_address_score(addr: Address) -> int:
@@ -46,39 +60,37 @@ def absentee_address_score(addr: Address) -> int:
 
 
 def get_absentee_contact_info(region_external_id: int) -> AbsenteeContactInfo:
+    contact_info = AbsenteeContactInfo()
+
+    try:
+        override = LeoContactOverride.objects.get(pk=region_external_id)
+        contact_info.email = override.email
+        contact_info.fax = override.fax
+        contact_info.phone = override.phone
+    except LeoContactOverride.DoesNotExist:
+        pass
+
     office_addresses = sorted(
         Address.objects.filter(office__region__external_id=region_external_id),
         key=absentee_address_score,
     )
 
-    absentee_mailing_addresses = [addr for addr in office_addresses]
+    # Find contact info
+    contact_info.address = next((addr for addr in office_addresses), None)
 
-    if len(absentee_mailing_addresses) == 0:
-        raise NoAbsenteeRequestMailingAddress(
-            f"No absentee request mailing address for region {region_external_id}"
+    if contact_info.email is None:
+        contact_info.email = next(
+            (addr.email for addr in office_addresses if addr.email), None
         )
 
-    # use first matching mailable address which processes absentee ballots
-    absentee_mailing_address = absentee_mailing_addresses[0]
+    if contact_info.phone is None:
+        contact_info.phone = next(
+            (addr.phone for addr in office_addresses if addr.phone), None
+        )
 
-    # Find contact info
-    email = next((addr.email for addr in office_addresses if addr.email), None)
-    phone = next((addr.phone for addr in office_addresses if addr.phone), None)
-    city = (
-        absentee_mailing_address.city.title() if absentee_mailing_address.city else None
-    )
-    state = (
-        absentee_mailing_address.state.code if absentee_mailing_address.state else None
-    )
+    if contact_info.fax is None:
+        contact_info.fax = next(
+            (addr.fax for addr in office_addresses if addr.fax), None
+        )
 
-    return AbsenteeContactInfo(
-        full_address=absentee_mailing_address.full_address,
-        address1=absentee_mailing_address.address,
-        address2=absentee_mailing_address.address2,
-        address3=absentee_mailing_address.address3,
-        city=city,
-        state=state,
-        zipcode=absentee_mailing_address.zipcode,
-        email=email,
-        phone=phone,
-    )
+    return contact_info

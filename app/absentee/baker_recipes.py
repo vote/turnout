@@ -5,7 +5,7 @@ from common import enums
 from election.models import State
 from official.baker_recipes import region
 
-from .models import BallotRequest
+from .models import BallotRequest, LeoContactOverride
 
 state = Recipe(State, code="XX")
 mailing_state = Recipe(State, code="YY")
@@ -26,3 +26,7 @@ ballot_request = Recipe(
 
 STATE_ID_NUMBER = "123-45-6789"
 IS_18_OR_OVER = True
+
+leo_contact_override = Recipe(
+    LeoContactOverride, region=foreign_key(region), _fill_optional=True
+)

@@ -70,11 +70,13 @@ class BallotRequest(
         return f"Ballot Request - {self.first_name} {self.last_name}, {self.state.pk}".strip()
 
 
-class AbsenteeLeoEmailOverride(TimestampModel):
+class LeoContactOverride(TimestampModel):
     region = models.OneToOneField(
         "official.Region", on_delete=models.CASCADE, primary_key=True
     )
-    email = models.EmailField(null=False)
+    email = models.EmailField(null=True)
+    phone = PhoneNumberField(null=True)
+    fax = PhoneNumberField(null=True)
 
     class Meta:
         ordering = ["-created_at"]

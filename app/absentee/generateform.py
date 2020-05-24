@@ -13,11 +13,7 @@ from common.utils.format import StringFormatter
 from election.models import StateInformation
 from storage.models import SecureUploadItem, StorageItem
 
-from .contactinfo import (
-    AbsenteeContactInfo,
-    NoAbsenteeRequestMailingAddress,
-    get_absentee_contact_info,
-)
+from .contactinfo import AbsenteeContactInfo, get_absentee_contact_info
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
 from .tasks import send_ballotrequest_leo_email, send_ballotrequest_notification
@@ -118,15 +114,14 @@ def prepare_formdata(
         form_data["same_mailing_address"] = True
 
     # find the mailing address and contact info
-    try:
-        contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+    if contact_info.full_address:
         form_data["mailto"] = contact_info.full_address
         form_data["mailto_address1"] = contact_info.address1
         form_data["mailto_address2"] = contact_info.address2
         form_data["mailto_address3"] = contact_info.address3
-        form_data["mailto_city_state_zip"] = fmt.format(
-            "{city}, {state} {zipcode}", **contact_info.asdict()
-        )
+        form_data["mailto_city_state_zip"] = contact_info.city_state_zip
+
         # split by linebreaks, because each line is a separate field in the envelope PDF
         for num, line in enumerate(form_data["mailto"].splitlines()):
             form_data[f"mailto_line_{num+1}"] = line
@@ -143,7 +138,7 @@ def prepare_formdata(
             form_data[
                 "leo_contact_info"
             ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
-    except NoAbsenteeRequestMailingAddress:
+    else:
         form_data[
             "leo_contact_info"
         ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"

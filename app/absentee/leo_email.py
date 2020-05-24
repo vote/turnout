@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from common.analytics import statsd
 
 from .contactinfo import get_absentee_contact_info
-from .models import AbsenteeLeoEmailOverride, BallotRequest
+from .models import BallotRequest
 
 NOTIFICATION_TEMPLATE = "absentee/email/leo_email.html"
 
@@ -23,11 +23,6 @@ class NoAbsenteeRequestEmailAddress(Exception):
 
 
 def get_leo_email(region_external_id: int) -> str:
-    try:
-        return AbsenteeLeoEmailOverride.objects.get(pk=region_external_id).email
-    except AbsenteeLeoEmailOverride.DoesNotExist:
-        pass
-
     email = get_absentee_contact_info(region_external_id).email
     if not email:
         raise NoAbsenteeRequestEmailAddress()

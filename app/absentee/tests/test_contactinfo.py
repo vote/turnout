@@ -1,11 +1,7 @@
 import pytest
 from model_bakery import baker
 
-from absentee.contactinfo import (
-    AbsenteeContactInfo,
-    NoAbsenteeRequestMailingAddress,
-    get_absentee_contact_info,
-)
+from absentee.contactinfo import AbsenteeContactInfo, get_absentee_contact_info
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 
@@ -33,16 +29,22 @@ def test_contact_info_all_in_one_address():
 
     correct_addr = baker.make_recipe("official.absentee_ballot_address", office=office)
 
-    assert get_absentee_contact_info(office.region.external_id) == AbsenteeContactInfo(
-        address1=correct_addr.address,
-        address2=correct_addr.address2,
-        address3=correct_addr.address3,
-        city=correct_addr.city.title(),
-        state=correct_addr.state.code,
-        zipcode=correct_addr.zipcode,
+    contact_info = get_absentee_contact_info(office.region.external_id)
+
+    assert contact_info == AbsenteeContactInfo(
+        address=correct_addr,
         email=correct_addr.email,
         phone=correct_addr.phone,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
+        fax=correct_addr.fax,
+    )
+
+    assert contact_info.full_address == ABSENTEE_BALLOT_MAILING_ADDRESS
+    assert contact_info.address1 == correct_addr.address
+    assert contact_info.address2 == correct_addr.address2
+    assert contact_info.address3 == correct_addr.address3
+    assert (
+        contact_info.city_state_zip
+        == f"{correct_addr.city.title()}, {correct_addr.state.code} {correct_addr.zipcode}"
     )
 
 
@@ -51,7 +53,11 @@ def test_contact_info_fallback():
     office = baker.make_recipe("official.office")
 
     first_priority = baker.make_recipe(
-        "official.absentee_ballot_address", office=office, email=None, phone=None
+        "official.absentee_ballot_address",
+        office=office,
+        email=None,
+        phone=None,
+        fax=None,
     )
 
     second_priority = baker.make_recipe(
@@ -61,6 +67,7 @@ def test_contact_info_fallback():
         is_regular_mail=False,
         email=None,
         phone="+16175552222",
+        fax=None,
     )
 
     third_priority = baker.make_recipe(
@@ -70,18 +77,14 @@ def test_contact_info_fallback():
         is_regular_mail=False,
         email="test@example.com",
         phone="+16175553333",
+        fax="+16175554444",
     )
 
     assert get_absentee_contact_info(office.region.external_id) == AbsenteeContactInfo(
-        address1=first_priority.address,
-        address2=first_priority.address2,
-        address3=first_priority.address3,
-        city=first_priority.city.title(),
-        state=first_priority.state.code,
-        zipcode=first_priority.zipcode,
+        address=first_priority,
         email=third_priority.email,
         phone=second_priority.phone,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
+        fax=third_priority.fax,
     )
 
 
@@ -90,30 +93,33 @@ def test_contact_info_no_email_or_phone():
     office = baker.make_recipe("official.office")
 
     addr = baker.make_recipe(
-        "official.absentee_ballot_address", office=office, email=None, phone=None
+        "official.absentee_ballot_address",
+        office=office,
+        email=None,
+        phone=None,
+        fax=None,
     )
 
     assert get_absentee_contact_info(office.region.external_id) == AbsenteeContactInfo(
-        address1=addr.address,
-        address2=addr.address2,
-        address3=addr.address3,
-        city=addr.city.title(),
-        state=addr.state.code,
-        zipcode=addr.zipcode,
-        email=None,
-        phone=None,
-        full_address=ABSENTEE_BALLOT_MAILING_ADDRESS,
+        address=addr, email=None, phone=None, fax=None
     )
 
 
 @pytest.mark.django_db
 def test_contact_info_no_mailing_address():
     office = baker.make_recipe("official.office")
+    office.address_set.set([])
 
-    with pytest.raises(NoAbsenteeRequestMailingAddress):
-        office.address_set.set([])
+    contact_info = get_absentee_contact_info(office.region.external_id)
+    assert contact_info == AbsenteeContactInfo(
+        address=None, email=None, phone=None, fax=None
+    )
 
-        get_absentee_contact_info(office.region.external_id)
+    assert contact_info.full_address is None
+    assert contact_info.address1 is None
+    assert contact_info.address2 is None
+    assert contact_info.address3 is None
+    assert contact_info.city_state_zip is None
 
 
 @pytest.mark.django_db
@@ -124,14 +130,7 @@ def test_contact_info_address_lines_filtering():
         "official.absentee_ballot_address", office=office, address3=None
     )
 
-    assert get_absentee_contact_info(office.region.external_id) == AbsenteeContactInfo(
-        address1=addr.address,
-        address2=addr.address2,
-        address3=None,
-        city=addr.city.title(),
-        state=addr.state.code,
-        zipcode=addr.zipcode,
-        email=addr.email,
-        phone=addr.phone,
-        full_address="Right Office\n123 Main Street\nFoo City, AA 12345",
+    assert (
+        get_absentee_contact_info(office.region.external_id).full_address
+        == "Right Office\n123 Main Street\nFoo City, AA 12345"
     )
