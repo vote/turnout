@@ -3,7 +3,7 @@ from io import StringIO
 from operator import attrgetter
 from typing import Any, List, Tuple
 
-from django.core.files import File
+from django.core.files.base import ContentFile
 from django.template.defaultfilters import slugify
 from django.utils.timezone import now
 
@@ -172,11 +172,13 @@ def report_runner(report: Report):
             new_row.append(attrgetter(field[0])(object))
         reportwriter.writerow(new_row)
 
+    encoded_file_content = new_file.getvalue().encode("utf-8")
+
     item = StorageItem(
         app=enums.FileType.REPORT, email=report.author.email, partner=report.partner,
     )
     item.file.save(
-        generate_name(report), File(new_file), True,
+        generate_name(report), ContentFile(encoded_file_content), True,
     )
     report.result_item = item
     report.status = enums.ReportStatus.COMPLETE
