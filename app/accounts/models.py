@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_smalluuid.models import SmallUUIDField, uuid_default
 
 from common.utils.models import TimestampModel, UUIDModel
-from multi_tenant.models import Association
+from multi_tenant.models import Association, Client
 
 
 class TurnoutUserManager(auth_models.UserManager):
@@ -79,6 +79,17 @@ class User(
     @cached_property
     def active_client_slug(self):
         return self.active_client.slug
+
+    @cached_property
+    def allowed_clients(self):
+        if self.is_superuser:
+            return Client.objects.all()
+        else:
+            return self.clients.all()
+
+    @cached_property
+    def multi_client_admin(self):
+        return self.allowed_clients.count() > 1
 
 
 def expire_date_time():

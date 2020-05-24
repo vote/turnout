@@ -49,7 +49,7 @@
                     <li class="nav-main-item nav-item">
                         <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span> {{ user }}</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:profile:change_partner_list' %}">Change Partner</a>
+                            {% if request.user.multi_client_admin %}<a class="dropdown-item" href="{% url 'manage:profile:change_partner_list' %}">Change Partner</a>{% endif %}
                             <a class="dropdown-item" href="{% url 'admin:password_change' %}">Change Password</a>
                             <a class="dropdown-item" href="{% url 'manage:logout' %}">Logout</a>
                         </div>

@@ -3,13 +3,20 @@ from django.views.generic import DetailView, ListView
 from action.mixin_manage_views import ActionListViewMixin
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
 from manage.mixins import ManageViewMixin
-from multi_tenant.mixins_manage_views import PartnerGenericViewMixin
+from multi_tenant.mixins_manage_views import (
+    PartnerGenericViewMixin,
+    PartnerManageViewMixin,
+)
 
 from .models import Registration
 
 
 class RegistrationListView(
-    PartnerGenericViewMixin, ActionListViewMixin, ManageViewMixin, ListView
+    PartnerGenericViewMixin,
+    PartnerManageViewMixin,
+    ActionListViewMixin,
+    ManageViewMixin,
+    ListView,
 ):
     model = Registration
     context_object_name = "registrations"
@@ -17,7 +24,11 @@ class RegistrationListView(
 
 
 class RegistrationDetailView(
-    PartnerGenericViewMixin, UUIDSlugMixin, ManageViewMixin, DetailView
+    PartnerGenericViewMixin,
+    PartnerManageViewMixin,
+    UUIDSlugMixin,
+    ManageViewMixin,
+    DetailView,
 ):
     model = Registration
     context_object_name = "registration"

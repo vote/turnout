@@ -3,7 +3,10 @@ from django.urls import reverse
 from django.views.generic import CreateView
 
 from manage.mixins import ManageViewMixin
-from multi_tenant.mixins_manage_views import PartnerGenericViewMixin
+from multi_tenant.mixins_manage_views import (
+    PartnerGenericViewMixin,
+    PartnerManageViewMixin,
+)
 
 from .forms import ReportCreationForm
 from .models import Report
@@ -11,7 +14,11 @@ from .tasks import process_report
 
 
 class ReportCreateView(
-    SuccessMessageMixin, PartnerGenericViewMixin, ManageViewMixin, CreateView
+    SuccessMessageMixin,
+    PartnerGenericViewMixin,
+    PartnerManageViewMixin,
+    ManageViewMixin,
+    CreateView,
 ):
     model = Report
     template_name = "reporting/manage/report_create.html"

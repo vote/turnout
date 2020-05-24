@@ -1,10 +1,9 @@
 import pytest
 from model_bakery import baker
 
+from action.models import ActionDetails
 from common import enums
 from event_tracking.models import Event
-
-from action.models import ActionDetails
 
 
 @pytest.mark.django_db

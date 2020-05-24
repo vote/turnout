@@ -1,8 +1,9 @@
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
-from django.http import Http404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import RedirectView, TemplateView
+
+from multi_tenant.mixins_manage_views import PartnerManageViewMixin
 
 from .forms import AuthenticationForm
 from .mixins import ManageViewMixin
@@ -23,13 +24,8 @@ class LogoutView(DjangoLogoutView):
     template_name = "management/auth/logout.html"
 
 
-class ManageView(ManageViewMixin, TemplateView):
+class ManageView(PartnerManageViewMixin, ManageViewMixin, TemplateView):
     template_name = "management/manage_home.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.active_client_slug != kwargs["partner"]:
-            raise Http404
-        return super().dispatch(request, *args, **kwargs)
 
 
 class RedirectToPartnerManageView(ManageViewMixin, RedirectView):
