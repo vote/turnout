@@ -132,7 +132,7 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
 def generate_name(report: Report):
     if report.partner:
         filename = slugify(
-            f'{now().strftime("%Y%m%d%H%M")}_{report.partner.name}_{report.type.label}_export'
+            f'{now().strftime("%Y%m%d%H%M")}_{report.partner.slug}_{report.type.label}_export'
         ).lower()
     else:
         filename = slugify(
@@ -156,7 +156,7 @@ def report_runner(report: Report):
         raise Exception("Invalid Report Type")
 
     objects = model.objects.select_related(
-        "partner", "action", "action__details"
+        "partner", "partner__default_slug", "action", "action__details"
     ).exclude(action__isnull=True)
 
     if report.partner:
