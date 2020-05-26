@@ -1,3 +1,4 @@
+import reversion
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
@@ -72,6 +73,7 @@ class BallotRequest(
         return f"Ballot Request - {self.first_name} {self.last_name}, {self.state.pk}".strip()
 
 
+@reversion.register()
 class LeoContactOverride(TimestampModel):
     region = models.OneToOneField(
         "official.Region", on_delete=models.CASCADE, primary_key=True
@@ -81,4 +83,4 @@ class LeoContactOverride(TimestampModel):
     fax = PhoneNumberField(null=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["region__state__code", "region__name"]

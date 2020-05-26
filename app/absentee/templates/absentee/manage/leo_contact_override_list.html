@@ -1,0 +1,56 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}List of LEO Contact Overrides | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-with-actions">
+                <div>LEO Contact Overrides</div>
+                <div class="card-header-actions">
+                    <a title="New" href="{% url 'manage:absentee_override:leo_contact_override_create' %}">
+                        <span class="mdi mdi-pencil"></span>
+                        New
+                    </a>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Region</th>
+                            <th>State</th>
+                            <th>Last Updated (Pacific Time)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leo_contact_override in leo_contact_overrides %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'manage:absentee_override:leo_contact_override_detail' leo_contact_override.pk %}">
+                                  {{ leo_contact_override.region.name }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ leo_contact_override.region.state.pk }}
+                            </td>
+                            <td>
+                                {{ leo_contact_override.created_at|timezone:"America/Los_Angeles" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "management/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

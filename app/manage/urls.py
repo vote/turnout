@@ -8,6 +8,7 @@ urlpatterns = [
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("profile/", include("accounts.manage_profile_urls")),
     path("election/", include("election.manage_urls")),
+    path("absentee_overrides/", include("absentee.manage_override_urls")),
     path("<slug:partner>/verifier/", include("verifier.manage_urls")),
     path("<slug:partner>/register/", include("register.manage_urls")),
     path("<slug:partner>/absentee/", include("absentee.manage_urls")),

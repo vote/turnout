@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('absentee', '0009_utm_term_content'),
+        ("absentee", "0011_auto_20200522_1807"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='ballotrequest',
-            name='submit_date',
+            model_name="ballotrequest",
+            name="submit_date",
             field=models.DateField(null=True),
         ),
     ]

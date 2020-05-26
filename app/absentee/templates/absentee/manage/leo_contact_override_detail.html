@@ -1,0 +1,57 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags pretty_json %}
+
+{% block title %}{{ leo_contact_override.region.name }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:absentee_override:leo_contact_override_list' %}">LEO Contact Overrides</a></li>
+                <li class="breadcrumb-item">
+                  {{ leo_contact_override.region.name }}
+                </li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header card-header-with-actions">
+                <div>{{ leo_contact_override.region.name }} ( {{ leo_contact_override.pk }} )</div>
+                <div class="card-header-actions">
+                    <a title="Edit" href="{% url 'manage:absentee_override:leo_contact_override_update' leo_contact_override.pk %}">
+                        <span class="mdi mdi-pencil"></span>
+                        Edit
+                    </a>
+                    <a title="Edit" href="{% url 'manage:absentee_override:leo_contact_override_delete' leo_contact_override.pk %}">
+                        <span class="mdi mdi-delete"></span>
+                        Delete
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <th>Contact Method</th>
+                        <th>Override Value</th>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{ leo_contact_override.email }}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone</td>
+                        <td>{{ leo_contact_override.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fax</td>
+                        <td>{{ leo_contact_override.fax }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

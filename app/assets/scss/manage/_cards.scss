@@ -9,3 +9,13 @@
 .btn-card {
     margin-bottom: 30px;
 }
+
+.card-header-with-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .card-header-actions a {
+        margin-left: 25px;
+    }
+}
