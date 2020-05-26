@@ -1,7 +1,7 @@
 {% extends "management/manage_base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Change Partner | {{ block.super }}{% endblock title %}
+{% block title %}Change Subscriber | {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="content-wrapper">
@@ -9,13 +9,13 @@
     <div class="col-md-12">
         <div class="row">
             <div class="col-md-12">
-                <h1>Select A Partner To Use</h1>
-                <p>Select which partner you wish to view the dashboard for.</p>
+                <h1>Select A Subscriber To Use</h1>
+                <p>Select which subscriber you wish to view the dashboard for.</p>
                 <form role="form" method="POST" action="">
                     <div class="list-group">
-                        {% for id, name in form.partner.field.choices %}
+                        {% for id, name in form.subscriber.field.choices %}
                         {% if id %}
-                        <button type="submit" name="partner" value="{{ id }}"
+                        <button type="submit" name="subscriber" value="{{ id }}"
                             class="list-group-item list-group-item-action{% if id == request.user.active_client.pk %} active{% endif %}">{{ name }}</button>
                         {% endif %}
                         {% endfor %}

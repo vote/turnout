@@ -3,7 +3,7 @@ from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.urls import reverse, reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 
-from multi_tenant.mixins_manage_views import PartnerManageViewMixin
+from multi_tenant.mixins_manage_views import SubscriberManageViewMixin
 
 from .forms import AuthenticationForm
 from .mixins import ManageViewMixin
@@ -24,10 +24,10 @@ class LogoutView(DjangoLogoutView):
     template_name = "management/auth/logout.html"
 
 
-class ManageView(PartnerManageViewMixin, ManageViewMixin, TemplateView):
+class ManageView(SubscriberManageViewMixin, ManageViewMixin, TemplateView):
     template_name = "management/manage_home.html"
 
 
-class RedirectToPartnerManageView(ManageViewMixin, RedirectView):
+class RedirectToSubscriberManageView(ManageViewMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         return reverse("manage:home", args=[self.request.user.active_client_slug])

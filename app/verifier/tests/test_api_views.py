@@ -29,7 +29,7 @@ VALID_LOOKUP = {
     "zipcode": "60657",
     "phone": "+13129289292",
     "sms_opt_in": True,
-    "sms_opt_in_partner": False,
+    "sms_opt_in_subscriber": False,
     "source": "mysource",
     "utm_campaign": "mycampaign",
     "utm_medium": "test",
@@ -48,7 +48,7 @@ VALID_LOOKUP_ALLOY = {
     "zipcode": "33480",
     "phone": "+15618675309",
     "sms_opt_in": False,
-    "sms_opt_in_partner": True,
+    "sms_opt_in_subscriber": True,
 }
 TARGETSMART_EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
@@ -211,11 +211,11 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.sms_opt_in == True
-    assert lookup.sms_opt_in_partner == False
+    assert lookup.sms_opt_in_subscriber == False
     assert lookup.response == {"result": [], "too_many": False}
     assert lookup.action == action
-    first_partner = Client.objects.first()
-    assert lookup.partner == first_partner
+    first_subscriber = Client.objects.first()
+    assert lookup.subscriber == first_subscriber
     assert (
         Event.objects.filter(action=lookup.action, event_type=EventType.FINISH).count()
         == 1
@@ -244,13 +244,13 @@ def test_sourcing(requests_mock, mocker, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_default_partner(requests_mock, smsbot_patch):
+def test_default_subscriber(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
     )
 
-    first_partner = Client.objects.first()
+    first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
     assert Client.objects.count() == 2
 
@@ -260,52 +260,54 @@ def test_default_partner(requests_mock, smsbot_patch):
     assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
-    assert lookup.partner == first_partner
+    assert lookup.subscriber == first_subscriber
 
 
 @pytest.mark.django_db
-def test_custom_partner(requests_mock, smsbot_patch):
+def test_custom_subscriber(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
     )
 
-    second_partner = baker.make_recipe("multi_tenant.client")
+    second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe(
-        "multi_tenant.partnerslug", partner=second_partner, slug="verifierslugtwo"
+        "multi_tenant.subscriberslug",
+        subscriber=second_subscriber,
+        slug="verifierslugtwo",
     )
     assert Client.objects.count() == 2
 
-    url = f"{LOOKUP_API_ENDPOINT}?partner=verifierslugtwo"
+    url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
     assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
-    assert lookup.partner == second_partner
+    assert lookup.subscriber == second_subscriber
 
 
 @pytest.mark.django_db
-def test_invalid_partner_key(requests_mock, smsbot_patch):
+def test_invalid_subscriber_key(requests_mock, smsbot_patch):
     client = APIClient()
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
     )
 
-    first_partner = Client.objects.first()
-    second_partner = baker.make_recipe("multi_tenant.client")
-    baker.make_recipe("multi_tenant.partnerslug", partner=second_partner)
+    first_subscriber = Client.objects.first()
+    second_subscriber = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe("multi_tenant.subscriberslug", subscriber=second_subscriber)
     assert Client.objects.count() == 2
 
-    url = f"{LOOKUP_API_ENDPOINT}?partner=INVALID"
+    url = f"{LOOKUP_API_ENDPOINT}?subscriber=INVALID"
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
     assert response.json() == {"registered": False, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
-    assert lookup.partner == first_partner
+    assert lookup.subscriber == first_subscriber
 
 
 def test_invalid_zipcode(requests_mock):
@@ -429,7 +431,7 @@ def test_alloy_response_active_voter(requests_mock):
     assert lookup.registered == True
     assert lookup.voter_status == VoterStatus.ACTIVE
     assert lookup.action == action
-    assert lookup.sms_opt_in_partner == True
+    assert lookup.sms_opt_in_subscriber == True
 
 
 @pytest.mark.django_db

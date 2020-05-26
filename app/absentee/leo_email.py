@@ -46,7 +46,7 @@ def compile_email(ballot_request: BallotRequest) -> Tuple[str, str]:
 
     context = {
         "ballot_request": ballot_request,
-        "partner": ballot_request.partner,
+        "subscriber": ballot_request.subscriber,
         "recipient": recipient,
         "state_info": ballot_request.state.data,
         "preheader_text": None,

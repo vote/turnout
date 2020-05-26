@@ -15,7 +15,7 @@ from common.utils.format import StringFormatter
 from election.models import StateInformation
 from storage.models import SecureUploadItem, StorageItem
 
-from .contactinfo import AbsenteeContactInfo, get_absentee_contact_info
+from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
 from .tasks import send_ballotrequest_leo_email, send_ballotrequest_notification
@@ -263,7 +263,7 @@ def process_ballot_request(
         item = StorageItem(
             app=enums.FileType.ABSENTEE_REQUEST_FORM,
             email=ballot_request.email,
-            partner=ballot_request.partner,
+            subscriber=ballot_request.subscriber,
         )
         item.file.save(
             generate_name(ballot_request.state.code, ballot_request.last_name),

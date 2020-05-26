@@ -36,7 +36,7 @@ VALID_REGISTRATION = {
     "zipcode": "02108",
     "phone": "+16174567890",
     "sms_opt_in": True,
-    "sms_opt_in_partner": True,
+    "sms_opt_in_subscriber": True,
     "us_citizen": True,
     "is_18_or_over": True,
     "state_id_number": "FOUNDER123",
@@ -108,15 +108,15 @@ def test_register_object_created(submission_task_patch):
     assert registration.date_of_birth == datetime.date(year=1737, month=1, day=23)
     assert registration.phone.as_e164 == "+16174567890"
     assert registration.sms_opt_in == True
-    assert registration.sms_opt_in_partner == True
+    assert registration.sms_opt_in_subscriber == True
     assert registration.us_citizen == True
     assert registration.party == PoliticalParties.OTHER
     assert registration.race_ethnicity == RaceEthnicity.WHITE
     assert registration.status == TurnoutActionStatus.PENDING
     assert registration.action == Action.objects.first()
 
-    first_partner = Client.objects.first()
-    assert registration.partner == first_partner
+    first_subscriber = Client.objects.first()
+    assert registration.subscriber == first_subscriber
 
     submission_task_patch.delay.assert_called_once_with(
         registration.uuid, "FOUNDER123", True
@@ -124,10 +124,10 @@ def test_register_object_created(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_default_partner(submission_task_patch):
+def test_default_subscriber(submission_task_patch):
     client = APIClient()
 
-    first_partner = Client.objects.first()
+    first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
     assert Client.objects.count() == 2
 
@@ -137,7 +137,7 @@ def test_default_partner(submission_task_patch):
 
     registration = Registration.objects.first()
     assert response.json()["uuid"] == str(registration.uuid)
-    assert registration.partner == first_partner
+    assert registration.subscriber == first_subscriber
 
     submission_task_patch.delay.assert_called_once_with(
         registration.uuid, "FOUNDER123", True
@@ -145,23 +145,25 @@ def test_default_partner(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_custom_partner(submission_task_patch):
+def test_custom_subscriber(submission_task_patch):
     client = APIClient()
 
-    second_partner = baker.make_recipe("multi_tenant.client")
+    second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe(
-        "multi_tenant.partnerslug", partner=second_partner, slug="custompartertwoslug"
+        "multi_tenant.subscriberslug",
+        subscriber=second_subscriber,
+        slug="custompartertwoslug",
     )
     assert Client.objects.count() == 2
 
-    url = f"{REGISTER_API_ENDPOINT}?partner=custompartertwoslug"
+    url = f"{REGISTER_API_ENDPOINT}?subscriber=custompartertwoslug"
     response = client.post(url, VALID_REGISTRATION)
     assert response.status_code == 200
     assert "uuid" in response.json()
 
     registration = Registration.objects.first()
     assert response.json()["uuid"] == str(registration.uuid)
-    assert registration.partner == second_partner
+    assert registration.subscriber == second_subscriber
 
     submission_task_patch.delay.assert_called_once_with(
         registration.uuid, "FOUNDER123", True
@@ -169,22 +171,22 @@ def test_custom_partner(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_invalid_partner_key(submission_task_patch):
+def test_invalid_subscriber_key(submission_task_patch):
     client = APIClient()
 
-    first_partner = Client.objects.first()
-    second_partner = baker.make_recipe("multi_tenant.client")
-    baker.make_recipe("multi_tenant.partnerslug", partner=second_partner)
+    first_subscriber = Client.objects.first()
+    second_subscriber = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe("multi_tenant.subscriberslug", subscriber=second_subscriber)
     assert Client.objects.count() == 2
 
-    url = f"{REGISTER_API_ENDPOINT}?partner=INVALID"
+    url = f"{REGISTER_API_ENDPOINT}?subscriber=INVALID"
     response = client.post(url, VALID_REGISTRATION)
     assert response.status_code == 200
     assert "uuid" in response.json()
 
     registration = Registration.objects.first()
     assert response.json()["uuid"] == str(registration.uuid)
-    assert registration.partner == first_partner
+    assert registration.subscriber == first_subscriber
 
     submission_task_patch.delay.assert_called_once_with(
         registration.uuid, "FOUNDER123", True

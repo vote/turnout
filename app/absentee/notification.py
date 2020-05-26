@@ -27,7 +27,7 @@ def compile_email(ballot_request: BallotRequest) -> str:
     }
     context = {
         "ballot_request": ballot_request,
-        "partner": ballot_request.partner,
+        "subscriber": ballot_request.subscriber,
         "recipient": recipient,
         "download_url": ballot_request.result_item.download_url,
         "state_info": ballot_request.state.data,
@@ -42,7 +42,7 @@ def send_email(ballot_request: BallotRequest, content: str) -> None:
     msg = EmailMessage(
         SUBJECT,
         content,
-        ballot_request.partner.full_email_address,
+        ballot_request.subscriber.full_email_address,
         [ballot_request.email],
     )
     msg.content_subtype = "html"

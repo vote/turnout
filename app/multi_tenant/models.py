@@ -18,14 +18,16 @@ class Client(UUIDModel, TimestampModel):
     sms_disclaimer = models.TextField(blank=True, null=True)
     # In order to create this in the admin, we need blank=True
     default_slug = models.ForeignKey(
-        "multi_tenant.PartnerSlug", null=True, on_delete=models.PROTECT, blank=True
+        "multi_tenant.SubscriberSlug", null=True, on_delete=models.PROTECT, blank=True
     )
 
-    # Passed to Civis to determine if a partner's data should be synced to TMC
+    # Passed to Civis to determine if subscriber's data should be synced to TMC
     sync_tmc = models.BooleanField(default=False, null=True)
 
     class Meta:
         ordering = ["created_at"]
+        verbose_name = "Subscriber"
+        verbose_name_plural = "Subscribers"
 
     def __str__(self):
         return self.name
@@ -40,9 +42,14 @@ class Client(UUIDModel, TimestampModel):
         return f'"{clean_name}" <{self.email}>'
 
 
-class PartnerSlug(UUIDModel, TimestampModel):
-    partner = models.ForeignKey(Client, on_delete=models.CASCADE)
+class SubscriberSlug(UUIDModel, TimestampModel):
+    subscriber = models.ForeignKey(
+        Client, on_delete=models.CASCADE, db_column="partner_id"
+    )
     slug = models.SlugField(unique=True)
+
+    class Meta:
+        db_table = "multi_tenant_partnerslug"
 
     def __str__(self):
         return self.slug

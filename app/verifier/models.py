@@ -7,10 +7,10 @@ from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
-from multi_tenant.mixins_models import PartnerModel
+from multi_tenant.mixins_models import SubscriberModel
 
 
-class Lookup(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel):
+class Lookup(ActionModel, SubscriberModel, TrackingModel, UUIDModel, TimestampModel):
     person = models.ForeignKey("people.Person", null=True, on_delete=models.PROTECT)
 
     first_name = models.TextField()

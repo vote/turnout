@@ -4,4 +4,6 @@ from multi_tenant import models
 
 client = Recipe(models.Client, name="My Great Organization", url="http://vote.local",)
 
-partnerslug = Recipe(models.PartnerSlug, slug="greatorg", partner=foreign_key(client))
+subscriberslug = Recipe(
+    models.SubscriberSlug, slug="greatorg", subscriber=foreign_key(client)
+)

@@ -4,8 +4,8 @@ from django.views.generic import CreateView
 
 from manage.mixins import ManageViewMixin
 from multi_tenant.mixins_manage_views import (
-    PartnerGenericViewMixin,
-    PartnerManageViewMixin,
+    SubscriberGenericViewMixin,
+    SubscriberManageViewMixin,
 )
 
 from .forms import ReportCreationForm
@@ -15,8 +15,8 @@ from .tasks import process_report
 
 class ReportCreateView(
     SuccessMessageMixin,
-    PartnerGenericViewMixin,
-    PartnerManageViewMixin,
+    SubscriberGenericViewMixin,
+    SubscriberManageViewMixin,
     ManageViewMixin,
     CreateView,
 ):
@@ -26,12 +26,12 @@ class ReportCreateView(
     success_message = "Report is being generated and will be emailed to you."
 
     def get_success_url(self):
-        return reverse("manage:home", args=[self.kwargs["partner"]])
+        return reverse("manage:home", args=[self.kwargs["subscriber"]])
 
     def form_valid(self, form):
         """Handle a valid form"""
         form.instance.author = self.request.user
-        form.instance.partner = self.partner
+        form.instance.subscriber = self.subscriber
 
         response = super().form_valid(form)
 

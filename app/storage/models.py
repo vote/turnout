@@ -11,7 +11,7 @@ from absentee.models import BallotRequest
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
-from multi_tenant.mixins_models import PartnerModel
+from multi_tenant.mixins_models import SubscriberModel
 from register.models import Registration
 
 from .backends import HighValueDownloadStorage, HighValueStorage
@@ -21,7 +21,7 @@ def storage_expire_date_time():
     return now() + datetime.timedelta(hours=settings.FILE_EXPIRATION_HOURS)
 
 
-class StorageItem(PartnerModel, UUIDModel, TimestampModel):
+class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
     token = SmallUUIDField(default=uuid_default())
     app = TurnoutEnumField(enums.FileType)
     file = models.FileField(storage=HighValueDownloadStorage())

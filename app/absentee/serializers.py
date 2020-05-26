@@ -50,12 +50,12 @@ class BallotRequestSerializer(ActionSerializer):
         nationally_required_fields = ["us_citizen", "is_18_or_over", "region"]
         optional_fields = [
             "state_id_number",
-            "partner",
+            "subscriber",
             "suffix",
             "middle_name",
             "phone",
             "sms_opt_in",
-            "sms_opt_in_partner",
+            "sms_opt_in_subscriber",
             "address2",
             "mailing_address1",
             "mailing_address2",

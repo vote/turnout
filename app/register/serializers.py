@@ -59,11 +59,11 @@ class RegistrationSerializer(ActionSerializer):
         ]
         nationally_required_fields = ["state_id_number", "us_citizen", "is_18_or_over"]
         optional_fields = [
-            "partner",
+            "subscriber",
             "suffix",
             "phone",
             "sms_opt_in",
-            "sms_opt_in_partner",
+            "sms_opt_in_subscriber",
             "address2",
             "previous_title",
             "previous_first_name",

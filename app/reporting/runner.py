@@ -17,7 +17,7 @@ from .models import Report
 
 ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("partner.name", "Partner"),
+    ("subscriber.name", "Subscriber"),
     ("created_at", "Time Started"),
     ("first_name", "First Name"),
     ("middle_name", "Middle Name"),
@@ -37,7 +37,7 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("mailing_state_id", "Mailing State"),
     ("mailing_zipcode", "Mailing Zipcode"),
     ("sms_opt_in", "VoteAmerica SMS Opt In"),
-    ("sms_opt_in_partner", "Partner SMS Opt In"),
+    ("sms_opt_in_subscriber", "Subscriber SMS Opt In"),
     ("action.details.finished", "Completed"),
     ("action.details.self_print", "Self Print Created"),
     ("action.details.finished_external_service", "Visited State Website"),
@@ -53,7 +53,7 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
 
 REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("partner.name", "Partner"),
+    ("subscriber.name", "Subscriber"),
     ("created_at", "Time Started"),
     ("previous_title", "Previous Title"),
     ("previous_first_name", "Previous First Name"),
@@ -88,7 +88,7 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("mailing_state_id", "Mailing State"),
     ("mailing_zipcode", "Mailing Zipcode"),
     ("sms_opt_in", "VoteAmerica SMS Opt In"),
-    ("sms_opt_in_partner", "Partner SMS Opt In"),
+    ("sms_opt_in_subscriber", "Subscriber SMS Opt In"),
     ("action.details.finished", "Completed"),
     ("action.details.self_print", "Self Print Created"),
     ("action.details.finished_external_service", "Visited State Website"),
@@ -105,7 +105,7 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
 
 VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("partner.name", "Partner"),
+    ("subscriber.name", "Subscriber"),
     ("created_at", "Time Started"),
     ("first_name", "First Name"),
     ("last_name", "Last Name"),
@@ -118,7 +118,7 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("zipcode", "Zipcode"),
     ("state_id", "State"),
     ("sms_opt_in", "VoteAmerica SMS Opt In"),
-    ("sms_opt_in_partner", "Partner SMS Opt In"),
+    ("sms_opt_in_subscriber", "Subscriber SMS Opt In"),
     ("registered", "Registered"),
     ("source", "source"),
     ("utm_source", "utm_source"),
@@ -130,9 +130,9 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
 
 
 def generate_name(report: Report):
-    if report.partner:
+    if report.subscriber:
         filename = slugify(
-            f'{now().strftime("%Y%m%d%H%M")}_{report.partner.slug}_{report.type.label}_export'
+            f'{now().strftime("%Y%m%d%H%M")}_{report.subscriber.slug}_{report.type.label}_export'
         ).lower()
     else:
         filename = slugify(
@@ -156,11 +156,11 @@ def report_runner(report: Report):
         raise Exception("Invalid Report Type")
 
     objects = model.objects.select_related(
-        "partner", "partner__default_slug", "action", "action__details"
+        "subscriber", "subscriber__default_slug", "action", "action__details"
     ).exclude(action__isnull=True)
 
-    if report.partner:
-        objects = objects.filter(partner=report.partner)
+    if report.subscriber:
+        objects = objects.filter(subscriber=report.subscriber)
 
     new_file = StringIO()
     reportwriter = csv.writer(new_file)
@@ -175,7 +175,9 @@ def report_runner(report: Report):
     encoded_file_content = new_file.getvalue().encode("utf-8")
 
     item = StorageItem(
-        app=enums.FileType.REPORT, email=report.author.email, partner=report.partner,
+        app=enums.FileType.REPORT,
+        email=report.author.email,
+        subscriber=report.subscriber,
     )
     item.file.save(
         generate_name(report), ContentFile(encoded_file_content), True,

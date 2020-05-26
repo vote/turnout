@@ -1,9 +1,9 @@
 from rest_framework import routers
 
-from .api_views import PartnerSlugViewSet
+from .api_views import SubscriberSlugViewSet
 
 router = routers.SimpleRouter()
-router.register(r"id", PartnerSlugViewSet)
+router.register(r"id", SubscriberSlugViewSet)
 
-app_name = "api_partner"
+app_name = "api_subscriber"
 urlpatterns = router.urls

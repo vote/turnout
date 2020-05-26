@@ -8,11 +8,11 @@ from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
-from multi_tenant.mixins_models import PartnerModel
+from multi_tenant.mixins_models import SubscriberModel
 
 
 class BallotRequest(
-    ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel
+    ActionModel, SubscriberModel, TrackingModel, UUIDModel, TimestampModel
 ):
     first_name = models.TextField(null=True)
     middle_name = models.TextField(null=True, blank=True)

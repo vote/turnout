@@ -8,7 +8,6 @@
                     <span class="sr-only">Turnout</span>
                 </a>
             </div>
-
         </div>
         <div class="col-md-8">
 
@@ -17,12 +16,19 @@
                     <li class="nav-main-item nav-item">
                     <li class="nav-main-item nav-item">
                         <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
-                            Voters</a>
+                            Actions</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Registrations</a>
-                            <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Ballot Requests</a>
-                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verifications</a>
-                            <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Request an export</a>
+                            <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Register</a>
+                            <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Absentee</a>
+                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verify</a>
+                        </div>
+                    </li>
+                    <li class="nav-main-item nav-item">
+                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-rocket"></span> Tools</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed
+                                Code</a>
+                            <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Export Request</a>
                         </div>
                     </li>
                     <li class="nav-main-item nav-item">
@@ -31,16 +37,10 @@
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
                             <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Information Fields</a>
-                            <a class="dropdown-item" href="{% url 'manage:absentee_override:leo_contact_override_list' %}">Absentee LEO Contact Overrides</a>
+                            <a class="dropdown-item" href="{% url 'manage:absentee_override:leo_contact_override_list' %}">Absentee LEO Contact
+                                Overrides</a>
                         </div>
                     </li>
-                    <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-rocket"></span> {{ user.active_client }}</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Code</a>
-                        </div>
-                    </li>
-
                 </ul>
             </nav>
         </div>
@@ -50,7 +50,7 @@
                     <li class="nav-main-item nav-item">
                         <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span> {{ user }}</a>
                         <div class="dropdown-menu">
-                            {% if request.user.multi_client_admin %}<a class="dropdown-item" href="{% url 'manage:profile:change_partner_list' %}">Change Partner</a>{% endif %}
+                            {% if request.user.multi_client_admin %}<a class="dropdown-item" href="{% url 'manage:profile:change_subscriber' %}">Change Subscriber</a>{% endif %}
                             <a class="dropdown-item" href="{% url 'admin:password_change' %}">Change Password</a>
                             <a class="dropdown-item" href="{% url 'manage:logout' %}">Logout</a>
                         </div>

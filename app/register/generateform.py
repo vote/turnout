@@ -114,7 +114,7 @@ def process_registration(registration, state_id_number, is_18_or_over):
         item = StorageItem(
             app=enums.FileType.REGISTRATION_FORM,
             email=registration.email,
-            partner=registration.partner,
+            subscriber=registration.subscriber,
         )
         item.file.save(generate_name(registration), File(filled_pdf), True)
 

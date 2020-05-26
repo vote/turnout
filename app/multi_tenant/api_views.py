@@ -2,28 +2,28 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from .models import PartnerSlug
+from .models import SubscriberSlug
 
 
-class PartnerSlugViewSet(GenericViewSet):
+class SubscriberSlugViewSet(GenericViewSet):
     permission_classes = [AllowAny]
-    model = PartnerSlug
-    queryset = PartnerSlug.objects.select_related("partner")
+    model = SubscriberSlug
+    queryset = SubscriberSlug.objects.select_related("subscriber")
     lookup_field = "slug"
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        partner = instance.partner
+        subscriber = instance.subscriber
 
         return Response(
             {
-                "name": partner.name,
-                "url": partner.url,
-                "terms_of_service": partner.terms_of_service,
-                "privacy_policy": partner.privacy_policy,
-                "sms_enabled": partner.sms_enabled == True,
-                "sms_checkbox_default": partner.sms_checkbox_default == True,
-                "sms_disclaimer": partner.sms_disclaimer,
-                "sms_checkbox": partner.sms_checkbox == True,
+                "name": subscriber.name,
+                "url": subscriber.url,
+                "terms_of_service": subscriber.terms_of_service,
+                "privacy_policy": subscriber.privacy_policy,
+                "sms_enabled": subscriber.sms_enabled == True,
+                "sms_checkbox_default": subscriber.sms_checkbox_default == True,
+                "sms_disclaimer": subscriber.sms_disclaimer,
+                "sms_checkbox": subscriber.sms_checkbox == True,
             }
         )

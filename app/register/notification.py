@@ -19,7 +19,7 @@ def compile_email(registration: Registration) -> str:
     }
     context = {
         "registration": registration,
-        "partner": registration.partner,
+        "subscriber": registration.subscriber,
         "recipient": recipient,
         "download_url": registration.result_item.download_url,
         "state_info": registration.state.data,
@@ -31,7 +31,10 @@ def compile_email(registration: Registration) -> str:
 
 def send_email(registration: Registration, content: str) -> None:
     msg = EmailMessage(
-        SUBJECT, content, registration.partner.full_email_address, [registration.email],
+        SUBJECT,
+        content,
+        registration.subscriber.full_email_address,
+        [registration.email],
     )
     msg.content_subtype = "html"
     msg.send()

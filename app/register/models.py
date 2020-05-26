@@ -6,10 +6,12 @@ from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, TrackingModel, UUIDModel
 from common.validators import zip_validator
-from multi_tenant.mixins_models import PartnerModel
+from multi_tenant.mixins_models import SubscriberModel
 
 
-class Registration(ActionModel, PartnerModel, TrackingModel, UUIDModel, TimestampModel):
+class Registration(
+    ActionModel, SubscriberModel, TrackingModel, UUIDModel, TimestampModel
+):
     title = TurnoutEnumField(enums.PersonTitle, null=True)
     first_name = models.TextField(null=True)
     middle_name = models.TextField(null=True)

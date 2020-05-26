@@ -5,7 +5,7 @@ from enumfields.drf.serializers import EnumSupportSerializerMixin
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from multi_tenant.mixins_serializers import PartnerSerializerMixin
+from multi_tenant.mixins_serializers import SubscriberSerializerMixin
 
 from .models import Action
 
@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
 
 class ActionSerializer(
-    PartnerSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
+    SubscriberSerializerMixin, EnumSupportSerializerMixin, serializers.ModelSerializer
 ):
     action = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
-    sms_opt_in_partner = serializers.BooleanField(required=False)
+    sms_opt_in_subscriber = serializers.BooleanField(required=False)
 
     def __init__(self, instance=None, data=empty, **kwargs) -> None:
         self.incomplete = kwargs.pop("incomplete", False)

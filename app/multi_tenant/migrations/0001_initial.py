@@ -24,7 +24,9 @@ class Migration(migrations.Migration):
             ],
             options={
                 'abstract': False,
-                'ordering': ['created_at']
+                'ordering': ['created_at'],
+                'verbose_name': 'Subscriber',
+                'verbose_name_plural': 'Subscribers',
             },
         ),
         migrations.CreateModel(

@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from common.analytics import statsd
 
-from .models import Client, PartnerSlug
+from .models import Client, SubscriberSlug
 
 if TYPE_CHECKING:
     _Base = serializers.ModelSerializer
@@ -16,23 +16,23 @@ else:
 logger = logging.getLogger("multi_tenant")
 
 
-class PartnerSerializerMixin(_Base):
-    partner = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
+class SubscriberSerializerMixin(_Base):
+    subscriber = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
 
     def create(self, validated_data: Dict[(str, Any)]) -> "Model":
         request = self.context.get("request")
-        if request and "partner" in request.GET:
+        if request and "subscriber" in request.GET:
             try:
-                partner_slug = PartnerSlug.objects.only("partner").get(
-                    slug=request.GET["partner"]
+                subscriber_slug = SubscriberSlug.objects.only("subscriber").get(
+                    slug=request.GET["subscriber"]
                 )
-                partner = partner_slug.partner
-            except PartnerSlug.DoesNotExist:
-                logger.info(f'Invalid partner {request.GET["partner"]}')
-                statsd.increment("turnout.multi_tenant.unknown_partner_request")
-                partner = Client.objects.first()
+                subscriber = subscriber_slug.subscriber
+            except SubscriberSlug.DoesNotExist:
+                logger.info(f'Invalid subscriber {request.GET["subscriber"]}')
+                statsd.increment("turnout.multi_tenant.unknown_subscriber_request")
+                subscriber = Client.objects.first()
         else:
-            partner = Client.objects.first()
+            subscriber = Client.objects.first()
 
-        validated_data["partner"] = partner
+        validated_data["subscriber"] = subscriber
         return super().create(validated_data)

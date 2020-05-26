@@ -19,7 +19,7 @@ def compile_email(report: Report) -> str:
     }
     context = {
         "report": report,
-        "partner": report.partner,
+        "subscriber": report.subscriber,
         "recipient": recipient,
         "download_url": report.result_item.download_url,
         "preheader_text": preheader_text,
@@ -32,7 +32,7 @@ def send_email(report: Report, content: str) -> None:
     msg = EmailMessage(
         f"Your {report.type.label}",
         content,
-        report.partner.full_email_address,
+        report.subscriber.full_email_address,
         [report.author.email],
     )
     msg.content_subtype = "html"

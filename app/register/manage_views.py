@@ -4,16 +4,16 @@ from action.mixin_manage_views import ActionListViewMixin
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
 from manage.mixins import ManageViewMixin
 from multi_tenant.mixins_manage_views import (
-    PartnerGenericViewMixin,
-    PartnerManageViewMixin,
+    SubscriberGenericViewMixin,
+    SubscriberManageViewMixin,
 )
 
 from .models import Registration
 
 
 class RegistrationListView(
-    PartnerGenericViewMixin,
-    PartnerManageViewMixin,
+    SubscriberGenericViewMixin,
+    SubscriberManageViewMixin,
     ActionListViewMixin,
     ManageViewMixin,
     ListView,
@@ -24,8 +24,8 @@ class RegistrationListView(
 
 
 class RegistrationDetailView(
-    PartnerGenericViewMixin,
-    PartnerManageViewMixin,
+    SubscriberGenericViewMixin,
+    SubscriberManageViewMixin,
     UUIDSlugMixin,
     ManageViewMixin,
     DetailView,
