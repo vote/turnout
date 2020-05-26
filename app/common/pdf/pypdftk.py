@@ -135,27 +135,64 @@ class PyPDFTK:
         return out_file
 
     @tracer.wrap(name="dump_data_fields", service="pypdftk")
-    def dump_data_fields(self, pdf_path: str) -> List[Dict[str, str]]:
+    def dump_data_fields(self, pdf_path: str) -> List[Dict[str, List[str]]]:
         """
             Return list of dicts of all fields in a PDF.
         """
         cmd = [PDFTK_PATH, pdf_path, "dump_data_fields"]
-        # Either can return strings with :
-        #    field_data = map(lambda x: x.decode("utf-8").split(': ', 1), run_command(cmd, True))
-        # Or return bytes with : (will break tests)
-        #    field_data = map(lambda x: x.split(b': ', 1), run_command(cmd, True))
-        field_data = map(
+
+        field_data = run_command(cmd, True)
+
+        field_data_lines: List[Tuple[str, str]] = []
+        is_in_value = False
+        for i, line_bytes in enumerate(field_data):
+            line = line_bytes.decode("utf-8")
+
+            if (
+                is_in_value
+                and not line.startswith("FieldValue:")
+                and not line.startswith("FieldValueDefault:")
+                and not line.startswith("FieldJustification:")
+            ):
+                # This is a continuation (borrowed from https://github.com/mikehaertl/php-pdftk/blob/master/src/DataFields.php#L159)
+                k, v = field_data_lines[-1]
+                field_data_lines[-1] = (k, v + "\n" + line)
+                continue
+
+            is_in_value = False
+            key_and_value = tuple(line.split(": ", 1)[0:2])
+
+            field_data_lines.append(cast(Tuple[str, str], key_and_value))
+
+            if key_and_value[0] in ("FieldValue", "FieldValueDefault"):
+                is_in_value = True
+
+        field_data_old = map(
             lambda x: cast(
                 Tuple[str, str], tuple(x.decode("utf-8").split(": ", 1)[0:2])
             ),
             run_command(cmd, True),
         )
+
         fields = [
             list(group)
-            for k, group in itertools.groupby(field_data, lambda x: len(x) == 1)
+            for k, group in itertools.groupby(field_data_lines, lambda x: len(x) == 1)
             if not k
         ]
-        return [dict(f) for f in fields]
+
+        result: List[Dict[str, List[str]]] = []
+
+        for field in fields:
+            field_props: Dict[str, List[str]] = {}
+            for k, v in field:
+                if k in field_props:
+                    field_props[k].append(v)
+                else:
+                    field_props[k] = [v]
+
+            result.append(field_props)
+
+        return result
 
     @tracer.wrap(name="concat", service="pypdftk")
     def concat(self, files: List[str], out_file: Optional[str] = None) -> str:

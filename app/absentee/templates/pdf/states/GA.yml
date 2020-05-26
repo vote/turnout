@@ -4,3 +4,37 @@ signatures:
     y: 305
     width: 150
     height: 23
+
+signature_statement: null
+
+form_fields:
+  - type: section
+    label: Election
+    content:
+      - type: election_date
+        slug: election_date
+        label: Date of Primary, Election, or Runoff
+  - type: section
+    label: Party
+    note: |
+      In Georgia, you can choose which party's primary you want to vote in. You
+      don't be registered with the party or commit to vote for that party. If
+      you choose “Non-partisan,” your ballot will only contain non-partisan
+      races like judges.
+    content:
+      - type: radio
+        layout: horizontal
+        required: true
+        options:
+          - label: Democratic
+            slug: party_democrat
+          - label: Republican
+            slug: party_republican
+          - label: Non-Partisan
+            slug: party_nonpartisan
+auto_fields:
+  - slug: application_date
+    type: todays_date
+
+manual_fields:
+  - CheckBox2

@@ -1,10 +1,13 @@
+from django.http import Http404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from action.mixin_apiview import IncompleteActionViewSet
 from common.enums import TurnoutActionStatus
 
 from .models import BallotRequest
 from .serializers import BallotRequestSerializer
+from .state_pdf_data import STATE_DATA
 from .tasks import process_ballotrequest_submission
 
 
@@ -34,3 +37,14 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             "regions": absentee_regions.order_by("name").values("name", "external_id"),
         }
         return Response(response)
+
+
+class StateMetadataView(APIView):
+    def get(self, request, state_code):
+        state_data = STATE_DATA.get(state_code)
+        if state_data is None:
+            raise Http404
+
+        return Response(
+            {k: state_data.get(k) for k in ("signature_statement", "form_fields")}
+        )

@@ -4,3 +4,75 @@ signatures:
     y: 50
     width: 200
     height: 28
+
+signature_statement: Signed (under penalty of perjury)
+
+form_fields:
+  - type: section
+    label: Election
+    content:
+      - type: radio
+        required: true
+        options:
+          - label: All elections this year
+            slug: election_all
+            default: true
+            conditional:
+              - type: text
+                label: Party (only required if requesting a primary ballot)
+                slug: party_presidential_primary
+          - label: All general elections (No primaries)
+            slug: election_general
+          - label: A specific election
+            slug: election_special
+            conditional:
+              - type: election_date
+                label: Date of Election
+                slug: election_date
+                required: true
+              - type: text
+                label: Party (only required if requesting a primary ballot)
+                slug: party_presidential_primary
+
+  - type: section
+    label: Special Circumstances
+    note: Only complete this section if it applies to you
+    content:
+      - type: radio
+        options:
+          - label: This application is being made by a family member of the voter
+            slug: special_circumstance_family_member
+            conditional:
+              - type: text
+                label: Relationship to voter
+                slug: relationship_to_voter
+                required: true
+          - label: Voter is a member of military on active duty or dependent family member of active duty personnel
+            slug: special_circumstance_military
+          - label: Voter is a Massachusetts citizen residing overseas
+            slug: special_circumstance_overseas
+          - label: Voter has been admitted to a healthcare facility after noon on the fifth day before the election and has designated someone to hand-deliver the ballot
+            slug: special_circumstance_hand_deliver
+            conditional:
+              - type: text
+                label: Name of person delivering the ballot
+                slug: ballot_hand_deliver_name
+                required: true
+          - label: Voter required assistance in completing application due to physical disability
+            slug: special_circumstance_required_assistance
+            conditional:
+              - type: text
+                label: Assisting person's name
+                slug: assisting_person_name
+                required: true
+              - type: text
+                label: Assisting person's address
+                slug: assisting_person_address
+                required: true
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date
+  - slug: party_state_primaries
+    type: copy
+    field: party_presidential_primary

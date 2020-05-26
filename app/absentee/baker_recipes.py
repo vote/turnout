@@ -1,14 +1,36 @@
+import os
+from io import BytesIO
+
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django_smalluuid.models import uuid_default
 from model_bakery.recipe import Recipe, foreign_key
 
 from common import enums
 from election.models import State
 from official.baker_recipes import region
+from storage.models import SecureUploadItem
 
 from .models import BallotRequest, LeoContactOverride
 
+
+def open_signature_file():
+    with open(
+        os.path.join(os.path.dirname(__file__), "tests/fixtures/sig.jpeg"), "rb",
+    ) as f:
+        data = BytesIO(f.read())
+
+    return SimpleUploadedFile("sig.jpg", data.getvalue())
+
+
 state = Recipe(State, code="XX")
 mailing_state = Recipe(State, code="YY")
+signature = Recipe(
+    SecureUploadItem,
+    upload_type="Signature",
+    content_type="image/jpeg",
+    file=open_signature_file(),
+)
 
 ballot_request = Recipe(
     BallotRequest,
@@ -21,6 +43,7 @@ ballot_request = Recipe(
     sms_opt_in=True,
     region=foreign_key(region),
     uuid=uuid_default(),
+    signature=foreign_key(signature),
     _fill_optional=True,
 )
 

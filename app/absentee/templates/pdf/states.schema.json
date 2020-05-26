@@ -1,0 +1,183 @@
+{
+  "$id": "https://schema.voteamerica.com/states.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VoteAmerica Absentee Ballot Application",
+  "type": "object",
+  "definitions": {
+    "form_field_block": {
+      "$id": "#form_field_block",
+      "oneOf": [
+        { "$ref": "#/definitions/form_field_block_radio" },
+        { "$ref": "#/definitions/form_field_block_checkbox" },
+        { "$ref": "#/definitions/form_field_block_text" },
+        { "$ref": "#/definitions/form_field_block_election_date" }
+      ]
+    },
+    "form_field_block_radio": {
+      "$id": "#form_field_block_radio",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "options"],
+      "properties": {
+        "type": { "const": "radio" },
+        "label": { "type": "string" },
+        "note": { "type": "string" },
+        "slug": { "type": "string" },
+        "layout": { "const": "horizontal" },
+        "required": { "const": true },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label"],
+            "properties": {
+              "label": { "type": "string" },
+              "slug": { "type": "string" },
+              "value": { "type": "string" },
+              "default": { "type": "boolean" },
+              "conditional": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/form_field_block"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "form_field_block_checkbox": {
+      "$id": "#form_field_block_checkbox",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "label"],
+      "properties": {
+        "type": { "const": "checkbox" },
+        "label": { "type": "string" },
+        "note": { "type": "string" },
+        "slug": { "type": "string" },
+        "required": { "const": true },
+        "conditional": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/form_field_block"
+          }
+        }
+      }
+    },
+    "form_field_block_text": {
+      "$id": "#form_field_block_text",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "slug"],
+      "properties": {
+        "type": { "const": "text" },
+        "label": { "type": "string" },
+        "note": { "type": "string" },
+        "slug": { "type": "string" },
+        "required": { "const": true },
+        "format": { "type": "string" },
+        "format_error": { "type": "string" }
+      }
+    },
+    "form_field_block_election_date": {
+      "$id": "#form_field_block_election_date",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "slug"],
+      "properties": {
+        "type": { "const": "election_date" },
+        "label": { "type": "string" },
+        "note": { "type": "string" },
+        "slug": { "type": "string" },
+        "required": { "const": true }
+      }
+    }
+  },
+  "properties": {
+    "signatures": {
+      "type": "object",
+      "description": "Locations of the signature fields in the PDF",
+      "propertyNames": {
+        "pattern": "\\d+"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "x": { "type": "integer" },
+          "y": { "type": "integer" },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" }
+        },
+        "additionalProperties": false,
+        "required": ["x", "y", "width", "height"]
+      }
+    },
+    "signature_statement": {
+      "type": ["string", "null"]
+    },
+    "form_fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "content"],
+        "properties": {
+          "type": { "const": "section" },
+          "label": { "type": "string" },
+          "note": { "type": "string" },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/form_field_block"
+            }
+          }
+        }
+      }
+    },
+    "auto_fields": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["slug", "type"],
+            "properties": {
+              "slug": { "type": "string" },
+              "type": { "const": "todays_date" }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["slug", "type", "value"],
+            "properties": {
+              "slug": { "type": "string" },
+              "type": { "const": "static" },
+              "value": {}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["slug", "type", "field"],
+            "properties": {
+              "slug": { "type": "string" },
+              "type": { "const": "copy" },
+              "field": { "type": "string" }
+            }
+          }
+        ]
+      }
+    },
+    "manual_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

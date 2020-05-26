@@ -63,6 +63,8 @@ class BallotRequest(
         "storage.SecureUploadItem", null=True, on_delete=models.SET_NULL
     )
 
+    submit_date = models.DateField(null=True)
+
     class Meta:
         ordering = ["-created_at"]
 

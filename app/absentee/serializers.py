@@ -70,4 +70,5 @@ class BallotRequestSerializer(ActionSerializer):
             "utm_term",
             "utm_content",
             "signature",
+            "submit_date",
         ]

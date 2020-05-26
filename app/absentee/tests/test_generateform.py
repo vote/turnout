@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 from model_bakery import baker
 
@@ -6,13 +8,8 @@ from absentee.generateform import generate_name, prepare_formdata
 from election.models import State, StateInformation
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
-
-def add_state_info(state: State, slug: str, value: str):
-    ft = baker.make_recipe("election.markdown_field_type", slug=slug)
-
-    info = StateInformation.objects.get(state=state.code, field_type=ft.uuid)
-    info.text = value
-    info.save()
+from ..state_pdf_data import STATE_DATA
+from .test_data import add_state_info
 
 
 def test_generate_name():
@@ -153,3 +150,123 @@ def test_prepare_formdata_state_fields_dont_overwrite():
     form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
 
     assert form_data["us_citizen"] == True
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_state_id_number():
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request", region=addr.office.region, state=state,
+    )
+
+    # Default
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+
+    assert form_data["state_id_number"] == STATE_ID_NUMBER
+    assert form_data.get("state_id_number_opt_1") == None
+    assert form_data.get("state_id_number_opt_2") == None
+    assert form_data.get("state_id_number_opt_3") == None
+
+    # Option 1
+    ballot_request.state_fields = {
+        "state_id_number_opt_1": True,
+    }
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+
+    assert form_data["state_id_number"] == STATE_ID_NUMBER
+    assert form_data.get("state_id_number_opt_1") == STATE_ID_NUMBER
+    assert form_data.get("state_id_number_opt_2") == None
+    assert form_data.get("state_id_number_opt_3") == None
+
+    # Option 2
+    ballot_request.state_fields = {
+        "state_id_number_opt_2": True,
+    }
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+
+    assert form_data["state_id_number"] == STATE_ID_NUMBER
+    assert form_data.get("state_id_number_opt_1") == None
+    assert form_data.get("state_id_number_opt_2") == STATE_ID_NUMBER
+    assert form_data.get("state_id_number_opt_3") == None
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_auto_todays_date(mocker):
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request",
+        region=addr.office.region,
+        state=state,
+        submit_date=datetime.date(2020, 5, 10),
+    )
+
+    mocker.patch.dict(
+        STATE_DATA,
+        {state.code: {"auto_fields": [{"type": "todays_date", "slug": "some_date"}]}},
+    )
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+    assert form_data["some_date"] == "05/10/2020"
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_auto_copy(mocker):
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request",
+        region=addr.office.region,
+        state=state,
+        date_of_birth=datetime.date(1992, 5, 10),
+        state_fields={"state_field_foo": "state_field_foo_val"},
+    )
+
+    mocker.patch.dict(
+        STATE_DATA,
+        {
+            state.code: {
+                "auto_fields": [
+                    # Copy a top-level field
+                    {"type": "copy", "slug": "cp_dob", "field": "date_of_birth"},
+                    # Copy a computed field
+                    {"type": "copy", "slug": "cp_year", "field": "year_of_birth"},
+                    # Copy a state field
+                    {"type": "copy", "slug": "cp_state", "field": "state_field_foo"},
+                ]
+            }
+        },
+    )
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+
+    assert form_data["date_of_birth"] == "05/10/1992"
+    assert form_data["cp_dob"] == "05/10/1992"
+
+    assert form_data["year_of_birth"] == "1992"
+    assert form_data["cp_year"] == "1992"
+
+    assert form_data["state_field_foo"] == "state_field_foo_val"
+    assert form_data["cp_state"] == "state_field_foo_val"
+
+
+@pytest.mark.django_db
+def test_prepare_formdata_auto_static(mocker):
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request", region=addr.office.region, state=state,
+    )
+
+    mocker.patch.dict(
+        STATE_DATA,
+        {
+            state.code: {
+                "auto_fields": [{"type": "static", "slug": "foo", "value": "bar"}]
+            }
+        },
+    )
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+    assert form_data["foo"] == "bar"

@@ -1,0 +1,44 @@
+signature_statement: I do solemnly swear that all statements made on this application are true to the best of my knowledge and belief.
+
+form_fields:
+  - type: section
+    label: Election
+    content:
+      - type: election_date
+        label: Date of Election
+        slug: election_date
+        required: true
+      - type: text
+        label: Political Party (only if you're requesting a ballot for a primary election)
+        slug: party
+  - type: section
+    label: Identification
+    content:
+      - type: text
+        required: true
+        label: Last 4 digits of your social security number
+        slug: state_id_number
+        format: "\\d{4}"
+        format_error: Enter 4 numeric digits
+  - type: section
+    label: Reason for requesting an absentee ballot
+    content:
+      - type: radio
+        required: true
+        options:
+          - label: Absence on Election Day from the jurisdiction of the election authority in which I am registered
+            slug: excuse_absence
+          - label: Incapacity or confinement due to illness or physical disability, including caring for a person who is incapacitated or confined due to illness or disability
+            slug: excuse_incapacitated
+          - label: Religious belief or practice
+            slug: excuse_religion
+          - label: Employment as an election authority or by an election authority at a location other than my polling place
+            slug: excuse_employment
+          - label: Incarceration, although I have retained all the necessary qualifications for voting
+            slug: excuse_incarceration
+          - label: Certified participation in the address confidentiality program established under sections 589.660 to 589.681 because of safety concerns.
+            slug: excuse_confidential
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date

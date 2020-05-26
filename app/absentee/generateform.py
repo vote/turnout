@@ -1,6 +1,8 @@
 import logging
+from datetime import datetime
 from typing import IO, Any, Dict, Optional
 
+import pytz
 from django.core.files import File
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
@@ -65,6 +67,17 @@ def prepare_formdata(
         for state_field_key, state_field_value in state_fields.items():
             if not state_field_key in form_data:
                 form_data[state_field_key] = state_field_value
+
+        # Some states (AK) have different boxes for different types of state ID
+        # numbers. So we allow for a radio button to select which box the state ID
+        # should go in.
+        if state_fields.get("state_id_number_opt_1"):
+            form_data["state_id_number_opt_1"] = state_id_number
+        elif state_fields.get("state_id_number_opt_2"):
+            form_data["state_id_number_opt_2"] = state_id_number
+        elif state_fields.get("state_id_number_opt_3"):
+            form_data["state_id_number_opt_3"] = state_id_number
+
     fmt = StringFormatter(missing="")
 
     # some fields need to be converted to string representation
@@ -89,6 +102,7 @@ def prepare_formdata(
 
     # get county from region
     form_data["county"] = ballot_request.region.county
+    form_data["region"] = ballot_request.region.name
 
     # combine address fields for states where the form is wonky
     form_data["address1_2"] = fmt.format("{address1} {address2}", **form_data).strip()
@@ -160,6 +174,23 @@ def prepare_formdata(
     # Signatures are handled separately
     del form_data["signature"]
 
+    # Handle auto_fields
+    state_data = STATE_DATA.get(ballot_request.state.code.upper())
+    if state_data and state_data.get("auto_fields"):
+        for auto_field in state_data["auto_fields"]:
+            auto_type = auto_field["type"]
+            if auto_type == "todays_date":
+                if ballot_request.submit_date:
+                    form_data[auto_field["slug"]] = ballot_request.submit_date.strftime(
+                        "%m/%d/%Y"
+                    )
+            elif auto_type == "copy":
+                form_data[auto_field["slug"]] = form_data.get(auto_field["field"])
+            elif auto_type == "static":
+                form_data[auto_field["slug"]] = auto_field["value"]
+            else:
+                raise RuntimeError(f"Invalid auto_field type: {auto_type}")
+
     return form_data
 
 
@@ -219,6 +250,7 @@ def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
     form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
+    print(form_data)
     signature = load_signature_image(ballot_request.signature)
     is_emailable = ballot_request_is_emailable(ballot_request)
 

@@ -29,3 +29,5 @@ absentee_ballot_address = Recipe(
 ABSENTEE_BALLOT_MAILING_ADDRESS = (
     "Right Office\n123 Main Street\nSte. 123\nFoo City, AA 12345"
 )
+
+ABSENTEE_BALLOT_MAILING_CITY_STATE_ZIP = "Foo City, AA 12345"

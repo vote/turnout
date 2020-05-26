@@ -23,13 +23,13 @@ clientshell:
 	docker-compose exec client /bin/bash
 
 testpy:
-	docker-compose exec server pytest /app/
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest /app/"
 
 mypy:
 	docker-compose exec server mypy /app/
 
 test:
-	docker-compose exec server bash -c "pytest /app/ && mypy /app/"
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest /app/ && mypy /app/"
 
 lint:
 	docker-compose exec server bash -c "autoflake \
