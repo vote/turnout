@@ -180,6 +180,9 @@ REST_FRAMEWORK = {
 
 #### CELERY CONFIGURATION
 
+# how often to recalculate subscriber stats
+CALC_STATS_INTERVAL = 5
+
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -193,6 +196,10 @@ CELERY_BEAT_SCHEDULE = {
     "trigger-netlify-updated-information": {
         "task": "election.tasks.trigger_netlify_if_updates",
         "schedule": crontab(minute=0, hour="*"),
+    },
+    "trigger-calc-subscriber-stats": {
+        "task": "reporting.tasks.calc_all_subscriber_stats",
+        "schedule": crontab(minute=f"*/{CALC_STATS_INTERVAL}"),
     },
 }
 CELERY_TIMEZONE = "UTC"
@@ -430,6 +437,11 @@ LOGGING = {
             "propagate": False,
         },
         "cdn": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+        "reporting": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,

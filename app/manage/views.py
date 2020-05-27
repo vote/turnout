@@ -27,6 +27,12 @@ class LogoutView(DjangoLogoutView):
 class ManageView(SubscriberManageViewMixin, ManageViewMixin, TemplateView):
     template_name = "management/manage_home.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["stats"] = self.subscriber.stats
+        context["by_state"] = sorted(self.subscriber.stats.get("by_state", {}).items())
+        return context
+
 
 class RedirectToSubscriberManageView(ManageViewMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):

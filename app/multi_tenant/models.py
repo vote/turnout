@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -40,6 +41,11 @@ class Client(UUIDModel, TimestampModel):
     def full_email_address(self) -> str:
         clean_name = self.name.replace('"', "'")
         return f'"{clean_name}" <{self.email}>'
+
+    @property
+    def stats(self):
+        # NOTE: callers should be able to cope with getting an empty dict here
+        return cache.get(f"client.stats/{self.uuid}") or {}
 
 
 class SubscriberSlug(UUIDModel, TimestampModel):

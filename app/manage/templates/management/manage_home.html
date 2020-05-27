@@ -6,9 +6,39 @@
 {% block content %}
 <div class="content-wrapper">
 
-    <div class="col-md-12">
-        Hey. This is where our control panel will be for the website and apps.
-    </div>
+  <div class="col-md-12">
+    <p>
+      Registrations: {{ stats.register }}<br>
+      Verifier lookups: {{ stats.verify }}<br>
+      Absentee ballot requests: {{ stats.absentee }}<br>
+    <p>
+      <table class="table">
+	<thead>
+	  <th>State</th><th>Register</th><th>Verify</th><th>Absentee</th>
+	</thead>
+	<tbody>
+	  {% for state, d in by_state %}
+	  <tr>
+	    <td>{{ state }}</td>
+	    <td>{{ d.register }}</td>
+	    <td>{{ d.verify }}</td>
+	    <td>{{ d.absentee }}</td>
+	  </tr>
+	  {% endfor %}
+	  <tfoot>
+	    <td>Total</td>
+	    <td>{{stats.register}}</td>
+	    <td>{{stats.verify}}</td>
+	    <td>{{stats.absentee}}</td>
+	  </tfoot>
+	</tbody>
+      </table>
+    <p>
+      {% if stats.last_updated %}
+      {% load tz %}
+      Last updated: {{ stats.last_updated|timezone:"America/Los_Angeles" }} (PT)
+      {% endif %}
+  </div>
 
 </div>
 {% endblock %}
