@@ -5,7 +5,6 @@ from model_bakery import baker
 
 from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
 from absentee.generateform import generate_name, prepare_formdata
-from election.models import State, StateInformation
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 from ..state_pdf_data import STATE_DATA

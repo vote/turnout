@@ -1,10 +1,7 @@
-import json
-import os
 import random
 import string
 
 import pytest
-from jsonschema import validate
 from model_bakery import baker
 
 from common.pdf.pypdftk import PyPDFTK

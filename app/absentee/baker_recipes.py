@@ -1,7 +1,6 @@
 import os
 from io import BytesIO
 
-from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django_smalluuid.models import uuid_default
 from model_bakery.recipe import Recipe, foreign_key

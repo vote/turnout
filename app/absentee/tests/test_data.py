@@ -4,8 +4,6 @@ from typing import Any, Dict, List, Tuple
 
 from model_bakery import baker
 
-from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
-from absentee.generateform import generate_name, prepare_formdata
 from absentee.models import BallotRequest
 from election.choices import STATES
 from election.models import State, StateInformation
