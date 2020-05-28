@@ -25,7 +25,7 @@
                             <th>Field</th>
                             <th>Current Value</th>
                             <th>Notes</th>
-                            <th>Last Updated</th>
+                            <th>Last Updated ({{ user.timezone }})</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -41,7 +41,7 @@
                                     {{ field.notes|linebreaks }}
                                 </td>
                                 <td scope="row">
-                                    {{ field.modified_at|timezone:"America/Los_Angeles" }}
+                                    {{ field.modified_at|timezone:user.timezone }}
                                 </td>
                             </tr>
                         {% endfor %}

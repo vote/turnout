@@ -1,0 +1,99 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}Current Users | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <!-- Default card contents -->
+            <div class="card-header card-header-with-actions">
+                <div>{{ user.active_client }} Dashboard Users</div>
+                <div class="card-header-actions">
+                    <a title="New" href="{% url 'manage:multi_tenant:invite_create' user.active_client_slug %}">
+                        <span class="mdi mdi-account-plus"></span>
+                        Invite
+                    </a>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for association in associations %}
+                        <tr>
+                            <td>
+                                {{ association.user }}
+                            </td>
+                            <td>
+                                {{ association.user.email }}
+                            </td>
+                            <td>
+                                {% if association.user == user %}
+                                Your Account
+                                {% else %}
+                                <a
+                                    title="Remove"
+                                    class="btn btn-danger"
+                                    href="{% url 'manage:multi_tenant:manager_remove' user.active_client_slug association.pk %}">
+                                    <span class="mdi mdi-account-minus"></span> Remove</a>
+                                {% endif %}
+
+
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if invite_associations %}
+            <div class="card">
+                <!-- Default card contents -->
+                <div class="card-header card-header-with-actions">
+                    <div>Pending Invites</div>
+                </div>
+                <!-- Table -->
+                <div class="table-responsive-lg">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Invited Email</th>
+                                <th>Invite Expires ({{ user.timezone }})</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invite_association in invite_associations %}
+                            <tr>
+                                <td>
+                                    {{ invite_association.user.email }}
+                                </td>
+                                <td>
+                                    {{ invite_association.user.expires|timezone:user.timezone }}
+                                </td>
+                                <td>
+                                    <a title="Remove" class="btn btn-danger"
+                                        href="{% url 'manage:multi_tenant:invite_remove' user.active_client_slug invite_association.pk %}">
+                                        <span class="mdi mdi-account-minus"></span> Remove</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

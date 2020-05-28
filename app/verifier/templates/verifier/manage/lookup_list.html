@@ -18,7 +18,7 @@
                             <th>Name</th>
                             <th>State</th>
                             <th>Status</th>
-                            <th>Lookup Time</th>
+                            <th>Lookup Time ({{ user.timezone }})</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,7 +34,7 @@
                                  {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
                              </td>
                             <td>
-                                {{ lookup.created_at|timezone:"America/Los_Angeles" }}
+                                {{ lookup.created_at|timezone:user.timezone }}
                             </td>
                         </tr>
                         {% endfor %}

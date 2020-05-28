@@ -24,7 +24,7 @@
                         <tr>
                             <th>Region</th>
                             <th>State</th>
-                            <th>Last Updated (Pacific Time)</th>
+                            <th>Last Updated ({{ user.timezone }})</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,7 +39,7 @@
                                 {{ leo_contact_override.region.state.pk }}
                             </td>
                             <td>
-                                {{ leo_contact_override.created_at|timezone:"America/Los_Angeles" }}
+                                {{ leo_contact_override.created_at|timezone:user.timezone }}
                             </td>
                         </tr>
                         {% endfor %}

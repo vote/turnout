@@ -1,0 +1,29 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}Remove {{ manager }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">{{ user.active_client }} Dashboard Users</a></li>
+                <li class="breadcrumb-item">Invites</li>
+                <li class="breadcrumb-item">{{ association.user.email }}</li>
+                <li class="breadcrumb-item">Delete</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <div class="card-header">Remove {{ association.user.email }}</div>
+            <div class="card-body">
+                <p>Are you sure you want to remove the invite for {{ association.user.email }} from your account?</p>
+                <form role="form" method="POST" action="" novalidate>
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

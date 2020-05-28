@@ -1,0 +1,28 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}Invite New Manager | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">{{ user.active_client }} Managers</a></li>
+                <li class="breadcrumb-item">Invite New Manager</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <div class="card-header">New Invite</div>
+            <div class="card-body">
+                <p>Enter the email address of a user you wish to grant access to {{ user.active_client }}.</p>
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-block btn-primary">Create</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

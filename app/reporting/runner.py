@@ -18,7 +18,7 @@ from .models import Report
 ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
     ("subscriber.name", "Subscriber"),
-    ("created_at", "Time Started"),
+    ("created_at", "Time Started (UTC)"),
     ("first_name", "First Name"),
     ("middle_name", "Middle Name"),
     ("last_name", "Last Name"),
@@ -54,7 +54,7 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
 REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
     ("subscriber.name", "Subscriber"),
-    ("created_at", "Time Started"),
+    ("created_at", "Time Started (UTC)"),
     ("previous_title", "Previous Title"),
     ("previous_first_name", "Previous First Name"),
     ("previous_middle_name", "Previous Middle Name"),
@@ -106,7 +106,7 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
 VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
     ("subscriber.name", "Subscriber"),
-    ("created_at", "Time Started"),
+    ("created_at", "Time Started (UTC)"),
     ("first_name", "First Name"),
     ("last_name", "Last Name"),
     ("date_of_birth", "Date of Birth"),

@@ -17,7 +17,7 @@
                         <tr>
                             <th>Name</th>
                             <th>State</th>
-                            <th>Start Time</th>
+                            <th>Start Time ({{ user.timezone }})</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -31,7 +31,7 @@
                                 {{ ballot_request.state.pk }}
                             </td>
                             <td>
-                                {{ ballot_request.created_at|timezone:"America/Los_Angeles" }}
+                                {{ ballot_request.created_at|timezone:user.timezone }}
                             </td>
                         </tr>
                         {% endfor %}

@@ -1,8 +1,11 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
+from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import RedirectView, TemplateView
+from django.views.generic import FormView, TemplateView
 
+from multi_tenant.forms import ChangeSubscriberManageForm
 from multi_tenant.mixins_manage_views import SubscriberManageViewMixin
 
 from .forms import AuthenticationForm
@@ -34,6 +37,34 @@ class ManageView(SubscriberManageViewMixin, ManageViewMixin, TemplateView):
         return context
 
 
-class RedirectToSubscriberManageView(ManageViewMixin, RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
-        return reverse("manage:home", args=[self.request.user.active_client_slug])
+class RedirectToSubscriberManageView(LoginRequiredMixin, FormView):
+    form_class = ChangeSubscriberManageForm
+    template_name = "management/manage_nosubscriber.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        # If the user is not authorized with 2 factor, send them there
+        if not request.user.is_verified():
+            return HttpResponseRedirect(reverse("multifactor:authform"))
+
+        # If the user has an "active client" (nearly all will) redirect to that dashboard
+        if request.user.active_client:
+            return HttpResponseRedirect(
+                reverse("manage:home", args=[self.request.user.active_client_slug])
+            )
+
+        # If the user does not have an "active client" show them the roadblock page
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self):
+        form = super().get_form()
+        # Explicitly set the choices by changing the queryset of the "subscriber"
+        # field. Django will validate that the submission is inside of this
+        # queryset.
+        form.fields["subscriber"].queryset = self.request.user.allowed_clients
+        return form
+
+    def form_valid(self, form):
+        new_client = form.cleaned_data["subscriber"]
+        self.request.user.active_client = new_client
+        self.request.user.save(update_fields=["active_client"])
+        return HttpResponseRedirect(reverse("manage:home", args=[new_client.slug]))

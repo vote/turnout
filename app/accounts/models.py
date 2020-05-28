@@ -9,6 +9,7 @@ from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django_smalluuid.models import SmallUUIDField, uuid_default
+from timezone_field import TimeZoneField
 
 from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.models import Association, Client
@@ -40,6 +41,18 @@ class TurnoutUserManager(auth_models.UserManager):
         return new_user
 
 
+TIMEZONE_CHOICES = [
+    ("US/Alaska", "US/Alaska"),
+    ("US/Arizona", "US/Arizona"),
+    ("US/Central", "US/Central"),
+    ("US/Eastern", "US/Eastern"),
+    ("US/Hawaii", "US/Hawaii"),
+    ("US/Mountain", "US/Mountain"),
+    ("US/Pacific", "US/Pacific"),
+    ("UTC", "UTC"),
+]
+
+
 class User(
     UUIDModel,
     TimestampModel,
@@ -52,11 +65,16 @@ class User(
     email = models.EmailField(_("Email Address"), editable=False, unique=True)
     first_name = models.CharField(_("First Name"), max_length=100, blank=True)
     last_name = models.CharField(_("Last Name"), max_length=200, blank=True)
+    timezone = TimeZoneField(default="US/Eastern", choices=TIMEZONE_CHOICES, null=True)
     clients = models.ManyToManyField(
         "multi_tenant.Client", through="multi_tenant.Association"
     )
     active_client = models.ForeignKey(
-        "multi_tenant.Client", related_name="active_client", on_delete=models.PROTECT,
+        "multi_tenant.Client",
+        related_name="active_client",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
     )
 
     objects = TurnoutUserManager()
@@ -96,6 +114,13 @@ def expire_date_time():
     return now() + timedelta(days=settings.INVITE_EXPIRATION_DAYS)
 
 
+class ActiveInvitesManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super().get_queryset().filter(expires__gte=now()).filter(user__isnull=True)
+        )
+
+
 class Invite(UUIDModel, TimestampModel):
     email = models.EmailField()
     token = SmallUUIDField(default=uuid_default(), editable=False)
@@ -109,6 +134,9 @@ class Invite(UUIDModel, TimestampModel):
         "multi_tenant.Client", related_name="invited_client", on_delete=models.PROTECT,
     )
 
+    objects = models.Manager()
+    actives = ActiveInvitesManager()
+
     class Meta(object):
         verbose_name = _("Invite")
         verbose_name_plural = _("Invites")
@@ -120,6 +148,11 @@ class Invite(UUIDModel, TimestampModel):
     @property
     def expired(self):
         return self.expires <= now()
+
+    @property
+    def full_url(self):
+        path = reverse("accounts:consume_invite", kwargs={"slug": self.token})
+        return f"{settings.PRIMARY_ORIGIN}{path}"
 
     def consume_invite(self, user):
         new_associations = []

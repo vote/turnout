@@ -36,7 +36,7 @@
     <p>
       {% if stats.last_updated %}
       {% load tz %}
-      Last updated: {{ stats.last_updated|timezone:"America/Los_Angeles" }} (PT)
+      Last updated: {{ stats.last_updated|timezone:user.timezone }} ({{ user.timezone }})
       {% endif %}
   </div>
 
