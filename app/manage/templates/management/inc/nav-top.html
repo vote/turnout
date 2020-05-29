@@ -1,65 +1,71 @@
 {% load static %}
 <header class="container-fluid">
-    <div class="row position-relative">
-
-        <div class="col-md-2">
+    <div class="row">
+        <div class="col-6 col-lg-4">
             <div class="logo">
                 <a href="{% url 'manage:home' user.active_client_slug %}">
-                    <span class="sr-only">Turnout</span>
+                    <img src="{% static "img/logo/logo.svg" %}" alt="VoteAmerica" />
                 </a>
             </div>
         </div>
-        <div class="col-md-8">
-
-            <nav class="navbar-center">
-                <ul class="nav navbar-nav">
-                    <li class="nav-main-item nav-item">
-                    <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-human-greeting"></span>
-                            Actions</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Register</a>
-                            <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Absentee</a>
-                            <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verify</a>
-                        </div>
-                    </li>
-                    <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-rocket"></span> Tools</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed
-                                Code</a>
-                            <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Export Request</a>
-                            <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Dashboard Users</a>
-                        </div>
-                    </li>
-                    <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-checkbox-marked-outline"></span>
-                            Elections</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
-                            <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Information Fields</a>
-                            <a class="dropdown-item" href="{% url 'manage:absentee_override:leo_contact_override_list' %}">Absentee LEO Contact
-                                Overrides</a>
-                        </div>
-                    </li>
-                </ul>
+        <div class="col-6 mobile__nav">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span>MENU</span>
+            </button>
+        </div>
+        <div class="col-lg-8 header__right">
+            <nav class="nav navbar navbar-expand-lg">
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown__actions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Voters
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown__actions">
+                                <a class="dropdown-item" href="{% url 'manage:register:registration_list' user.active_client_slug %}">Register</a>
+                                <a class="dropdown-item" href="{% url 'manage:absentee:ballot_request_list' user.active_client_slug %}">Absentee</a>
+                                <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verify</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown__tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Tools
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown__tools">
+                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Code</a>
+                                <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Exports</a>
+                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Users</a>
+                            </div>
+                        </li>
+                        {% comment %} {% if user.is_election_admin %} {% endcomment %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown__elections" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Elections
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown__tools">
+                                <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
+                                <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
+                                <a class="dropdown-item" href="{% url 'manage:absentee_override:leo_contact_override_list' %}">Absentee LEO Contact
+                                    Overrides</a>
+                            </div>
+                        </li>
+                        {% comment %} {% endif %} {% endcomment %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown__profile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Profile
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown__profile">
+                                {% if request.user.multi_client_admin %}
+                                    <a class="dropdown-item" href="{% url 'manage:profile:change_subscriber' %}">Change Subscriber</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'manage:profile:update_profile' %}">Update Profile</a>
+                                <a class="dropdown-item" href="{% url 'manage:profile:change_password' %}">Change Password</a>
+                                <a class="dropdown-item" href="{% url 'manage:logout' %}">Logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </nav>
         </div>
-        <div class="col-md-2">
-            <nav class="navbar-right">
-                <ul class="nav navbar-nav">
-                    <li class="nav-main-item nav-item">
-                        <a class="dropdown-expand-link" href="#"><span class="mdi mdi-account"></span> {{ user }}</a>
-                        <div class="dropdown-menu">
-                            {% if request.user.multi_client_admin %}<a class="dropdown-item" href="{% url 'manage:profile:change_subscriber' %}">Change Subscriber</a>{% endif %}
-                            <a class="dropdown-item" href="{% url 'manage:profile:update_profile' %}">Update Profile</a>
-                            <a class="dropdown-item" href="{% url 'manage:profile:change_password' %}">Change Password</a>
-                            <a class="dropdown-item" href="{% url 'manage:logout' %}">Logout</a>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-
     </div>
 </header>

@@ -5,12 +5,149 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header">{{ lookup }}</div>
-            <div class="card-body">
-                <pre>{{ lookup.response|pretty_json }}</pre>
-            </div>
+    <div class="col-lg-10 offset-lg-1">
+        <h1>{{ lookup }}</h1>
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <th>Field</th>
+                    <th>Value</th>
+                </thead>
+                <tbody>
+                    {% if lookup.uuid %}
+                        <tr>
+                            <td>ID</td>
+                            <td>{{lookup.uuid}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.subscriber.name %}
+                        <tr>
+                            <td>Subscriber</td>
+                            <td>{{lookup.subscriber.name}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.created_at %}
+                        <tr>
+                            <td>Time Started UTC</td>
+                            <td>{{lookup.created_at}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.first_name %}
+                        <tr>
+                            <td>First Name</td>
+                            <td>{{lookup.first_name}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.last_name %}
+                        <tr>
+                            <td>Last Name</td>
+                            <td>{{lookup.last_name}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.date_of_birth %}
+                        <tr>
+                            <td>Date of Birth</td>
+                            <td>{{lookup.date_of_birth}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.email %}
+                        <tr>
+                            <td>Email</td>
+                            <td>{{lookup.email}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.phone %}
+                        <tr>
+                            <td>Phone</td>
+                            <td>{{lookup.phone}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.address1 %}
+                        <tr>
+                            <td>Address 1</td>
+                            <td>{{lookup.address1}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.address2 %}
+                        <tr>
+                            <td>Address 2</td>
+                            <td>{{lookup.address2}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.city %}
+                        <tr>
+                            <td>City</td>
+                            <td>{{lookup.city}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.zipcode %}
+                        <tr>
+                            <td>Zipcode</td>
+                            <td>{{lookup.zipcode}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.state_id %}
+                        <tr>
+                            <td>State</td>
+                            <td>{{lookup.state_id}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.sms_opt_in %}
+                        <tr>
+                            <td>VoteAmerica SMS Opt In</td>
+                            <td>{{lookup.sms_opt_in}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.sms_opt_in_subscriber %}
+                        <tr>
+                            <td>Subscriber SMS Opt In</td>
+                            <td>{{lookup.sms_opt_in_subscriber}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.registered %}
+                        <tr>
+                            <td>Registered</td>
+                            <td>{{lookup.registered}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.source %}
+                        <tr>
+                            <td>source</td>
+                            <td>{{lookup.source}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.utm_source %}
+                        <tr>
+                            <td>utm_source</td>
+                            <td>{{lookup.utm_source}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.utm_medium %}
+                        <tr>
+                            <td>utm_medium</td>
+                            <td>{{lookup.utm_medium}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.utm_campaign %}
+                        <tr>
+                            <td>utm_campaign</td>
+                            <td>{{lookup.utm_campaign}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.utm_content %}
+                        <tr>
+                            <td>utm_content</td>
+                            <td>{{lookup.utm_content}}</td>
+                        </tr>
+                    {% endif %}
+                    {% if lookup.utm_term %}
+                        <tr>
+                            <td>utm_term</td>
+                            <td>{{lookup.utm_term}}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

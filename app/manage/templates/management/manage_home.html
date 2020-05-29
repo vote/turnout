@@ -5,14 +5,40 @@
 
 {% block content %}
 <div class="content-wrapper">
+  <div class="col-md-8 offset-md-2">
+		<h1>Welcome to VoteAmerica Tools</h1>
+		<p>
+			{{ user.active_client|default:"Your organization" }} has submitted <strong>{{ stats.register }}
+			</strong> registration requests, <strong>{{ stats.absentee }}</strong> absentee ballot requests,
+			and <strong>{{ stats.verify }}</strong> registration verification requests.
+		</p>
+		{% if stats.last_updated %}
+		{% load tz %}
+      	<p><em>Last updated: {{ stats.last_updated|timezone:user.timezone }} ({{ user.timezone }})</em></p>
+		{% endif %}
+		<hr>
+		<h2>Quick links</h2>
+		<ul>
+			<li>
+				<a href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Get your embed code</a>
+			</li>
+			<li>
+				<a href="{% url 'manage:reporting:request' user.active_client_slug %}">Export your data</a>
+			</li>
+		</ul>
+		<div class="callout">
+			<h2>Have questions about the tools?</h2>
+			<p>Check our our documentation to answer commonly asked questions. Topics covered include:<p>
+			<ul>
+				<li>Tool embeds</li>
+				<li>Using Google Tag Manager</li>
+				<li>Election API</li>
+				<li>VoteAmerica dashboard</li>
+			</ul>
+			<a href="https://docs.voteamerica.com" class="btn btn-primary">Read the documentation</a>
+		</div>
 
-  <div class="col-md-12">
-    <p>
-      Registrations: {{ stats.register }}<br>
-      Verifier lookups: {{ stats.verify }}<br>
-      Absentee ballot requests: {{ stats.absentee }}<br>
-    <p>
-      <table class="table">
+ {% comment %} <table class="table">
 	<thead>
 	  <th>State</th><th>Register</th><th>Verify</th><th>Absentee</th>
 	</thead>
@@ -39,6 +65,6 @@
       Last updated: {{ stats.last_updated|timezone:user.timezone }} ({{ user.timezone }})
       {% endif %}
   </div>
-
+		 {% endcomment %}
 </div>
 {% endblock %}

@@ -1,7 +1,37 @@
-@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Work+Sans:400,700,800');
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800');
 
 body{
     font-family: $body-font-family;
     font-size: $base-font-size;
     line-height: $body-line-height;
+}
+
+h1 {
+    font-size: 42px;
+    line-height: 1.15em;
+    font-weight: 700;
+    margin-bottom: .75em;
+}
+
+h2 {
+    font-size: 32px;
+    line-height: 1.15em;
+    font-weight: 700;
+    margin-bottom: .75em;
+}
+
+h3 {
+    font-size: 24px;
+    line-height: 1.15em;
+    font-weight: 700;
+    margin-bottom: .75em;
+}
+
+hr {
+    color: $black;
+    margin: 50px 0;
+}
+
+.text-right {
+    text-align: right;
 }

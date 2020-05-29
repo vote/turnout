@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <div class="col-lg-12">
+    <div class="col-lg-10 offset-lg-1">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">{{ user.active_client }} Dashboard Users</a></li>
@@ -13,8 +13,8 @@
                 <li class="breadcrumb-item">Delete</li>
             </ol>
         </nav>
+        <h1>Remove {{ association.user }}</h1>
         <div class="card">
-            <div class="card-header">Remove {{ association.user }}</div>
             <div class="card-body">
                 <p>Are you sure you want to remove {{ association.user }} from your account?</p>
                 <form role="form" method="POST" action="" novalidate>

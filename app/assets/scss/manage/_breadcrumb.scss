@@ -1,6 +1,11 @@
 .breadcrumb {
+    background-color: $gray;
+    border-radius: 0;
+    margin-bottom: 50px;
+    border: 1px solid $medium-gray;
+    font-size: 16px;
+
     li.active {
         color: $black;
     }
-    background-color: rgba($blue, 0.05);
 }

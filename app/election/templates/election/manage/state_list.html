@@ -5,12 +5,9 @@
 
 {% block content %}
 <div class="content-wrapper">
-
-    <div class="col-md-12">
-        <div class="card">
-            <!-- Default card contents -->
-            <div class="card-header">States</div>
-            <!-- Table -->
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <h1>States</h1>
             <div class="table-responsive-lg">
                 <table class="table">
                     <thead>
@@ -21,11 +18,11 @@
                     <tbody>
                         {% for state in states %}
                         <tr>
-                            <td scope="row"><a
-                                    href="{% url 'manage:election:state' state.pk %}">{{ state.name }}</a>
-                            </td>                        </tr>
+                            <td scope="row">
+                                <a href="{% url 'manage:election:state' state.pk %}">{{ state.name }}</a>
+                            </td>
+                        </tr>
                         {% endfor %}
-
                     </tbody>
                 </table>
             </div>
@@ -34,6 +31,5 @@
             {% endif %}
         </div>
     </div>
-
 </div>
 {% endblock %}

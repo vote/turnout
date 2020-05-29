@@ -1,25 +1,19 @@
 footer{
     background: $black;
-    color: $medium-gray;
-    font-family: $worksans;
+    color: $white;
     text-align: center;
-    height: 60px;
-    a{
-        color: $medium-gray;
+    padding: 65px 0;
+    font-size: 16px;
+    margin-top: 100px;
+
+    a {
+        color: $white;
+
         &:active,
         &:focus,
         &:hover{
             color: $white;
-            text-decoration: none;
+            text-decoration: underline;
         }
-    }
-    padding: 20px 0;
-    @include media-breakpoint-down(sm){
-        padding: 30px 0;
-    }
-    font-size: 16px;
-    @include media-breakpoint-down(sm){
-        height: auto;
-        margin-bottom: 0;
     }
 }

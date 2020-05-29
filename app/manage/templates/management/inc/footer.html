@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <span>VoteAmerica{% if request.user.multi_client_admin %} - {{ user.active_client }}{% endif %}</span>
+                <span>VoteAmerica{% if request.user.multi_client_admin %} &bull; {{ user.active_client }}{% endif %} &bull; <a href="https://www.voteamerica.com/privacy/">Privacy Policy</a></span>
             </div>
         </div>
     </div>

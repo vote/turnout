@@ -133,7 +133,10 @@ MIDDLEWARE = [
 #### STATIC ASSET CONFIGURATION
 
 BASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-STATICFILES_DIRS = (os.path.join(BASE_PATH, "dist"),)
+STATICFILES_DIRS = (
+    os.path.join(BASE_PATH, "dist"),
+    os.path.join(BASE_PATH, "assets"),
+)
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_PATH, "static")
 

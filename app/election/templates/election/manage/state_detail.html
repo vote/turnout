@@ -5,55 +5,55 @@
 
 {% block content %}
 <div class="content-wrapper">
-
-    <div class="col-md-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">{{ state.name }}</li>
-            </ol>
-        </nav>
-        <div class="card">
-            <!-- Default card contents -->
-            <div class="card-header">{{ state.name }}</div>
-            <!-- Table -->
-            <div class="table-responsive-lg">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>Current Value</th>
-                            <th>Notes</th>
-                            <th>Last Updated ({{ user.timezone }})</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for field in state_information %}
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ state.name }}</li>
+                </ol>
+            </nav>
+            <div class="card">
+                <!-- Default card contents -->
+                <div class="card-header">{{ state.name }}</div>
+                <!-- Table -->
+                <div class="table-responsive-lg">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <td scope="row">
-                                    <a href="{% url 'manage:election:update_information' state.pk field.field_type.slug %}">{{ field.field_type.slug }}</a>
-                                </td>
-                                <td scope="row">
-                                    {{ field.html|safe }}
-                                </td>
-                                <td scope="row">
-                                    {{ field.notes|linebreaks }}
-                                </td>
-                                <td scope="row">
-                                    {{ field.modified_at|timezone:user.timezone }}
-                                </td>
+                                <th>Field</th>
+                                <th>Current Value</th>
+                                <th>Notes</th>
+                                <th>Last Updated ({{ user.timezone }})</th>
                             </tr>
-                        {% endfor %}
+                        </thead>
+                        <tbody>
+                            {% for field in state_information %}
+                                <tr>
+                                    <td scope="row">
+                                        <a href="{% url 'manage:election:update_information' state.pk field.field_type.slug %}">{{ field.field_type.slug }}</a>
+                                    </td>
+                                    <td scope="row">
+                                        {{ field.html|safe }}
+                                    </td>
+                                    <td scope="row">
+                                        {{ field.notes|linebreaks }}
+                                    </td>
+                                    <td scope="row">
+                                        {{ field.modified_at|timezone:user.timezone }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
+                {% if is_paginated %}
+                {% include "management/inc/pagination.html" %}
+                {% endif %}
             </div>
-            {% if is_paginated %}
-            {% include "management/inc/pagination.html" %}
-            {% endif %}
         </div>
     </div>
-
 </div>
 {% endblock %}

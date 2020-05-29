@@ -1,9 +1,22 @@
 .card {
-    border-radius: none;
+    border-radius: 0;
     margin-bottom: 30px;
+    border: 1px solid $black;
+
     .table {
         margin-bottom: 0;
     }
+
+    code {
+        font-size: 16px;
+    }
+}
+
+.card-header {
+    background: $black;
+    color: $white;
+    border-radius: 0;
+    font-weight: 600;
 }
 
 .btn-card {

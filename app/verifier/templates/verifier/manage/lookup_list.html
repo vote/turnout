@@ -6,46 +6,41 @@
 {% block content %}
 <div class="content-wrapper">
 
-    <div class="col-md-12">
-        <div class="card">
-            <!-- Default card contents -->
-            <div class="card-header">Lookups</div>
-            <!-- Table -->
-            <div class="table-responsive-lg">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>State</th>
-                            <th>Status</th>
-                            <th>Lookup Time ({{ user.timezone }})</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lookup in lookups %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'manage:verifier:lookup_detail' lookup.subscriber.slug lookup.pk %}">{{ lookup.first_name }} {{ lookup.last_name }}</a>
-                            </td>
-                            <td>
-                                {{ lookup.state.pk }}
-                            </td>
-                            <td>
-                                 {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
-                             </td>
-                            <td>
-                                {{ lookup.created_at|timezone:user.timezone }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% if is_paginated %}
-            {% include "management/inc/pagination.html" %}
-            {% endif %}
+    <div class="col-lg-10 offset-lg-1">
+        <h1>Verify</h1>
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>State</th>
+                        <th>Status</th>
+                        <th>Lookup Time ({{ user.timezone }})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lookup in lookups %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'manage:verifier:lookup_detail' lookup.subscriber.slug lookup.pk %}">{{ lookup.first_name }} {{ lookup.last_name }}</a>
+                        </td>
+                        <td>
+                            {{ lookup.state.pk }}
+                        </td>
+                        <td>
+                            {% if lookup.registered %}{{ lookup.voter_status }} Voter{% else %}Unregistered{% endif %}
+                        </td>
+                        <td>
+                            {{ lookup.created_at|timezone:user.timezone }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        {% if is_paginated %}
+        {% include "management/inc/pagination.html" %}
+        {% endif %}
     </div>
-
 </div>
 {% endblock %}

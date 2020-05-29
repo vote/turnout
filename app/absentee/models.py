@@ -70,7 +70,7 @@ class BallotRequest(
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Ballot Request - {self.first_name} {self.last_name}, {self.state.pk}".strip()
+        return f"Absentee - {self.first_name} {self.last_name}, {self.state.pk}".strip()
 
 
 @reversion.register()

@@ -1,0 +1,43 @@
+table.table {
+  font-size: 16px;
+
+  th {
+    font-weight: 600;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid $black;
+    background: $black;
+    color: $white;
+  }
+
+  tbody {
+    & > tr {
+
+      &:nth-of-type(odd) {
+        background: $gray;
+      }
+    }
+  }
+
+  tr {
+    vertical-align: top;
+    padding: 0;
+
+    &:last-child {
+      border: 0;
+    }
+  }
+
+  td {
+    padding: 10px;
+    border: 1px solid $medium-gray;
+
+    & ul {
+      margin: 0;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

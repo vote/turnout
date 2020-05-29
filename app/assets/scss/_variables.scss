@@ -1,29 +1,32 @@
 /* Colors */
-$black: #272931;
-$blue: #00afd5;
+$black: #000;
+$red: #e12814;
 $gray: #f7f7f7;
-$medium-gray: #b2b2b5;
-$dark-gray: #1f2b39;
+$medium-gray: #d6d6d6;
+$dark-gray: #343434;
 $white: #ffffff;
 
 /* Typography settings */
 $base-font-size: 18px;
 
-$worksans: 'Work Sans', 'Helvetica Neue', Helvetica, Arial, Sans-Serif;
+$fontfamily: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, Sans-Serif;
 
-$headings-font-family: $worksans;
+$headings-font-family: $fontfamily;
 $headings-font-weight: 700;
-$headings-line-height: 1.05;
-$body-font-family: 'Source Sans Pro', serif;
-$body-line-height: 1.44;
+$body-font-family: $fontfamily;
+$body-line-height: 1.77;
 
 /* Link style variables */
-$link-color: $blue;
-$link-hover-color: darken($blue, 20%);
-$link-hover-decoration: none;
+$link-color: $red;
+$link-hover-color: $black;
 
 /* Navbar */
 $navbar-light-color: lighten($black, 30%);
 
 $dropdown-border-radius: none;
 $dropdown-border-width: 1px;
+
+$theme-colors: (
+  "primary": $red,
+  "danger": $red
+);

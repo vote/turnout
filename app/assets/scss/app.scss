@@ -42,9 +42,11 @@
 @import "common/sticky-footer";
 @import "common/base";
 
+@import "manage/typography";
+
 .manage {
     @import "manage/header";
-    @import "manage/typography";
+    @import "manage/home";
     @import "manage/core";
     @import "manage/cards";
     @import "manage/footer";
@@ -52,6 +54,7 @@
     @import "manage/widgets";
     @import "manage/pagination";
     @import "manage/breadcrumb";
+    @import "manage/table";
 }
 
 .api_browse {
