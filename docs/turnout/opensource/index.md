@@ -1,0 +1,5 @@
+# Open Source Backend
+
+The Turnout backend and tools were built in 2020 specifically for VoteAmerica. We are making the source publically available because we believe that we stand on the shoulders of giants in open source technology, and so that subscribing organizations can audit it for security and reliability.
+
+The application runs on standard technologies like Django, Django REST Framework, PDFTK, PyOpenCV, and Postgres/PostGIS. The source can be viewed at [https://github.com/vote/turnout](https://github.com/vote/turnout) and is made available under the [Business Source License](https://github.com/vote/turnout/blob/master/LICENSE), which stipulates that it cannot be used for a commercial "Voter Outreach and Registration Service" offered to third parties. In 2024 it will convert to the Apache License, for use without restriction.

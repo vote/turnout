@@ -1,0 +1,26 @@
+site_name: VoteAmerica Knowledgebase
+docs_dir: 'turnout'
+nav:
+    - Home: 'index.md'
+    - 'Election Information API': '/api/'
+    - 'Tool Embed':
+        - 'Embed Codes': '/embed/'
+        - 'Google Tag Manager': '/embed/tagmanager'
+    - 'Tool Admin': '/admin/'
+    - 'Open Source Development': '/opensource/'
+collapse_navigation: false
+theme:
+  name: material
+  logo: images/logo.png
+  favicon: images/favicon.png
+  palette:
+    primary: red
+    accent: black
+  font:
+    text: Open Sans
+extra_css:
+  - styles/extra.css
+markdown_extensions:
+  - admonition
+  - codehilite
+  - meta

@@ -1,0 +1,19 @@
+/* override color variables with branding */
+:root {
+    --md-primary-fg-color: #e12814;
+}
+
+.md-header {
+    background-color: #e12814;
+}
+
+/* we're not using a square logo */
+.md-header-nav__button.md-logo img, .md-header-nav__button.md-logo svg {
+    width: auto;
+}
+
+/* fix code linebreaks */
+.md-typeset code {
+    word-break: keep-all;
+}
+

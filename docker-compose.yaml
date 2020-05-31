@@ -109,6 +109,16 @@ services:
     ports:
       - "3333:3333"
 
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile-docs
+    command: mkdocs serve -a 0.0.0.0:8000
+    volumes:
+      - ./docs:/docs
+    ports:
+      - "9003:8000"
+
 volumes:
   pgdata_turnout:
   redisdata_turnout:
