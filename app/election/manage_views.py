@@ -6,6 +6,7 @@ from reversion.views import RevisionMixin
 from manage.mixins import ManageViewMixin
 
 from .forms import StateInformationManageForm
+from .mixins_manage_views import ElectionAdminView
 from .models import State, StateInformation, StateInformationFieldType
 
 
@@ -13,7 +14,7 @@ class ElectionView(TemplateView):
     template_name = "election/manage/election.html"
 
 
-class StateListView(ManageViewMixin, ListView):
+class StateListView(ManageViewMixin, ElectionAdminView, ListView):
     model = State
     context_object_name = "states"
     template_name = "election/manage/state_list.html"
@@ -35,13 +36,13 @@ class StateDetailView(ManageViewMixin, DetailView):
         return context
 
 
-class FieldInformationTypeListView(ManageViewMixin, ListView):
+class FieldInformationTypeListView(ManageViewMixin, ElectionAdminView, ListView):
     model = StateInformationFieldType
     context_object_name = "fieldtypes"
     template_name = "election/manage/stateinformationfieldtype_list.html"
 
 
-class FieldInformationTypeDetailView(ManageViewMixin, DetailView):
+class FieldInformationTypeDetailView(ManageViewMixin, ElectionAdminView, DetailView):
     model = StateInformationFieldType
     context_object_name = "fieldtype"
     template_name = "election/manage/stateinformationfieldtype_detail.html"
@@ -58,7 +59,9 @@ class FieldInformationTypeDetailView(ManageViewMixin, DetailView):
         return context
 
 
-class StateInformationUpdateView(ManageViewMixin, RevisionMixin, UpdateView):
+class StateInformationUpdateView(
+    ManageViewMixin, ElectionAdminView, RevisionMixin, UpdateView
+):
     model = StateInformation
     queryset = StateInformation.objects.select_related()
     context_object_name = "state_information"

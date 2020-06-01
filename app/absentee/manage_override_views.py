@@ -10,6 +10,7 @@ from reversion.views import RevisionMixin
 
 from action.mixin_manage_views import ActionListViewMixin
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
+from election.mixins_manage_views import ElectionAdminView
 from manage.mixins import ManageViewMixin
 
 from .forms import (
@@ -20,7 +21,9 @@ from .forms import (
 from .models import LeoContactOverride
 
 
-class LeoContactOverrideListView(ActionListViewMixin, ManageViewMixin, ListView):
+class LeoContactOverrideListView(
+    ActionListViewMixin, ManageViewMixin, ElectionAdminView, ListView
+):
     model = LeoContactOverride
     context_object_name = "leo_contact_overrides"
     template_name = "absentee/manage/leo_contact_override_list.html"
@@ -33,7 +36,9 @@ class LeoContactOverrideDetailView(UUIDSlugMixin, ManageViewMixin, DetailView):
     slug_field = "uuid"
 
 
-class LeoContactOverrideUpdateView(RevisionMixin, ManageViewMixin, UpdateView):
+class LeoContactOverrideUpdateView(
+    RevisionMixin, ManageViewMixin, ElectionAdminView, UpdateView
+):
     model = LeoContactOverride
     context_object_name = "leo_contact_override"
     template_name = "absentee/manage/leo_contact_override_update.html"
@@ -46,7 +51,9 @@ class LeoContactOverrideUpdateView(RevisionMixin, ManageViewMixin, UpdateView):
         )
 
 
-class LeoContactOverrideDeleteView(RevisionMixin, ManageViewMixin, DeleteView):
+class LeoContactOverrideDeleteView(
+    RevisionMixin, ManageViewMixin, ElectionAdminView, DeleteView
+):
     model = LeoContactOverride
     context_object_name = "leo_contact_override"
     template_name = "absentee/manage/leo_contact_override_delete.html"
@@ -56,7 +63,9 @@ class LeoContactOverrideDeleteView(RevisionMixin, ManageViewMixin, DeleteView):
         return reverse("manage:absentee_override:leo_contact_override_list",)
 
 
-class LeoContactOverrideCreateView(RevisionMixin, ManageViewMixin, CreateView):
+class LeoContactOverrideCreateView(
+    RevisionMixin, ManageViewMixin, ElectionAdminView, CreateView
+):
     model = LeoContactOverride
     context_object_name = "leo_contact_override"
     template_name = "absentee/manage/leo_contact_override_create.html"

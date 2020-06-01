@@ -37,7 +37,7 @@
                                 <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Users</a>
                             </div>
                         </li>
-                        {% comment %} {% if user.is_election_admin %} {% endcomment %}
+                        {% if user.can_manage_election_information %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__elections" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Elections
@@ -49,7 +49,7 @@
                                     Overrides</a>
                             </div>
                         </li>
-                        {% comment %} {% endif %} {% endcomment %}
+                        {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__profile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Profile

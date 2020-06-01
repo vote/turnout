@@ -14,11 +14,20 @@ class AssociationInline(admin.TabularInline):
 
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
-    list_display = ("email", "first_name", "last_name", "active_client")
+    list_display = (
+        "email",
+        "first_name",
+        "last_name",
+        "active_client",
+        "is_election_admin",
+    )
     fieldsets = (
         (None, {"fields": ("password", "email", "active_client")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
-        ("Permissions", {"fields": ("is_active", "is_staff", "is_superuser")}),
+        (
+            "Permissions",
+            {"fields": ("is_election_admin", "is_active", "is_staff", "is_superuser")},
+        ),
         ("Important dates", {"fields": ("last_login", "created_at", "modified_at")}),
     )
     inlines = (AssociationInline,)

@@ -62,6 +62,10 @@ class User(
     is_staff = models.BooleanField(_("Staff Status"), default=False)
     is_active = models.BooleanField(_("Active"), default=True, db_index=True)
 
+    is_election_admin = models.BooleanField(
+        "Election Information Admin", default=False, null=True
+    )
+
     email = models.EmailField(_("Email Address"), editable=False, unique=True)
     first_name = models.CharField(_("First Name"), max_length=100, blank=True)
     last_name = models.CharField(_("Last Name"), max_length=200, blank=True)
@@ -93,6 +97,13 @@ class User(
         if self.first_name:
             return self.first_name
         return self.email
+
+    @property
+    def can_manage_election_information(self):
+        if self.is_superuser:
+            return True
+        else:
+            return self.is_election_admin
 
     @cached_property
     def active_client_slug(self):
