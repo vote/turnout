@@ -1,12 +1,13 @@
 from django.http import Http404
 
+from manage.mixins import ManageViewMixin
 from multi_tenant.models import Client
 
 
-class SubscriberManageViewMixin:
+class SubscriberManageViewMixin(ManageViewMixin):
     def dispatch(self, request, *args, **kwargs):
         self.subscriber = Client.objects.get(default_slug__slug=kwargs["subscriber"])
-        if (
+        if request.user.is_authenticated and (
             self.subscriber != request.user.active_client
             or self.subscriber not in request.user.allowed_clients
         ):

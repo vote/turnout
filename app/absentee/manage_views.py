@@ -2,7 +2,6 @@ from django.views.generic import DetailView, ListView
 
 from action.mixin_manage_views import ActionListViewMixin
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
-from manage.mixins import ManageViewMixin
 from multi_tenant.mixins_manage_views import (
     SubscriberGenericViewMixin,
     SubscriberManageViewMixin,
@@ -15,7 +14,6 @@ class BallotRequestListView(
     SubscriberGenericViewMixin,
     SubscriberManageViewMixin,
     ActionListViewMixin,
-    ManageViewMixin,
     ListView,
 ):
     model = BallotRequest
@@ -24,11 +22,7 @@ class BallotRequestListView(
 
 
 class BallotRequestDetailView(
-    SubscriberGenericViewMixin,
-    SubscriberManageViewMixin,
-    UUIDSlugMixin,
-    ManageViewMixin,
-    DetailView,
+    SubscriberGenericViewMixin, SubscriberManageViewMixin, UUIDSlugMixin, DetailView,
 ):
     model = BallotRequest
     context_object_name = "ballot_request"

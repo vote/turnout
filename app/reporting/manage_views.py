@@ -2,7 +2,6 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse
 from django.views.generic import CreateView
 
-from manage.mixins import ManageViewMixin
 from multi_tenant.mixins_manage_views import (
     SubscriberGenericViewMixin,
     SubscriberManageViewMixin,
@@ -17,7 +16,6 @@ class ReportCreateView(
     SuccessMessageMixin,
     SubscriberGenericViewMixin,
     SubscriberManageViewMixin,
-    ManageViewMixin,
     CreateView,
 ):
     model = Report

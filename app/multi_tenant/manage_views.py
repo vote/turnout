@@ -29,7 +29,7 @@ from .tasks import send_invite_notifcation
 logger = logging.getLogger("multi_tenant")
 
 
-class EmbedCodeSampleView(SubscriberManageViewMixin, ManageViewMixin, TemplateView):
+class EmbedCodeSampleView(SubscriberManageViewMixin, TemplateView):
     template_name = "multi_tenant/manage/embed.html"
 
 
@@ -58,7 +58,7 @@ class ChangeSubscriberView(ManageViewMixin, FormView):
 
 
 class ManagerListView(
-    SubscriberManageViewMixin, ManageViewMixin, ListView,
+    SubscriberManageViewMixin, ListView,
 ):
     model = Association
     context_object_name = "associations"
@@ -77,9 +77,7 @@ class ManagerListView(
         return context
 
 
-class ManagerDeleteView(
-    SuccessMessageMixin, SubscriberManageViewMixin, ManageViewMixin, DeleteView
-):
+class ManagerDeleteView(SuccessMessageMixin, SubscriberManageViewMixin, DeleteView):
     model = Association
     context_object_name = "association"
     template_name = "multi_tenant/manage/managers_remove.html"
@@ -118,9 +116,7 @@ class ManagerDeleteView(
         return reverse("manage:multi_tenant:manager_list", args=(self.subscriber.slug,))
 
 
-class ManagerInviteView(
-    SuccessMessageMixin, SubscriberManageViewMixin, ManageViewMixin, CreateView
-):
+class ManagerInviteView(SuccessMessageMixin, SubscriberManageViewMixin, CreateView):
     model = Invite
     template_name = "multi_tenant/manage/invite_create.html"
     form_class = InviteCreateForm
@@ -220,7 +216,7 @@ class ManagerInviteView(
 
 
 class ManagerInviteDeleteView(
-    SuccessMessageMixin, SubscriberManageViewMixin, ManageViewMixin, DeleteView
+    SuccessMessageMixin, SubscriberManageViewMixin, DeleteView
 ):
     model = InviteAssociation
     context_object_name = "association"
