@@ -154,25 +154,25 @@
                 {% endif %}
                 {% if ballot_request.action.details.self_print %}
                     <tr>
-                        <td>Self Print Created</td>
+                        <td>PDF Emailed to Voter</td>
                         <td>{{ballot_request.action.details.self_print}}</td>
                     </tr>
                 {% endif %}
                 {% if ballot_request.action.details.finished_external_service %}
                     <tr>
-                        <td>Visited State Website</td>
+                        <td>Redirected To State Website</td>
                         <td>{{ballot_request.action.details.finished_external_service}}</td>
                     </tr>
                 {% endif %}
                 {% if ballot_request.action.details.leo_message_sent %}
                     <tr>
-                        <td>Submitted to LEO</td>
+                        <td>PDF submitted to LEO</td>
                         <td>{{ballot_request.action.details.leo_message_sent}}</td>
                     </tr>
                 {% endif %}
                 {% if ballot_request.action.details.total_downloads %}
                     <tr>
-                        <td>Total Self Print Downloads</td>
+                        <td>PDF Download Count</td>
                         <td>{{ballot_request.action.details.total_downloads}}</td>
                     </tr>
                 {% endif %}

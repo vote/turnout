@@ -5,8 +5,11 @@ nav:
     - 'Election Information API': '/api/'
     - 'Tool Embed':
         - 'Embed Codes': '/embed/'
-        - 'Google Tag Manager': '/embed/tagmanager'
-    - 'Tool Admin': '/admin/'
+        - 'Source Tracking': '/embed/tracking/'
+        - 'WordPress': '/embed/wordpress/'
+    - 'Tool Admin':
+        - 'Introduction': '/admin/'
+        - 'Export Format': '/admin/exportformat/'
     - 'Open Source Development': '/opensource/'
 collapse_navigation: false
 theme:
