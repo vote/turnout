@@ -18,7 +18,7 @@ form_fields:
     label: Party
     note: |
       In Georgia, you can choose which party's primary you want to vote in. You
-      don't be registered with the party or commit to vote for that party. If
+      won't be registered with the party or commit to vote for that party. If
       you choose “Non-partisan,” your ballot will only contain non-partisan
       races like judges.
     content:
