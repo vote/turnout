@@ -34,7 +34,7 @@ If you do not have a subscription to log in there, you can use the generic embed
 <div class="voteamerica-embed" data-subscriber="public" data-tool="locate"></div>
 ```
 
-```html
+<!-- ```html
 <script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
 <div class="voteamerica-embed" data-subscriber="public" data-tool="leo"></div>
-```
+``` -->
