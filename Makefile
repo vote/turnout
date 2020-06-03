@@ -39,6 +39,8 @@ lint:
 openapi:
 	docker-compose exec server python manage.py generateschema --format openapi openapi.yaml
 
+make psql:
+	PGPASSWORD=turnout psql turnout -h localhost -U postgres
 
 dbshell:
 	bash scripts/rds_psql.sh

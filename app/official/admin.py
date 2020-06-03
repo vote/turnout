@@ -29,6 +29,7 @@ class AddressInlineAdmin(NestedStackedInline):
         "email",
         "phone",
         "fax",
+        "location",
         "is_physical",
         "is_regular_mail",
         "process_domestic_registrations",

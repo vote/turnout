@@ -6,8 +6,10 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 import requests
 from django.conf import settings
+from django.contrib.gis.geos import Point
 
 from common.analytics import statsd
+from common.geocode import geocode
 from election.models import State
 
 from .models import Address, Office, Region
@@ -87,7 +89,7 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
     existing_offices = Office.objects.values_list("external_id", flat=True)
     offices_dict: Dict[(int, Tuple[Action, Office])] = {}
 
-    existing_addresses = Address.objects.values_list("external_id", flat=True)
+    existing_addresses = {a.external_id: a for a in Address.objects.all()}
     addresses_dict: Dict[(int, Tuple[Action, Address])] = {}
 
     next_url = f"{API_ENDPOINT}/offices?limit=100"
@@ -118,10 +120,24 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
 
             for address in office.get("addresses", []):
                 # Process each address in the office
-                if address["id"] in existing_addresses:
+                existing = existing_addresses.get(address["id"], None)
+                if existing:
                     address_action = Action.UPDATE
+                    location = existing.location
                 else:
                     address_action = Action.INSERT
+                    location = None
+                if not location:
+                    addrs = geocode(
+                        street=address.get("street1"),
+                        city=address.get("city"),
+                        state=address.get("state"),
+                        postal_code=address.get("zip"),
+                    )
+                    if addrs:
+                        location = Point(
+                            addrs[0]["location"]["lng"], addrs[0]["location"]["lat"]
+                        )
                 addresses_dict[address["id"]] = (
                     address_action,
                     Address(
@@ -137,6 +153,7 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
                         email=address.get("main_email"),
                         phone=address.get("main_phone_number"),
                         fax=address.get("main_fax_number"),
+                        location=location,
                         is_physical=address.get("is_physical"),
                         is_regular_mail=address.get("is_regular_mail"),
                         process_domestic_registrations="DOM_VR" in address["functions"],
@@ -186,6 +203,7 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
             "fax",
             "is_physical",
             "is_regular_mail",
+            "location",
             "process_domestic_registrations",
             "process_absentee_requests",
             "process_absentee_ballots",

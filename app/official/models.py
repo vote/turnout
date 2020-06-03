@@ -1,3 +1,4 @@
+from django.contrib.gis.db.models import PointField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -49,6 +50,8 @@ class Address(USVFModel):
     email = models.EmailField(null=True)
     phone = PhoneNumberField(null=True)
     fax = PhoneNumberField(null=True)
+
+    location = PointField(null=True, geography=True)
 
     is_physical = models.BooleanField(default=False, null=True)
     is_regular_mail = models.BooleanField(default=False, null=True)
