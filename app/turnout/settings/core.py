@@ -200,6 +200,10 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
 CELERY_BEAT_SCHEDULE = {
+    "trigger-usvf-sync": {
+        "task": "official.tasks.sync_usvotefoundation",
+        "schedule": crontab(minute=30, hour=6),
+    },
     "trigger-netlify-updated-information": {
         "task": "election.tasks.trigger_netlify_if_updates",
         "schedule": crontab(minute=0, hour="*"),

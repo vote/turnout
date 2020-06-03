@@ -70,6 +70,7 @@ def scrape_regions(session: requests.Session) -> List[Region]:
     statsd.gauge("turnout.official.scraper.regions", len(regions))
     logger.info("Found %(number)s Regions", {"number": len(regions)})
     Region.objects.bulk_create(regions, ignore_conflicts=True)
+    Region.objects.exclude(external_id__in=[r.external_id for r in regions]).delete()
 
     return regions
 
