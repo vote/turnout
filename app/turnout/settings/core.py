@@ -43,7 +43,9 @@ DATABASES = {
 }
 DATABASES["default"]["ENGINE"] = "django_db_geventpool.backends.postgis"
 DATABASES["default"]["CONN_MAX_AGE"] = 0
-DATABASES["default"]["OPTIONS"] = {"MAX_CONNS": 20}
+DATABASES["default"]["OPTIONS"] = {
+    "MAX_CONNS": env.int("DATABASE_MAX_CONNECTIONS", default=4)
+}
 
 ##### END DATABASE CONFIGURATION
 
