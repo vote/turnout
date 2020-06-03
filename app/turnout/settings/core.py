@@ -1,6 +1,7 @@
 import os
 from typing import Dict, Optional
 
+import ddtrace
 import environs
 import sentry_sdk
 from celery.schedules import crontab
@@ -37,9 +38,12 @@ BUILD = env.str("BUILD", default="0")
 
 DATABASES = {
     "default": env.dj_db_url(
-        "DATABASE_URL", default="pgsql://postgres:turnout@postgres:5432/turnout"
+        "DATABASE_URL", default="postgis://postgres:turnout@postgres:5432/turnout"
     )
 }
+DATABASES["default"]["ENGINE"] = "django_db_geventpool.backends.postgis"
+DATABASES["default"]["CONN_MAX_AGE"] = 0
+DATABASES["default"]["OPTIONS"] = {"MAX_CONNS": 20}
 
 ##### END DATABASE CONFIGURATION
 
@@ -67,6 +71,7 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
 ]
 
 
@@ -78,7 +83,6 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_alive",
     "corsheaders",
-    "ddtrace.contrib.django",
     "django_celery_results",
     "phonenumber_field",
     "django_otp",
@@ -320,10 +324,7 @@ CLOUDFLARE_ZONE = env.str("CLOUDFLARE_ZONE", default="")
 
 #### DATADOG CONFIGURATION
 
-DATADOG_TRACE = {
-    "TRACER": "common.apm.tracer",
-    "TAGS": {"build": BUILD},
-}
+ddtrace.tracer.set_tags({"build": BUILD})
 
 #### END DATADOG CONFIGURATION
 
@@ -391,6 +392,10 @@ LOGGING = {
     "formatters": {"json": {"()": "pythonjsonlogger.jsonlogger.JsonFormatter"}},
     "loggers": {
         "django": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+        },
+        "ddtrace": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
         },

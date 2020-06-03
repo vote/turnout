@@ -2,7 +2,7 @@ FROM python:3.7-buster
 ENV APP_DIR=/app
 WORKDIR $APP_DIR
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs pdftk-java && apt-get clean
+    apt-get install -y nodejs pdftk-java gdal-bin && apt-get clean
 
 COPY app/package.json app/package-lock.json $APP_DIR/
 RUN npm install
@@ -20,4 +20,4 @@ ENV TAG=$TAG_ARG
 ENV BUILD=$BUILD_ARG
 
 EXPOSE 8000
-CMD ["ddtrace-run", "gunicorn", "-b", "0.0.0.0:8000", "-c", "/app/turnout/gunicorn.conf.py", "turnout.wsgi"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-c", "/app/turnout/gunicorn.conf.py", "turnout.wsgi_prod"]

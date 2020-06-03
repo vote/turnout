@@ -2,12 +2,14 @@ django==2.2.*
 psycopg2==2.8.*
 environs==7.1.*
 dj-database-url==0.5.*
-gunicorn==20.0.*
+gunicorn[gevent]==20.0.*
+psycogreen==1.0.*
+django-db-geventpool==3.2.*
 celery[redis]==4.4.*
 celery-redbeat==0.13.*
 django-celery-results==1.1.*
 django-redis==4.11.*
-ddtrace==0.31.*
+ddtrace==0.38.*
 datadog==0.34.*
 python-json-logger==0.1.11
 sendgrid==6.1.*
