@@ -325,7 +325,7 @@ def ts_address_to_region(street, city, state, zipcode):
     if r.status_code != 200:
         extra = {"url": url, "status_code": r.status_code}
         logger.error(
-            "Error querying TS district %{url}s, status code %{status_code}s",
+            "Error querying TS district %(url)s, status code %(status_code)s",
             extra,
             extra=extra,
         )
@@ -344,7 +344,7 @@ def ts_address_to_region(street, city, state, zipcode):
     except KeyError:
         extra = {"url": url, "response": r.json()}
         logger.error(
-            "Malformed result from TS district %{url}s, response %{response}s",
+            "Malformed result from TS district %(url)s, response %(response)s",
             extra,
             extra=extra,
         )

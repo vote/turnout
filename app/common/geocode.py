@@ -44,7 +44,7 @@ def geocode(**kwargs):
     if r.status_code != 200:
         extra = {"url": url, "status_code": r.status_code}
         logger.error(
-            "Error querying geocodio %{url}s, status code %{status_code}s",
+            "Error querying geocodio %(url)s, status code %(status_code)s",
             extra,
             extra=extra,
         )
@@ -86,7 +86,7 @@ def wi_location_to_mcd(location):
     if r.status_code != 200:
         extra = {"url": r.request.url, "status_code": r.status_code}
         logger.warning(
-            "Error querying WI state API %{url}s status code %{status_code}s",
+            "Error querying WI state API %(url)s status code %(status_code)s",
             extra,
             extra=extra,
         )
@@ -98,7 +98,7 @@ def wi_location_to_mcd(location):
     if not features:
         extra = {"url": r.request.url, "response": r.json()}
         logger.warning(
-            "Malformed response from WI state API %{url}s, %{response}s",
+            "Malformed response from WI state API %(url)s, %(response)s",
             extra,
             extra=extra,
         )
