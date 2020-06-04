@@ -40,6 +40,14 @@ export ABSENTEE_LEO_EMAIL_FROM=$(aws ssm get-parameter --region $REGION --with-d
 export TWILIO_ACCOUNT_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_account_sid | jq '.Parameter["Value"]' -r)
 export TWILIO_AUTH_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_auth_token | jq '.Parameter["Value"]' -r)
 export TWILIO_MESSAGING_SERVICE_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_messaging_service_sid | jq '.Parameter["Value"]' -r)
+export GEOCODIO_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.geocodio_key | jq '.Parameter["Value"]' -r)
+export FAX_DISABLE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_disable | jq '.Parameter["Value"]' -r)
+export FAX_OVERRIDE_DEST=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_override_dest | jq '.Parameter["Value"]' -r)
+export FAX_GATEWAY_CALLBACK_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_gateway_callback_url | jq '.Parameter["Value"]' -r)
+export FAX_GATEWAY_SQS_QUEUE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_gateway_sqs_queue | jq '.Parameter["Value"]' -r)
+export SLACK_DATA_ERROR_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_enabled | jq '.Parameter["Value"]' -r)
+export SLACK_DATA_ERROR_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_webhook | jq '.Parameter["Value"]' -r)
+
 
 echo "Parameters Acquired"
 
@@ -94,6 +102,13 @@ docker run -i -t \
            -e TWILIO_ACCOUNT_SID \
            -e TWILIO_AUTH_TOKEN \
            -e TWILIO_MESSAGING_SERVICE_SID \
+           -e GEOCODIO_KEY \
+           -e FAX_DISABLE \
+           -e FAX_OVERRIDE_DEST \
+           -e FAX_GATEWAY_CALLBACK_URL \
+           -e FAX_GATEWAY_SQS_QUEUE \
+           -e SLACK_DATA_ERROR_ENABLED \
+           -e SLACK_DATA_ERROR_WEBHOOK \
            -e DEBUG=$DEBUG \
            -p 8000:8000 \
            $IMAGE \
