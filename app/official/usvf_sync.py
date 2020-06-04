@@ -132,7 +132,7 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
                         street=address.get("street1"),
                         city=address.get("city"),
                         state=address.get("state"),
-                        postal_code=address.get("zip"),
+                        zipcode=address.get("zip"),
                     )
                     if addrs:
                         location = Point(

@@ -7,7 +7,7 @@ from common.geocode import API_ENDPOINT, al_jefferson_county_bessemer_division, 
 
 
 def test_well_formed_request(requests_mock):
-    settings.GEOCODIO_API_KEY = "foobar"
+    settings.GEOCODIO_KEY = "foobar"
 
     APIClient()
     geocodio_call = requests_mock.register_uri(
@@ -41,7 +41,7 @@ def test_well_formed_request(requests_mock):
 
     assert geocodio_call.called
     assert geocodio_call.last_request.qs == {
-        "api_key": [settings.GEOCODIO_API_KEY],
+        "api_key": [settings.GEOCODIO_KEY],
         "q": ["90024"],
     }
     assert r == [

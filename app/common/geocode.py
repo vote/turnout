@@ -33,7 +33,7 @@ def geocode(**kwargs):
             args[k] = kwargs[k]
     if "zipcode" in kwargs:
         args["postal_code"] = kwargs["zipcode"]
-    url = f"{API_ENDPOINT}?{urlencode({**args, 'api_key': settings.GEOCODIO_API_KEY})}"
+    url = f"{API_ENDPOINT}?{urlencode({**args, 'api_key': settings.GEOCODIO_KEY})}"
     with statsd.timed("turnout.common.geocode.geocode", sample_rate=0.2):
         retries = Retry(
             total=RETRIES, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504]
