@@ -148,3 +148,15 @@ def test_slugs_match_pdf(state):
             assert (
                 "On" in field["FieldStateOption"]
             ), f"Expected PDF field {field['FieldName']} to use \"On\" as its checked value"
+
+
+# Make sure page counts are correct
+@pytest.mark.parametrize("state", STATES_WITH_METADATA)
+def test_page_counts(state):
+    state_data = STATE_DATA[state]
+
+    page_count = PyPDFTK().get_num_pages(
+        os.path.join(os.path.dirname(__file__), f"../templates/pdf/states/{state}.pdf")
+    )
+
+    assert state_data["pages"] == page_count

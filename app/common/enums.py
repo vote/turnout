@@ -1,16 +1,16 @@
+# We explicitly mark the metaclass as EnumMeta for mypy
+from enum import EnumMeta
+
 from enumfields import Enum
 
-# NB EnumField default max_length=10 in migrations
-# Ensure value lengths are at or below max
 
-
-class TargetSmartGender(Enum):
+class TargetSmartGender(Enum, metaclass=EnumMeta):
     MALE = "Male"
     FEMALE = "Female"
     UNKNOWN = "Unknown Gender"
 
 
-class RegistrationGender(Enum):
+class RegistrationGender(Enum, metaclass=EnumMeta):
     MALE = "Male"
     FEMALE = "Female"
     NON_BINARY = "NonBinary"
@@ -20,7 +20,7 @@ class RegistrationGender(Enum):
         NON_BINARY = "Non-binary"
 
 
-class PoliticalParties(Enum):
+class PoliticalParties(Enum, metaclass=EnumMeta):
     NONE = "None"
     DEMOCRATIC = "Democratic"
     REPUBLICAN = "Republican"
@@ -29,7 +29,7 @@ class PoliticalParties(Enum):
     OTHER = "Other"
 
 
-class RaceEthnicity(Enum):
+class RaceEthnicity(Enum, metaclass=EnumMeta):
     AMERICAN_INDIAN_ALASKA_NATIVE = "Native"
     ASIAN_PACIFIC_ISLANDER = "AAPI"
     BLACK = "Black"
@@ -46,7 +46,7 @@ class RaceEthnicity(Enum):
         WHITE = "White (not Hispanic)"
 
 
-class PersonTitle(Enum):
+class PersonTitle(Enum, metaclass=EnumMeta):
     MR = "Mr"
     MRS = "Mrs"
     MISS = "Miss"
@@ -61,7 +61,7 @@ class PersonTitle(Enum):
         MX = "Mx."
 
 
-class TurnoutActionStatus(Enum):
+class TurnoutActionStatus(Enum, metaclass=EnumMeta):
     INCOMPLETE = "Incomplete"
     PENDING = "Pending"
     PDF_SENT = "SentPDF"
@@ -74,13 +74,13 @@ class TurnoutActionStatus(Enum):
         OVR_REFERRED = "OVR Referred"
 
 
-class VoterStatus(Enum):
+class VoterStatus(Enum, metaclass=EnumMeta):
     ACTIVE = "Active"
     INACTIVE = "Inactive"
     UNKNOWN = "Unknown"
 
 
-class StateFieldFormats(Enum):
+class StateFieldFormats(Enum, metaclass=EnumMeta):
     MARKDOWN = "Markdown"
     BOOLEAN = "Boolean"
     URL = "URL"
@@ -93,11 +93,11 @@ class StateFieldFormats(Enum):
         DATE = "Date"
 
 
-class NotificationWebhookTypes(Enum):
+class NotificationWebhookTypes(Enum, metaclass=EnumMeta):
     NETLIFY = "Netlify"
 
 
-class FileType(Enum):
+class FileType(Enum, metaclass=EnumMeta):
     REGISTRATION_FORM = "RegForm"
     ABSENTEE_REQUEST_FORM = "AbsForm"
     REPORT = "Report"
@@ -107,11 +107,14 @@ class FileType(Enum):
         ABSENTEE_REQUEST_FORM = "Absentee Request Form"
 
 
-class EventType(Enum):
+class EventType(Enum, metaclass=EnumMeta):
     START = "Start"
     FINISH_SELF_PRINT = "FinishPrint"
     FINISH_EXTERNAL = "FinishExternal"
     FINISH_LEO = "FinishLEO"
+    FINISH_LEO_FAX_PENDING = "FinishLEOFaxPending"
+    FINISH_LEO_FAX_SENT = "FinishLEOFaxSent"
+    FINISH_LEO_FAX_FAILED = "FinishLEOFaxFailed"
     FINISH = "Finish"
     DOWNLOAD = "Download"
     DONATE = "Donate"
@@ -120,22 +123,25 @@ class EventType(Enum):
         START = "Started Form"
         FINISH_SELF_PRINT = "Finished via Print and Mail"
         FINISH_EXTERNAL = "Finished with External Tool"
-        FINISH_LEO = "Finish via direct LEO submission"
+        FINISH_LEO = "Finish via direct LEO email submission"
+        FINISH_LEO_FAX_PENDING = "Finish via direct LEO fax submission (fax pending)"
+        FINISH_LEO_FAX_SENT = "Finish via direct LEO fax submission (fax sent)"
+        FINISH_LEO_FAX_FAILED = "LEO fax submission failed"
         FINISH = "Completed Action"
         DOWNLOAD_PDF = "Downloaded File"
         DONATE_CLICK = "Donate Click"
 
 
-class SecureUploadType(Enum):
+class SecureUploadType(Enum, metaclass=EnumMeta):
     SIGNATURE = "Signature"
 
 
-class MessageDirectionType(Enum):
+class MessageDirectionType(Enum, metaclass=EnumMeta):
     IN = "in"
     OUT = "out"
 
 
-class ToolName(Enum):
+class ToolName(Enum, metaclass=EnumMeta):
     VERIFY = "verify"
     REGISTER = "register"
     ABSENTEE = "absentee"
@@ -150,7 +156,7 @@ class ToolName(Enum):
         LEO = "LEO"
 
 
-class ReportType(Enum):
+class ReportType(Enum, metaclass=EnumMeta):
     VERIFY = "verify"
     REGISTER = "register"
     ABSENTEE = "absentee"
@@ -161,6 +167,24 @@ class ReportType(Enum):
         ABSENTEE = "Absentee Tool Export"
 
 
-class ReportStatus(Enum):
+class ReportStatus(Enum, metaclass=EnumMeta):
     PENDING = "Pending"
     COMPLETE = "Complete"
+
+
+class FaxStatus(Enum, metaclass=EnumMeta):
+    PENDING = "pending"
+    SENT = "sent"
+    TEMPORARY_FAILURE = "tmp_fail"
+    PERMANENT_FAILURE = "perm_fail"
+
+
+class SubmissionType(Enum, metaclass=EnumMeta):
+    LEO_EMAIL = "leo_email"
+    LEO_FAX = "leo_fax"
+    SELF_PRINT = "self_print"
+
+    class Labels:
+        LEO_EMAIL = "Email to LEO"
+        LEO_FAX = "Fax to LEO"
+        SELF_PRINT = "Print at Home"

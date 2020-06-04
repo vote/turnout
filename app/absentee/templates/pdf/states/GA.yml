@@ -38,3 +38,5 @@ auto_fields:
 
 manual_fields:
   - CheckBox2
+
+pages: 1

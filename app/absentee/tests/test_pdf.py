@@ -6,7 +6,7 @@ from model_bakery import baker
 
 from common.pdf.pypdftk import PyPDFTK
 
-from ..generateform import ballot_request_is_emailable, process_ballot_request
+from ..generateform import process_ballot_request
 from ..state_pdf_data import STATE_DATA, each_slug_with_type
 from .test_data import (
     ALL_STATES,
@@ -68,10 +68,7 @@ def test_gen_pdf(state, mocker):
     )
 
     # Make sure the job to send the result was queued
-    if ballot_request_is_emailable(ballot_request):
-        patched_leo_email.delay.assert_called_once_with(ballot_request.uuid)
-    else:
-        patched_notification.delay.assert_called_once_with(ballot_request.uuid)
+    patched_notification.delay.assert_called_once_with(ballot_request.uuid)
 
     # Dump the data from the generated PDF and make sure it matches up
     result_data = PyPDFTK().dump_data_fields(

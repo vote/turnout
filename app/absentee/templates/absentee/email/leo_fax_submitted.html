@@ -1,0 +1,58 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+We are currently submitting your absentee ballot application to your local
+election office via fax.
+<br><br>
+It can take up to 12 hours for us to submit your application. We'll follow up
+once it's been sent. If you don't hear from us after 24 hours, you can reply to
+this email and we'll look into your application.
+<br><br>
+If you have any other questions about your application, you can reach out directly
+to your local election office.<br><br>
+{% if has_leo_contact %}
+  {% if leo_contact.email %}Email: <a href="mailto:{{leo_contact.email}}">{{leo_contact.email}}</a><br>{% endif %}
+  {% if leo_contact.phone %}Phone: <a href="tel:{{leo_contact.phone}}">{{leo_contact.phone}}</a><br>{% endif %}
+{% else %}
+  <a href="https://www.voteamerica.com/local-election-offices/{{ballot_request.state.code}}/{ballot_request.region.external_id}}/">Contact Information</a>
+  <br>
+{% endif %}
+<br><br>
+There's nothing else you need to do, but you can save a copy of your application
+for your records if you'd like.
+
+Happy voting,<br>
+{{ subscriber.name }}
+<br>
+<br>
+
+<!--[if gte mso 9]>
+<br>
+<![endif]-->
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+    <tr>
+        <td>
+            <center>
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td align="center"
+                            style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
+                            bgcolor="#e23c16">
+                            <a href="{{ download_url }}"
+                                target="_blank"
+                                style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Save a copy of your form</a>
+                        </td>
+                    </tr>
+                </table>
+            </center>
+        </td>
+    </tr>
+</table>
+<!--[if gte mso 9]>
+<br>
+<![endif]-->
+
+{% endblock %}

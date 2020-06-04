@@ -76,3 +76,5 @@ auto_fields:
   - slug: party_state_primaries
     type: copy
     field: party_presidential_primary
+
+pages: 2

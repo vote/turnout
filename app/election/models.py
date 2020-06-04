@@ -28,6 +28,9 @@ class State(TimestampModel):
     state_information = models.ManyToManyField(
         "StateInformationFieldType", through="StateInformation"
     )
+    vbm_submission_type = TurnoutEnumField(
+        enums.SubmissionType, default=enums.SubmissionType.SELF_PRINT
+    )
 
     class Meta(object):
         ordering = ["code"]

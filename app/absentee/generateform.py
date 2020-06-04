@@ -16,11 +16,16 @@ from storage.models import SecureUploadItem, StorageItem
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
 from .state_pdf_data import STATE_DATA
-from .tasks import send_ballotrequest_leo_email, send_ballotrequest_notification
+from .tasks import (
+    send_ballotrequest_leo_email,
+    send_ballotrequest_leo_fax,
+    send_ballotrequest_notification,
+)
 
 logger = logging.getLogger("absentee")
 
-COVER_SHEET_PATH = "absentee/templates/pdf/cover.pdf"
+SELF_PRINT_COVER_SHEET_PATH = "absentee/templates/pdf/cover.pdf"
+FAX_COVER_SHEET_PATH = "absentee/templates/pdf/fax-cover.pdf"
 ENVELOPE_PATH = "absentee/templates/pdf/envelope.pdf"
 
 
@@ -155,6 +160,9 @@ def prepare_formdata(
             "leo_contact_info"
         ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
 
+    if contact_info.fax:
+        form_data["leo_fax"] = contact_info.fax
+
     # Find state-specific info
     form_data["vbm_deadline"] = (
         state_text_property(ballot_request.state.code, "vbm_deadline_mail", lower=True)
@@ -221,42 +229,73 @@ def load_signature_image(
 def generate_pdf(
     form_data: Dict[str, Any],
     state_code: str,
+    submission_method: enums.SubmissionType,
     signature: Optional[Image.Image] = None,
-    include_cover_sheet=True,
 ) -> IO:
-    sections = [
-        PDFTemplateSection(
-            path=f"absentee/templates/pdf/states/{state_code}.pdf",
-            is_form=True,
-            flatten_form=False,
-            signature_locations=get_signature_locations(state_code),
-        ),
-        PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
-    ]
+    # We assume a 1-page form if there's no YAML file with the number of pages.
+    # This is usually true, and we also don't use the page count except in
+    # esign states, where we always have the YAML file with the accurate page
+    # count.
+    state_template_pages = STATE_DATA.get(state_code, {}).get("pages", 1)
 
-    if include_cover_sheet:
-        sections.insert(0, PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True))
+    if submission_method == enums.SubmissionType.LEO_EMAIL:
+        sections = [
+            PDFTemplateSection(
+                path=f"absentee/templates/pdf/states/{state_code}.pdf",
+                is_form=True,
+                flatten_form=False,
+                signature_locations=get_signature_locations(state_code),
+            )
+        ]
+
+        num_pages = state_template_pages
+    elif submission_method == enums.SubmissionType.LEO_FAX:
+        sections = [
+            PDFTemplateSection(path=FAX_COVER_SHEET_PATH, is_form=True),
+            PDFTemplateSection(
+                path=f"absentee/templates/pdf/states/{state_code}.pdf",
+                is_form=True,
+                flatten_form=False,
+                signature_locations=get_signature_locations(state_code),
+            ),
+        ]
+
+        num_pages = state_template_pages + 1
+    else:
+        # Self-print
+        sections = [
+            PDFTemplateSection(path=SELF_PRINT_COVER_SHEET_PATH, is_form=True),
+            PDFTemplateSection(
+                path=f"absentee/templates/pdf/states/{state_code}.pdf",
+                is_form=True,
+                flatten_form=False,
+            ),
+            PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
+        ]
+
+        num_pages = state_template_pages + 2
+
+    form_data.update({"num_pages": str(num_pages)})
 
     return PDFTemplate(sections).fill(form_data, signature=signature)
 
 
-def ballot_request_is_emailable(ballot_request: BallotRequest):
-    return ballot_request.state.code == "GA" and ballot_request.signature is not None
+def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType:
+    if ballot_request.signature is None:
+        return enums.SubmissionType.SELF_PRINT
+
+    return ballot_request.state.vbm_submission_type
 
 
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
     form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
-    print(form_data)
     signature = load_signature_image(ballot_request.signature)
-    is_emailable = ballot_request_is_emailable(ballot_request)
+    submission_method = get_submission_method(ballot_request)
 
     with generate_pdf(
-        form_data,
-        ballot_request.state.code,
-        signature,
-        include_cover_sheet=not is_emailable,
+        form_data, ballot_request.state.code, submission_method, signature,
     ) as filled_pdf:
         item = StorageItem(
             app=enums.FileType.ABSENTEE_REQUEST_FORM,
@@ -272,8 +311,10 @@ def process_ballot_request(
     ballot_request.result_item = item
     ballot_request.save(update_fields=["result_item"])
 
-    if is_emailable:
+    if submission_method == enums.SubmissionType.LEO_EMAIL:
         send_ballotrequest_leo_email.delay(ballot_request.pk)
+    elif submission_method == enums.SubmissionType.LEO_FAX:
+        send_ballotrequest_leo_fax.delay(ballot_request.pk)
     else:
         send_ballotrequest_notification.delay(ballot_request.pk)
 

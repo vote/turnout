@@ -110,6 +110,7 @@ FIRST_PARTY_APPS = [
     "official",
     "smsbot",
     "reporting",
+    "fax",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -530,11 +531,15 @@ PDF_DEBUG = env.bool("PDF_DEBUG", default=DEBUG)
 
 ABSENTEE_LEO_EMAIL_DISABLE = env.bool("ABSENTEE_LEO_EMAIL_DISABLE", default=True)
 ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS = env.str(
-    "ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS", default="blackhole@nowhere.voteamerica.com"
+    "ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS", default=None
 )
 
 ABSENTEE_LEO_EMAIL_FROM = env.str(
     "ABSENTEE_LEO_EMAIL_FROM", default="noreply@voteamerica.com"
+)
+
+ABSENTEE_LEO_FAX_EMAIL_REPLY_TO = env.str(
+    "ABSENTEE_LEO_FAX_EMAIL_FROM", default=ABSENTEE_LEO_EMAIL_FROM
 )
 
 #### END ABSENTEE CONFIGURATION
@@ -548,3 +553,18 @@ SLACK_DATA_ERROR_WEBHOOK = env.str(
 )
 
 #### END SLACK DATA ERROR CONFIGURATION
+
+
+#### FAX CONFIGURATION
+
+FAX_DISABLE = env.bool("FAX_DISABLE", default=True)
+
+FAX_OVERRIDE_DEST = env.str("FAX_OVERRIDE_DEST", default=None)
+
+FAX_GATEWAY_CALLBACK_URL = env.str(
+    "FAX_GATEWAY_CALLBACK_URL", default=f"{PRIMARY_ORIGIN}/fax/gateway_callback/"
+)
+
+FAX_GATEWAY_SQS_QUEUE = env.str("FAX_GATEWAY_SQS_QUEUE", default=None)
+
+#### END FAX CONFIGURATION

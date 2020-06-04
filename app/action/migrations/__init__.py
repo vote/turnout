@@ -53,7 +53,7 @@ FROM
       FROM
         event_tracking_event e
       WHERE
-        e.event_type = 'FinishLEO'
+        e.event_type IN ('FinishLEO', 'FinishLEOFaxPending', 'FinishLEOFaxSent', 'FinishLEOFaxFailed')
     )
     finish_leo
     ON finish_leo.action_id = a.uuid

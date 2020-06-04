@@ -177,7 +177,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "pages": {
+      "type": "integer"
     }
   },
+  "required": ["pages"],
   "additionalProperties": false
 }

@@ -4,7 +4,17 @@ import pytest
 from model_bakery import baker
 
 from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
-from absentee.generateform import generate_name, prepare_formdata
+from absentee.generateform import (
+    ENVELOPE_PATH,
+    FAX_COVER_SHEET_PATH,
+    SELF_PRINT_COVER_SHEET_PATH,
+    generate_name,
+    generate_pdf,
+    get_submission_method,
+    prepare_formdata,
+)
+from common.enums import SubmissionType
+from common.pdf.pdftemplate import PDFTemplateSection, SignatureBoundingBox
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 from ..state_pdf_data import STATE_DATA
@@ -269,3 +279,120 @@ def test_prepare_formdata_auto_static(mocker):
 
     form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
     assert form_data["foo"] == "bar"
+
+
+@pytest.mark.django_db
+def test_get_submission_method():
+    email_state = baker.make_recipe(
+        "election.state", vbm_submission_type=SubmissionType.LEO_EMAIL
+    )
+    fax_state = baker.make_recipe(
+        "election.state", vbm_submission_type=SubmissionType.LEO_FAX
+    )
+    self_print_state = baker.make_recipe("election.state")
+
+    req = baker.make_recipe("absentee.ballot_request")
+
+    # With a signature, use the state's submission method
+    req.state = fax_state
+    assert get_submission_method(req) == SubmissionType.LEO_FAX
+
+    req.state = email_state
+    assert get_submission_method(req) == SubmissionType.LEO_EMAIL
+
+    req.state = self_print_state
+    assert get_submission_method(req) == SubmissionType.SELF_PRINT
+
+    # Without a signature, always use self-print
+    req.signature = None
+
+    req.state = fax_state
+    assert get_submission_method(req) == SubmissionType.SELF_PRINT
+
+    req.state = email_state
+    assert get_submission_method(req) == SubmissionType.SELF_PRINT
+
+    req.state = self_print_state
+    assert get_submission_method(req) == SubmissionType.SELF_PRINT
+
+
+def test_generate_pdf_email(mocker):
+    mocker.patch.dict(
+        STATE_DATA,
+        {
+            "XX": {
+                "pages": 2,
+                "signatures": {2: {"x": 1, "y": 2, "width": 3, "height": 4}},
+            }
+        },
+    )
+
+    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
+
+    generate_pdf({"some": "data",}, "XX", SubmissionType.LEO_EMAIL, "some-sig")
+
+    MockPDFTemplate.assert_called_with(
+        [
+            PDFTemplateSection(
+                path="absentee/templates/pdf/states/XX.pdf",
+                is_form=True,
+                flatten_form=False,
+                signature_locations={
+                    2: SignatureBoundingBox(x=1, y=2, width=3, height=4),
+                },
+            )
+        ]
+    )
+
+    MockPDFTemplate().fill.assert_called_with(
+        {"some": "data", "num_pages": "2"}, signature="some-sig"
+    )
+
+
+def test_generate_pdf_fax(mocker):
+    mocker.patch.dict(
+        STATE_DATA, {"XX": {"pages": 3,}},
+    )
+
+    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
+
+    generate_pdf({"some": "data"}, "XX", SubmissionType.LEO_FAX, "some-sig")
+
+    MockPDFTemplate.assert_called_with(
+        [
+            PDFTemplateSection(path=FAX_COVER_SHEET_PATH, is_form=True),
+            PDFTemplateSection(
+                path="absentee/templates/pdf/states/XX.pdf",
+                is_form=True,
+                flatten_form=False,
+                signature_locations=None,
+            ),
+        ]
+    )
+
+    MockPDFTemplate().fill.assert_called_with(
+        {"some": "data", "num_pages": "4"}, signature="some-sig"
+    )
+
+
+def test_generate_pdf_self_print(mocker):
+    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
+
+    generate_pdf({"some": "data"}, "XX", SubmissionType.SELF_PRINT, "some-sig")
+
+    MockPDFTemplate.assert_called_with(
+        [
+            PDFTemplateSection(path=SELF_PRINT_COVER_SHEET_PATH, is_form=True),
+            PDFTemplateSection(
+                path="absentee/templates/pdf/states/XX.pdf",
+                is_form=True,
+                flatten_form=False,
+                signature_locations=None,
+            ),
+            PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
+        ]
+    )
+
+    MockPDFTemplate().fill.assert_called_with(
+        {"some": "data", "num_pages": "3"}, signature="some-sig"
+    )

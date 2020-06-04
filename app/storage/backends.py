@@ -21,7 +21,7 @@ def uniqify_filename(existing_filename: str) -> str:
 
 
 private_bucket_name: str = getattr(settings, "AWS_STORAGE_PRIVATE_BUCKET_NAME", "")
-querystring_expire: int = getattr(settings, "AWS_STORAGE_PRIVATE_URL_EXPIRATION", 7200)
+querystring_expire: int = getattr(settings, "AWS_STORAGE_PRIVATE_URL_EXPIRATION", 43200)
 
 
 class AttachmentStorage(AttachmentStorageEngine):  # noqa

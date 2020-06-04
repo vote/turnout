@@ -42,3 +42,5 @@ form_fields:
 auto_fields:
   - slug: date_signed
     type: todays_date
+
+pages: 1
