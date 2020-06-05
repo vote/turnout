@@ -6,11 +6,11 @@ gunicorn[gevent]==20.0.*
 psycogreen==1.0.*
 django-db-geventpool==3.2.*
 celery[redis]==4.4.*
-celery-redbeat==0.13.*
+celery-redbeat==1.0.*
 django-celery-results==1.1.*
 django-redis==4.11.*
 ddtrace==0.38.*
-datadog==0.34.*
+datadog==0.36.*
 python-json-logger==0.1.11
 sendgrid==6.1.*
 django-sendgrid-v5==0.8.*
@@ -26,7 +26,7 @@ django-smalluuid==1.1.*
 django-enumfields==1.0.*
 django-phonenumber-field==4.0.*
 django-timezone-field==4.*
-phonenumbers==8.11.*
+phonenumbers==8.12.*
 django_sekizai==1.0.*
 django-crispy-forms==1.8.*
 django-markdownify==0.8.*
@@ -37,7 +37,7 @@ whitenoise==5.0.*
 boto3==1.12.*
 django-s3-folder-storage==0.5
 django-alive==1.1.*
-sentry-sdk==0.13.*
+sentry-sdk==0.14.*
 watchdog==0.9.*
 pytest-django==3.8.*
 django-cors-headers==3.2.1
