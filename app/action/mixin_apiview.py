@@ -13,18 +13,28 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
+        incomplete = request.GET.get("incomplete") == "true"
         instance = self.get_object()
         action_object = self.process_serializer(
-            self.get_serializer(instance, data=request.data, partial=partial)
+            self.get_serializer(
+                instance, data=request.data, partial=partial, incomplete=incomplete
+            )
         )
-        response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
-        return Response(response)
+
+        return self.create_or_update_response(request, action_object)
 
     def create(self, request, *args, **kwargs):
         incomplete = request.GET.get("incomplete") == "true"
         action_object = self.process_serializer(
             self.get_serializer(data=request.data, incomplete=incomplete)
         )
+
+        return self.create_or_update_response(request, action_object)
+
+    def after_create_or_update(self, action_object):
+        pass
+
+    def create_or_update_response(self, request, action_object):
         response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
         return Response(response)
 
@@ -55,6 +65,8 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         state_id_number = serializer.validated_data.pop("state_id_number", None)
 
         action_object = serializer.save()
+
+        self.after_create_or_update(action_object)
 
         if serializer.incomplete:
             action_object.action.track_event(enums.EventType.START)

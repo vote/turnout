@@ -66,6 +66,8 @@ class BallotRequest(
 
     submit_date = models.DateField(null=True)
 
+    esign_method = TurnoutEnumField(enums.SubmissionType, null=True)
+
     class Meta:
         ordering = ["-created_at"]
 

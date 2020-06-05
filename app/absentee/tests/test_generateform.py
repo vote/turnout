@@ -283,36 +283,30 @@ def test_prepare_formdata_auto_static(mocker):
 
 @pytest.mark.django_db
 def test_get_submission_method():
-    email_state = baker.make_recipe(
-        "election.state", vbm_submission_type=SubmissionType.LEO_EMAIL
-    )
-    fax_state = baker.make_recipe(
-        "election.state", vbm_submission_type=SubmissionType.LEO_FAX
-    )
-    self_print_state = baker.make_recipe("election.state")
-
     req = baker.make_recipe("absentee.ballot_request")
 
     # With a signature, use the state's submission method
-    req.state = fax_state
+    assert get_submission_method(req) == SubmissionType.SELF_PRINT
+
+    req.esign_method = SubmissionType.LEO_FAX
     assert get_submission_method(req) == SubmissionType.LEO_FAX
 
-    req.state = email_state
+    req.esign_method = SubmissionType.LEO_EMAIL
     assert get_submission_method(req) == SubmissionType.LEO_EMAIL
 
-    req.state = self_print_state
+    req.esign_method = SubmissionType.SELF_PRINT
     assert get_submission_method(req) == SubmissionType.SELF_PRINT
 
     # Without a signature, always use self-print
     req.signature = None
 
-    req.state = fax_state
+    req.esign_method = SubmissionType.LEO_FAX
     assert get_submission_method(req) == SubmissionType.SELF_PRINT
 
-    req.state = email_state
+    req.esign_method = SubmissionType.LEO_EMAIL
     assert get_submission_method(req) == SubmissionType.SELF_PRINT
 
-    req.state = self_print_state
+    req.esign_method = SubmissionType.SELF_PRINT
     assert get_submission_method(req) == SubmissionType.SELF_PRINT
 
 

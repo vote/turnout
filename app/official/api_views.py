@@ -6,17 +6,15 @@ import sentry_sdk
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
+from django.contrib.gis.measure import \
+    D  # ``D`` is a shortcut for ``Distance``
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from common.analytics import statsd
-from common.geocode import (
-    al_jefferson_county_bessemer_division,
-    geocode,
-    wi_location_to_mcd,
-)
+from common.geocode import (al_jefferson_county_bessemer_division, geocode,
+                            wi_location_to_mcd)
 
 from .models import Address, Region
 from .serializers import RegionDetailSerializer, RegionNameSerializer
@@ -325,7 +323,7 @@ def ts_address_to_region(street, city, state, zipcode):
     if r.status_code != 200:
         extra = {"url": url, "status_code": r.status_code}
         logger.error(
-            "Error querying TS district %(url)s, status code %(status_code)s",
+            "Error querying TS district %{url}s, status code %{status_code}s",
             extra,
             extra=extra,
         )
@@ -422,12 +420,12 @@ def ts_address_to_region(street, city, state, zipcode):
     return []
 
 
-@api_view(["GET"])
-def address_regions(request):
-    street = request.query_params.get("street", None)
-    city = request.query_params.get("city", None)
-    state = request.query_params.get("state", None).upper()
-    zipcode = request.query_params.get("zipcode", None)
+# Returns (regions, was_geocode_error).
+#
+# regions maybe None, which indicates we weren't able to narrow down the regions
+# at all (and the user probably has to pick their region manually)
+def get_regions_for_address(street, city, state, zipcode):
+    state = state.upper() if state else state
 
     regions = None
 
@@ -445,9 +443,13 @@ def address_regions(request):
             street=street, city=city, state=state, zipcode=zipcode, fields="stateleg",
         )
         if not addrs:
-            return Response(
-                "unable to geocode address", status=status.HTTP_400_BAD_REQUEST
+            logger.error(f"Unable to geocode ({street}, {city}, {state} {zipcode})")
+            sentry_sdk.capture_exception(
+                AddressRegionsAPIError(
+                    f"Unable to geocode ({street}, {city}, {state} {zipcode})"
+                )
             )
+            return (None, True)
         regions = geocode_to_regions(addrs)
     if not regions:
         logger.error(f"No match for ({street}, {city}, {state} {zipcode})")
@@ -465,5 +467,21 @@ def address_regions(request):
                 f"Multiple results for ({street}, {city}, {state} {zipcode}): {regions}"
             )
         )
+
+    return (regions, False)
+
+
+@api_view(["GET"])
+def address_regions(request):
+    regions, was_geocode_error = get_regions_for_address(
+        street=request.query_params.get("street", None),
+        city=request.query_params.get("city", None),
+        state=request.query_params.get("state", None),
+        zipcode=request.query_params.get("zipcode", None),
+    )
+
+    if was_geocode_error:
+        return Response("unable to geocode address", status=status.HTTP_400_BAD_REQUEST)
+
     serializer = RegionNameSerializer(regions, many=True)
     return Response(serializer.data)

@@ -284,7 +284,7 @@ def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType
     if ballot_request.signature is None:
         return enums.SubmissionType.SELF_PRINT
 
-    return ballot_request.state.vbm_submission_type
+    return ballot_request.esign_method or enums.SubmissionType.SELF_PRINT
 
 
 def process_ballot_request(

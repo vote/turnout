@@ -43,6 +43,7 @@ ballot_request = Recipe(
     region=foreign_key(region),
     uuid=uuid_default(),
     signature=foreign_key(signature),
+    esign_method=enums.SubmissionType.SELF_PRINT,
     _fill_optional=True,
 )
 
