@@ -169,7 +169,7 @@ class Invite(UUIDModel, TimestampModel):
         new_associations = []
         new_associations.append(Association(client=self.primary_client, user=user))
         for client in self.clients.exclude(pk=self.primary_client.pk):
-            new_associations.append(Association(client=client.pk, user=user))
+            new_associations.append(Association(client=client, user=user))
         Association.objects.bulk_create(new_associations)
 
         Invite.objects.filter(email__iexact=user.email).update(
