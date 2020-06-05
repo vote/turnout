@@ -1,5 +1,3 @@
-import smalluuid
-from django.conf import settings
 from django.db import models
 from django_smalluuid.models import SmallUUIDField, uuid_default
 from phonenumber_field.modelfields import PhoneNumberField

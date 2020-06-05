@@ -287,7 +287,7 @@ def test_callback_bad_request(mocker):
     token = SmallUUID()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
-    mock_statsd = mocker.patch("fax.api_views.statsd")
+    mocker.patch("fax.api_views.statsd")
     client = APIClient()
 
     fax = baker.make_recipe("fax.fax", token=token)

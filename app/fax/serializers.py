@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from enumfields.drf.fields import EnumField
-from enumfields.drf.serializers import EnumSupportSerializerMixin
 from rest_framework import serializers
 
 from common import enums

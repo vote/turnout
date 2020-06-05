@@ -1,8 +1,5 @@
-from typing import Tuple
-
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
 from common.analytics import statsd

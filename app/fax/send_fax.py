@@ -5,10 +5,8 @@ from typing import Optional
 
 import boto3  # type: ignore
 from botocore.config import Config  # type: ignore
-from celery import shared_task
 from django.conf import settings
 
-from common.analytics import statsd
 from common.enums import FaxStatus
 from storage.models import StorageItem
 

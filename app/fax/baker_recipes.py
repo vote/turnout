@@ -1,7 +1,6 @@
-from model_bakery.recipe import Recipe, foreign_key
+from model_bakery.recipe import Recipe
 
 from common import enums
-from storage.baker_recipes import ballot_request_form
 
 from .models import Fax
 
