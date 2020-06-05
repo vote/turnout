@@ -2,8 +2,13 @@ import os
 import time
 
 from celery import Celery
+from ddtrace import patch, patch_all
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "turnout.settings")
+
+if os.environ.get("DEBUG") != "True":
+    patch_all()
+    patch(celery=True)
 
 app = Celery("turnout")
 
