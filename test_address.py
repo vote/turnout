@@ -1,6 +1,6 @@
-import pytest
-
 from urllib.parse import urlencode
+
+import pytest
 import requests
 
 API_URL = "http://localhost:9001/v1/official/address/"
@@ -28,7 +28,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("518 N 12th St", "East St Louis", "IL", "62201", [{'external_id': 430785, 'name': 'City of East Saint Louis'}]),
         ("275 S Academy St", "Galesburg", "IL", "61401", [{'external_id': 430786, 'name': 'City of Galesburg'}]),
         ("2305 Charles St", "Rockford", "IL", "61104", [{'external_id': 430787, 'name': 'City of Rockford'}]),
-        
+
         # al
         ("3083 S Perkins Rd", "Memphis", "TN", "38118", [{'name': 'Shelby County', 'external_id': 432362}]),
         #  birmingham
@@ -71,7 +71,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("16 beach st", "eastham", "ma", "", [{'name': 'Town of Eastham', 'external_id': 431215}]),
         ("85 Treadwell Hollow Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
         ("554 Sloan Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
-        
+
         # mi
         ("301 S 5th St", "Grand Haven", "MI", "49417", [{'external_id': 435266, 'name': 'Grand Haven City, Ottawa County'}]),
         ("2101 168th Ave", "Grand Haven", "MI", "49417", [{'name': 'Grand Haven Township, Ottawa County', 'external_id': 435674}]),
@@ -94,6 +94,6 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("11 Hazen St", "East Elmhurst", "NY", "11370", [{'name': 'New York City: The Bronx', 'external_id': 433316}]),
     ])
 def test_full(street, city, state, zipcode, expected):
-    r = requests.get(f"{API_URL}?{urlencode({'street':street,'city': city,'state':state,'zipcode':zipcode})}")
+    r = requests.get(f"{API_URL}?{urlencode({'address1':street,'city': city,'state':state,'zipcode':zipcode})}")
     assert r.status_code == 200
     assert r.json() == expected

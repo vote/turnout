@@ -6,15 +6,17 @@ import sentry_sdk
 from django.conf import settings
 from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
-from django.contrib.gis.measure import \
-    D  # ``D`` is a shortcut for ``Distance``
+from django.contrib.gis.measure import D  # ``D`` is a shortcut for ``Distance``
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from common.analytics import statsd
-from common.geocode import (al_jefferson_county_bessemer_division, geocode,
-                            wi_location_to_mcd)
+from common.geocode import (
+    al_jefferson_county_bessemer_division,
+    geocode,
+    wi_location_to_mcd,
+)
 
 from .models import Address, Region
 from .serializers import RegionDetailSerializer, RegionNameSerializer
@@ -474,7 +476,7 @@ def get_regions_for_address(street, city, state, zipcode):
 @api_view(["GET"])
 def address_regions(request):
     regions, was_geocode_error = get_regions_for_address(
-        street=request.query_params.get("street", None),
+        street=request.query_params.get("address1", None),
         city=request.query_params.get("city", None),
         state=request.query_params.get("state", None),
         zipcode=request.query_params.get("zipcode", None),

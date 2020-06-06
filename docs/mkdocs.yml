@@ -27,3 +27,4 @@ markdown_extensions:
   - admonition
   - codehilite
   - meta
+  - attr_list
