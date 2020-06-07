@@ -57,6 +57,10 @@
     @import "manage/table";
 }
 
+.election {
+    @import "manage/election";
+}
+
 .api_browse {
     @import "api/api";
 }

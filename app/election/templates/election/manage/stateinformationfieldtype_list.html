@@ -3,9 +3,11 @@
 
 {% block title %}List of Fields | {{ block.super }}{% endblock title %}
 
+
 {% block content %}
+{% add_data "body-class" "election" %}
+
 <div class="content-wrapper">
-    <div class="row">
         <div class="col-lg-10 offset-lg-1">
             <h1>Fields</h1>
             <div class="table-responsive-lg">
@@ -31,6 +33,5 @@
             {% include "management/inc/pagination.html" %}
             {% endif %}
         </div>
-    </div>
 </div>
 {% endblock %}

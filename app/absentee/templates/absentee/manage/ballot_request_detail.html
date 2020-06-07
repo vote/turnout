@@ -14,204 +14,138 @@
                 <th>Value</th>
             </thead>
             <tbody>
-                {% if ballot_request.uuid %}
-                    <tr>
-                        <td>ID</td>
-                        <td>{{ballot_request.uuid}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.subscriber.name %}
-                    <tr>
-                        <td>Subscriber</td>
-                        <td>{{ballot_request.subscriber.name}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.created_at %}
-                    <tr>
-                        <td>Time Started (UTC)</td>
-                        <td>{{ballot_request.created_at}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.first_name %}
-                    <tr>
-                        <td>First Name</td>
-                        <td>{{ballot_request.first_name}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.middle_name %}
-                    <tr>
-                        <td>Middle Name</td>
-                        <td>{{ballot_request.middle_name}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.last_name %}
-                    <tr>
-                        <td>Last Name</td>
-                        <td>{{ballot_request.last_name}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.suffix %}
-                    <tr>
-                        <td>Suffix</td>
-                        <td>{{ballot_request.suffix}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.date_of_birth %}
-                    <tr>
-                        <td>Date of Birth</td>
-                        <td>{{ballot_request.date_of_birth}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.email %}
-                    <tr>
-                        <td>Email</td>
-                        <td>{{ballot_request.email}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.phone %}
-                    <tr>
-                        <td>Phone</td>
-                        <td>{{ballot_request.phone}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.address1 %}
-                    <tr>
-                        <td>Address 1</td>
-                        <td>{{ballot_request.address1}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.address2 %}
-                    <tr>
-                        <td>Address 2</td>
-                        <td>{{ballot_request.address2}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.city %}
-                    <tr>
-                        <td>City</td>
-                        <td>{{ballot_request.city}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.zipcode %}
-                    <tr>
-                        <td>Zipcode</td>
-                        <td>{{ballot_request.zipcode}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.state_id %}
-                    <tr>
-                        <td>State</td>
-                        <td>{{ballot_request.state_id}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.mailing_address1 %}
-                    <tr>
-                        <td>Mailing Address 1</td>
-                        <td>{{ballot_request.mailing_address1}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.mailing_address2 %}
-                    <tr>
-                        <td>Mailing Address 2</td>
-                        <td>{{ballot_request.mailing_address2}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.mailing_city %}
-                    <tr>
-                        <td>Mailing City</td>
-                        <td>{{ballot_request.mailing_city}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.mailing_state_id %}
-                    <tr>
-                        <td>Mailing State</td>
-                        <td>{{ballot_request.mailing_state_id}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.mailing_zipcode %}
-                    <tr>
-                        <td>Mailing Zipcode</td>
-                        <td>{{ballot_request.mailing_zipcode}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.sms_opt_in %}
-                    <tr>
-                        <td>VoteAmerica SMS Opt In</td>
-                        <td>{{ballot_request.sms_opt_in}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.sms_opt_in_subscriber %}
-                    <tr>
-                        <td>Subscriber SMS Opt In</td>
-                        <td>{{ballot_request.sms_opt_in_subscriber}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.action.details.finished %}
-                    <tr>
-                        <td>Completed</td>
-                        <td>{{ballot_request.action.details.finished}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.action.details.self_print %}
-                    <tr>
-                        <td>PDF Emailed to Voter</td>
-                        <td>{{ballot_request.action.details.self_print}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.action.details.finished_external_service %}
-                    <tr>
-                        <td>Redirected To State Website</td>
-                        <td>{{ballot_request.action.details.finished_external_service}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.action.details.leo_message_sent %}
-                    <tr>
-                        <td>PDF submitted to LEO</td>
-                        <td>{{ballot_request.action.details.leo_message_sent}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.action.details.total_downloads %}
-                    <tr>
-                        <td>PDF Download Count</td>
-                        <td>{{ballot_request.action.details.total_downloads}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.source %}
-                    <tr>
-                        <td>source</td>
-                        <td>{{ballot_request.source}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.utm_source %}
-                    <tr>
-                        <td>utm_source</td>
-                        <td>{{ballot_request.utm_source}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.utm_medium %}
-                    <tr>
-                        <td>utm_medium</td>
-                        <td>{{ballot_request.utm_medium}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.utm_campaign %}
-                    <tr>
-                        <td>utm_campaign</td>
-                        <td>{{ballot_request.utm_campaign}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.utm_content %}
-                    <tr>
-                        <td>utm_content</td>
-                        <td>{{ballot_request.utm_content}}</td>
-                    </tr>
-                {% endif %}
-                {% if ballot_request.utm_term %}
-                    <tr>
-                        <td>utm_term</td>
-                        <td>{{ballot_request.utm_term}}</td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td>ID</td>
+                    <td>{{ballot_request.uuid|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Subscriber</td>
+                    <td>{{ballot_request.subscriber.name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Time Started (UTC)</td>
+                    <td>{{ballot_request.created_at|date:"Y-m-d g:i a"|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>First Name</td>
+                    <td>{{ballot_request.first_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Middle Name</td>
+                    <td>{{ballot_request.middle_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Last Name</td>
+                    <td>{{ballot_request.last_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Suffix</td>
+                    <td>{{ballot_request.suffix|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Date of Birth</td>
+                    <td>{{ballot_request.date_of_birth|date:"Y-m-d"|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ballot_request.email|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td>{{ballot_request.phone|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Address 1</td>
+                    <td>{{ballot_request.address1|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Address 2</td>
+                    <td>{{ballot_request.address2|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td>{{ballot_request.city|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Zipcode</td>
+                    <td>{{ballot_request.zipcode|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>State</td>
+                    <td>{{ballot_request.state_id|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Mailing Address 1</td>
+                    <td>{{ballot_request.mailing_address1|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Mailing Address 2</td>
+                    <td>{{ballot_request.mailing_address2|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Mailing City</td>
+                    <td>{{ballot_request.mailing_city|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Mailing State</td>
+                    <td>{{ballot_request.mailing_state_id|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Mailing Zipcode</td>
+                    <td>{{ballot_request.mailing_zipcode|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>VoteAmerica SMS Opt In</td>
+                    <td>{{ballot_request.sms_opt_in|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Subscriber SMS Opt In</td>
+                    <td>{{ballot_request.sms_opt_in_subscriber|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Completed</td>
+                    <td>{{ballot_request.action.details.finished|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>PDF Emailed to Voter</td>
+                    <td>{{ballot_request.action.details.self_print|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Redirected To State Website</td>
+                    <td>{{ballot_request.action.details.finished_external_service|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>PDF submitted to LEO</td>
+                    <td>{{ballot_request.action.details.leo_message_sent|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>PDF Download Count</td>
+                    <td>{{ballot_request.action.details.total_downloads|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>source</td>
+                    <td>{{ballot_request.source|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>utm_source</td>
+                    <td>{{ballot_request.utm_source|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>utm_medium</td>
+                    <td>{{ballot_request.utm_medium|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>utm_campaign</td>
+                    <td>{{ballot_request.utm_campaign|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>utm_content</td>
+                    <td>{{ballot_request.utm_content|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>utm_term</td>
+                    <td>{{ballot_request.utm_term|default_if_none:""}}</td>
+                </tr>
             </tbody>
         </table>
     </div>

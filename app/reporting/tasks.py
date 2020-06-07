@@ -62,19 +62,16 @@ def calc_subscriber_stats(uuid):
     r["register"] = (
         Registration.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .count()
     )
     r["verify"] = (
         Lookup.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .count()
     )
     r["absentee"] = (
         BallotRequest.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .count()
     )
 
@@ -83,7 +80,6 @@ def calc_subscriber_stats(uuid):
     for i in (
         Lookup.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .values("state_id")
         .order_by("state_id")
         .annotate(count=Count("state_id"))
@@ -94,7 +90,6 @@ def calc_subscriber_stats(uuid):
     for i in (
         Registration.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .values("state_id")
         .annotate(count=Count("state_id"))
         .order_by("state_id")
@@ -105,7 +100,6 @@ def calc_subscriber_stats(uuid):
     for i in (
         BallotRequest.objects.filter(subscriber_id=uuid)
         .select_related("action", "action__details")
-        .filter(action__details__finished=True)
         .values("state_id")
         .annotate(count=Count("state_id"))
         .order_by("state_id")

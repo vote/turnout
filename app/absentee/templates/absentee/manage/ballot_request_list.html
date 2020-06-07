@@ -26,7 +26,7 @@
                             {{ ballot_request.state.pk }}
                         </td>
                         <td>
-                            {{ ballot_request.created_at|timezone:user.timezone }}
+                            {{ ballot_request.created_at|timezone:user.timezone|date:"Y-m-d g:i a" }}
                         </td>
                     </tr>
                     {% endfor %}

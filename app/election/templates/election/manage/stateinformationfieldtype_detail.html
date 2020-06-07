@@ -4,9 +4,10 @@
 {% block title %}{{ fieldtype }} | {{ block.super }}{% endblock title %}
 
 {% block content %}
+{% add_data "body-class" "election" %}
+
 <div class="content-wrapper">
-    <div class="row">
-        <div class="col-lg-10 offset-lg-1">
+        <div class="col-lg-12">
             <h1>{{ fieldtype.long_name }} ( {{ fieldtype.slug }} )</h1>
             <div class="table-responsive-lg">
                 <table class="table table__state-info">
@@ -32,7 +33,7 @@
                                 {{ field.notes|linebreaks }}
                             </td>
                             <td scope="row">
-                                {{ field.modified_at|timezone:user.timezone }}
+                                {{ field.modified_at|timezone:user.timezone|date:"Y-m-d g:i a" }}
                             </td>
                         </tr>
                         {% endfor %}
@@ -44,6 +45,5 @@
             {% include "management/inc/pagination.html" %}
             {% endif %}
         </div>
-    </div>
 </div>
 {% endblock %}

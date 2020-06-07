@@ -14,138 +14,94 @@
                     <th>Value</th>
                 </thead>
                 <tbody>
-                    {% if lookup.uuid %}
-                        <tr>
-                            <td>ID</td>
-                            <td>{{lookup.uuid}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.subscriber.name %}
-                        <tr>
-                            <td>Subscriber</td>
-                            <td>{{lookup.subscriber.name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.created_at %}
-                        <tr>
-                            <td>Time Started UTC</td>
-                            <td>{{lookup.created_at}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.first_name %}
-                        <tr>
-                            <td>First Name</td>
-                            <td>{{lookup.first_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.last_name %}
-                        <tr>
-                            <td>Last Name</td>
-                            <td>{{lookup.last_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.date_of_birth %}
-                        <tr>
-                            <td>Date of Birth</td>
-                            <td>{{lookup.date_of_birth}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.email %}
-                        <tr>
-                            <td>Email</td>
-                            <td>{{lookup.email}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.phone %}
-                        <tr>
-                            <td>Phone</td>
-                            <td>{{lookup.phone}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.address1 %}
-                        <tr>
-                            <td>Address 1</td>
-                            <td>{{lookup.address1}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.address2 %}
-                        <tr>
-                            <td>Address 2</td>
-                            <td>{{lookup.address2}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.city %}
-                        <tr>
-                            <td>City</td>
-                            <td>{{lookup.city}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.zipcode %}
-                        <tr>
-                            <td>Zipcode</td>
-                            <td>{{lookup.zipcode}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.state_id %}
-                        <tr>
-                            <td>State</td>
-                            <td>{{lookup.state_id}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.sms_opt_in %}
-                        <tr>
-                            <td>VoteAmerica SMS Opt In</td>
-                            <td>{{lookup.sms_opt_in}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.sms_opt_in_subscriber %}
-                        <tr>
-                            <td>Subscriber SMS Opt In</td>
-                            <td>{{lookup.sms_opt_in_subscriber}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.registered %}
-                        <tr>
-                            <td>Registered</td>
-                            <td>{{lookup.registered}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.source %}
-                        <tr>
-                            <td>source</td>
-                            <td>{{lookup.source}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.utm_source %}
-                        <tr>
-                            <td>utm_source</td>
-                            <td>{{lookup.utm_source}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.utm_medium %}
-                        <tr>
-                            <td>utm_medium</td>
-                            <td>{{lookup.utm_medium}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.utm_campaign %}
-                        <tr>
-                            <td>utm_campaign</td>
-                            <td>{{lookup.utm_campaign}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.utm_content %}
-                        <tr>
-                            <td>utm_content</td>
-                            <td>{{lookup.utm_content}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if lookup.utm_term %}
-                        <tr>
-                            <td>utm_term</td>
-                            <td>{{lookup.utm_term}}</td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>ID</td>
+                        <td>{{lookup.uuid|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Subscriber</td>
+                        <td>{{lookup.subscriber.name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Time Started UTC</td>
+                        <td>{{lookup.created_at|date:"Y-m-d g:i a"|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>First Name</td>
+                        <td>{{lookup.first_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Name</td>
+                        <td>{{lookup.last_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Date of Birth</td>
+                        <td>{{lookup.date_of_birth|date:"Y-m-d"|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{lookup.email|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone</td>
+                        <td>{{lookup.phone|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Address 1</td>
+                        <td>{{lookup.address1|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Address 2</td>
+                        <td>{{lookup.address2|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>City</td>
+                        <td>{{lookup.city|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Zipcode</td>
+                        <td>{{lookup.zipcode|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>State</td>
+                        <td>{{lookup.state_id|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>VoteAmerica SMS Opt In</td>
+                        <td>{{lookup.sms_opt_in|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Subscriber SMS Opt In</td>
+                        <td>{{lookup.sms_opt_in_subscriber|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Registered</td>
+                        <td>{{lookup.registered|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>source</td>
+                        <td>{{lookup.source|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_source</td>
+                        <td>{{lookup.utm_source|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_medium</td>
+                        <td>{{lookup.utm_medium|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_campaign</td>
+                        <td>{{lookup.utm_campaign|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_content</td>
+                        <td>{{lookup.utm_content|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_term</td>
+                        <td>{{lookup.utm_term|default_if_none:""}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

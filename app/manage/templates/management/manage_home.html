@@ -7,14 +7,18 @@
 <div class="content-wrapper">
   <div class="col-md-8 offset-md-2">
 		<h1>Welcome to VoteAmerica Tools</h1>
-		<p>
-			{{ user.active_client|default:"Your organization" }} has submitted <strong>{{ stats.register }}
-			</strong> registration requests, <strong>{{ stats.absentee }}</strong> absentee ballot requests,
-			and <strong>{{ stats.verify }}</strong> registration verification requests.
-		</p>
 		{% if stats.last_updated %}
 		{% load tz %}
-      	<p><em>Last updated: {{ stats.last_updated|timezone:user.timezone }} ({{ user.timezone }})</em></p>
+		<p><em>Last updated: {{ stats.last_updated|timezone:user.timezone|date:"Y-m-d g:i a" }} ({{ user.timezone }})</em></p>
+
+		<h3>Quick Stats</h3>
+		<p>
+			{{ user.active_client|default:"Your organization" }} overall submissions<br>
+			<strong>Register:</strong> {{ stats.register }}<br>
+			<strong>Verify:</strong> {{ stats.verify }}<br>
+			<strong>Absentee</strong> {{ stats.absentee }}
+		</p>
+
 		{% endif %}
 		<hr>
 		<h2>Quick links</h2>

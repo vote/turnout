@@ -14,300 +14,202 @@
                     <th>Value</th>
                 </thead>
                 <tbody>
-                    {% if registration.uuid %}
-                        <tr>
-                            <td>ID</td>
-                            <td>{{registration.uuid}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.subscriber.name %}
-                        <tr>
-                            <td>Subscriber</td>
-                            <td>{{registration.subscriber.name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.created_at %}
-                        <tr>
-                            <td>Time Started (UTC)</td>
-                            <td>{{registration.created_at}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_title %}
-                        <tr>
-                            <td>Previous Title</td>
-                            <td>{{registration.previous_title}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_first_name %}
-                        <tr>
-                            <td>Previous First Name</td>
-                            <td>{{registration.previous_first_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_middle_name %}
-                        <tr>
-                            <td>Previous Middle Name</td>
-                            <td>{{registration.previous_middle_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_last_name %}
-                        <tr>
-                            <td>Previous Last Name</td>
-                            <td>{{registration.previous_last_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_suffix %}
-                        <tr>
-                            <td>Previous Suffix</td>
-                            <td>{{registration.previous_suffix}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.title %}
-                        <tr>
-                            <td>Title</td>
-                            <td>{{registration.title}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.first_name %}
-                        <tr>
-                            <td>First Name</td>
-                            <td>{{registration.first_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.middle_name %}
-                        <tr>
-                            <td>Middle Name</td>
-                            <td>{{registration.middle_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.last_name %}
-                        <tr>
-                            <td>Last Name</td>
-                            <td>{{registration.last_name}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.suffix %}
-                        <tr>
-                            <td>Suffix</td>
-                            <td>{{registration.suffix}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.date_of_birth %}
-                        <tr>
-                            <td>Date of Birth</td>
-                            <td>{{registration.date_of_birth}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.gender %}
-                        <tr>
-                            <td>Gender</td>
-                            <td>{{registration.gender}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.race_ethnicity %}
-                        <tr>
-                            <td>Race-Ethnicity</td>
-                            <td>{{registration.race_ethnicity}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.us_citizen %}
-                        <tr>
-                            <td>US Citizen</td>
-                            <td>{{registration.us_citizen}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.party %}
-                        <tr>
-                            <td>Party</td>
-                            <td>{{registration.party}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.email %}
-                        <tr>
-                            <td>Email</td>
-                            <td>{{registration.email}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.phone %}
-                        <tr>
-                            <td>Phone</td>
-                            <td>{{registration.phone}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.address1 %}
-                        <tr>
-                            <td>Address 1</td>
-                            <td>{{registration.address1}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.address2 %}
-                        <tr>
-                            <td>Address 2</td>
-                            <td>{{registration.address2}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.city %}
-                        <tr>
-                            <td>City</td>
-                            <td>{{registration.city}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.zipcode %}
-                        <tr>
-                            <td>Zipcode</td>
-                            <td>{{registration.zipcode}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.state_id %}
-                        <tr>
-                            <td>State</td>
-                            <td>{{registration.state_id}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_address1 %}
-                        <tr>
-                            <td>Previous Address 1</td>
-                            <td>{{registration.previous_address1}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_address2 %}
-                        <tr>
-                            <td>Previous Address 2</td>
-                            <td>{{registration.previous_address2}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_city %}
-                        <tr>
-                            <td>Previous City</td>
-                            <td>{{registration.previous_city}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_state_id %}
-                        <tr>
-                            <td>Previous State</td>
-                            <td>{{registration.previous_state_id}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.previous_zipcode %}
-                        <tr>
-                            <td>Previous Zipcode</td>
-                            <td>{{registration.previous_zipcode}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.mailing_address1 %}
-                        <tr>
-                            <td>Mailing Address 1</td>
-                            <td>{{registration.mailing_address1}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.mailing_address2 %}
-                        <tr>
-                            <td>Mailing Address 2</td>
-                            <td>{{registration.mailing_address2}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.mailing_city %}
-                        <tr>
-                            <td>Mailing City</td>
-                            <td>{{registration.mailing_city}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.mailing_state_id %}
-                        <tr>
-                            <td>Mailing State</td>
-                            <td>{{registration.mailing_state_id}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.mailing_zipcode %}
-                        <tr>
-                            <td>Mailing Zipcode</td>
-                            <td>{{registration.mailing_zipcode}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.sms_opt_in %}
-                        <tr>
-                            <td>VoteAmerica SMS Opt In</td>
-                            <td>{{registration.sms_opt_in}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.sms_opt_in_subscriber %}
-                        <tr>
-                            <td>Subscriber SMS Opt In</td>
-                            <td>{{registration.sms_opt_in_subscriber}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.action.details.finished %}
-                        <tr>
-                            <td>Completed</td>
-                            <td>{{registration.action.details.finished}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.action.details.self_print %}
-                        <tr>
-                            <td>PDF Emailed to Voter</td>
-                            <td>{{registration.action.details.self_print}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.action.details.finished_external_service %}
-                        <tr>
-                            <td>Redirected To State Website</td>
-                            <td>{{registration.action.details.finished_external_service}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.action.details.leo_message_sent %}
-                        <tr>
-                            <td>PDF Submitted to LEO</td>
-                            <td>{{registration.action.details.leo_message_sent}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.action.details.total_downloads %}
-                        <tr>
-                            <td>Total Self Print Downloads</td>
-                            <td>{{registration.action.details.total_downloads}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.source %}
-                        <tr>
-                            <td>source</td>
-                            <td>{{registration.source}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.utm_source %}
-                        <tr>
-                            <td>utm_source</td>
-                            <td>{{registration.utm_source}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.utm_medium %}
-                        <tr>
-                            <td>utm_medium</td>
-                            <td>{{registration.utm_medium}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.utm_campaign %}
-                        <tr>
-                            <td>utm_campaign</td>
-                            <td>{{registration.utm_campaign}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.utm_content %}
-                        <tr>
-                            <td>utm_content</td>
-                            <td>{{registration.utm_content}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.utm_term %}
-                        <tr>
-                            <td>utm_term</td>
-                            <td>{{registration.utm_term}}</td>
-                        </tr>
-                    {% endif %}
-                    {% if registration.referring_tool %}
-                        <tr>
-                            <td>Referring Tool</td>
-                            <td>{{registration.referring_tool}}</td>
-                        </tr>
-                    {% endif %}
+                    <tr>
+                        <td>ID</td>
+                        <td>{{registration.uuid|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Subscriber</td>
+                        <td>{{registration.subscriber.name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Time Started (UTC)</td>
+                        <td>{{registration.created_at|date:"Y-m-d g:i a"|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Title</td>
+                        <td>{{registration.previous_title|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous First Name</td>
+                        <td>{{registration.previous_first_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Middle Name</td>
+                        <td>{{registration.previous_middle_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Last Name</td>
+                        <td>{{registration.previous_last_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Suffix</td>
+                        <td>{{registration.previous_suffix|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Title</td>
+                        <td>{{registration.title|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>First Name</td>
+                        <td>{{registration.first_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Middle Name</td>
+                        <td>{{registration.middle_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Last Name</td>
+                        <td>{{registration.last_name|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Suffix</td>
+                        <td>{{registration.suffix|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Date of Birth</td>
+                        <td>{{registration.date_of_birth|date:"Y-m-d"|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Gender</td>
+                        <td>{{registration.gender|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Race-Ethnicity</td>
+                        <td>{{registration.race_ethnicity|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>US Citizen</td>
+                        <td>{{registration.us_citizen|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Party</td>
+                        <td>{{registration.party|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{registration.email|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone</td>
+                        <td>{{registration.phone|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Address 1</td>
+                        <td>{{registration.address1|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Address 2</td>
+                        <td>{{registration.address2|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>City</td>
+                        <td>{{registration.city|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Zipcode</td>
+                        <td>{{registration.zipcode|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>State</td>
+                        <td>{{registration.state_id|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Address 1</td>
+                        <td>{{registration.previous_address1|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Address 2</td>
+                        <td>{{registration.previous_address2|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous City</td>
+                        <td>{{registration.previous_city|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous State</td>
+                        <td>{{registration.previous_state_id|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Previous Zipcode</td>
+                        <td>{{registration.previous_zipcode|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Mailing Address 1</td>
+                        <td>{{registration.mailing_address1|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Mailing Address 2</td>
+                        <td>{{registration.mailing_address2|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Mailing City</td>
+                        <td>{{registration.mailing_city|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Mailing State</td>
+                        <td>{{registration.mailing_state_id|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Mailing Zipcode</td>
+                        <td>{{registration.mailing_zipcode|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>VoteAmerica SMS Opt In</td>
+                        <td>{{registration.sms_opt_in|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Subscriber SMS Opt In</td>
+                        <td>{{registration.sms_opt_in_subscriber|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Completed</td>
+                        <td>{{registration.action.details.finished|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>PDF Emailed to Voter</td>
+                        <td>{{registration.action.details.self_print|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Redirected To State Website</td>
+                        <td>{{registration.action.details.finished_external_service|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>PDF Submitted to LEO</td>
+                        <td>{{registration.action.details.leo_message_sent|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Self Print Downloads</td>
+                        <td>{{registration.action.details.total_downloads|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>source</td>
+                        <td>{{registration.source|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_source</td>
+                        <td>{{registration.utm_source|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_medium</td>
+                        <td>{{registration.utm_medium|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_campaign</td>
+                        <td>{{registration.utm_campaign|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_content</td>
+                        <td>{{registration.utm_content|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>utm_term</td>
+                        <td>{{registration.utm_term|default_if_none:""}}</td>
+                    </tr>
+                    <tr>
+                        <td>Referring Tool</td>
+                        <td>{{registration.referring_tool|default_if_none:""}}</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
