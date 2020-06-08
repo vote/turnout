@@ -1,13 +1,17 @@
-# This code pulls the bare minimum necessary from the US Vote Foundation API for
-# local usage. The goal is to reduce the number of hits on the API and our database
+# This code pulls down a copy of the USVF region office and contact
+# data to our database, and does some validation on that data to
+# ensure VBM contact data is complete for states that need it.
 import logging
 from enum import Enum as PythonEnum
 from typing import Any, Dict, List, Sequence, Tuple
 
+import phonenumbers
 import requests
 from django.conf import settings
 from django.contrib.gis.geos import Point
 
+from absentee.models import LeoContactOverride
+from common import enums
 from common.analytics import statsd
 from common.geocode import geocode
 from election.models import State
@@ -218,3 +222,76 @@ def sync() -> None:
     session.headers["Authorization"] = f"OAuth {settings.USVOTEFOUNDATION_KEY}"
     regions = scrape_regions(session)
     scrape_offices(session, regions)
+
+
+def check_state_contacts(state_id: str, mode: enums.SubmissionType) -> str:
+    if mode not in [enums.SubmissionType.LEO_EMAIL, enums.SubmissionType.LEO_FAX]:
+        return None
+
+    regions: Dict[int, Region] = {
+        region.external_id: region
+        for region in Region.objects.filter(state_id=state_id)
+    }
+    region_offices: Dict[int, List[Office]] = {
+        region_id: [] for region_id in regions.keys()
+    }
+    office_addresses: Dict[int, List[Address]] = {}
+    for office in Office.objects.filter(region_id__in=regions.keys()):
+        region_offices[office.region_id].append(office)
+        office_addresses[office.external_id] = []
+
+    for address in Address.objects.filter(office_id__in=office_addresses.keys()):
+        office_addresses[address.office_id].append(address)
+
+    region_override = {}
+    for override in LeoContactOverride.objects.filter(region_id__in=regions.keys()):
+        region_override[override.region_id] = override
+
+    bad_regions = []
+    for region_id, region in regions.items():
+        num = 0
+        override = region_override.get(region_id)
+        for office in region_offices[region_id]:
+            for address in office_addresses[office.external_id]:
+                if mode == enums.SubmissionType.LEO_FAX and (
+                    (address.fax and phonenumbers.is_valid_number(address.fax))
+                    or (override and override.fax)
+                ):
+                    num += 1
+                if mode == enums.SubmissionType.LEO_EMAIL and (
+                    address.email or (override and override.email)
+                ):
+                    num += 1
+
+        if not num:
+            url = f"https://www.voteamerica.com/local-election-offices/{state_id}/{region.external_id}/"
+            m = f"    {region_id} {region.name} ({state_id}) - {url}"
+            bad_regions.append(m)
+
+    if bad_regions:
+        message = (
+            f"{state_id} has {len(bad_regions)} regions missing {mode} contact info"
+        )
+        return "\n".join([message] + bad_regions)
+    return None
+
+
+def check_vbm_states():
+    for state in State.objects.all():
+        if state.vbm_submission_type != enums.SubmissionType.SELF_PRINT:
+            message = check_state_contacts(state.code, state.vbm_submission_type)
+            if message:
+                logger.warning(message)
+                if settings.SLACK_DATA_ERROR_ENABLED:
+                    try:
+                        with statsd.timed(
+                            "turnout.official.check_vbm_states.slackcall"
+                        ):
+                            r = requests.post(
+                                settings.SLACK_DATA_ERROR_WEBHOOK,
+                                json={"text": message},
+                            )
+                        r.raise_for_status()
+                    except Exception as e:
+                        logger.warning(f"Failed to post warning to slack webhook: {e}")
+    
