@@ -5,13 +5,15 @@
 
 {% block content %}
 <div class="content-wrapper">
-    <div class="col-lg-10 offset-lg-1">
+    <div class="col-lg-12">
         <h1>Register</h1>
+        {% include "action/manage/inc/action_listview_search.html" %}
         <div class="table-responsive-lg">
             <table class="table">
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Email</th>
                         <th>State</th>
                         <th>Start Time ({{ user.timezone }})</th>
                     </tr>
@@ -21,6 +23,9 @@
                     <tr>
                         <td>
                             <a href="{% url 'manage:register:registration_detail' user.active_client_slug registration.pk %}">{{ registration.first_name }} {{ registration.last_name }}</a>
+                        </td>
+                        <td>
+                            {{ registration.email }}
                         </td>
                         <td>
                             {{ registration.state.pk }}
