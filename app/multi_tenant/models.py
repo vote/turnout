@@ -25,6 +25,10 @@ class Client(UUIDModel, TimestampModel):
     # Passed to Civis to determine if subscriber's data should be synced to TMC
     sync_tmc = models.BooleanField(default=False, null=True)
 
+    # Determines if we show our own donate asks when a user is interacting with
+    # this client.
+    is_first_party = models.BooleanField(default=False)
+
     class Meta:
         ordering = ["created_at"]
         verbose_name = "Subscriber"

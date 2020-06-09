@@ -7,55 +7,66 @@
 Just a few more steps to complete your voter registration.
 <br><br>
 
-<ol>
-    <li><a href="{{ download_url }}">Print your voter registration form.</a></li>
-    <li>Complete all required fields.</li>
-    <li>Sign and date the form.</li>
-    <li>Send your completed form to the address below:</li>
-</ol>
-
-<center>
-{{ state_info.registration_nvrf_submission_address|markdownify|linebreaksbr }}<br><br>
-</center>
-
-Your voter registration form must be <strong>{{ state_info.registration_deadline_mail|markdownify|lower }}</strong>.<br><br>
-
-Helpful hints:
-<ul>
-    <li>If you don’t have a printer, you can print the form out at any local library.</li>
-    <li>If you don’t have a stamp, you can buy one from any grocery store: just ask the cashier to sell you one.</li>
-</ul>
-
-You are not registered to vote until your state processes this form.  You should receive written confirmation within 1-2 weeks.
-If not, you might want to call your local election office{% if state_info.external_tool_verify_status %} or use the <a href="{{ state_info.external_tool_verify_status }}">State of {{ registration.state }} website</a>{% endif %} to confirm that you are now registered to vote.<br><br>
-
-Happy voting,<br>
-{{ subscriber.name }}
-
 <!--[if gte mso 9]>
 <br>
 <![endif]-->
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
     <tr>
         <td>
-            <center>
-                <table border="0" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td align="center"
-                            style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
-                            bgcolor="#e23c16">
-                            <a href="{{ download_url }}"
-                                target="_blank"
-                                style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Print your form</a>
-                        </td>
-                    </tr>
-                </table>
-            </center>
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="center"
+                        style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
+                        bgcolor="#e23c16">
+                        <a href="{{ download_url }}"
+                            target="_blank"
+                            style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Print your form</a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>
 <!--[if gte mso 9]>
 <br>
 <![endif]-->
+
+<ol style="margin-left:0;padding-left:0">
+    <li>Use the button above to print your voter registration form</li>
+    <li>Complete all required fields.</li>
+    <li><strong>Sign and date</strong> the form.</li>
+    <li>Send your completed form to the address below:</li>
+</ol>
+
+<div>
+{{ state_info.registration_nvrf_submission_address|markdownify|linebreaksbr }}<br><br>
+</div>
+
+<hr><br>
+
+Your voter registration form must be <strong>{{ state_info.registration_deadline_mail|markdownify|lower }}</strong>.<br><br>
+
+Helpful hints:
+<ul style="margin-left:0;padding-left:0">
+    <li>If you don’t have a printer, you can print the form out at any local library.</li>
+    <li>If you don’t have a stamp, you can buy one from any grocery store: just ask the cashier to sell you one.</li>
+</ul>
+<br>
+
+You are not registered to vote until your state processes this form.  You should receive written confirmation within 1-2 weeks.
+If not, you might want to <a href="https://www.voteamerica.com/local-election-offices/{{registration.state.code}}/">call your local election office</a>{% if state_info.external_tool_verify_status %} or use the <a href="{{ state_info.external_tool_verify_status }}">State of {{ registration.state }} website</a>{% endif %} to confirm that you are now registered to vote.<br><br>
+
+<hr><br>
+
+{% if subscriber.is_first_party %}
+One last thing: We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{registration.email}}&firstname={{registration.first_name}}&lastname={{registration.last_name}}&zip={{registration.zipcode}}&city={{registration.city}}&state={{registration.state.code}}&phone={{registration.phone.as_e164}}&addr1={{registration.address1}}&refcode=register_file_notification" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}
 
 {% endblock %}

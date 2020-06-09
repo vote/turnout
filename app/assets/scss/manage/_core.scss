@@ -2,6 +2,12 @@
     margin-bottom: 20px;
     margin-left: 15px;
     margin-right: 15px;
+    background-color: black;
+    color: white;
+}
+
+.alert-dismissible button.close {
+    opacity: 1;
 }
 
 .btn-primary {

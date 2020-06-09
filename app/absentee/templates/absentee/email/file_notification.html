@@ -7,27 +7,6 @@
 Just a few more steps to request your absentee ballot.
 <br><br>
 
-<ol>
-    <li><a href="{{ download_url }}">Print your absentee ballot request form.</a></li>
-    <li>Complete all required fields.</li>
-    <li>Sign and date the form.</li>
-    <li>Send your completed form to the address below:</li>
-</ol>
-
-<center>
-{{ mailing_address|linebreaksbr }}<br><br>
-</center>
-
-Your absentee ballot request form must be <strong>received</strong> by <strong>{{ state_info.vbm_deadline_mail|markdownify|lower }}</strong>.<br><br>
-
-Helpful hints:
-<ul>
-    <li>If you don’t have a printer, you can print the form out at any local library.</li>
-    <li>If you don’t have a stamp, you can buy one from any grocery store: just ask the cashier to sell you one.</li>
-</ul>
-
-Happy voting,<br>
-{{ subscriber.name }}
 
 <!--[if gte mso 9]>
 <br>
@@ -35,24 +14,57 @@ Happy voting,<br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
     <tr>
         <td>
-            <center>
-                <table border="0" cellspacing="0" cellpadding="0">
-                    <tr>
-                        <td align="center"
-                            style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
-                            bgcolor="#e23c16">
-                            <a href="{{ download_url }}"
-                                target="_blank"
-                                style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Print your form</a>
-                        </td>
-                    </tr>
-                </table>
-            </center>
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="center"
+                        style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
+                        bgcolor="#e23c16">
+                        <a href="{{ download_url }}"
+                            target="_blank"
+                            style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Print your form</a>
+                    </td>
+                </tr>
+            </table>
         </td>
     </tr>
 </table>
 <!--[if gte mso 9]>
 <br>
 <![endif]-->
+
+<ol style="margin-left:0;padding-left:0">
+    <li>Use the button above to print your absentee ballot request form.</a></li>
+    <li>Complete all required fields.</li>
+    <li><strong>Sign and date</strong> the form.</li>
+    <li>Send your completed form to the address below:</li>
+</ol>
+
+<div>
+{{ mailing_address|linebreaksbr }}<br><br>
+</div>
+
+<hr><br>
+
+Your absentee ballot request form must be <strong>received</strong> by <strong>{{ state_info.vbm_deadline_mail|markdownify|lower }}</strong>.<br><br>
+
+Helpful hints:
+<ul style="margin-left:0;padding-left:0">
+    <li>If you don’t have a printer, you can print the form out at any local library.</li>
+    <li>If you don’t have a stamp, you can buy one from any grocery store: just ask the cashier to sell you one.</li>
+</ul>
+
+<hr><br>
+
+{% if subscriber.is_first_party %}
+One last thing: We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{ballot_request.email}}&firstname={{ballot_request.first_name}}&lastname={{ballot_request.last_name}}&zip={{ballot_request.zipcode}}&city={{ballot_request.city}}&state={{ballot_request.state.code}}&phone={{ballot_request.phone.as_e164}}&addr1={{ballot_request.address1}}&refcode=absentee_file_notification" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}
+
 
 {% endblock %}
