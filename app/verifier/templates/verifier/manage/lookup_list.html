@@ -15,9 +15,10 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Date of Birth</th>
                         <th>State</th>
                         <th>Status</th>
-                        <th>Lookup Time ({{ user.timezone }})</th>
+                        <th>Lookup Time <small>({{ user.timezone }})</small></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,9 @@
                         </td>
                         <td>
                             {{ lookup.email }}
+                        </td>
+                        <td>
+                            {{ lookup.date_of_birth|date:"Y-m-d" }}
                         </td>
                         <td>
                             {{ lookup.state.pk }}

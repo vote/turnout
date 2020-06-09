@@ -14,8 +14,9 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Date of Birth</th>
                         <th>State</th>
-                        <th>Start Time ({{ user.timezone }})</th>
+                        <th>Start Time <small>({{ user.timezone }})</small></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,6 +27,9 @@
                         </td>
                         <td>
                             {{ ballot_request.email }}
+                        </td>
+                        <td>
+                            {{ ballot_request.date_of_birth|date:"Y-m-d" }}
                         </td>
                         <td>
                             {{ ballot_request.state.pk }}
