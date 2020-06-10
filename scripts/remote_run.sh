@@ -111,7 +111,8 @@ docker run -i -t \
     -e SLACK_DATA_ERROR_ENABLED \
     -e SLACK_DATA_ERROR_WEBHOOK \
     -e USVF_SYNC \
-    -e USVF_SYNC_HOUR \-e DEBUG=$DEBUG \
+    -e USVF_SYNC_HOUR \
+-e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
 /bin/bash
