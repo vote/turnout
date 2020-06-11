@@ -52,26 +52,40 @@ def scrape_regions(session: requests.Session) -> List[Region]:
     regions: List[Region] = []
     supported_states = State.objects.values_list("code", flat=True)
 
-    next_url = f"{API_ENDPOINT}/regions?limit=100"
-    while next_url:
-        with statsd.timed("turnout.official.usvfcall.regions", sample_rate=0.2):
-            result = acquire_data(session, next_url)
+    # The USVF API is buggy and does not paginate reliably.  Make
+    # multiple passes with different page sizes to ensure we capture
+    # all records.  In practice, the [100,73] is sufficient but
+    # additional passes act as an insurance policy.
+    saw_id = set()
+    for limit in [100, 73, 67]:
+        next_url = f"{API_ENDPOINT}/regions?limit={limit}"
+        while next_url:
+            with statsd.timed("turnout.official.usvfcall.regions", sample_rate=0.2):
+                result = acquire_data(session, next_url)
 
-        for usvf_region in result["objects"]:
-            if usvf_region.get("state_abbr") not in supported_states:
-                continue
-            regions.append(
-                Region(
-                    external_id=usvf_region["id"],
-                    name=usvf_region.get("region_name"),
-                    municipality=usvf_region.get("municipality_name"),
-                    municipality_type=usvf_region.get("municipality_type"),
-                    county=usvf_region.get("county_name"),
-                    state_id=usvf_region.get("state_abbr"),
+            for usvf_region in result["objects"]:
+                if usvf_region.get("state_abbr") not in supported_states:
+                    continue
+
+                id_ = usvf_region.get("id")
+                if id_ in saw_id:
+                    continue
+                saw_id.add(id_)
+                regions.append(
+                    Region(
+                        external_id=usvf_region["id"],
+                        name=usvf_region.get("region_name"),
+                        municipality=usvf_region.get("municipality_name"),
+                        municipality_type=usvf_region.get("municipality_type"),
+                        county=usvf_region.get("county_name"),
+                        state_id=usvf_region.get("state_abbr"),
+                    )
                 )
-            )
 
-        next_url = result["meta"].get("next")
+            next_url = result["meta"].get("next")
+        logger.info(
+            "Found %(number)s Regions after this pass", {"number": len(regions)}
+        )
 
     statsd.gauge("turnout.official.scraper.regions", len(regions))
     logger.info("Found %(number)s Regions", {"number": len(regions)})
@@ -96,79 +110,90 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
     existing_addresses = {a.external_id: a for a in Address.objects.all()}
     addresses_dict: Dict[(int, Tuple[Action, Address])] = {}
 
-    next_url = f"{API_ENDPOINT}/offices?limit=100"
-    while next_url:
-        with statsd.timed("turnout.official.usvfcall.offices", sample_rate=0.2):
-            result = acquire_data(session, next_url)
+    # The USVF API pagination is buggy; make multiple passes with
+    # different page sizes.
+    for limit in [100, 73, 67]:
+        next_url = f"{API_ENDPOINT}/offices?limit={limit}"
+        while next_url:
+            with statsd.timed("turnout.official.usvfcall.offices", sample_rate=0.2):
+                result = acquire_data(session, next_url)
 
-        for office in result["objects"]:
-            # Check that the region is valid (we don't support US territories)
-            region_id = int(office["region"].rsplit("/", 1)[1])
-            if region_id not in existing_region_ids:
-                continue
+            for office in result["objects"]:
+                # Check that the region is valid (we don't support US territories)
+                region_id = int(office["region"].rsplit("/", 1)[1])
+                if region_id not in existing_region_ids:
+                    continue
 
-            # Process each office in the response
-            if office["id"] in existing_offices:
-                office_action = Action.UPDATE
-            else:
-                office_action = Action.INSERT
-            offices_dict[office["id"]] = (
-                office_action,
-                Office(
-                    external_id=office["id"],
-                    region_id=int(office["region"].split("/")[-1]),
-                    hours=office.get("hours"),
-                    notes=office.get("notes"),
-                ),
-            )
+                office_id = office["id"]
+                if office_id in offices_dict:
+                    continue
 
-            for address in office.get("addresses", []):
-                # Process each address in the office
-                existing = existing_addresses.get(address["id"], None)
-                if existing:
-                    address_action = Action.UPDATE
-                    location = existing.location
+                # Process each office in the response
+                if office_id in existing_offices:
+                    office_action = Action.UPDATE
                 else:
-                    address_action = Action.INSERT
-                    location = None
-                if not location:
-                    addrs = geocode(
-                        street=address.get("street1"),
-                        city=address.get("city"),
-                        state=address.get("state"),
-                        zipcode=address.get("zip"),
-                    )
-                    if addrs:
-                        location = Point(
-                            addrs[0]["location"]["lng"], addrs[0]["location"]["lat"]
-                        )
-                addresses_dict[address["id"]] = (
-                    address_action,
-                    Address(
-                        external_id=address["id"],
-                        office_id=office["id"],
-                        address=address.get("address_to"),
-                        address2=address.get("street1"),
-                        address3=address.get("street2"),
-                        city=address.get("city"),
-                        state_id=address.get("state"),
-                        zipcode=address.get("zip"),
-                        website=address.get("website"),
-                        email=address.get("main_email"),
-                        phone=address.get("main_phone_number"),
-                        fax=address.get("main_fax_number"),
-                        location=location,
-                        is_physical=address.get("is_physical"),
-                        is_regular_mail=address.get("is_regular_mail"),
-                        process_domestic_registrations="DOM_VR" in address["functions"],
-                        process_absentee_requests="DOM_REQ" in address["functions"],
-                        process_absentee_ballots="DOM_RET" in address["functions"],
-                        process_overseas_requests="OVS_REQ" in address["functions"],
-                        process_overseas_ballots="OVS_RET" in address["functions"],
+                    office_action = Action.INSERT
+                offices_dict[office_id] = (
+                    office_action,
+                    Office(
+                        external_id=office_id,
+                        region_id=int(office["region"].split("/")[-1]),
+                        hours=office.get("hours"),
+                        notes=office.get("notes"),
                     ),
                 )
 
-        next_url = result["meta"].get("next")
+                for address in office.get("addresses", []):
+                    # Process each address in the office
+                    existing = existing_addresses.get(address["id"], None)
+                    if existing:
+                        address_action = Action.UPDATE
+                        location = existing.location
+                    else:
+                        address_action = Action.INSERT
+                        location = None
+                    if not location:
+                        addrs = geocode(
+                            street=address.get("street1"),
+                            city=address.get("city"),
+                            state=address.get("state"),
+                            zipcode=address.get("zip"),
+                        )
+                        if addrs:
+                            location = Point(
+                                addrs[0]["location"]["lng"], addrs[0]["location"]["lat"]
+                            )
+                    addresses_dict[address["id"]] = (
+                        address_action,
+                        Address(
+                            external_id=address["id"],
+                            office_id=office["id"],
+                            address=address.get("address_to"),
+                            address2=address.get("street1"),
+                            address3=address.get("street2"),
+                            city=address.get("city"),
+                            state_id=address.get("state"),
+                            zipcode=address.get("zip"),
+                            website=address.get("website"),
+                            email=address.get("main_email"),
+                            phone=address.get("main_phone_number"),
+                            fax=address.get("main_fax_number"),
+                            location=location,
+                            is_physical=address.get("is_physical"),
+                            is_regular_mail=address.get("is_regular_mail"),
+                            process_domestic_registrations="DOM_VR"
+                            in address["functions"],
+                            process_absentee_requests="DOM_REQ" in address["functions"],
+                            process_absentee_ballots="DOM_RET" in address["functions"],
+                            process_overseas_requests="OVS_REQ" in address["functions"],
+                            process_overseas_ballots="OVS_RET" in address["functions"],
+                        ),
+                    )
+
+            next_url = result["meta"].get("next")
+        logger.info(
+            "Found %(number)s offices after this pass", {"number": len(offices_dict)}
+        )
 
     statsd.gauge("turnout.official.scraper.offices", len(offices_dict))
     logger.info("Found %(number)s Offices", {"number": len(offices_dict)})
@@ -294,4 +319,3 @@ def check_vbm_states():
                         r.raise_for_status()
                     except Exception as e:
                         logger.warning(f"Failed to post warning to slack webhook: {e}")
-    

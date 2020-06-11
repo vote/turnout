@@ -194,6 +194,10 @@ REST_FRAMEWORK = {
 # how often to recalculate subscriber stats
 CALC_STATS_INTERVAL = 5
 
+USVF_SYNC = env.bool("USVF_SYNC", False)
+USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
+USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
+
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -204,10 +208,6 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
 }
 CELERY_BEAT_SCHEDULE = {
-    "trigger-usvf-sync": {
-        "task": "official.tasks.sync_usvotefoundation",
-        "schedule": crontab(minute=30, hour=6),
-    },
     "trigger-netlify-updated-information": {
         "task": "election.tasks.trigger_netlify_if_updates",
         "schedule": crontab(minute=0, hour="*"),
@@ -218,6 +218,12 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_TIMEZONE = "UTC"
+
+if USVF_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
+        "task": "official.tasks.sync_usvotefoundation",
+        "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
+    }
 
 #### END CELERY CONFIGURATION
 
