@@ -11,6 +11,7 @@ from common.analytics import statsd
 from common.utils.serializers import SmallUUIDKeySerializer
 
 from .models import SecureUploadItem, StorageItem
+from .notification import trigger_notification
 from .parsers import UnnamedFileUploadParser
 
 
@@ -28,7 +29,7 @@ class ResetView(APIView):
             raise Http404
 
         item.refresh_token()
-        # TODO: Trigger email to user with new token
+        trigger_notification(item)
 
         return Response(status=status.HTTP_201_CREATED)
 

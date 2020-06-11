@@ -1,4 +1,5 @@
 import logging
+import time
 
 from django.views.generic import RedirectView
 from django.views.generic.detail import SingleObjectMixin
@@ -17,6 +18,10 @@ class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         item = self.get_object()
         token = self.request.GET.get("token")
+        statsd.distribution(
+            "turnout.storage.token_validity_seconds",
+            time.time() - item.expires.timestamp(),
+        )
         if token and item.validate_token(token):
             logger.info(f"Valid token {item.pk}. Redirecting to file url.")
 

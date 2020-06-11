@@ -281,7 +281,7 @@ DEFAULT_FILE_STORAGE = "storage.backends.AttachmentStorage"
 FILE_EXPIRATION_HOURS = env.int("FILE_EXPIRATION_HOURS", default=168)
 FILE_TIMEZONE = env.str("FILE_TIMEZONE", default="America/Los_Angeles")
 FILE_TOKEN_RESET_URL = env.str(
-    "FILE_TOKEN_RESET_URL", default="https://www.turnout2020.us/download/?id={item_id}"
+    "FILE_TOKEN_RESET_URL", default="http://localhost:8000/download/?id={item_id}"
 )
 
 if env.bool("ATTACHMENT_USE_S3", False):

@@ -42,7 +42,9 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
         return self.token
 
     def validate_token(self, token):
-        return token == str(self.token)
+        return (token == str(self.token)) and (
+            datetime.datetime.now(tz=datetime.timezone.utc) < self.expires
+        )
 
     @property
     def download_url(self):

@@ -1,0 +1,42 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+Hello,<br><br>
+
+Here's the new link to download your file.
+<br><br>
+
+<!--[if gte mso 9]>
+<br>
+<![endif]-->
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+    <tr>
+        <td>
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="center"
+                        style="-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;width: 300px;"
+                        bgcolor="#e23c16">
+                        <a href="{{ download_url }}" target="_blank"
+                            style="font-size: 22px; font-family: Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; padding: 10px 25px; border: 1px solid #e23c16; display: inline-block;;font-weight: bold">Download your file</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+<!--[if gte mso 9]>
+<br>
+<![endif]-->
+<br><br>
+Happy voting,<br>
+{% if subscriber %}
+{{ subscriber.name }}
+{% else %}
+VoteAmerica
+{% endif %}
+
+
+{% endblock %}
