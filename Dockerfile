@@ -2,7 +2,7 @@ FROM python:3.7-buster
 ENV APP_DIR=/app
 WORKDIR $APP_DIR
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
-    apt-get install -y nodejs pdftk-java gdal-bin && apt-get clean
+    apt-get install -y nodejs pdftk-java gdal-bin postgis && apt-get clean
 
 COPY app/package.json app/package-lock.json $APP_DIR/
 RUN npm install

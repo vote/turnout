@@ -52,6 +52,8 @@ To clean python files run `make lint` (while the server is running)
 To bootstrap the database with state information fields and data from our production API,
 run `make importfromprod` (while server is running)
 
+To download GIS data for address matching, run `make importgisdata` (while the server is running)
+
 
 ### Shell Access
 

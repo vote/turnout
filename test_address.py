@@ -12,6 +12,36 @@ API_URL = "http://localhost:9001/v1/official/address/"
 @pytest.mark.parametrize(
     "street,city,state,zipcode,expected",
     [
+        # VA
+        ("3004 Stony Point Rd", "Richmond", "VA", "23235", [{"name":"City of Richmond","external_id":432959}]),
+
+        # OK
+        ("21781 main st", "Howe", "OK", "74940", [{"name":"LeFlore County","external_id":432057}]),
+
+        # TN
+        ("101 sunnybrook dr", "Bristol", "TN", "37620", [{"name":"Sullivan County","external_id":432365}]),
+
+        # FL
+        ("319 S Brevard Ave", "Arcadia", "FL", "34266", [{"name":"De Soto County","external_id":430666}]),
+
+        # MD
+        ("6151 chevy chase dr", "Laurel", "MD", "20707", [{"name":"Prince Georges County","external_id":434812}]),
+
+        # SD
+        ("PO Box 1", "Kyle", "SD", "57752", [{"name":"Oglala Lakota County","external_id":434278}]),
+
+        # HI
+        ("1525 bernice st", "Honolulu", "HI", "96817", [{"name":"Honolulu, City and County","external_id":430725}]),
+        ("1067 california ave", "Wahiawa", "HI", "96786", [{"name":"Honolulu, City and County","external_id":430725}]),
+
+        # "La Foo" counties, which sometimes contract to "LaFoo", "De*" -> "De *"
+        ("500 N Moon Mountain Ave", "Quartzsite", "AZ", "85346", [{"name":"La Paz County","external_id":430444}]),
+        ("515 E College Dr", "Durango", "CO", "81301", [{'external_id': 430619, 'name': 'La Plata County'}]),
+        ("345 Hupp Rd", "La Porte", "IN", "46350", [{'external_id': 431494, 'name': 'La Porte County'}]),
+        ("6805 state road 101", "Saint Joe", "IN", "46785", [{"name":"De Kalb County","external_id":431464}]),
+        ("1911 Ottawa Ave", "Ottawa", "IL", "61350", [{'external_id': 430825, 'name': 'La Salle County'}]),
+        ("803 Pecos St", "Cotulla", "TX", "78014", [{'external_id': 432517, 'name': 'La Salle County'}]),
+
         # mo
         ("1200 Lynch St", "St. Louis", "MO", "63118", [{'external_id': 433919, 'name': 'Saint Louis City'}]),
         ("7733 Forsyth Blvd", "Clayton", "MO", "63105", [{'external_id': 433920, 'name': 'Saint Louis County'}]),
@@ -60,6 +90,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("304 E Main St", "Albany", "WI", "53502", [{"name":"Village of Albany, Green County","external_id":437902}]),
         ("6490 Chippewa Rd", "Land O' Lakes", "WI", "54540", [{'external_id': 437244, 'name': "Town of Land O' Lakes, Vilas County"}]),
         ("14990 Superior St", "Drummond", "WI", "54832", [{'external_id': 436948, 'name': 'Town of Drummond , Bayfield County'}]),
+        ("1100 co rd a", "Hudson", "WI", "54016", [{"name":"Town of Saint Joseph, Saint Croix County","external_id":437702}]),
 
         # or
         ("500 holly st", "ashland", "OR", "97530", [{'name': 'Jackson County', 'external_id': 432109}]),
@@ -71,6 +102,8 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("16 beach st", "eastham", "ma", "", [{'name': 'Town of Eastham', 'external_id': 431215}]),
         ("85 Treadwell Hollow Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
         ("554 Sloan Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
+        ("po box 1", "HOUSATONIC", "MA", "01236", [{'name': 'Town of West Stockbridge', 'external_id': 431427}]),
+        ("69 pleasant st", "gardner", "MA", "01440", [{"name":"Ctiy of Gardner","external_id":431107}]),
 
         # mi
         ("301 S 5th St", "Grand Haven", "MI", "49417", [{'external_id': 435266, 'name': 'Grand Haven City, Ottawa County'}]),
@@ -85,6 +118,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("46640 Healy St", "Dodgeville", "MI", "49921", [{'name': 'Portage Township, Houghton County', 'external_id': 436123}]),
 
         # ny
+        ("PO Box 1", "Queens Village", "NY", "11428", [{"name":"New York City: Queens","external_id":433319}]),
         ("20 W 34th St", "New York", "NY", "10001", [{'name': 'New York City: Manhattan', 'external_id': 433320}]),
         ("1050 Clove Rd", "Staten Island", "NY", "10301", [{'name': 'New York City: Staten Island', 'external_id': 433318}]),
         ("5800 20th Ave", "Brooklyn", "NY", "11204", [{'name': 'New York City: Brooklyn', 'external_id': 433317}]),

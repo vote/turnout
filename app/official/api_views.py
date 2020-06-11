@@ -15,6 +15,7 @@ from common.analytics import statsd
 from common.geocode import (
     al_jefferson_county_bessemer_division,
     geocode,
+    ma_location_to_mcd,
     wi_location_to_mcd,
 )
 
@@ -110,22 +111,33 @@ county_method = [
 # City: %s" for (Manhattan, Brooklyn, Staten Island,
 # Queens, The Bronx).  Which are actually counties.
 nyc_remap = {
-    "new york": "new york city: manhattan",
-    "kings": "new york city: brooklyn",
-    "bronx": "new york city: the bronx",
-    "queens": "new york city: queens",
-    "richmond": "new york city: staten island",
+    "new york county": "new york city: manhattan",
+    "kings county": "new york city: brooklyn",
+    "bronx county": "new york city: the bronx",
+    "queens county": "new york city: queens",
+    "richmond county": "new york city: staten island",
 }
 
 
-def geocode_to_regions(addrs):
+def geocode_to_regions(street, city, state, zipcode):
     # how many "nearby" offices to return when searching by lat/lng
     max_by_distance = 4
 
     max_distance = D(mi=100)
 
+    addrs = geocode(
+        street=street, city=city, state=state, zipcode=zipcode, fields="stateleg",
+    )
+    if not addrs:
+        logger.error(f"Unable to geocode ({street}, {city}, {state} {zipcode})")
+        sentry_sdk.capture_exception(
+            AddressRegionsAPIError(
+                f"Unable to geocode ({street}, {city}, {state} {zipcode})"
+            )
+        )
+        return None
+
     # assume the first address match is the correct (only) state
-    assert addrs
     state_code = addrs[0]["address_components"]["state"]
 
     queryset = Region.objects.filter(state__code=state_code).order_by("name")
@@ -135,18 +147,40 @@ def geocode_to_regions(addrs):
         from django.db.models import Q
 
         q = None
-        for county in [address["address_components"]["county"] for address in addrs]:
+        for county in [
+            address["address_components"].get("county") for address in addrs
+        ]:
+            if not county:
+                continue
             if q:
                 q = q | Q(name__icontains=county)
             else:
                 q = Q(name__icontains=county)
-        queryset = queryset.filter(q)
+            if county.startswith("La") or county.startswith("De"):
+                county2 = county[0:2] + " " + county[2:]
+                q = q | Q(name__icontains=county2)
+            elif county.startswith("Le "):
+                county2 = county[0:2] + county[3:]
+                q = q | Q(name__icontains=county2)
+            elif county.startswith("St. "):
+                county2 = "Saint " + county[4:]
+                q = q | Q(name__icontains=county2)
+            elif county == "Shannon County":
+                q = q | Q(name__icontains="oglala lakota county")
+            elif county.endswith(" city"):
+                county2 = "City of " + county[:-5]
+                q = q | Q(name__icontains=county2)
+
+        if q:
+            queryset = queryset.filter(q)
 
     ls = list(queryset)
     regions_by_name = {r.name.lower(): r for r in ls}
 
     regions = []
     had_perfect_match = False
+    best_match = addrs[0]["accuracy"]
+    addr_num = 0
     for addr in addrs:
         logger.debug(addr)
         # sometimes geocodio returns multiple addr matches even when the first one is perfect
@@ -154,10 +188,36 @@ def geocode_to_regions(addrs):
             break
         if addr["accuracy"] == 1:
             had_perfect_match = True
+        # if additional possible matches are much worse, ignore them.
+        if addr["accuracy"] < best_match * 0.7:
+            break
+        # only try the first address
+        addr_num += 1
+        if addr_num > 1:
+            break
 
+        if "county" not in addr["address_components"]:
+            continue
         county = addr["address_components"]["county"].lower()
         city = addr["address_components"]["city"].lower()
         location = Point(addr["location"]["lng"], addr["location"]["lat"])
+
+        if county.startswith("la") or county.startswith("de"):
+            county2 = county[0:2] + " " + county[2:]
+        elif county.startswith("le "):
+            county2 = county[0:2] + county[3:]
+        elif county.startswith("st. "):
+            county2 = "saint " + county[4:]
+        elif county == "honolulu county" and state_code == "HI":
+            county2 = "honolulu, city and county"
+        elif county == "shannon county" and state_code == "SD":
+            county2 = "oglala lakota county"
+        elif "'" in county:
+            county2 = county.replace("'", "")
+        elif county.endswith(" city"):
+            county2 = "city of " + county[:-5]
+        else:
+            county2 = county
 
         if state_code == "MO":
             logger.info("city %s county %s" % (city, county))
@@ -168,13 +228,38 @@ def geocode_to_regions(addrs):
             if county == "st. louis county":
                 return [regions_by_name["saint louis county"]]
 
+        if state_code == "MA":
+            # check against state API
+            mcd = ma_location_to_mcd(location)
+            if mcd:
+                found = False
+                for typ in ["city", "town", "ctiy"]:
+                    key = "%s of %s" % (typ.lower(), mcd.lower())
+                    if key in regions_by_name:
+                        regions.append(regions_by_name[key])
+                        found = True
+                        break
+                    if key in regions_by_name:
+                        regions.append(regions_by_name[key])
+                        found = True
+                        break
+                if found:
+                    continue
+
         if state_code == "WI":
             # check against state API
             mcd = wi_location_to_mcd(location)
             if mcd:
                 found = False
+                if mcd.startswith("St. "):
+                    mcd = "Saint " + mcd[4:]
                 for typ in ["city", "village", "town"]:
-                    key = "%s of %s, %s" % (typ, mcd, county)
+                    key = "%s of %s, %s" % (typ.lower(), mcd.lower(), county)
+                    if key in regions_by_name:
+                        regions.append(regions_by_name[key])
+                        found = True
+                        break
+                    key = "%s of %s, %s" % (typ.lower(), mcd.lower(), county2)
                     if key in regions_by_name:
                         regions.append(regions_by_name[key])
                         found = True
@@ -266,8 +351,11 @@ def geocode_to_regions(addrs):
             # generic county
             "{county}",
             "{county} County",
+            # La* -> La *, De* -> De *, Le * -> Le*
+            "{county2}",
+            "{county2} County",
         ]:
-            key = fmt.format(city=city, county=county).lower()
+            key = fmt.format(city=city, county=county, county2=county2).lower()
             if key in regions_by_name:
                 regions.append(regions_by_name[key])
                 found = True
@@ -276,6 +364,10 @@ def geocode_to_regions(addrs):
             continue
 
         if state_code == "NY":
+            key = nyc_remap.get(county, None)
+            if key and key in regions_by_name:
+                regions.append(regions_by_name[key])
+                continue
             key = nyc_remap.get("%s county" % county, None)
             if key and key in regions_by_name:
                 regions.append(regions_by_name[key])
@@ -288,7 +380,9 @@ def geocode_to_regions(addrs):
                 regions.append(regions_by_name["jefferson county, birmingham division"])
             continue
 
+    if not regions:
         # Fall back to looking for nearby offices by lat/lng
+        location = Point(addrs[0]["location"]["lng"], addrs[0]["location"]["lat"])
         queryset = Address.objects.filter(state__code=state_code)
 
         # narrow search to ~70 miles in each direction
@@ -311,12 +405,22 @@ def geocode_to_regions(addrs):
     return final
 
 
-def ts_address_to_region(street, city, state, zipcode):
-    args = {
-        "search_type": "address",
-        "address": f"{street}, {city}, {state} {zipcode}",
-        "state": state,
-    }
+def ts_to_region(
+    street=None, city=None, state=None, zipcode=None, latitude=None, longitude=None
+):
+    if latitude and longitude:
+        args = {
+            "search_type": "point",
+            "latitude": latitude,
+            "longitude": longitude,
+        }
+    else:
+        args = {
+            "search_type": "address",
+            "address": f"{street}, {city}, {state} {zipcode}",
+            "state": state,
+            "zip5": zipcode,
+        }
     url = f"{TARGETSMART_DISTRICT_API}?{urlencode({**args})}"
     with statsd.timed(
         "turnout.official.api_views.targetsmart.service.district", sample_rate=0.2
@@ -335,6 +439,8 @@ def ts_address_to_region(street, city, state, zipcode):
         return None
     try:
         match_data = r.json()["match_data"]
+        if not match_data:
+            return None
         state_code = match_data["vb.vf_reg_cass_state"]
         county = match_data["vb.vf_county_name"].lower()
         city = (
@@ -429,7 +535,7 @@ def ts_address_to_region(street, city, state, zipcode):
 def get_regions_for_address(street, city, state, zipcode):
     state = state.upper() if state else state
 
-    regions = None
+    regions = []
 
     # avoid TS for "easy" addresses, since the geocod.io latency (esp
     # long tail) *seems* to be better.  Also specifically avoid it for AL and AK,
@@ -438,21 +544,21 @@ def get_regions_for_address(street, city, state, zipcode):
     # avoid TS for MA too since I've seen at least one problematic address
     # on a city boundary for which TS returns the wrong municipality/region, whereas
     # geocod.io gets it right.
-    if state not in ["AK", "AL", "MA"] + county_method:
-        regions = ts_address_to_region(street, city, state, zipcode)
-    if not regions:
-        addrs = geocode(
-            street=street, city=city, state=state, zipcode=zipcode, fields="stateleg",
-        )
-        if not addrs:
-            logger.error(f"Unable to geocode ({street}, {city}, {state} {zipcode})")
-            sentry_sdk.capture_exception(
-                AddressRegionsAPIError(
-                    f"Unable to geocode ({street}, {city}, {state} {zipcode})"
-                )
-            )
-            return (None, True)
-        regions = geocode_to_regions(addrs)
+
+    # a few states do better with targetsmart.  for the others, we get
+    # better results from geocodio.
+    prefer_ts = ["VT", "MI"]
+
+    if state not in prefer_ts:
+        regions = geocode_to_regions(street, city, state, zipcode)
+    if not regions or len(regions) != 1:
+        # try targetsmart
+        r = ts_to_region(street, city, state, zipcode)
+        if r and len(r) == 1:
+            regions = r
+    if not regions and state in prefer_ts:
+        regions = geocode_to_regions(street, city, state, zipcode)
+
     if not regions:
         logger.error(f"No match for ({street}, {city}, {state} {zipcode})")
         sentry_sdk.capture_exception(

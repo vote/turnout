@@ -4,10 +4,12 @@ from urllib.parse import urlencode
 import requests
 import sentry_sdk
 from django.conf import settings
+from django.db import utils
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 from common.analytics import statsd
+from official.models import RegionGeomMA, RegionGeomWI
 
 API_ENDPOINT = "https://api.geocod.io/v1.5/geocode"
 
@@ -19,7 +21,7 @@ class GeocodioAPIError(Exception):
     pass
 
 
-class WIGISAPIError(Exception):
+class GISDataError(Exception):
     pass
 
 
@@ -40,7 +42,19 @@ def geocode(**kwargs):
         )
         http = requests.Session()
         http.mount("https://", HTTPAdapter(max_retries=retries))
-        r = http.get(url, timeout=TIMEOUT)
+        try:
+            r = http.get(url, timeout=TIMEOUT)
+        except Exception as e:
+            extra = {"url": url, "exception": str(e)}
+            logger.error(
+                "Error querying geocodio %(url)s, exception %(exception)s",
+                extra,
+                extra=extra,
+            )
+            sentry_sdk.capture_exception(
+                GeocodioAPIError(f"Error querying {url}, exception {str(e)}")
+            )
+            return None
     if r.status_code != 200:
         extra = {"url": url, "status_code": r.status_code}
         logger.error(
@@ -59,54 +73,42 @@ def wi_location_to_mcd(location):
     """
     query API with official WI state data as of jan 2020
     see: https://data-ltsb.opendata.arcgis.com/datasets/wi-cities-towns-and-villages-january-2020/geoservice
+
+    This same data set can be imported; see scripts/import_region_geom.sh
     """
-    RETRIES = 2
-    TIMEOUT = 2.0
-
-    API_ENDPOINT = "https://mapservices.legis.wisconsin.gov/arcgis/rest/services/Statewide/Municipal_Boundaries_January_2020/FeatureServer/0/query"
-
-    args = {
-        "outFields": "MCD_NAME",
-        "geometryType": "esriGeometryPoint",
-        "inSR": "4326",
-        "spatialRel": "esriSpatialRelWithin",
-        "returnGeometry": "false",
-        "outSR": "4326",
-        "f": "json",
-        "geometry": f"{location.x},{location.y}",
-    }
-    url = f"{API_ENDPOINT}?{urlencode(args)}"
-    with statsd.timed("turnout.common.geocode.wi_latlng_to_mcd", sample_rate=0.2):
-        retries = Retry(
-            total=RETRIES, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504]
-        )
-        http = requests.Session()
-        http.mount("https://", HTTPAdapter(max_retries=retries))
-        r = http.get(url, timeout=TIMEOUT)
-    if r.status_code != 200:
-        extra = {"url": r.request.url, "status_code": r.status_code}
-        logger.warning(
-            "Error querying WI state API %(url)s status code %(status_code)s",
-            extra,
-            extra=extra,
-        )
+    try:
+        mcds = list(RegionGeomWI.objects.filter(geom__intersects=location))
+        if mcds:
+            return mcds[0].mcd_name.title()
+    except utils.ProgrammingError:
+        # table doesn't exist; fall back to querying the API below
+        logger.warning(f"Table official_region_geom_wi does not exist")
         sentry_sdk.capture_exception(
-            WIGISAPIError(f"Error querying {url}, status code {r.status_code}")
+            GISDataError(f"Table official_region_geom_wi does not exist")
         )
-        return None
-    features = r.json().get("features", [])
-    if not features:
-        extra = {"url": r.request.url, "response": r.json()}
-        logger.warning(
-            "Malformed response from WI state API %(url)s, %(response)s",
-            extra,
-            extra=extra,
-        )
+    return None
+
+
+def ma_location_to_mcd(location):
+    """
+    query API with official MA state data as of fall 2018
+    see:
+      https://www.arcgis.com/home/item.html?id=e847265dcae6420f97b9eb55730a81df
+      https://services.arcgis.com/40CMVGZPtmu7aNof/arcgis/rest/services/Massachusetts_Wards_and_Precincts/FeatureServer/0
+
+    This same data set can be imported; see scripts/import_region_geom.sh
+    """
+    try:
+        precincts = list(RegionGeomMA.objects.filter(geom__intersects=location))
+        if precincts:
+            return precincts[0].town.title()
+    except utils.ProgrammingError:
+        # table doesn't exist; fall back to querying the API below
+        logger.warning(f"Table official_region_geom_ma does not exist")
         sentry_sdk.capture_exception(
-            WIGISAPIError(f"Malformed response from {url}, response {r.json()}")
+            GISDataError(f"Table official_region_geom_ma does not exist")
         )
-        return None
-    return features[0]["attributes"]["MCD_NAME"].title()
+    return None
 
 
 def al_jefferson_county_bessemer_division(location):

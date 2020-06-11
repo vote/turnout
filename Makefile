@@ -16,6 +16,9 @@ createsuperuser:
 importfromprod:
 	docker-compose exec server python manage.py importfromprod
 
+importgisdata:
+	docker-compose exec server python manage.py importgisdata
+
 shell:
 	docker-compose exec server /bin/bash
 

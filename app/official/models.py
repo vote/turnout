@@ -1,4 +1,4 @@
-from django.contrib.gis.db.models import PointField
+from django.contrib.gis.db.models import MultiPolygonField, PointField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -82,3 +82,25 @@ class Address(USVFModel):
                 if line is not None and len(line) > 0
             ]
         )
+
+
+class RegionGeomMA(models.Model):
+    # note: these are only the fields we care about
+    gid = models.IntegerField(primary_key=True)
+    town = models.TextField()
+    geom = MultiPolygonField(geography=True)
+
+    class Meta:
+        db_table = "official_region_geom_ma"
+        managed = False
+
+
+class RegionGeomWI(models.Model):
+    # note: these are only the fields we care about
+    gid = models.IntegerField(primary_key=True)
+    mcd_name = models.TextField()
+    geom = MultiPolygonField(geography=True)
+
+    class Meta:
+        db_table = "official_region_geom_wi"
+        managed = False
