@@ -154,11 +154,11 @@ def prepare_formdata(
         else:
             form_data[
                 "leo_contact_info"
-            ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+            ] = "https://www.voteamerica.com/local-election-offices/"
     else:
         form_data[
             "leo_contact_info"
-        ] = "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+        ] = "https://www.voteamerica.com/local-election-offices/"
 
     if contact_info.fax:
         form_data["leo_fax"] = contact_info.fax

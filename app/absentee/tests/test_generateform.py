@@ -75,7 +75,7 @@ def test_prepare_formdata_no_phone_or_email():
 
     assert (
         form_data["leo_contact_info"]
-        == "https://www.usvotefoundation.org/vote/eoddomestic.htm"
+        == "https://www.voteamerica.com/local-election-offices/"
     )
 
 
