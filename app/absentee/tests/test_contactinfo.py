@@ -13,21 +13,23 @@ def test_contact_info_all_in_one_address():
         "official.address",
         office=office,
         process_absentee_requests=True,
-        is_regular_mail=False,
+        is_physical=False,
     )
 
     wrong_addr2 = baker.make_recipe(
         "official.address",
         office=office,
         process_absentee_requests=False,
-        is_regular_mail=True,
+        is_physical=True,
     )
 
     wrong_addr3 = baker.make_recipe(
-        "official.address", process_absentee_requests=True, is_regular_mail=True,
+        "official.address", process_absentee_requests=True, is_physical=True,
     )
 
-    correct_addr = baker.make_recipe("official.absentee_ballot_address", office=office)
+    correct_addr = baker.make_recipe(
+        "official.absentee_ballot_address", office=office, is_physical=True
+    )
 
     contact_info = get_absentee_contact_info(office.region.external_id)
 
@@ -58,13 +60,14 @@ def test_contact_info_fallback():
         email=None,
         phone=None,
         fax=None,
+        is_physical=True,
     )
 
     second_priority = baker.make_recipe(
         "official.address",
         office=office,
         process_absentee_requests=True,
-        is_regular_mail=False,
+        is_physical=False,
         email=None,
         phone="+16175552222",
         fax=None,
@@ -74,7 +77,7 @@ def test_contact_info_fallback():
         "official.address",
         office=office,
         process_absentee_requests=False,
-        is_regular_mail=False,
+        is_physical=False,
         email="test@example.com",
         phone="+16175553333",
         fax="+16175554444",

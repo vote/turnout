@@ -40,18 +40,19 @@ class AbsenteeContactInfo:
 
 def absentee_address_score(addr: Address) -> int:
     """
-    Returns a "score" for how appropriate it is to talk to this Address about
-    absentee ballots.
+    Returns a "score" for selecting the optimal address to tell the user to
+    contact for questions about their absentee ballot.
 
-    1: This is an office that accept absentee ballot forms by mail
+    1: This is an office that accept absentee ballot forms and is a physical address
     2: This is an office that processes absentee ballot forms
     3: All other offices
 
-    We will only tell users to mail to offices with a score of 1, but we may
-    give them contact info for 2's and 3's if there are no 1's with contact
-    info.
+    We prioritize physical addresses over mailing addresses because the physical
+    offices can always receive mail, and some kinds of mail (USPS express) can
+    only be delivered to the physical addresses (the mailing addresses are
+    typically PO boxes).
     """
-    if addr.process_absentee_requests and addr.is_regular_mail:
+    if addr.process_absentee_requests and addr.is_physical:
         return 1
     elif addr.process_absentee_requests:
         return 2
