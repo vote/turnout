@@ -146,7 +146,7 @@ form_fields:
         required: true
         label: Last 4 digits of your social security number
         slug: state_id_number
-        format: "\\d{4}"
+        format: "^\\d{4}$"
         format_error: Enter 4 numeric digits
   - type: section
     label: Change of Name/Address
