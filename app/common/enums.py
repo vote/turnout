@@ -111,6 +111,7 @@ class EventType(Enum, metaclass=EnumMeta):
     START = "Start"
     FINISH_SELF_PRINT = "FinishPrint"
     FINISH_EXTERNAL = "FinishExternal"
+    FINISH_EXTERNAL_CONFIRMED = "FinishExternalConfirmed"
     FINISH_LEO = "FinishLEO"
     FINISH_LEO_FAX_PENDING = "FinishLEOFaxPending"
     FINISH_LEO_FAX_SENT = "FinishLEOFaxSent"
@@ -118,11 +119,15 @@ class EventType(Enum, metaclass=EnumMeta):
     FINISH = "Finish"
     DOWNLOAD = "Download"
     DONATE = "Donate"
+    RESTART = "Restart"
 
     class Labels:
         START = "Started Form"
         FINISH_SELF_PRINT = "Finished via Print and Mail"
         FINISH_EXTERNAL = "Finished with External Tool"
+        FINISH_EXTERNAL_CONFIRMED = (
+            "Finished with External Tool And Confirmed Completion"
+        )
         FINISH_LEO = "Finish via direct LEO email submission"
         FINISH_LEO_FAX_PENDING = "Finish via direct LEO fax submission (fax pending)"
         FINISH_LEO_FAX_SENT = "Finish via direct LEO fax submission (fax sent)"
@@ -130,6 +135,7 @@ class EventType(Enum, metaclass=EnumMeta):
         FINISH = "Completed Action"
         DOWNLOAD_PDF = "Downloaded File"
         DONATE_CLICK = "Donate Click"
+        RESTART = "Restarted Flow"
 
 
 class SecureUploadType(Enum, metaclass=EnumMeta):

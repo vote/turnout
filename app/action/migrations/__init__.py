@@ -41,7 +41,7 @@ FROM
       FROM
         event_tracking_event e
       WHERE
-        e.event_type = 'FinishExternal'
+        e.event_type IN ('FinishExternal', 'FinishExternalConfirmed')
     )
     finish_external
     ON finish_external.action_id = a.uuid
