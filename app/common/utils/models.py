@@ -1,3 +1,4 @@
+import tsvector_field
 from django.db import models
 from django_smalluuid.models import SmallUUIDField, uuid_default
 
@@ -27,3 +28,15 @@ class TrackingModel(models.Model):
 
     class Meta(object):
         abstract = True
+
+
+def SearchableModel(*args):
+    fields = [tsvector_field.WeightedColumn(name, "A") for name in args]
+
+    class SearchBase(models.Model):
+        search = tsvector_field.SearchVectorField(fields, "english")
+
+        class Meta(object):
+            abstract = True
+
+    return SearchBase

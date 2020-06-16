@@ -62,3 +62,4 @@ twilio==6.39.*
 jsonschema==3.2.0
 pdfrw==0.4
 shapely==1.7.*
+django-tsvector-field==0.9.*

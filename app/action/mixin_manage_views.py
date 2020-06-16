@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.postgres.search import SearchVector
 
 
 class ActionListViewMixin:
@@ -10,8 +9,6 @@ class ActionListViewMixin:
 
         search_query = self.request.GET.get("q")
         if search_query:
-            queryset = queryset.annotate(
-                search=SearchVector("first_name", "last_name", "email")
-            ).filter(search=search_query)
+            queryset = queryset.filter(search=search_query)
 
         return queryset

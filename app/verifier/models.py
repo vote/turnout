@@ -5,12 +5,24 @@ from phonenumber_field.modelfields import PhoneNumberField
 from action.mixin_models import ActionModel
 from common import enums
 from common.fields import TurnoutEnumField
-from common.utils.models import TimestampModel, TrackingModel, UUIDModel
+from common.utils.models import (
+    SearchableModel,
+    TimestampModel,
+    TrackingModel,
+    UUIDModel,
+)
 from common.validators import zip_validator
 from multi_tenant.mixins_models import SubscriberModel
 
 
-class Lookup(ActionModel, SubscriberModel, TrackingModel, UUIDModel, TimestampModel):
+class Lookup(
+    ActionModel,
+    SubscriberModel,
+    TrackingModel,
+    SearchableModel("email", "last_name", "first_name"),  # type: ignore
+    UUIDModel,
+    TimestampModel,
+):
     person = models.ForeignKey("people.Person", null=True, on_delete=models.PROTECT)
 
     first_name = models.TextField()

@@ -44,6 +44,7 @@ ballot_request = Recipe(
     uuid=uuid_default(),
     signature=foreign_key(signature),
     esign_method=enums.SubmissionType.SELF_PRINT,
+    search=None,
     _fill_optional=True,
 )
 
