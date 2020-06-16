@@ -2,33 +2,34 @@ signature_statement: I do solemnly swear that all statements made on this applic
 
 form_fields:
   - type: section
-    label: Election
+    label: Party
     content:
-      - type: election_date
-        label: Date of Election
-        slug: election_date
+      - type: radio
         required: true
-      - type: text
-        label: Political Party (only if you're requesting a ballot for a primary election)
-        slug: party
+        options:
+          - label: Republican
+            slug: party_republican
+          - label: Democratic
+            slug: party_democratic
+          - label: Libertarian
+            slug: party_libertarian
+          - label: Constitution
+            slug: party_constitution
+          - label: Green
+            slug: party_green
   - type: section
-    label: Identification
-    content:
-      - type: text
-        required: true
-        label: Last 4 digits of your social security number
-        slug: state_id_number
-        format: "^\\d{4}$"
-        format_error: Enter 4 numeric digits
-  - type: section
-    label: Reason for requesting an absentee ballot
+    label: Reason for requesting an absentee/mail-in ballot
+    note: |
+      Unless otherwise noted by the option you select, this form must be
+      notarized, and you may deliver it in-person, by mail, by fax, or by
+      email.
     content:
       - type: radio
         required: true
         options:
           - label: Absence on Election Day from the jurisdiction of the election authority in which I am registered
             slug: excuse_absence
-          - label: Incapacity or confinement due to illness or physical disability, including caring for a person who is incapacitated or confined due to illness or disability
+          - label: Incapacity or confinement due to illness or physical disability, including caring for a person who is incapacitated or confined due to illness or disability. NO NOTARY REQUIRED.
             slug: excuse_incapacitated
           - label: Religious belief or practice
             slug: excuse_religion
@@ -38,9 +39,16 @@ form_fields:
             slug: excuse_incarceration
           - label: Certified participation in the address confidentiality program established under sections 589.660 to 589.681 because of safety concerns.
             slug: excuse_confidential
+          - label: I have contracted or am in an at-risk category for contracting or transmitting severe acute respiratory syndrome, coronavirus 2 (COVID-19), pursuant to Section 115.277.6, RSMo. NO NOTARY REQUIRED
+            slug: excuse_covid
+          - label: Any registered voter can request a mail-in ballot. If selecting this option, this form must be delivered to your local election authority in person or by mail only. CANNOT SUBMIT BY EMAIL OR FAX.
+            slug: excuse_mailin
 
 auto_fields:
   - slug: date_signed
     type: todays_date
+
+manual_fields:
+  - party_nonpartisan
 
 pages: 1

@@ -109,7 +109,7 @@ def prepare_formdata(
 
     # combine address fields for states where the form is wonky
     form_data["address1_2"] = fmt.format("{address1} {address2}", **form_data).strip()
-    form_data["address1_2_city"] = fmt.format("{address1_2}, {state}", **form_data)
+    form_data["address1_2_city"] = fmt.format("{address1_2}, {city}", **form_data)
     form_data["address_city_state_zip"] = fmt.format(
         "{city}, {state} {zipcode}", **form_data
     )
