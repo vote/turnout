@@ -39,7 +39,7 @@
                                     {{ field.notes|linebreaks }}
                                 </td>
                                 <td scope="row">
-                                    {{ field.modified_at|timezone:user.timezone|date:"D d M Y" }}
+                                    {{ field.modified_at|timezone:user.timezone|date:"Y-m-d g:i a" }}
                                 </td>
                             </tr>
                         {% endfor %}
