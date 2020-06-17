@@ -187,7 +187,7 @@ local migrations = std.extVar('migrations');
         },
         {
           name: 'DD_DOCKER_LABELS_AS_TAGS',
-          value: '{"spinnaker.stack":"spinnaker_stack", "spinnaker.servergroup":"spinnaker_servergroup", "spinnaker.detail":"spinnaker_detail"}',
+          value: '{"spinnaker.stack":"spinnaker_stack", "spinnaker.servergroup":"spinnaker_servergroup", "spinnaker.detail":"spinnaker_detail", "spinnaker.stack":"env"}',
         },
         {
           name: 'DD_APM_ENABLED',
