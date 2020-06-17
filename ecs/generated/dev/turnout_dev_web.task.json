@@ -78,6 +78,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_url"
             },
             {
+               "name": "DATABASE_MAX_CONNECTIONS",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_max_connections"
+            },
+            {
                "name": "TARGETSMART_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.targetsmart_key"
             },
@@ -287,6 +291,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_url"
             },
             {
+               "name": "DATABASE_MAX_CONNECTIONS",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_max_connections"
+            },
+            {
                "name": "TARGETSMART_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.targetsmart_key"
             },
@@ -493,6 +501,10 @@
             {
                "name": "DATABASE_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_url"
+            },
+            {
+               "name": "DATABASE_MAX_CONNECTIONS",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_max_connections"
             },
             {
                "name": "TARGETSMART_KEY",
@@ -768,6 +780,10 @@
             {
                "name": "DATABASE_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_url"
+            },
+            {
+               "name": "DATABASE_MAX_CONNECTIONS",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.database_max_connections"
             },
             {
                "name": "TARGETSMART_KEY",

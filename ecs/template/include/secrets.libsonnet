@@ -6,6 +6,10 @@
         name: 'DATABASE_URL',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.database_max_connections',
+        name: 'DATABASE_MAX_CONNECTIONS',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.targetsmart_key',
         name: 'TARGETSMART_KEY',
       },
