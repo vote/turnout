@@ -52,6 +52,7 @@ export SLACK_DATA_ERROR_ENABLED=$(aws ssm get-parameter --region $REGION --with-
 export SLACK_DATA_ERROR_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_webhook | jq '.Parameter["Value"]' -r)
 export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
 export USVF_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync_hour | jq '.Parameter["Value"]' -r)
+export DD_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name general.datadogkey | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -114,6 +115,7 @@ docker run -i -t \
     -e SLACK_DATA_ERROR_WEBHOOK \
     -e USVF_SYNC \
     -e USVF_SYNC_HOUR \
+    -e DD_API_KEY \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

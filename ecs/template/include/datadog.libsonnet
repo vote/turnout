@@ -17,5 +17,9 @@
         name: 'DD_LOGS_INJECTION',
         value: 'true',
       },
+      {
+        name: 'DD_TAGS',
+        value: 'env:' + env + ',service:' + service,
+      },
     ],
 }

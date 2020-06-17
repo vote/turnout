@@ -27,6 +27,10 @@
             {
                "name": "DD_LOGS_INJECTION",
                "value": "true"
+            },
+            {
+               "name": "DD_TAGS",
+               "value": "env:prod,service:turnoutweb"
             }
          ],
          "essential": true,
@@ -212,6 +216,10 @@
             {
                "name": "USVF_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.usvf_sync_hour"
+            },
+            {
+               "name": "DD_API_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey"
             }
          ]
       },
@@ -252,6 +260,10 @@
             {
                "name": "DD_LOGS_INJECTION",
                "value": "true"
+            },
+            {
+               "name": "DD_TAGS",
+               "value": "env:prod,service:turnoutworker"
             }
          ],
          "essential": true,
@@ -421,6 +433,10 @@
             {
                "name": "USVF_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.usvf_sync_hour"
+            },
+            {
+               "name": "DD_API_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey"
             }
          ]
       },
@@ -460,6 +476,10 @@
             {
                "name": "DD_LOGS_INJECTION",
                "value": "true"
+            },
+            {
+               "name": "DD_TAGS",
+               "value": "env:prod,service:turnoutbeat"
             }
          ],
          "essential": true,
@@ -629,6 +649,10 @@
             {
                "name": "USVF_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.usvf_sync_hour"
+            },
+            {
+               "name": "DD_API_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey"
             }
          ]
       },
