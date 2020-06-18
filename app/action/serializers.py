@@ -5,6 +5,7 @@ from enumfields.drf.serializers import EnumSupportSerializerMixin
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+from common.apm import tracer
 from multi_tenant.mixins_serializers import SubscriberSerializerMixin
 
 from .models import Action
@@ -27,6 +28,10 @@ class ActionSerializer(
     def create(self, validated_data: Dict[(str, Any)]) -> "Model":
         validated_data["action"] = Action.objects.create()
         return super().create(validated_data)
+
+    @tracer.wrap()
+    def run_validation(self, *args, **kwargs):
+        return super().run_validation(*args, **kwargs)
 
     def get_field_names(
         self, declared_fields: Mapping[(str, serializers.Field)], info: "FieldInfo"
