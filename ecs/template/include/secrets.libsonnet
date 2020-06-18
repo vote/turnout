@@ -110,6 +110,10 @@
         name: 'MULTIFACTOR_ENABLED',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.two_factor_sms_number',
+        name: 'TWO_FACTOR_SMS_NUMBER',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.geocodio_key',
         name: 'GEOCODIO_KEY',
       },

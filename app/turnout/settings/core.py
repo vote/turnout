@@ -89,6 +89,9 @@ THIRD_PARTY_APPS = [
     "django_celery_results",
     "phonenumber_field",
     "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "two_factor",
     "s3_folder_storage",
     "nested_inline",
 ]
@@ -101,7 +104,6 @@ FIRST_PARTY_APPS = [
     "election",
     "people",
     "verifier",
-    "multifactor",
     "register",
     "mailer",
     "storage",
@@ -131,6 +133,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    # Include for twilio gateway
+    "two_factor.middleware.threadlocals.ThreadLocals",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -240,21 +244,17 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 LOGIN_URL = "/manage/login/"
+LOGIN_REDIRECT_URL = "/manage/"
+
 INVITE_EXPIRATION_DAYS = env.int("INVITE_EXPIRATION_DAYS", default=7)
 
+TWO_FACTOR_SMS_GATEWAY = "two_factor.gateways.twilio.gateway.Twilio"
+PHONENUMBER_DEFAULT_REGION = "1"
+
+# source number for 2FA SMS
+TWILIO_CALLER_ID = env.str("TWO_FACTOR_SMS_NUMBER", default=None)
+
 #### END AUTH CONFIGURATION
-
-
-#### MULTIFACTOR CONFIGURATION
-
-MULTIFACTOR_ENABLED = env.bool("MULTIFACTOR_ENABLED", default=True)
-MULTIFACTOR_DIGITS_DEFAULT = env.int("MULTIFACTOR_DIGITS_DEFAULT", default=6)
-MULTIFACTOR_TOLERANCE = env.int("MULTIFACTOR_TOLERANCE", default=1)
-MULTIFACTOR_STEP_LENGTH = env.int("MULTIFACTOR_STEP_LENGTH", default=30)
-MULTIFACTOR_THROTTLE_FACTOR = env.int("MULTIFACTOR_THROTTLE_FACTOR", default=1)
-MULTIFACTOR_ISSUER = env.str("MULTIFACTOR_ISSUER", default="Turnout")
-
-#### END MULTIFACTOR CONFIGURATION
 
 
 #### DJANGO-ALIVE CONFIGURATION

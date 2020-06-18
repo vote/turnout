@@ -186,6 +186,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
             },
             {
+               "name": "TWO_FACTOR_SMS_NUMBER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.two_factor_sms_number"
+            },
+            {
                "name": "GEOCODIO_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.geocodio_key"
             },
@@ -407,6 +411,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
             },
             {
+               "name": "TWO_FACTOR_SMS_NUMBER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.two_factor_sms_number"
+            },
+            {
                "name": "GEOCODIO_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.geocodio_key"
             },
@@ -625,6 +633,10 @@
             {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
+            },
+            {
+               "name": "TWO_FACTOR_SMS_NUMBER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.two_factor_sms_number"
             },
             {
                "name": "GEOCODIO_KEY",
@@ -912,6 +924,10 @@
             {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
+            },
+            {
+               "name": "TWO_FACTOR_SMS_NUMBER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.two_factor_sms_number"
             },
             {
                "name": "GEOCODIO_KEY",

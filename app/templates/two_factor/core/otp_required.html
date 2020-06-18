@@ -1,0 +1,16 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% block title %}{% trans "Permission Denied" %}{% endblock %}</h1>
+
+  <p>{% blocktrans trimmed %}Two-factor authentication is required for security reasons. You need to enable these
+    security features in order to access this page.{% endblocktrans %}</p>
+
+  <p>
+    <a href="javascript:history.go(-1)"
+       class="pull-right btn btn-link">{% trans "Go back" %}</a>
+    <a href="{% url 'two_factor:setup' %}" class="btn btn-primary">
+    {% trans "Enable Two-Factor Authentication" %}</a>
+  </p>
+{% endblock %}

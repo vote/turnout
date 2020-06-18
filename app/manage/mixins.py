@@ -10,6 +10,6 @@ class ManageViewMixin(LoginRequiredMixin):
             return redirect("/")
 
         if not request.user.is_verified():
-            return redirect(reverse("multifactor:authform"))
+            return redirect(reverse("two_factor:profile"))
 
         return super(ManageViewMixin, self).dispatch(request, *args, **kwargs)

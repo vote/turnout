@@ -43,8 +43,9 @@ pytest-django==3.8.*
 django-cors-headers==3.2.1
 redis==3.3.*
 model-bakery==1.1.*
-# Use version of django-otp that suppors devices having UUID primary keys
-git+https://github.com/nickcatal/django-otp.git@b1d1a36008da5e2e161d3e550a91ae230fc67bb5#egg=django_otp
+django-otp==0.8.*
+django-formtools==2.2
+django-two-factor-auth==1.11.*
 qrcode==6.*
 requests-mock==1.7.*
 pytest-mock==2.0.*

@@ -43,6 +43,7 @@ export TWILIO_ACCOUNT_SID=$(aws ssm get-parameter --region $REGION --with-decryp
 export TWILIO_AUTH_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_auth_token | jq '.Parameter["Value"]' -r)
 export TWILIO_MESSAGING_SERVICE_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_messaging_service_sid | jq '.Parameter["Value"]' -r)
 export MULTIFACTOR_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.multifactor_enabled | jq '.Parameter["Value"]' -r)
+export TWO_FACTOR_SMS_NUMBER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.two_factor_sms_number | jq '.Parameter["Value"]' -r)
 export GEOCODIO_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.geocodio_key | jq '.Parameter["Value"]' -r)
 export FAX_DISABLE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_disable | jq '.Parameter["Value"]' -r)
 export FAX_OVERRIDE_DEST=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_override_dest | jq '.Parameter["Value"]' -r)
@@ -106,6 +107,7 @@ docker run -i -t \
     -e TWILIO_AUTH_TOKEN \
     -e TWILIO_MESSAGING_SERVICE_SID \
     -e MULTIFACTOR_ENABLED \
+    -e TWO_FACTOR_SMS_NUMBER \
     -e GEOCODIO_KEY \
     -e FAX_DISABLE \
     -e FAX_OVERRIDE_DEST \

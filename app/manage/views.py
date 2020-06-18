@@ -1,9 +1,9 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.contrib.auth.views import LogoutView as DjangoLogoutView
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
+from two_factor.views import LoginView as TFLoginView
 
 from multi_tenant.forms import ChangeSubscriberManageForm
 from multi_tenant.mixins_manage_views import SubscriberManageViewMixin
@@ -12,7 +12,7 @@ from .forms import AuthenticationForm
 from .mixins import ManageViewMixin
 
 
-class LoginView(DjangoLoginView):
+class LoginView(TFLoginView):
     form_class = AuthenticationForm
     template_name = "management/auth/login.html"
     next_page = reverse_lazy("manage:home_redirect")
@@ -44,7 +44,7 @@ class RedirectToSubscriberManageView(LoginRequiredMixin, FormView):
     def dispatch(self, request, *args, **kwargs):
         # If the user is not authorized with 2 factor, send them there
         if not request.user.is_verified():
-            return HttpResponseRedirect(reverse("multifactor:authform"))
+            return HttpResponseRedirect(reverse("two_factor:profile"))
 
         # If the user has an "active client" (nearly all will) redirect to that dashboard
         if request.user.active_client:

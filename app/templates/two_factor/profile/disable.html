@@ -1,0 +1,14 @@
+
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block content %}
+  <h1>{% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}</h1>
+  <p>{% blocktrans trimmed %}To reconfigure two-factor authentication, you must first disable it.  Until you complete the process by reconfiguring two-factor authentication (on the next page), you will not be able to access other parts of this site.{% endblocktrans %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <table>{{ form|crispy }}</table>
+    <button class="btn btn-primary"
+            type="submit">{% trans "Disable" %}</button>
+  </form>
+{% endblock %}
