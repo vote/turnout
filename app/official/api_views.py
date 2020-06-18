@@ -506,7 +506,6 @@ def ts_to_region(
         "Town of {city}",
         "{city} Township",
         "{city}, {county} County",
-        "{city} , {county} County",  # Town of Drummond
         "{city}",
         # michigan-specific (try local office *before* county office--mail will get processed faster)
         "{city}, {county} County",
