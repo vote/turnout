@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 from manage.mixins import ManageViewMixin
 from multi_tenant.models import Client
@@ -6,7 +7,7 @@ from multi_tenant.models import Client
 
 class SubscriberManageViewMixin(ManageViewMixin):
     def dispatch(self, request, *args, **kwargs):
-        self.subscriber = Client.objects.get(default_slug__slug=kwargs["subscriber"])
+        self.subscriber = get_object_or_404(Client, default_slug__slug=kwargs["subscriber"])
         if request.user.is_authenticated and (
             self.subscriber != request.user.active_client
             or self.subscriber not in request.user.allowed_clients
