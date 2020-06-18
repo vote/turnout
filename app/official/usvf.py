@@ -13,6 +13,7 @@ from django.contrib.gis.geos import Point
 from absentee.models import LeoContactOverride
 from common import enums
 from common.analytics import statsd
+from common.apm import tracer
 from common.geocode import geocode
 from election.models import State
 
@@ -46,7 +47,7 @@ def acquire_data(session: requests.Session, url: str) -> Dict[(str, Any)]:
     return response.json()
 
 
-@statsd.timed("turnout.official.scrape_region")
+@tracer.wrap()
 def scrape_regions(session: requests.Session) -> List[Region]:
     session = authenticated_session()
     regions: List[Region] = []
@@ -100,7 +101,7 @@ class Action(PythonEnum):
     UPDATE = "Update"
 
 
-@statsd.timed("turnout.official.scrape_offices")
+@tracer.wrap()
 def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None:
     existing_region_ids = [region.external_id for region in regions]
 
@@ -301,6 +302,7 @@ def check_state_contacts(state_id: str, mode: enums.SubmissionType) -> str:
     return None
 
 
+@tracer.wrap()
 def check_vbm_states():
     for state in State.objects.all():
         if state.vbm_submission_type != enums.SubmissionType.SELF_PRINT:

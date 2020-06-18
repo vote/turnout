@@ -36,7 +36,6 @@ def test_sendgrid_mail(mocker):
 def test_sendgrid_exception(mocker):
     cache = mocker.patch("mailer.tasks.cache")
     sendgrid_client = mocker.patch("mailer.tasks.sg")
-    statsd = mocker.patch("mailer.tasks.statsd")
 
     cache.get.return_value = TEST_MAIL
     sendgrid_client.client.mail.send.post.side_effect = Exception()
@@ -48,6 +47,3 @@ def test_sendgrid_exception(mocker):
     )
     cache.get.assert_called_once_with("efgh456")
     cache.delete.assert_called_once_with("efgh456")
-    statsd.increment.assert_called_once_with(
-        "turnout.mailer.sendgrid_send_task_server_error"
-    )

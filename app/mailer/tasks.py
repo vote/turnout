@@ -5,7 +5,6 @@ from celery import shared_task
 from django.conf import settings
 from django.core.cache import cache
 
-from common.analytics import statsd
 from common.apm import tracer
 
 logger = logging.getLogger("mailer")
@@ -13,7 +12,6 @@ sg = sendgrid.SendGridAPIClient(api_key=settings.SENDGRID_API_KEY)
 
 
 @shared_task
-@statsd.timed("turnout.mailer.sendgrid_send_task")
 def send_sendgrid_mail(key):
     mail = cache.get(key)
 

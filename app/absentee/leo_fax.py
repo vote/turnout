@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 from fax.send_fax import send_fax
 
 from .contactinfo import AbsenteeContactInfo, get_absentee_contact_info
@@ -19,7 +19,7 @@ class NoAbsenteeRequestFaxAddress(Exception):
     pass
 
 
-@statsd.timed("turnout.absentee.compile_email")
+@tracer.wrap()
 def compile_email(
     ballot_request: BallotRequest,
     leo_contact: AbsenteeContactInfo,

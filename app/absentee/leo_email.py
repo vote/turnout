@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
@@ -30,7 +30,7 @@ def get_leo_email(region_external_id: int) -> str:
     return email
 
 
-@statsd.timed("turnout.absentee.compile_leo_email")
+@tracer.wrap()
 def compile_email(ballot_request: BallotRequest) -> Tuple[str, str]:
     real_leo_email = get_leo_email(ballot_request.region.external_id)
 

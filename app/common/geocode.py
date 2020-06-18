@@ -9,6 +9,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 from common.analytics import statsd
+from common.apm import tracer
 from official.models import RegionGeomMA, RegionGeomWI
 
 API_ENDPOINT = "https://api.geocod.io/v1.5/geocode"
@@ -43,7 +44,8 @@ def geocode(**kwargs):
         http = requests.Session()
         http.mount("https://", HTTPAdapter(max_retries=retries))
         try:
-            r = http.get(url, timeout=TIMEOUT)
+            with tracer.trace("geocode", service="geocodioclient"):
+                r = http.get(url, timeout=TIMEOUT)
         except Exception as e:
             extra = {"url": url, "exception": str(e)}
             logger.error(

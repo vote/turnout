@@ -2,14 +2,14 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 
 from .models import StorageItem
 
 NOTIFICATION_TEMPLATE = "storage/email/refresh_notification.html"
 
 
-@statsd.timed("turnout.storage.compile_refresh_email")
+@tracer.wrap()
 def compile_email(storage_item: StorageItem) -> str:
     recipient = {
         "email": storage_item.email,

@@ -1,7 +1,7 @@
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 
 from .models import Registration
 
@@ -9,7 +9,7 @@ NOTIFICATION_TEMPLATE = "register/email/file_notification.html"
 SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
 
 
-@statsd.timed("turnout.register.compile_email")
+@tracer.wrap()
 def compile_email(registration: Registration) -> str:
     preheader_text = f"{registration.first_name}, just a few more steps to complete your voter registration: print, sign and mail your form."
     recipient = {

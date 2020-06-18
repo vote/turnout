@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from common import enums
+from common.apm import tracer
 from common.enums import TurnoutActionStatus
 from election.models import State
 
@@ -38,6 +39,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
         return Response(response)
 
+    @tracer.wrap()
     def process_serializer(self, serializer):
         serializer.is_valid(raise_exception=True)
         if "state" in serializer.validated_data:

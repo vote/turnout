@@ -6,6 +6,7 @@ from django.conf import settings
 from django.template.defaultfilters import slugify
 
 from common.analytics import statsd
+from common.apm import tracer
 
 logger = logging.getLogger("cdn")
 
@@ -30,10 +31,11 @@ def purge_cdn_tags(tags: Iterable[str]) -> None:
     if not settings.CLOUDFLARE_ENABLED:
         logger.info("Cloudflare Disabled")
         return
-    cf = CloudFlare.CloudFlare(token=settings.CLOUDFLARE_TOKEN)
-    cf.zones.purge_cache.delete(
-        identifier1=settings.CLOUDFLARE_ZONE, data={"tags": final_tags}
-    )
+    with tracer.trace("cf.purge_cache", service="cloudflareclient"):
+        cf = CloudFlare.CloudFlare(token=settings.CLOUDFLARE_TOKEN)
+        cf.zones.purge_cache.delete(
+            identifier1=settings.CLOUDFLARE_ZONE, data={"tags": final_tags}
+        )
 
 
 def purge_cdn_tag(tag: str) -> None:

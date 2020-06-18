@@ -5,7 +5,7 @@ from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
 
 from common import enums
-from common.analytics import statsd
+from common.apm import tracer
 from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection
 from election.models import StateInformation
 from storage.models import StorageItem
@@ -26,7 +26,7 @@ def generate_name(registration):
     return f"{filename}.pdf"
 
 
-@statsd.timed("turnout.register.registration_submission_pdfgeneration")
+@tracer.wrap()
 def generate_pdf(form_data):
     return PDFTemplate(
         [
@@ -36,6 +36,7 @@ def generate_pdf(form_data):
     ).fill(form_data)
 
 
+@tracer.wrap()
 def extract_formdata(registration, state_id_number, is_18_or_over):
     # convert Registration to dict
     form_data = model_to_dict(registration)
@@ -107,6 +108,7 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
     return form_data
 
 
+@tracer.wrap()
 def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
 

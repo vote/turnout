@@ -7,6 +7,7 @@ import boto3  # type: ignore
 from botocore.config import Config  # type: ignore
 from django.conf import settings
 
+from common.apm import tracer
 from common.enums import FaxStatus
 from storage.models import StorageItem
 
@@ -23,6 +24,7 @@ sqs_client = boto3.client(
 logger = logging.getLogger("fax")
 
 
+@tracer.wrap()
 def send_fax(
     storage_item: StorageItem,
     to: str,

@@ -1,7 +1,7 @@
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
@@ -10,7 +10,7 @@ NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
 SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
 
 
-@statsd.timed("turnout.absentee.compile_email")
+@tracer.wrap()
 def compile_email(ballot_request: BallotRequest) -> str:
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
     mailing_address = (

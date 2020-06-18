@@ -3,7 +3,7 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from accounts.models import Invite
-from common.analytics import statsd
+from common.apm import tracer
 
 from .models import Client
 
@@ -11,7 +11,7 @@ NOTIFICATION_TEMPLATE = "multi_tenant/email/new_invite.html"
 SUBJECT = "You've been invited to join the VoteAmerica toolset"
 
 
-@statsd.timed("turnout.multi_tenant.compile_invite_email")
+@tracer.wrap()
 def compile_email(invite: Invite, subscriber: Client) -> str:
 
     preheader_text = f"Click below to access the {{ subscriber }} subscription"

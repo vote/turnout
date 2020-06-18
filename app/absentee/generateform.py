@@ -7,7 +7,7 @@ from django.template.defaultfilters import slugify
 from PIL import Image
 
 from common import enums
-from common.analytics import statsd
+from common.apm import tracer
 from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 from common.utils.format import StringFormatter
 from election.models import StateInformation
@@ -56,6 +56,7 @@ def state_text_property(state_code: str, slug: str, lower=False) -> Optional[str
         return None
 
 
+@tracer.wrap()
 def prepare_formdata(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool,
 ) -> Dict[str, Any]:
@@ -200,6 +201,7 @@ def prepare_formdata(
     return form_data
 
 
+@tracer.wrap()
 def get_signature_locations(
     state_code: str,
 ) -> Optional[Dict[int, SignatureBoundingBox]]:
@@ -216,6 +218,7 @@ def get_signature_locations(
     }
 
 
+@tracer.wrap()
 def load_signature_image(
     signature_attachment: Optional[SecureUploadItem],
 ) -> Optional[Image.Image]:
@@ -225,7 +228,7 @@ def load_signature_image(
     return Image.open(signature_attachment.file)
 
 
-@statsd.timed("turnout.absentee.absentee_application_pdfgeneration")
+@tracer.wrap()
 def generate_pdf(
     form_data: Dict[str, Any],
     state_code: str,
@@ -287,6 +290,7 @@ def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType
     return ballot_request.esign_method or enums.SubmissionType.SELF_PRINT
 
 
+@tracer.wrap()
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):

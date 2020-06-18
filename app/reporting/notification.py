@@ -1,14 +1,14 @@
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
-from common.analytics import statsd
+from common.apm import tracer
 
 from .models import Report
 
 NOTIFICATION_TEMPLATE = "reporting/email/report_notification.html"
 
 
-@statsd.timed("turnout.reporting.compile_email")
+@tracer.wrap()
 def compile_email(report: Report) -> str:
 
     preheader_text = f"A new {report.type.label} has been successfully generated"

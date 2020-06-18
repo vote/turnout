@@ -3,7 +3,7 @@ import logging
 import requests
 from django.conf import settings
 
-from common.analytics import statsd
+from common.apm import tracer
 
 logger = logging.getLogger("verifier")
 
@@ -47,7 +47,6 @@ ALLOY_STATES_ENABLED = ALLOY_STATES_MONTHLY + ALLOY_STATES_WEEKLY
 # update frequencies per https://alloy.us/verify/details/
 
 
-@statsd.timed("turnout.verifier.alloy_query")
 def query_alloy(serializer_data):
     address2 = serializer_data.get("address2", "")
     address_line = f"{serializer_data['address1']} {address2}".strip()
@@ -63,11 +62,12 @@ def query_alloy(serializer_data):
         "birth_date": serializer_data["date_of_birth"].strftime("%Y-%m-%d"),
     }
 
-    response = requests.get(
-        ALLOY_ENDPOINT,
-        params=query,
-        auth=requests.auth.HTTPBasicAuth(settings.ALLOY_KEY, settings.ALLOY_SECRET),
-    )
+    with tracer.trace("alloy.verify", service="alloyapi"):
+        response = requests.get(
+            ALLOY_ENDPOINT,
+            params=query,
+            auth=requests.auth.HTTPBasicAuth(settings.ALLOY_KEY, settings.ALLOY_SECRET),
+        )
 
     if response.status_code != 200:
         return {"error": f"HTTP error {response.status_code}: {response.text}"}

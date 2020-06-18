@@ -11,7 +11,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from common.analytics import statsd
+from common.apm import tracer
 from common.geocode import (
     al_jefferson_county_bessemer_division,
     geocode,
@@ -119,6 +119,7 @@ nyc_remap = {
 }
 
 
+@tracer.wrap()
 def geocode_to_regions(street, city, state, zipcode):
     # how many "nearby" offices to return when searching by lat/lng
     max_by_distance = 4
@@ -405,6 +406,7 @@ def geocode_to_regions(street, city, state, zipcode):
     return final
 
 
+@tracer.wrap()
 def ts_to_region(
     street=None, city=None, state=None, zipcode=None, latitude=None, longitude=None
 ):
@@ -422,9 +424,7 @@ def ts_to_region(
             "zip5": zipcode,
         }
     url = f"{TARGETSMART_DISTRICT_API}?{urlencode({**args})}"
-    with statsd.timed(
-        "turnout.official.api_views.targetsmart.service.district", sample_rate=0.2
-    ):
+    with tracer.trace("ts.district", service="targetsmartapi"):
         r = requests.get(url, headers={"x-api-key": settings.TARGETSMART_KEY})
     if r.status_code != 200:
         extra = {"url": url, "status_code": r.status_code}
@@ -532,6 +532,7 @@ def ts_to_region(
 #
 # regions maybe None, which indicates we weren't able to narrow down the regions
 # at all (and the user probably has to pick their region manually)
+@tracer.wrap()
 def get_regions_for_address(street, city, state, zipcode):
     state = state.upper() if state else state
 
