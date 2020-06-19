@@ -8,7 +8,7 @@ from two_factor.urls import urlpatterns as tf_urls
 admin.site.__class__ = AdminSiteOTPRequired
 
 # exclude login from tf_urls -- we implement our own /manage/login
-tf_urls = ([u for u in tf_urls[0] if u.name != 'login'], tf_urls[1])
+tf_urls = ([u for u in tf_urls[0] if u.name != "login"], tf_urls[1])
 
 urlpatterns = [
     re_path(r"", include(tf_urls)),
