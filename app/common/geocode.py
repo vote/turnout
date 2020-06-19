@@ -47,25 +47,25 @@ def geocode(**kwargs):
             with tracer.trace("geocode", service="geocodioclient"):
                 r = http.get(url, timeout=TIMEOUT)
         except Exception as e:
-            extra = {"url": url, "exception": str(e)}
-            logger.error(
+            extra = {"url": API_ENDPOINT, "args": str(args), "exception": str(e)}
+            logger.warning(
                 "Error querying geocodio %(url)s, exception %(exception)s",
                 extra,
                 extra=extra,
             )
             sentry_sdk.capture_exception(
-                GeocodioAPIError(f"Error querying {url}, exception {str(e)}")
+                GeocodioAPIError(f"Error querying {API_ENDPOINT}, args {args}, exception {str(e)}")
             )
             return None
     if r.status_code != 200:
-        extra = {"url": url, "status_code": r.status_code}
-        logger.error(
-            "Error querying geocodio %(url)s, status code %(status_code)s",
+        extra = {"url": API_ENDPOINT, "args": str(args), "status_code": r.status_code}
+        logger.warning(
+            "Error querying geocodio %(url)s, args %(args)s, status code %(status_code)s",
             extra,
             extra=extra,
         )
         sentry_sdk.capture_exception(
-            GeocodioAPIError(f"Error querying {url}, status code {r.status_code}")
+            GeocodioAPIError(f"Error querying {API_ENDPOINT}, args {args}, status code {r.status_code}")
         )
         return None
     return r.json().get("results", None)
