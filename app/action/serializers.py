@@ -46,19 +46,15 @@ class ActionSerializer(
         optional_fields = getattr(self.Meta, "optional_fields", [])
         standard_fields = getattr(self.Meta, "fields", [])
 
-        # By default ModelSerializers need a "field" attribute, but we don't want
-        # to make a bunch of our code duplicative. So setting our own Meta.fields
-        # will give ourselves more flexibility.
-        setattr(
-            self.Meta,
-            "fields",
-            minimum_necessary_fields
-            + nationally_required_fields
-            + optional_fields
-            + standard_fields,
+        # Return a deduplicated list of all fields
+        return list(
+            set(
+                minimum_necessary_fields
+                + nationally_required_fields
+                + optional_fields
+                + standard_fields
+            )
         )
-
-        return super().get_field_names(declared_fields, info)
 
     def get_fields(self) -> "collections.OrderedDict[str, serializers.Field]":
         initial_fields = super().get_fields()
