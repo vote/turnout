@@ -140,6 +140,12 @@ def geocode_to_regions(street, city, state, zipcode):
 
     # assume the first address match is the correct (only) state
     state_code = addrs[0]["address_components"]["state"]
+    if state_code != state:
+        # if the address match gets the state wrong, return *no* result
+        logger.warning(
+            f"User-provided state {state} does not match geocoded state in {addrs[0]['address_components']}"
+        )
+        return None
 
     queryset = Region.objects.filter(state__code=state_code).order_by("name")
 
@@ -442,6 +448,12 @@ def ts_to_region(
         if not match_data:
             return None
         state_code = match_data["vb.vf_reg_cass_state"]
+        if state_code != state:
+            # if the address match gets the state wrong, return *no* result.
+            logger.warning(
+                f"User-provided state {state} does not match geocoded state in {match_data}"
+            )
+            return None
         county = match_data["vb.vf_county_name"].lower()
         city = (
             match_data["vb.vf_municipal_district"].lower()
