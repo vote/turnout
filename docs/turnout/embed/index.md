@@ -4,37 +4,6 @@ All VoteAmerica tools can be embedded in other websites with a short snippet of 
 
 The tools have minimal branding, and the fonts and color scheme should work with any website design.
 
----
+For users who do not need access to the information collected by the tools, you can use our [free embed code](/embed/free/). For users who want the information collected in the tools, you can visit [https://premium.voteamerica.com/](https://premium.voteamerica.com/) for more information.
 
-You can find your custom embed code via the VoteAmerica admin at [https://admin.voteamerica.com/](https://admin.voteamerica.com/)
-
-If you do not have a subscription to log in there, you can use the generic embeds below.
-
-!!! warning
-    **If you use code found on this page, VoteAmerica will never be able to provide you with an export of your data or be able to reliably tell you how many people used the tools on your website.**
-    Subscribers should *always* use the source code found by logging into the VoteAmerica admin.
-
-```html
-<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
-<div class="voteamerica-embed" data-subscriber="public" data-tool="register"></div>
-```
-
-```html
-<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
-<div class="voteamerica-embed" data-subscriber="public" data-tool="verify"></div>
-```
-
-```html
-<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
-<div class="voteamerica-embed" data-subscriber="public" data-tool="absentee"></div>
-```
-
-```html
-<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
-<div class="voteamerica-embed" data-subscriber="public" data-tool="locate"></div>
-```
-
-<!-- ```html
-<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
-<div class="voteamerica-embed" data-subscriber="public" data-tool="leo"></div>
-``` -->
+Existing premium subscribers can access their custom embed code at [https://admin.voteamerica.com/](https://admin.voteamerica.com/).

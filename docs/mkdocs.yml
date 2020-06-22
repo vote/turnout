@@ -5,6 +5,7 @@ nav:
     - 'Election Information API': '/api/'
     - 'Tool Embed':
         - 'Embed Codes': '/embed/'
+        - 'Free Embed Code': '/embed/free/'
         - 'Source Tracking': '/embed/tracking/'
         - 'WordPress': '/embed/wordpress/'
     - 'Tool Admin':
