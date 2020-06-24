@@ -1,7 +1,7 @@
 {% extends "management/manage_base.html" %}
-{% load sekizai_tags crispy_forms_tags %}
+{% load sekizai_tags crispy_forms_tags markdownify %}
 
-{% block title %}{{ state_information.state }} {{ state_information.field_type.long_name }} | {{ block.super }}{% endblock title %}
+{% block title %}{{ state_information.state }} {{ state_information.field_type.slug }} | {{ block.super }}{% endblock title %}
 
 {% block content %}
 {% add_data "body-class" "election" %}
@@ -20,18 +20,18 @@
                 <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a></li>
                 <li class="breadcrumb-item"><a
                         href="{% url 'manage:election:state' state_information.state.pk %}">{{ state_information.state.name }}</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ state_information.field_type.long_name }} (
-                    {{ state_information.field_type.slug }} )</li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</li>
                 {% endif %}
 
             </ol>
         </nav>
+        {% if state_information.field_type.help_text %}<p>Help Text: {{ state_information.field_type.help_text|markdownify }}</p>{% endif %}
         <div class="card">
             <!-- <div class="card-header">{{ state_information.state.name }} {{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</div> -->
             <div class="card-body">
 
 
-                <form role="form" method="POST" action="" novalidate>
+                <form role="form" method="POST" action="" novalidate class="information-edit-form">
                     {{ form|crispy }}
                     <button type="submit" class="btn btn-block btn-primary">Update</button>
                     {% csrf_token %}

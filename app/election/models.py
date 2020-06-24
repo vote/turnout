@@ -51,6 +51,9 @@ class State(TimestampModel):
 class StateInformationFieldType(UUIDModel, TimestampModel):
     slug = models.SlugField("Name", max_length=50, unique=True)
     long_name = models.CharField("Long Name", max_length=200)
+    help_text = models.TextField(
+        "Help Text", help_text="Markdown allowed", null=True, blank=True
+    )
     field_format = TurnoutEnumField(
         enums.StateFieldFormats, null=True, default=enums.StateFieldFormats.MARKDOWN
     )

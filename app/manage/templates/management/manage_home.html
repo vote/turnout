@@ -1,23 +1,22 @@
 {% extends "management/manage_base.html" %}
-{% load sekizai_tags crispy_forms_tags %}
+{% load sekizai_tags crispy_forms_tags humanize %}
 
-{% block title %}{{ user.first_name }}'s Control Panel | {{ block.super }}{% endblock title %}
+{% block title %}{{ user.first_name }}'s Dashboard | {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="content-wrapper">
   <div class="col-md-8 offset-md-2">
-		<h1>Welcome to VoteAmerica Tools</h1>
+		<h1>Hello, {{ user.active_client }}!</h1>
 		{% if stats.last_updated %}
 		{% load tz %}
 		<p><em>Last updated: {{ stats.last_updated|timezone:user.timezone|date:"Y-m-d g:i a" }} ({{ user.timezone }})</em></p>
 
-		<h3>Quick Stats</h3>
-		<p>
-			{{ user.active_client|default:"Your organization" }} overall submissions<br>
-			<strong>Register:</strong> {{ stats.register }}<br>
-			<strong>Verify:</strong> {{ stats.verify }}<br>
-			<strong>Absentee</strong> {{ stats.absentee }}
-		</p>
+		<h2>Summary</h2>
+		<ul>
+			<li><strong>Register:</strong> {{ stats.register|intcomma }}</li>
+			<li><strong>Verify:</strong> {{ stats.verify|intcomma }}</li>
+			<li><strong>Absentee:</strong> {{ stats.absentee|intcomma }}</li>
+		</ul>
 
 		{% endif %}
 		<hr>

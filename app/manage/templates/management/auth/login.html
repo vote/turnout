@@ -12,7 +12,7 @@
   <h1>{% block title %}VoteAmerica{% endblock %}</h1>
 
   {% if wizard.steps.current == 'auth' %}
-    <p>{% blocktrans %}Login to the VoteAmerica dashboard.{% endblocktrans %}</p>
+    <p>{% blocktrans %}Login to the VoteAmerica admin dashboard.{% endblocktrans %}</p>
   {% elif wizard.steps.current == 'token' %}
     {% if device.method == 'call' %}
       <p>{% blocktrans trimmed %}We are calling your phone right now, please enter the
@@ -34,7 +34,7 @@
     {{ form|crispy }}
 
     {# hidden submit button to enable [enter] key #}
-    <div style="margin-left: -9999px"><input type="submit" value=""/></div>
+    {# <div style="margin-left: -9999px"><input type="submit" value=""/></div> #}
 
     {% if other_devices %}
       <p>{% trans "Or, alternatively, use one of your backup phones:" %}</p>
@@ -61,6 +61,8 @@
             class="btn btn-default">{% trans "Back" %}</button>
     <button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
     {% else %}
+    <p><small>By logging in you accept the <a href="https://www.voteamerica.com/subscriber-terms/"
+          target="_blank">VoteAmerica Subscriber Terms and Conditions</a></small></p>
     <button type="submit" class="btn btn-primary btn-block">Log In</button>
     {% endif %}
 

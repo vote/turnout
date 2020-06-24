@@ -10,15 +10,16 @@
             <div class="col-md-6 offset-md-3 public-page-wrap">
                 <div class="row">
                     <div class="col-md-12">
-                        <h2>Turnout</h2>
-                        <p class="subheading">Signup for Turnout.</p>
+                        <h2>VoteAmerica Admin</h2>
+                        <p class="subheading">Create an account for the VoteAmerica admin dashboard.</p>
                         {% if invite.expired %}
-                        <p>This link has expired. Contact an admin for another inivitation link.</p>
+                        <p>This link has expired. Contact support for another inivitation link.</p>
                         {% else %}
                         <p>Your username will be <strong>{{ invite.email }}</strong></p>
                         <form role="form" method="POST" action="">
                             {{ form|crispy }}
-                            <button type="submit" class="btn btn-block btn-primary">Signup</button>
+                            <p><small>By creating an account you accept the <a href="https://www.voteamerica.com/subscriber-terms/" target="_blank">VoteAmerica Subscriber Terms and Conditions</a></small></p>
+                            <button type="submit" class="btn btn-block btn-primary">Create Account</button>
                             {% csrf_token %}
                         </form>
                         {% endif %}

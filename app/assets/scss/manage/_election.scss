@@ -19,3 +19,13 @@ h1 {
     max-width: inherit;
     width: 100%;
 }
+
+.information-edit-form {
+    textarea {
+        height: 200px;
+    }
+}
+
+.card {
+    border: 1px solid $medium-gray;
+}

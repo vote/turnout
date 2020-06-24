@@ -14,7 +14,6 @@ SUBJECT = "You've been invited to join the VoteAmerica toolset"
 @tracer.wrap()
 def compile_email(invite: Invite, subscriber: Client) -> str:
 
-    preheader_text = f"Click below to access the {{ subscriber }} subscription"
     recipient = {
         "email": invite.email,
     }
@@ -22,7 +21,6 @@ def compile_email(invite: Invite, subscriber: Client) -> str:
         "invite": invite,
         "subscriber": subscriber,
         "recipient": recipient,
-        "preheader_text": preheader_text,
     }
 
     return render_to_string(NOTIFICATION_TEMPLATE, context)
