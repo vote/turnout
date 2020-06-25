@@ -1,13 +1,13 @@
 {% extends "management/manage_base.html" %}
 {% load sekizai_tags tz %}
 
-{% block title %}Current Users | {{ block.super }}{% endblock title %}
+{% block title %}Current Team | {{ block.super }}{% endblock title %}
 
 {% block content %}
 <div class="content-wrapper">
 
     <div class="col-lg-10 offset-lg-1">
-        <h1>{{ user.active_client }} Users</h1>
+        <h1>{{ user.active_client }} Team</h1>
         <div class="table-responsive-lg">
             <table class="table">
                 <thead>

@@ -34,7 +34,7 @@
                             <div class="dropdown-menu" aria-labelledby="dropdown__tools">
                                 <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Code</a>
                                 <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Exports</a>
-                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Users</a>
+                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Team</a>
                             </div>
                         </li>
                         {% if user.can_manage_election_information %}
