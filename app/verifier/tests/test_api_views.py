@@ -142,7 +142,7 @@ def test_smsbot_trigger(requests_mock, smsbot_patch):
     client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
 
     smsbot_patch.apply_async.assert_called_once_with(
-        args=("(312) 928-9292",), countdown=150
+        args=("(312) 928-9292", "verifier"), countdown=150
     )
 
 

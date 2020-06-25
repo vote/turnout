@@ -178,6 +178,14 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.twilio_messaging_service_sid"
             },
             {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_post_signup_alert"
+            },
+            {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.multifactor_enabled"
             },
@@ -399,6 +407,14 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.twilio_messaging_service_sid"
             },
             {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_post_signup_alert"
+            },
+            {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.multifactor_enabled"
             },
@@ -617,6 +633,14 @@
             {
                "name": "TWILIO_MESSAGING_SERVICE_SID",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.twilio_messaging_service_sid"
+            },
+            {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.sms_post_signup_alert"
             },
             {
                "name": "MULTIFACTOR_ENABLED",

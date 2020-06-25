@@ -2,9 +2,11 @@ import logging
 
 import sentry_sdk
 from celery import shared_task
+from django.conf import settings
 
 from common.analytics import statsd
 from common.enums import EventType, FaxStatus
+from smsbot.tasks import send_welcome_sms
 
 log = logging.getLogger("absentee")
 
@@ -19,6 +21,12 @@ def process_ballotrequest_submission(
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
     process_ballot_request(ballot_request, state_id_number, is_18_or_over)
+
+    if ballot_request.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
+        send_welcome_sms.apply_async(
+            args=(str(ballot_request.phone), "absentee"),
+            countdown=settings.SMS_OPTIN_REMINDER_DELAY,
+        )
 
 
 @shared_task

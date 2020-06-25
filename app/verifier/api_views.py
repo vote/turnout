@@ -124,7 +124,8 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
 
         if instance.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
             send_welcome_sms.apply_async(
-                args=(str(instance.phone),), countdown=settings.SMS_OPTIN_REMINDER_DELAY
+                args=(str(instance.phone), "verifier"),
+                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
             )
 
         response = {"registered": registered, "action_id": instance.action.pk}

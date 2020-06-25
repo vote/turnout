@@ -42,6 +42,8 @@ export ABSENTEE_LEO_EMAIL_FROM=$(aws ssm get-parameter --region $REGION --with-d
 export TWILIO_ACCOUNT_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_account_sid | jq '.Parameter["Value"]' -r)
 export TWILIO_AUTH_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_auth_token | jq '.Parameter["Value"]' -r)
 export TWILIO_MESSAGING_SERVICE_SID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.twilio_messaging_service_sid | jq '.Parameter["Value"]' -r)
+export SMS_OPTIN_REMINDER_DELAY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sms_optin_reminder_delay | jq '.Parameter["Value"]' -r)
+export SMS_POST_SIGNUP_ALERT=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sms_post_signup_alert | jq '.Parameter["Value"]' -r)
 export MULTIFACTOR_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.multifactor_enabled | jq '.Parameter["Value"]' -r)
 export TWO_FACTOR_SMS_NUMBER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.two_factor_sms_number | jq '.Parameter["Value"]' -r)
 export GEOCODIO_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.geocodio_key | jq '.Parameter["Value"]' -r)
@@ -106,6 +108,8 @@ docker run -i -t \
     -e TWILIO_ACCOUNT_SID \
     -e TWILIO_AUTH_TOKEN \
     -e TWILIO_MESSAGING_SERVICE_SID \
+    -e SMS_OPTIN_REMINDER_DELAY \
+    -e SMS_POST_SIGNUP_ALERT \
     -e MULTIFACTOR_ENABLED \
     -e TWO_FACTOR_SMS_NUMBER \
     -e GEOCODIO_KEY \

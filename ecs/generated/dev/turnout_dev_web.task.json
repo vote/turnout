@@ -182,6 +182,14 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.twilio_messaging_service_sid"
             },
             {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_post_signup_alert"
+            },
+            {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
             },
@@ -407,6 +415,14 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.twilio_messaging_service_sid"
             },
             {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_post_signup_alert"
+            },
+            {
                "name": "MULTIFACTOR_ENABLED",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.multifactor_enabled"
             },
@@ -629,6 +645,14 @@
             {
                "name": "TWILIO_MESSAGING_SERVICE_SID",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.twilio_messaging_service_sid"
+            },
+            {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_post_signup_alert"
             },
             {
                "name": "MULTIFACTOR_ENABLED",
@@ -920,6 +944,14 @@
             {
                "name": "TWILIO_MESSAGING_SERVICE_SID",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.twilio_messaging_service_sid"
+            },
+            {
+               "name": "SMS_OPTIN_REMINDER_DELAY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_optin_reminder_delay"
+            },
+            {
+               "name": "SMS_POST_SIGNUP_ALERT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.sms_post_signup_alert"
             },
             {
                "name": "MULTIFACTOR_ENABLED",

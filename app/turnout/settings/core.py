@@ -518,6 +518,10 @@ TWILIO_MESSAGING_SERVICE_SID = env.str("TWILIO_MESSAGING_SERVICE_SID", default=N
 TWILIO_ENDPOINT_IS_HTTPS = env.bool("TWILIO_ENDPOINT_IS_HTTPS", default=True)
 
 SMS_OPTIN_REMINDER_DELAY = env.int("SMS_OPTIN_REMINDER_DELAY", default=60 * 60)
+# If set, we will resend the welcome message if the last one is older than this
+SMS_OPTIN_REMINDER_RESEND_SECONDS = env.int(
+    "SMS_OPTIN_REMINDER_RESEND_SECONDS", default=None,
+)
 SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
 
 #### END TWILIO CONFIGURATION
@@ -525,9 +529,6 @@ SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
 #### GEOCODIO CONFIGURATION
 
 GEOCODIO_KEY = env.str("GEOCODIO_KEY", default=None)
-
-GEOCODE_USE_GIS_TABLE_MA = env.bool("GEOCODE_USE_GIS_TABLE_MA", default=False)
-GEOCODE_USE_GIS_TABLE_WI = env.bool("GEOCODE_USE_GIS_TABLE_WI", default=False)
 
 #### END GEOCODIO CONFIGURATION
 

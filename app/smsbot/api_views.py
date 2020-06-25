@@ -34,7 +34,7 @@ Extra keywords: join, yes
 Default keywords: help
 
   Reply YES to receive VoteAmerica Election Alerts.
-  Msg&Data Rates May Apply. 4 msgs/month.
+  Msg & Data Rates May Apply. 4 msgs/month.
   Reply HELP for help, STOP to cancel.
 
 """
@@ -77,25 +77,25 @@ def twilio(request):
         # We'll send an additional message either way.
         if n and n.opt_in_time:
             reply = (
-                "You have already signed up for VoteAmerica Election Alerts.\n"
+                "You have already signed up for VoteAmerica Election Alerts. "
                 "Reply HELP for help, STOP to cancel."
             )
         else:
             reply = (
                 "Reply YES to join VoteAmerica and receive Election Alerts. "
-                "Msg&Data rates may apply. 4 msgs/month.\n"
+                "Msg & Data rates may apply. 4 msgs/month. "
                 "Reply HELP for help, STOP to cancel."
             )
     elif cmd in ["yes"]:
         if n and n.opt_in_time:
             reply = (
-                "You have already signed up for VoteAmerica Election Alerts.\n"
+                "You have already signed up for VoteAmerica Election Alerts. "
                 "Reply HELP for help, STOP to cancel."
             )
         else:
             reply = (
-                "Thanks for joining VoteAmerica Election Alerts!\n"
-                "Msg&Data rates may apply. 4 msgs/month.\n"
+                "Thanks for joining VoteAmerica Election Alerts! "
+                "Msg & Data rates may apply. 4 msgs/month. "
                 "Reply HELP for help, STOP to cancel."
             )
             if not n:
@@ -121,16 +121,16 @@ def twilio(request):
             # Twilio won't let them see this, but we can try anyway in case we are
             # out of sync with twilio's blacklist.
             reply = (
-                "Hi, I am the VoteAmerica chat bot.\n"
-                "You have previously opted-out of our Election Alerts list.\n"
+                "Hi, I am the VoteAmerica chat bot. "
+                "You have previously opted-out of our Election Alerts list. "
                 "Reply HELP for help, JOIN to join."
             )
         else:
             # We got a random message from an unknown number.
             reply = (
-                "Hi, I am the VoteAmerica chat bot.\n"
+                "Hi, I am the VoteAmerica chat bot. "
                 "Reply YES to join VoteAmerica and receive Election Alerts. "
-                "Msg&Data rates may apply. 4 msgs/month.\n"
+                "Msg & Data rates may apply. 4 msgs/month. "
                 "Reply HELP for help, STOP to cancel."
             )
 

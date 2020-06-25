@@ -106,6 +106,14 @@
         name: 'TWILIO_MESSAGING_SERVICE_SID',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.sms_optin_reminder_delay',
+        name: 'SMS_OPTIN_REMINDER_DELAY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.sms_post_signup_alert',
+        name: 'SMS_POST_SIGNUP_ALERT',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.multifactor_enabled',
         name: 'MULTIFACTOR_ENABLED',
       },
