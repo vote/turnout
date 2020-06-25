@@ -1,0 +1,4 @@
+pages: 1
+auto_fields:
+  - slug: submit_date
+    type: todays_date
