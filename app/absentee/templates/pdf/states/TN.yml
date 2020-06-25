@@ -1,0 +1,13 @@
+manual_fields:
+  - 'Election Type'
+  - 'Reason'
+  - 'CDL or TWIC Number'
+  - 'Transmission'
+  - 'assist_address'
+  - 'assist_date'
+  - 'witness_address'
+  - 'witness_date'
+pages: 1
+auto_fields:
+  - slug: submit_date
+    type: todays_date
