@@ -131,6 +131,29 @@ def prepare_formdata(
     else:
         form_data["same_mailing_address"] = True
 
+    # Some forms always want your mailing address, even if it's the same as
+    # your registered address (NC, for example). The mailing_* vars are only
+    # populated if you *do* have a separate address, but these are *always*
+    # populated.
+    if ballot_request.mailing_state:
+        form_data["mailing_or_reg_address1"] = form_data["mailing_address1"]
+        form_data["mailing_or_reg_address2"] = form_data["mailing_address2"]
+        form_data["mailing_or_reg_city"] = form_data["mailing_city"]
+        form_data["mailing_or_reg_state"] = form_data["mailing_state"]
+        form_data["mailing_or_reg_zipcode"] = form_data["mailing_zipcode"]
+        form_data["mailing_or_reg_address1_2"] = form_data["mailing_address1_2"]
+        form_data["mailing_or_reg_city_state_zip"] = form_data["mailing_city_state_zip"]
+        form_data["mailing_or_reg_full_address"] = form_data["mailing_full_address"]
+    else:
+        form_data["mailing_or_reg_address1"] = form_data["address1"]
+        form_data["mailing_or_reg_address2"] = form_data["address2"]
+        form_data["mailing_or_reg_city"] = form_data["city"]
+        form_data["mailing_or_reg_state"] = form_data["state"]
+        form_data["mailing_or_reg_zipcode"] = form_data["zipcode"]
+        form_data["mailing_or_reg_address1_2"] = form_data["address1_2"]
+        form_data["mailing_or_reg_city_state_zip"] = form_data["address_city_state_zip"]
+        form_data["mailing_or_reg_full_address"] = form_data["full_address"]
+
     # find the mailing address and contact info
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
     if contact_info.full_address:

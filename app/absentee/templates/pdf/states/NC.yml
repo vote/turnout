@@ -1,0 +1,35 @@
+manual_fields:
+  - not_moved_yes
+  - not_moved_no
+  - moved_date
+  - permanent_mailing_address
+  - year_vbm_illness
+  - relative_name
+  - relative_relation
+  - relative_address1_2
+  - relative_city
+  - relative_state
+  - relative_zipcode
+  - assist_name
+  - assist_address1_2
+  - assist_city
+  - assist_state
+  - assist_zipcode
+  - patient_hospital_name
+  - patient_yes
+  - patient_no
+  - uocava_mil
+  - uocava_overseas
+  - uocava_full_address
+  - uocava_mailing_full_address
+  - uocava_email
+  - uocava_fax
+  - previous_first_name
+  - previous_last_name
+  - previous_middle_name
+  - state_id_number_opt_1
+  - state_id_number_opt_2
+auto_fields:
+  - slug: date_signed
+    type: todays_date
+pages: 3
