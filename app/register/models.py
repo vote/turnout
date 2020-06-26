@@ -90,6 +90,8 @@ class Registration(
 
     referring_tool = TurnoutEnumField(enums.ToolName, null=True, blank=True)
 
+    custom_ovr_link = models.TextField(null=True, blank=True)
+
     class Meta:
         ordering = ["-created_at"]
 

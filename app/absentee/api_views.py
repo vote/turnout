@@ -84,7 +84,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
                 serializer.validated_data["region"] = regions[0]
                 include_regions = False
 
-        ballot_request = self.process_serializer(serializer)
+        ballot_request = self.process_serializer(serializer, is_create=True)
 
         # Based on the results of region mapping, attach a list of regions
         # to the response

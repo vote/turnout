@@ -19,7 +19,8 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         action_object = self.process_serializer(
             self.get_serializer(
                 instance, data=request.data, partial=partial, incomplete=incomplete
-            )
+            ),
+            is_create=False,
         )
 
         return self.create_or_update_response(request, action_object)
@@ -27,10 +28,17 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
     def create(self, request, *args, **kwargs):
         incomplete = request.GET.get("incomplete") == "true"
         action_object = self.process_serializer(
-            self.get_serializer(data=request.data, incomplete=incomplete)
+            self.get_serializer(data=request.data, incomplete=incomplete),
+            is_create=True,
         )
 
         return self.create_or_update_response(request, action_object)
+
+    def after_create(self, action_object):
+        pass
+
+    def after_update(self, action_object):
+        pass
 
     def after_create_or_update(self, action_object):
         pass
@@ -40,7 +48,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         return Response(response)
 
     @tracer.wrap()
-    def process_serializer(self, serializer):
+    def process_serializer(self, serializer, is_create):
         serializer.is_valid(raise_exception=True)
         if "state" in serializer.validated_data:
             serializer.validated_data["state"] = State.objects.get(
@@ -67,6 +75,11 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         state_id_number = serializer.validated_data.pop("state_id_number", None)
 
         action_object = serializer.save()
+
+        if is_create:
+            self.after_create(action_object)
+        else:
+            self.after_update(action_object)
 
         self.after_create_or_update(action_object)
 

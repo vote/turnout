@@ -161,5 +161,21 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey',
         name: 'DD_API_KEY',
       },
-    ],
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_co_vrd_id',
+        name: 'REGISTER_CO_VRD_ID',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_co_vrd_enabled',
+        name: 'REGISTER_CO_VRD_ENABLED',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_wa_vrd_id',
+        name: 'REGISTER_WA_VRD_ID',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_wa_vrd_enabled',
+        name: 'REGISTER_WA_VRD_ENABLED',
+      },
+    ]
 }
