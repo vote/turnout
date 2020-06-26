@@ -56,6 +56,13 @@ export SLACK_DATA_ERROR_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-
 export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
 export USVF_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync_hour | jq '.Parameter["Value"]' -r)
 export DD_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name general.datadogkey | jq '.Parameter["Value"]' -r)
+export REGISTER_CO_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_co_vrd_id | jq '.Parameter["Value"]' -r)
+export REGISTER_CO_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_co_vrd_enabled | jq '.Parameter["Value"]' -r)
+export REGISTER_WA_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_id | jq '.Parameter["Value"]' -r)
+export REGISTER_WA_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_enabled | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_key | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -122,6 +129,13 @@ docker run -i -t \
     -e USVF_SYNC \
     -e USVF_SYNC_HOUR \
     -e DD_API_KEY \
+    -e REGISTER_CO_VRD_ID \
+    -e REGISTER_CO_VRD_ENABLED \
+    -e REGISTER_WA_VRD_ID \
+    -e REGISTER_WA_VRD_ENABLED \
+    -e ACTIONNETWORK_KEY \
+    -e ACTIONNETWORK_SYNC \
+    -e ACTIONNETWORK_SYNC_HOUR \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

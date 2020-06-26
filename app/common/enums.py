@@ -194,3 +194,7 @@ class SubmissionType(Enum, metaclass=EnumMeta):
         LEO_EMAIL = "Email to LEO"
         LEO_FAX = "Fax to LEO"
         SELF_PRINT = "Print at Home"
+
+
+class ExternalToolType(Enum, metaclass=EnumMeta):
+    ACTIONNETWORK = "actionnetwork"

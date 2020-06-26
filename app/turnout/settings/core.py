@@ -115,6 +115,7 @@ FIRST_PARTY_APPS = [
     "smsbot",
     "reporting",
     "fax",
+    "integration",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -203,6 +204,11 @@ USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
 USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
 
+# This (daily?) sync is only to catch stragglers that don't sync in realtime.
+ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
+ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
+ACTIONNETWORK_SYNC_MINUTE = env.int("ACTIONNETWORK_SYNC_MINUTE", 45)
+
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -228,6 +234,13 @@ if USVF_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
         "task": "official.tasks.sync_usvotefoundation",
         "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
+    }
+if ACTIONNETWORK_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
+        "task": "integration.tasks.sync_actionnetwork",
+        "schedule": crontab(
+            minute=ACTIONNETWORK_SYNC_MINUTE, hour=ACTIONNETWORK_SYNC_HOUR
+        ),
     }
 
 #### END CELERY CONFIGURATION
@@ -469,6 +482,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "integration": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
     },
 }
 
@@ -591,3 +609,9 @@ FAX_GATEWAY_CALLBACK_URL = env.str(
 FAX_GATEWAY_SQS_QUEUE = env.str("FAX_GATEWAY_SQS_QUEUE", default=None)
 
 #### END FAX CONFIGURATION
+
+#### ACTIONNETWORK CONFIGURATION
+
+ACTIONNETWORK_KEY = env.str("ACTIONNETWORK_KEY", default=None)
+
+#### END ACTIONNETWORK CONFIGURATION

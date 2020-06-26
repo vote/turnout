@@ -2,6 +2,8 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
+from common import enums
+from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 
 
@@ -73,3 +75,13 @@ class Association(UUIDModel, TimestampModel):
 class InviteAssociation(UUIDModel, TimestampModel):
     client = models.ForeignKey("multi_tenant.Client", on_delete=models.CASCADE)
     user = models.ForeignKey("accounts.Invite", on_delete=models.CASCADE)
+
+
+class SubscriberIntegrationProperty(UUIDModel, TimestampModel):
+    subscriber = models.ForeignKey(Client, on_delete=models.CASCADE,)
+    external_tool = TurnoutEnumField(enums.ExternalToolType, null=True)
+    name = models.TextField(null=True)
+    value = models.TextField(null=True)
+
+    class Meta:
+        ordering = ["-created_at"]

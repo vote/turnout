@@ -80,6 +80,7 @@ def apikey_override(settings):
     settings.TARGETSMART_KEY = "mytargetsmartkey"
     settings.ALLOY_KEY = "myalloykey"
     settings.ALLOY_SECRET = "myalloysecret"
+    settings.ACTIONNETWORK_SYNC = False
 
 
 @pytest.fixture()

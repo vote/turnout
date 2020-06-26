@@ -11,6 +11,7 @@ from common import enums
 from common.analytics import statsd
 from common.enums import EventType
 from election.models import State
+from integration.tasks import sync_lookup_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
 
 from .alloy import ALLOY_STATES_ENABLED, query_alloy
@@ -127,6 +128,9 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
                 args=(str(instance.phone), "verifier"),
                 countdown=settings.SMS_OPTIN_REMINDER_DELAY,
             )
+
+        if settings.ACTIONNETWORK_SYNC:
+            sync_lookup_to_actionnetwork.delay(instance.uuid)
 
         response = {"registered": registered, "action_id": instance.action.pk}
         if serializer.validated_data.get("last_updated"):

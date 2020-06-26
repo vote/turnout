@@ -177,5 +177,17 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_wa_vrd_enabled',
         name: 'REGISTER_WA_VRD_ENABLED',
       },
-    ]
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_key',
+        name: 'ACTIONNETWORK_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync',
+        name: 'ACTIONNETWORK_SYNC',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync_hour',
+        name: 'ACTIONNETWORK_SYNC_HOUR',
+      },
+    ],
 }

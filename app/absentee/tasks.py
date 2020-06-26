@@ -6,6 +6,7 @@ from django.conf import settings
 
 from common.analytics import statsd
 from common.enums import EventType, FaxStatus
+from integration.tasks import sync_ballotrequest_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
 
 log = logging.getLogger("absentee")
@@ -27,6 +28,9 @@ def process_ballotrequest_submission(
             args=(str(ballot_request.phone), "absentee"),
             countdown=settings.SMS_OPTIN_REMINDER_DELAY,
         )
+
+    if settings.ACTIONNETWORK_SYNC:
+        sync_ballotrequest_to_actionnetwork.delay(ballot_request.uuid)
 
 
 @shared_task

@@ -3,6 +3,7 @@ from django.conf import settings
 
 from common.analytics import statsd
 from common.enums import EventType, TurnoutActionStatus
+from integration.tasks import sync_registration_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
 
 
@@ -22,6 +23,9 @@ def process_registration_submission(
             args=(str(registration.phone), "register"),
             countdown=settings.SMS_OPTIN_REMINDER_DELAY,
         )
+
+    if settings.ACTIONNETWORK_SYNC:
+        sync_registration_to_actionnetwork.delay(registration.uuid)
 
 
 @shared_task
