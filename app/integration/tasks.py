@@ -27,3 +27,10 @@ def sync_registration_to_actionnetwork(pk: str) -> None:
 @shared_task
 def sync_actionnetwork():
     sync()
+
+
+@shared_task
+def sync_datadog_synthetics():
+    from .datadog_synthetics import sync
+
+    sync()

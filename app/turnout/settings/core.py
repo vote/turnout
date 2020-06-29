@@ -204,6 +204,10 @@ USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
 USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
 
+DATADOG_SYNTHETICS_SYNC = env.bool("DATADOG_SYNTHETICS_SYNC", default=False)
+DATADOG_SYNTHETICS_SYNC_HOUR = env.int("DATADOG_SYNTHETICS_SYNC_HOUR", default=5)
+DATADOG_SYNTHETICS_SYNC_MINUTE = env.int("DATADOG_SYNTHETICS_SYNC_HOUR", default=5)
+
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
 ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
@@ -234,6 +238,13 @@ if USVF_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
         "task": "official.tasks.sync_usvotefoundation",
         "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
+    }
+if DATADOG_SYNTHETICS_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-datadog-synthetics-sync"] = {
+        "task": "integration.tasks.sync_datadog_synthetics",
+        "schedule": crontab(
+            minute=DATADOG_SYNTHETICS_SYNC_MINUTE, hour=DATADOG_SYNTHETICS_SYNC_HOUR
+        ),
     }
 if ACTIONNETWORK_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
@@ -353,6 +364,8 @@ CLOUDFLARE_ZONE = env.str("CLOUDFLARE_ZONE", default="")
 #### DATADOG CONFIGURATION
 
 ddtrace.tracer.set_tags({"build": BUILD})
+DATADOG_API_KEY = env.str("DATADOG_API_KEY", default=None)
+DATADOG_APPLICATION_KEY = env.str("DATADOG_APPLICATION_KEY", default=None)
 
 #### END DATADOG CONFIGURATION
 
