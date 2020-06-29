@@ -6,11 +6,7 @@ from common.enums import NotificationWebhookTypes, StateFieldFormats, Submission
 from election import models
 
 new_state = Recipe(models.State, code="XX")
-state = Recipe(
-    models.State,
-    created_at=datetime.now(timezone.utc),
-    vbm_submission_type=SubmissionType.SELF_PRINT,
-)
+state = Recipe(models.State, created_at=datetime.now(timezone.utc),)
 
 
 markdown_field_type = Recipe(

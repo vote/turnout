@@ -7,6 +7,8 @@ from rest_framework.views import APIView
 
 from action.mixin_apiview import IncompleteActionViewSet
 from common.enums import SubmissionType, TurnoutActionStatus
+from common.rollouts import flag_enabled_for_state
+from election.models import StateInformation
 from official.api_views import get_regions_for_address
 
 from .contactinfo import get_absentee_contact_info
@@ -17,19 +19,34 @@ from .tasks import process_ballotrequest_submission
 
 
 def get_esign_method(ballot_request: BallotRequest):
-    state_submission_method = ballot_request.state.vbm_submission_type
-    if state_submission_method == SubmissionType.SELF_PRINT:
+    if not flag_enabled_for_state("vbm_esign", ballot_request.state.code):
         return SubmissionType.SELF_PRINT
 
     # Check that we have the right contact info for fax/email
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
 
-    if state_submission_method == SubmissionType.LEO_FAX and not contact_info.fax:
-        return SubmissionType.SELF_PRINT
-    if state_submission_method == SubmissionType.LEO_EMAIL and not contact_info.email:
-        return SubmissionType.SELF_PRINT
+    state_infos = StateInformation.objects.select_related("field_type").filter(
+        field_type__slug__in=("vbm_app_submission_email", "vbm_app_submission_fax"),
+        state=ballot_request.state,
+    )
 
-    return state_submission_method
+    email_allowed_for_state = any(
+        info.boolean_value()
+        for info in state_infos
+        if info.field_type.slug == "vbm_app_submission_email"
+    )
+    if email_allowed_for_state and contact_info.email:
+        return SubmissionType.LEO_EMAIL
+
+    fax_allowed_for_state = any(
+        info.boolean_value()
+        for info in state_infos
+        if info.field_type.slug == "vbm_app_submission_fax"
+    )
+    if fax_allowed_for_state and contact_info.fax:
+        return SubmissionType.LEO_FAX
+
+    return SubmissionType.SELF_PRINT
 
 
 def populate_esign_method(ballot_request: BallotRequest):

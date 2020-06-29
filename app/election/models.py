@@ -28,8 +28,10 @@ class State(TimestampModel):
     state_information = models.ManyToManyField(
         "StateInformationFieldType", through="StateInformation"
     )
+
+    # TODO: remove this field
     vbm_submission_type = TurnoutEnumField(
-        enums.SubmissionType, default=enums.SubmissionType.SELF_PRINT
+        enums.SubmissionType, default=enums.SubmissionType.SELF_PRINT, null=True
     )
 
     class Meta(object):
@@ -97,7 +99,7 @@ class StateInformation(UUIDModel, TimestampModel):
         if self.text == "":
             content = None
         elif self.field_type.field_format == enums.StateFieldFormats.BOOLEAN:
-            content = self.text.lower() == "true"
+            content = self.boolean_value()
         elif self.field_type.field_format == enums.StateFieldFormats.DATE:
             try:
                 content = datetime.date.fromisoformat(self.text)
@@ -106,6 +108,14 @@ class StateInformation(UUIDModel, TimestampModel):
         else:
             content = self.text
         return content
+
+    def boolean_value(self):
+        if self.field_type.field_format != enums.StateFieldFormats.BOOLEAN:
+            raise RuntimeError(
+                "Cannot call boolean_value on non-boolean StateInformation"
+            )
+
+        return self.text.lower() == "true"
 
 
 class UpdateNotificationWebhookManager(models.Manager):

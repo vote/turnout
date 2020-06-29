@@ -304,20 +304,23 @@ def check_state_contacts(state_id: str, mode: enums.SubmissionType) -> str:
 
 @tracer.wrap()
 def check_vbm_states():
-    for state in State.objects.all():
-        if state.vbm_submission_type != enums.SubmissionType.SELF_PRINT:
-            message = check_state_contacts(state.code, state.vbm_submission_type)
-            if message:
-                logger.warning(message)
-                if settings.SLACK_DATA_ERROR_ENABLED:
-                    try:
-                        with statsd.timed(
-                            "turnout.official.check_vbm_states.slackcall"
-                        ):
-                            r = requests.post(
-                                settings.SLACK_DATA_ERROR_WEBHOOK,
-                                json={"text": message},
-                            )
-                        r.raise_for_status()
-                    except Exception as e:
-                        logger.warning(f"Failed to post warning to slack webhook: {e}")
+    # TODO: bring this back in some form? Now that we have clean fallbacks for
+    # missing contact info maybe we don't need it?
+    pass
+    # for state in State.objects.all():
+    #     if state.vbm_submission_type != enums.SubmissionType.SELF_PRINT:
+    #         message = check_state_contacts(state.code, state.vbm_submission_type)
+    #         if message:
+    #             logger.warning(message)
+    #             if settings.SLACK_DATA_ERROR_ENABLED:
+    #                 try:
+    #                     with statsd.timed(
+    #                         "turnout.official.check_vbm_states.slackcall"
+    #                     ):
+    #                         r = requests.post(
+    #                             settings.SLACK_DATA_ERROR_WEBHOOK,
+    #                             json={"text": message},
+    #                         )
+    #                     r.raise_for_status()
+    #                 except Exception as e:
+    #                     logger.warning(f"Failed to post warning to slack webhook: {e}")

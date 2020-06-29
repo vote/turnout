@@ -189,5 +189,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync_hour',
         name: 'ACTIONNETWORK_SYNC_HOUR',
       },
-    ],
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.optimizely_sdk_key',
+        name: 'OPTIMIZELY_SDK_KEY',
+      },
+    ]
 }
