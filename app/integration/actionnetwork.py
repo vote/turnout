@@ -79,13 +79,12 @@ def get_api_key(subscriber_id):
 
 @tracer.wrap()
 def sync_item(item):
-    if settings.ACTIONNETWORK_SYNC:
+    if settings.ACTIONNETWORK_SYNC and item.action:
         _sync_item(item, None)
         _sync_item(item, item.subscriber_id)
 
 
 def _sync_item(item, subscriber_id):
-
     api_key = get_api_key(subscriber_id)
     if not api_key:
         return
@@ -130,7 +129,7 @@ def sync_all_items(cls):
                 )
             )
         )
-        .filter(no_sync=True)
+        .filter(no_sync=True, action__isnull=False)
         .order_by("created_at")
     ):
         _sync_item(item, None)
@@ -145,7 +144,7 @@ def sync_all_items(cls):
                 )
             )
         )
-        .filter(no_sync=True)
+        .filter(no_sync=True, action__isnull=False)
         .order_by("created_at")
     ):
         _sync_item(item, item.subscriber_id)
