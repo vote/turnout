@@ -60,7 +60,11 @@ def geocode(**kwargs):
             )
             return None
     if r.status_code != 200:
-        extra = {"url": API_ENDPOINT, "api_args": str(args), "status_code": r.status_code}
+        extra = {
+            "url": API_ENDPOINT,
+            "api_args": str(args),
+            "status_code": r.status_code,
+        }
         logger.warning(
             "Error querying geocodio %(url)s, args %(args)s, status code %(status_code)s",
             extra,

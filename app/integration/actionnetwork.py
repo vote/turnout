@@ -1,6 +1,7 @@
 import logging
 
 import requests
+import sentry_sdk
 from django.conf import settings
 from django.db.models import Exists, OuterRef
 
@@ -33,7 +34,7 @@ def post_person(info, api_key):
         except Exception as e:
             extra = {"url": ADD_ENDPOINT, "info": info, "exception": str(e)}
             logger.error(
-                "Error posting to %(url)s, info %(info)s, exception %(exception)s",
+                "actionnetwork: Error posting to %(url)s, info %(info)s, exception %(exception)s",
                 extra,
                 extra=extra,
             )
@@ -46,7 +47,7 @@ def post_person(info, api_key):
     if response.status_code != 200:
         extra = {"url": ADD_ENDPOINT, "info": info, "status_code": response.status_code}
         logger.error(
-            "Error posting to %(url)s, info %(info)s, status_code %(response.status_code)s",
+            "actionnetwork: Error posting to %(url)s, info %(info)s, status_code %(response.status_code)s",
             extra,
             extra=extra,
         )
@@ -90,7 +91,11 @@ def _sync_item(item, subscriber_id):
         return
 
     extra = {"subscriber_id": subscriber_id, "item": item}
-    logger.info(f"Sync %(item)s, subscriber %(subscriber_id)s", extra, extra=extra)
+    logger.info(
+        f"actionnetwork: Sync %(item)s, subscriber %(subscriber_id)s",
+        extra,
+        extra=extra,
+    )
     external_id = post_person(
         {
             "given_name": item.first_name,
