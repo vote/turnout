@@ -538,7 +538,7 @@ def test_get_esign_method(
 
     # Run the test!
     client = APIClient()
-    response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, VALID_ABSENTEE_INITIAL)
+    client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, VALID_ABSENTEE_INITIAL)
 
     assert BallotRequest.objects.count() == 1
     ballot_request = BallotRequest.objects.first()

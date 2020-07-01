@@ -1,5 +1,4 @@
 from django.conf import settings
-
 from optimizely import optimizely
 from optimizely.config_manager import PollingConfigManager
 

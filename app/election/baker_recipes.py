@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from model_bakery.recipe import Recipe, foreign_key
 
-from common.enums import NotificationWebhookTypes, StateFieldFormats, SubmissionType
+from common.enums import NotificationWebhookTypes, StateFieldFormats
 from election import models
 
 new_state = Recipe(models.State, code="XX")
