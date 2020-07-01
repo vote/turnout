@@ -11,6 +11,7 @@ from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from common.analytics import statsd
 from common.apm import tracer
 from common.geocode import (
     al_jefferson_county_bessemer_division,
@@ -28,10 +29,6 @@ TARGETSMART_DISTRICT_API = "https://api.targetsmart.com/service/district"
 
 
 class TargetSmartAPIError(Exception):
-    pass
-
-
-class AddressRegionsAPIError(Exception):
     pass
 
 
@@ -130,12 +127,8 @@ def geocode_to_regions(street, city, state, zipcode):
         street=street, city=city, state=state, zipcode=zipcode, fields="stateleg",
     )
     if not addrs:
-        logger.error(f"Unable to geocode ({street}, {city}, {state} {zipcode})")
-        sentry_sdk.capture_exception(
-            AddressRegionsAPIError(
-                f"Unable to geocode ({street}, {city}, {state} {zipcode})"
-            )
-        )
+        logger.warning(f"address: Unable to geocode ({street}, {city}, {state} {zipcode})")
+        statsd.increment("turnout.official.address.failed_geocode")
         return None
 
     # assume the first address match is the correct (only) state
@@ -572,21 +565,13 @@ def get_regions_for_address(street, city, state, zipcode):
         regions = geocode_to_regions(street, city, state, zipcode)
 
     if not regions:
-        logger.error(f"No match for ({street}, {city}, {state} {zipcode})")
-        sentry_sdk.capture_exception(
-            AddressRegionsAPIError(
-                f"No match for ({street}, {city}, {state} {zipcode})"
-            )
-        )
+        logger.warning(f"address: No match for ({street}, {city}, {state} {zipcode})")
+        statsd.increment("turnout.official.address.no_region_match")
     elif len(regions) > 1:
         logger.warning(
-            f"Multiple results for ({street}, {city}, {state} {zipcode}): {regions}"
+            f"address: Multiple results for ({street}, {city}, {state} {zipcode}): {regions}"
         )
-        sentry_sdk.capture_exception(
-            AddressRegionsAPIError(
-                f"Multiple results for ({street}, {city}, {state} {zipcode}): {regions}"
-            )
-        )
+        statsd.increment("turnout.official.address.multiple_region_matches")
 
     return (regions, False)
 
