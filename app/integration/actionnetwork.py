@@ -40,7 +40,7 @@ def post_person(info, api_key):
             )
             sentry_sdk.capture_exception(
                 ActionNetworkError(
-                    f"Error posting to {url}, info {info}, exception {str(e)}"
+                    f"Error posting to {ADD_ENDPOINT}, info {info}, exception {str(e)}"
                 )
             )
             return None
@@ -53,7 +53,7 @@ def post_person(info, api_key):
         )
         sentry_sdk.capture_exception(
             ActionNetworkError(
-                f"Error posting to {url}, info {info}, status code {response.status_code}"
+                f"Error posting to {ADD_ENDPOINT}, info {info}, status code {response.status_code}"
             )
         )
         return None
