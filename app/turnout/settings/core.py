@@ -204,6 +204,10 @@ USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
 USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
 
+UPTIMEDOTCOM_SYNC = env.bool("UPTIMEDOTCOM_SYNC", default=False)
+UPTIMEDOTCOM_SYNC_HOUR = env.int("UPTIMEDOTCOM_SYNC_HOUR", default=5)
+UPTIMEDOTCOM_SYNC_MINUTE = env.int("UPTIMEDOTCOM_SYNC_HOUR", default=5)
+
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
 ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
@@ -234,6 +238,13 @@ if USVF_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
         "task": "official.tasks.sync_usvotefoundation",
         "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
+    }
+if UPTIMEDOTCOM_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-uptimedotcom-sync"] = {
+        "task": "integration.tasks.sync_uptimedotcom",
+        "schedule": crontab(
+            minute=UPTIMEDOTCOM_SYNC_MINUTE, hour=UPTIMEDOTCOM_SYNC_HOUR
+        ),
     }
 if ACTIONNETWORK_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
@@ -625,3 +636,9 @@ OPTIMIZELY_UPDATE_INTERVAL_SECONDS = env.int(
 )
 
 #### END OPTIMIZELY CONFIGURATION
+
+#### UPTIME CONFIGURATION
+
+UPTIMEDOTCOM_KEY = env.str("UPTIMEDOTCOM_KEY", default=None)
+
+#### END UPTIME CONFIGURATION
