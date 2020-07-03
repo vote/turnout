@@ -25,12 +25,18 @@ DESCRIPTIONS = {
     "ovr": "Online Voter Registration",
     "verify-status": "Voter Registration Status Verifier",
     "absentee-application": "Absentee Ballot Request",
-    "absentee-tracker": "Abesentee Ballot Tracker",
+    "absentee-tracker": "Absentee Ballot Tracker",
 }
 
 CHECKS_ENDPOINT = "https://uptime.com/api/v1/checks/"
 ADD_ENDPOINT = "https://uptime.com/api/v1/checks/add-http/"
 STATUSPAGES_ENDPOINT = "https://uptime.com/api/v1/statuspages/"
+
+CHECK_FREQUENCY_MINUTES = 10
+CHECK_REGIONS = ["US East", "US West", "US Central"]
+
+# as downtime crosses each of these thresholds, we tweet (again)
+TWEET_DOWNTIME_THRESHOLDS = [600, 3600, 6 * 3600, 24 * 3600, 7 * 24 * 3600]
 
 
 class APIError(Exception):
@@ -42,7 +48,10 @@ class APIThrottle(Exception):
         self.seconds = seconds
 
 
-def api_check_response(response):
+def api_call(verb, url, data=None):
+    response = getattr(requests, verb)(
+        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
+    )
     if response.status_code != 200:
         msg = response.json().get("messages", {})
         if msg.get("error_code") == "API_RATE_LIMIT":
@@ -53,37 +62,6 @@ def api_check_response(response):
                 logger.info(f"Throttled by uptime.com; must wait {seconds}")
                 raise APIThrottle(seconds)
         raise APIError(response.text)
-
-
-def api_get(url):
-    response = requests.get(
-        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-    )
-    api_check_response(response)
-    return response.json()
-
-
-def api_delete(url):
-    response = requests.delete(
-        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-    )
-    api_check_response(response)
-    return response.json()
-
-
-def api_patch(url, data):
-    response = requests.patch(
-        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
-    )
-    api_check_response(response)
-    return response.json()
-
-
-def api_post(url, data):
-    response = requests.post(
-        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
-    )
-    api_check_response(response)
     return response.json()
 
 
@@ -91,7 +69,7 @@ def get_existing_checks():
     checks = {}
     nexturl = CHECKS_ENDPOINT
     while nexturl:
-        r = api_get(nexturl)
+        r = api_call("get", nexturl)
         for test in r["results"]:
             checks[test["name"]] = test
         nexturl = r.get("next")
@@ -100,7 +78,7 @@ def get_existing_checks():
 
 def get_existing_pages():
     pages = {}
-    r = api_get(STATUSPAGES_ENDPOINT)
+    r = api_call("get", STATUSPAGES_ENDPOINT)
     for page in r["results"]:
         pages[page["name"]] = page
     return pages
@@ -127,9 +105,9 @@ def update_group(prefix, slug, existing):
             "name": name,
             # hack: uptime.com uppercases urlescaped hex, so uppercase our value too to avoid a diff
             "msp_address": item.text.replace("%2f", "%2F"),
-            "msp_interval": 5,
+            "msp_interval": CHECK_FREQUENCY_MINUTES,
             "contact_groups": ["Default"],
-            "locations": ["US East", "US West", "US Central",],
+            "locations": CHECK_REGIONS,
         }
 
         if name in existing:
@@ -139,22 +117,22 @@ def update_group(prefix, slug, existing):
             same = True
             for k, v in req.items():
                 if v != old.get(k):
-                    logger.info(f"{name} field {old[k]} != {v}")
+                    logger.info(f"Will change {name} field {k} {old[k]} -> {v}")
                     same = False
             if same:
                 continue
 
             logger.info(f"Updating {name}")
-            api_patch(f"{CHECKS_ENDPOINT}{old['pk']}/", req)
+            api_call("patch", f"{CHECKS_ENDPOINT}{old['pk']}/", req)
         else:
             logger.info(f"Adding {name} {item.text}")
             req["type"] = "http"
-            api_post(ADD_ENDPOINT, req)
+            api_call("post", ADD_ENDPOINT, req)
 
     for name, old in existing.items():
         if name.startswith(prefix + "-"):
             logger.info(f"Removing {name}")
-            api_delete(f"{CHECKS_ENDPOINT}{old['pk']}/")
+            api_call("delete", f"{CHECKS_ENDPOINT}{old['pk']}/")
 
     return names
 
@@ -186,14 +164,15 @@ def sync():
             same = True
             for k, v in req.items():
                 if v != old[k]:
+                    logger.info(f"Will change page {prefix} field {k} {old[k]} -> {v}")
                     same = False
             if same:
                 continue
             logger.info(f"Updating page {prefix} {page_slug}")
-            api_patch(f"{STATUSPAGES_ENDPOINT}{pages[prefix]['pk']}/", req)
+            api_call("patch", f"{STATUSPAGES_ENDPOINT}{pages[prefix]['pk']}/", req)
         else:
             logger.info(f"Creating page {prefix} {page_slug} services {names}")
-            api_post(f"{STATUSPAGES_ENDPOINT}", req)
+            api_call("post", f"{STATUSPAGES_ENDPOINT}", req)
 
 
 def to_pretty_timedelta(n):
@@ -215,8 +194,14 @@ def to_pretty_timedelta(n):
 def get_site_uptime(pk):
     now = datetime.datetime.utcnow()
     r = []
-    for period, seconds in {"week": 7 * 24 * 3600, "year": 365 * 24 * 3600}.items():
-        res = api_get(
+    for period, seconds in {
+        "week": 7 * 24 * 3600,
+        "month": 30 * 24 * 3600,
+        "quarter": 91 * 24 * 3600,
+        # "year": 365 * 24 * 3600,
+    }.items():
+        res = api_call(
+            "get",
             f"{CHECKS_ENDPOINT}{pk}/stats/?start_date={(now - datetime.timedelta(seconds=seconds)).isoformat()}&end_date={now.isoformat()}",
         )
         down_seconds = res["totals"]["downtime_secs"]
@@ -226,7 +211,7 @@ def get_site_uptime(pk):
                 f"down {to_pretty_timedelta(datetime.timedelta(seconds=down_seconds))} over last {period} ({'%.3f' % (uptime*100)}% uptime)"
             )
     if r:
-        return ", ".join(r)
+        return "Overall: " + ", ".join(r)
     return None
 
 
@@ -243,6 +228,7 @@ def tweet(message):
     api = tweepy.API(auth)
 
     # Create a tweet
+    logger.info(f"Tweet: {message}")
     api.update_status(message)
 
 
@@ -262,7 +248,7 @@ def tweet_site_status(site, uptime_state):
 
     if not site.state_up:
         # complain about being down after crossing several thresholds
-        for seconds in [600, 900, 3600, 6 * 3600, 24 * 3600]:
+        for seconds in TWEET_DOWNTIME_THRESHOLDS:
             cutoff = site.state_changed_at + datetime.timedelta(seconds=seconds)
             if now > cutoff and (not site.last_tweet_at or site.last_tweet_at < cutoff):
                 actual_delta = now - site.state_changed_at
@@ -275,13 +261,10 @@ def tweet_site_status(site, uptime_state):
     if message:
         u = get_site_uptime(pk)
         if u:
-            message += ". Historical: " + u
-        logger.info(message)
-
+            message += ". " + u
+        message += " " + uptime_state["msp_address"]
         site.last_tweet_at = now
         site.save()
-
-        message += " " + uptime_state["msp_address"]
         tweet(message)
 
 

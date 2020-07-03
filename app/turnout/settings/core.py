@@ -249,9 +249,9 @@ if UPTIMEDOTCOM_SYNC:
         ),
     }
 if UPTIME_TWITTER_CRON_MINUTE:
-    CELERY_BEAT_SCHEDULE["trigger-tweet-uptimedotcom"] = {
+    CELERY_BEAT_SCHEDULE["trigger-uptimedotcom-tweet"] = {
         "task": "integration.tasks.tweet_uptimedotcom",
-        "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE,),
+        "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
     }
 
 if ACTIONNETWORK_SYNC:
