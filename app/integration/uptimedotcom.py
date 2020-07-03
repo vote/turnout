@@ -7,6 +7,7 @@ import requests
 import tweepy
 from django.conf import settings
 
+from common.apm import tracer
 from election.models import StateInformation
 
 from .models import ExternalStateSite
@@ -48,6 +49,7 @@ class APIThrottle(Exception):
         self.seconds = seconds
 
 
+@tracer.wrap()
 def api_call(verb, url, data=None):
     response = getattr(requests, verb)(
         url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
@@ -84,6 +86,7 @@ def get_existing_pages():
     return pages
 
 
+@tracer.wrap()
 def update_group(prefix, slug, existing):
     names = []
     for item in StateInformation.objects.filter(field_type__slug=slug):
@@ -137,6 +140,7 @@ def update_group(prefix, slug, existing):
     return names
 
 
+@tracer.wrap()
 def sync():
     checks = get_existing_checks()
     pages = get_existing_pages()
@@ -191,6 +195,7 @@ def to_pretty_timedelta(n):
     return str(int(n.total_seconds() // (24 * 3600 * 365))) + "y"
 
 
+@tracer.wrap()
 def get_site_uptime(pk):
     now = datetime.datetime.utcnow()
     r = []
@@ -232,6 +237,7 @@ def tweet(message):
     api.update_status(message)
 
 
+@tracer.wrap()
 def tweet_site_status(site, uptime_state):
     pk = uptime_state["pk"]
     uptime_state["name"]
@@ -268,8 +274,8 @@ def tweet_site_status(site, uptime_state):
         tweet(message)
 
 
+@tracer.wrap()
 def tweet_all_sites():
-    logger.info("tweet_all_sites")
     checks = get_existing_checks()
     for site in ExternalStateSite.objects.all():
         if site.name not in checks:
