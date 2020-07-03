@@ -264,6 +264,34 @@
             {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.optimizely_sdk_key"
+            },
+            {
+               "name": "UPTIMEDOTCOM_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptimedotcom_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_CRON_MINUTE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_cron_minute"
             }
          ]
       },
@@ -525,6 +553,34 @@
             {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.optimizely_sdk_key"
+            },
+            {
+               "name": "UPTIMEDOTCOM_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptimedotcom_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_CRON_MINUTE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_cron_minute"
             }
          ]
       },
@@ -785,6 +841,34 @@
             {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.optimizely_sdk_key"
+            },
+            {
+               "name": "UPTIMEDOTCOM_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptimedotcom_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_CRON_MINUTE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_cron_minute"
             }
          ]
       },
@@ -1112,6 +1196,34 @@
             {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.optimizely_sdk_key"
+            },
+            {
+               "name": "UPTIMEDOTCOM_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptimedotcom_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_key"
+            },
+            {
+               "name": "UPTIME_TWITTER_CONSUMER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token"
+            },
+            {
+               "name": "UPTIME_TWITTER_ACCESS_TOKEN_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token_secret"
+            },
+            {
+               "name": "UPTIME_TWITTER_CRON_MINUTE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_cron_minute"
             }
          ]
       }

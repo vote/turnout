@@ -63,6 +63,12 @@ export REGISTER_WA_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-d
 export ACTIONNETWORK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_key | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
+export UPTIMEDOTCOM_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptimedotcom_key | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_CONSUMER_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_key | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_CONSUMER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_secret | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_ACCESS_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_ACCESS_TOKEN_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token_secret | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_CRON_MINUTE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_cron_minute | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -136,6 +142,12 @@ docker run -i -t \
     -e ACTIONNETWORK_KEY \
     -e ACTIONNETWORK_SYNC \
     -e ACTIONNETWORK_SYNC_HOUR \
+    -e UPTIMEDOTCOM_KEY \
+    -e UPTIME_TWITTER_CONSUMER_KEY \
+    -e UPTIME_TWITTER_CONSUMER_SECRET \
+    -e UPTIME_TWITTER_ACCESS_TOKEN \
+    -e UPTIME_TWITTER_ACCESS_TOKEN_SECRET \
+    -e UPTIME_TWITTER_CRON_MINUTE \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
