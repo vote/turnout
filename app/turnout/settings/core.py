@@ -208,6 +208,8 @@ UPTIMEDOTCOM_SYNC = env.bool("UPTIMEDOTCOM_SYNC", default=False)
 UPTIMEDOTCOM_SYNC_HOUR = env.int("UPTIMEDOTCOM_SYNC_HOUR", default=5)
 UPTIMEDOTCOM_SYNC_MINUTE = env.int("UPTIMEDOTCOM_SYNC_HOUR", default=5)
 
+UPTIME_TWITTER_CRON_MINUTE = env.str("UPTIME_TWITTER_CRON_MINUTE", default=None)
+
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
 ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
@@ -246,6 +248,12 @@ if UPTIMEDOTCOM_SYNC:
             minute=UPTIMEDOTCOM_SYNC_MINUTE, hour=UPTIMEDOTCOM_SYNC_HOUR
         ),
     }
+if UPTIME_TWITTER_CRON_MINUTE:
+    CELERY_BEAT_SCHEDULE["trigger-tweet-uptimedotcom"] = {
+        "task": "integration.tasks.tweet_uptimedotcom",
+        "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE,),
+    }
+
 if ACTIONNETWORK_SYNC:
     CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
         "task": "integration.tasks.sync_actionnetwork",
@@ -640,5 +648,12 @@ OPTIMIZELY_UPDATE_INTERVAL_SECONDS = env.int(
 #### UPTIME CONFIGURATION
 
 UPTIMEDOTCOM_KEY = env.str("UPTIMEDOTCOM_KEY", default=None)
+
+UPTIME_TWITTER_CONSUMER_KEY = env.str("UPTIME_TWITTER_CONSUMER_KEY", default=None)
+UPTIME_TWITTER_CONSUMER_SECRET = env.str("UPTIME_TWITTER_CONSUMER_SECRET", default=None)
+UPTIME_TWITTER_ACCESS_TOKEN = env.str("UPTIME_TWITTER_ACCESS_TOKEN", default=None)
+UPTIME_TWITTER_ACCESS_TOKEN_SECRET = env.str(
+    "UPTIME_TWITTER_ACCESS_TOKEN_SECRET", default=None
+)
 
 #### END UPTIME CONFIGURATION

@@ -1,9 +1,15 @@
+import datetime
 import logging
+import re
 
+import dateutil.parser
 import requests
+import tweepy
 from django.conf import settings
 
 from election.models import StateInformation
+
+from .models import ExternalStateSite
 
 logger = logging.getLogger("integration")
 
@@ -14,32 +20,90 @@ MONITORS = {
     "absentee-application": "external_tool_vbm_application",
     "absentee-tracker": "external_tool_absentee_ballot_tracker",
 }
+DESCRIPTIONS = {
+    "polling-place": "Polling Place Lookup",
+    "ovr": "Online Voter Registration",
+    "verify-status": "Voter Registration Status Verifier",
+    "absentee-application": "Absentee Ballot Request",
+    "absentee-tracker": "Abesentee Ballot Tracker",
+}
 
 CHECKS_ENDPOINT = "https://uptime.com/api/v1/checks/"
 ADD_ENDPOINT = "https://uptime.com/api/v1/checks/add-http/"
 STATUSPAGES_ENDPOINT = "https://uptime.com/api/v1/statuspages/"
 
 
-def get_existing():
+class APIError(Exception):
+    pass
+
+
+class APIThrottle(Exception):
+    def __init__(self, seconds):
+        self.seconds = seconds
+
+
+def api_check_response(response):
+    if response.status_code != 200:
+        msg = response.json().get("messages", {})
+        if msg.get("error_code") == "API_RATE_LIMIT":
+            p = re.compile(r".* (\d+) seconds")
+            m = p.match(msg.get("error_message"))
+            if m:
+                seconds = int(m[1])
+                logger.info(f"Throttled by uptime.com; must wait {seconds}")
+                raise APIThrottle(seconds)
+        raise APIError(response.text)
+
+
+def api_get(url):
+    response = requests.get(
+        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
+    )
+    api_check_response(response)
+    return response.json()
+
+
+def api_delete(url):
+    response = requests.delete(
+        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
+    )
+    api_check_response(response)
+    return response.json()
+
+
+def api_patch(url, data):
+    response = requests.patch(
+        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
+    )
+    api_check_response(response)
+    return response.json()
+
+
+def api_post(url, data):
+    response = requests.post(
+        url, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"}, json=data,
+    )
+    api_check_response(response)
+    return response.json()
+
+
+def get_existing_checks():
     checks = {}
     nexturl = CHECKS_ENDPOINT
     while nexturl:
-        response = requests.get(
-            nexturl, headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-        )
-        for test in response.json()["results"]:
+        r = api_get(nexturl)
+        for test in r["results"]:
             checks[test["name"]] = test
-        nexturl = response.json().get("next")
+        nexturl = r.get("next")
+    return checks
 
+
+def get_existing_pages():
     pages = {}
-    response = requests.get(
-        STATUSPAGES_ENDPOINT,
-        headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-    )
-    for page in response.json()["results"]:
+    r = api_get(STATUSPAGES_ENDPOINT)
+    for page in r["results"]:
         pages[page["name"]] = page
-
-    return checks, pages
+    return pages
 
 
 def update_group(prefix, slug, existing):
@@ -52,11 +116,18 @@ def update_group(prefix, slug, existing):
         name = f"{prefix}-{item.state_id}"
         names.append(name)
 
+        site, _ = ExternalStateSite.objects.get_or_create(name=name,)
+        desc = f"{item.state_id} {DESCRIPTIONS[prefix]}"
+        if site.description != desc or site.state_up is None:
+            site.description = desc
+            site.state_up = True
+            site.save()
+
         req = {
             "name": name,
             # hack: uptime.com uppercases urlescaped hex, so uppercase our value too to avoid a diff
             "msp_address": item.text.replace("%2f", "%2F"),
-            "msp_interval": 10,
+            "msp_interval": 5,
             "contact_groups": ["Default"],
             "locations": ["US East", "US West", "US Central",],
         }
@@ -74,35 +145,23 @@ def update_group(prefix, slug, existing):
                 continue
 
             logger.info(f"Updating {name}")
-            response = requests.patch(
-                f"{CHECKS_ENDPOINT}{old['pk']}/",
-                headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-                json=req,
-            )
+            api_patch(f"{CHECKS_ENDPOINT}{old['pk']}/", req)
         else:
             logger.info(f"Adding {name} {item.text}")
             req["type"] = "http"
-            response = requests.post(
-                ADD_ENDPOINT,
-                headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-                json=req,
-            )
-        if response.status_code != 200:
-            logger.warning(response.text)
+            api_post(ADD_ENDPOINT, req)
 
     for name, old in existing.items():
         if name.startswith(prefix + "-"):
             logger.info(f"Removing {name}")
-            response = requests.delete(
-                f"{CHECKS_ENDPOINT}{old['pk']}/",
-                headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-            )
+            api_delete(f"{CHECKS_ENDPOINT}{old['pk']}/")
 
     return names
 
 
 def sync():
-    checks, pages = get_existing()
+    checks = get_existing_checks()
+    pages = get_existing_pages()
 
     for prefix, slug in MONITORS.items():
         names = update_group(prefix, slug, checks)
@@ -131,17 +190,105 @@ def sync():
             if same:
                 continue
             logger.info(f"Updating page {prefix} {page_slug}")
-            response = requests.patch(
-                f"{STATUSPAGES_ENDPOINT}{pages[prefix]['pk']}/",
-                headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-                json=req,
-            )
+            api_patch(f"{STATUSPAGES_ENDPOINT}{pages[prefix]['pk']}/", req)
         else:
             logger.info(f"Creating page {prefix} {page_slug} services {names}")
-            response = requests.post(
-                f"{STATUSPAGES_ENDPOINT}",
-                headers={"Authorization": f"Token {settings.UPTIMEDOTCOM_KEY}"},
-                json=req,
+            api_post(f"{STATUSPAGES_ENDPOINT}", req)
+
+
+def to_pretty_timedelta(n):
+    if n < datetime.timedelta(seconds=120):
+        return str(int(n.total_seconds())) + "s"
+    if n < datetime.timedelta(minutes=120):
+        return str(int(n.total_seconds() // 60)) + "m"
+    if n < datetime.timedelta(hours=48):
+        return str(int(n.total_seconds() // 3600)) + "h"
+    if n < datetime.timedelta(days=14):
+        return str(int(n.total_seconds() // (24 * 3600))) + "d"
+    if n < datetime.timedelta(days=7 * 12):
+        return str(int(n.total_seconds() // (24 * 3600 * 7))) + "w"
+    if n < datetime.timedelta(days=365 * 2):
+        return str(int(n.total_seconds() // (24 * 3600 * 30))) + "M"
+    return str(int(n.total_seconds() // (24 * 3600 * 365))) + "y"
+
+
+def get_site_uptime(pk):
+    now = datetime.datetime.utcnow()
+    r = []
+    for period, seconds in {"week": 7 * 24 * 3600, "year": 365 * 24 * 3600}.items():
+        res = api_get(
+            f"{CHECKS_ENDPOINT}{pk}/stats/?start_date={(now - datetime.timedelta(seconds=seconds)).isoformat()}&end_date={now.isoformat()}",
+        )
+        down_seconds = res["totals"]["downtime_secs"]
+        uptime = res["totals"]["uptime"]
+        if down_seconds:
+            r.append(
+                f"down {to_pretty_timedelta(datetime.timedelta(seconds=down_seconds))} over last {period} ({'%.3f' % (uptime*100)}% uptime)"
             )
-        if response.status_code != 200:
-            logger.warning(response.text)
+    if r:
+        return ", ".join(r)
+    return None
+
+
+def tweet(message):
+    auth = tweepy.OAuthHandler(
+        settings.UPTIME_TWITTER_CONSUMER_KEY, settings.UPTIME_TWITTER_CONSUMER_SECRET
+    )
+    auth.set_access_token(
+        settings.UPTIME_TWITTER_ACCESS_TOKEN,
+        settings.UPTIME_TWITTER_ACCESS_TOKEN_SECRET,
+    )
+
+    # Create API object
+    api = tweepy.API(auth)
+
+    # Create a tweet
+    api.update_status(message)
+
+
+def tweet_site_status(site, uptime_state):
+    pk = uptime_state["pk"]
+    uptime_state["name"]
+    message = None
+    now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+    if uptime_state["state_is_up"] != site.state_up:
+        site.state_up = uptime_state["state_is_up"]
+        site.state_changed_at = dateutil.parser.isoparse(
+            uptime_state["state_changed_at"]
+        )
+        if site.state_up:
+            message = f"{site.description} is now back up"
+        site.save()
+
+    if not site.state_up:
+        # complain about being down after crossing several thresholds
+        for seconds in [600, 900, 3600, 6 * 3600, 24 * 3600]:
+            cutoff = site.state_changed_at + datetime.timedelta(seconds=seconds)
+            if now > cutoff and (not site.last_tweet_at or site.last_tweet_at < cutoff):
+                actual_delta = now - site.state_changed_at
+                logger.info(
+                    f"cutoff {cutoff} {seconds} change at {site.state_changed_at} tweet_at {site.last_tweet_at}"
+                )
+                message = f"{site.description} has been down for {to_pretty_timedelta(actual_delta)}"
+                break
+
+    if message:
+        u = get_site_uptime(pk)
+        if u:
+            message += ". Historical: " + u
+        logger.info(message)
+
+        site.last_tweet_at = now
+        site.save()
+
+        message += " " + uptime_state["msp_address"]
+        tweet(message)
+
+
+def tweet_all_sites():
+    logger.info("tweet_all_sites")
+    checks = get_existing_checks()
+    for site in ExternalStateSite.objects.all():
+        if site.name not in checks:
+            continue
+        tweet_site_status(site, checks[site.name])

@@ -31,6 +31,21 @@ def sync_actionnetwork():
 
 @shared_task
 def sync_uptimedotcom():
-    from .uptimedotcom import sync
+    from .uptimedotcom import sync, APIThrottle
 
-    sync()
+    try:
+        sync()
+    except APIThrottle as e:
+        sync_uptimedotcom.apply_async(
+            args=(), countdown=e.seconds,
+        )
+
+
+@shared_task
+def tweet_uptimedotcom():
+    from .uptimedotcom import tweet_all_sites, APIThrottle
+
+    try:
+        tweet_all_sites()
+    except APIThrottle:
+        pass

@@ -15,3 +15,14 @@ class Link(UUIDModel, TimestampModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class ExternalStateSite(UUIDModel, TimestampModel):
+    name = models.TextField(null=True)
+    description = models.TextField(null=True)
+    state_up = models.BooleanField(null=True)
+    state_changed_at = models.DateTimeField(null=True)
+    last_tweet_at = models.DateTimeField(null=True)
+
+    class Meta:
+        ordering = ["-modified_at"]
