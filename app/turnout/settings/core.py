@@ -418,7 +418,12 @@ LOGGING = {
         "console": {"class": "logging.StreamHandler",},
         "json": {"class": "logging.StreamHandler", "formatter": "json"},
     },
-    "formatters": {"json": {"()": "pythonjsonlogger.jsonlogger.JsonFormatter"}},
+    "formatters": {
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": "%(name) %(message)s %(levelname) %(module) %(filename) %(funcName) %(lineno)",
+        }
+    },
     "loggers": {
         "django": {
             "handlers": [handler],
