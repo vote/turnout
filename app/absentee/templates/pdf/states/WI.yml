@@ -1,0 +1,28 @@
+pages: 2
+manual_fields:
+  - mun_town
+  - mun_village
+  - mun_city
+  - fax
+  - special_military
+  - special_perm_overseas
+  - special_temp_overseas
+  - recv_mail
+  - recv_office
+  - recv_fax
+  - recv_email
+  - facility_name
+  - mailing_co
+  - recv_fax_number
+  - recv_email_addr
+  - election_specific
+  - election_dates
+  - election_all
+  - election_perm
+  - is_hospital
+  - agent_last_name
+  - agent_first_name
+  - agent_middle_name
+  - agent_address
+  - todays_date
+  - todays_date_2
