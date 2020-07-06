@@ -1,0 +1,12 @@
+pages: 2
+manual_fields:
+  - j_city
+  - j_township
+  - election_both
+  - election_primary
+  - election_general
+  - vbm_permanent
+  - primary_mail_start
+  - primary_mail_end
+  - general_mail_start
+  - general_mail_end
