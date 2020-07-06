@@ -8,6 +8,7 @@ from rest_framework import serializers
 from action.serializers import ActionSerializer
 from common import enums
 from common.utils.fields import RequiredBooleanField
+from common.utils.serializers import TrackingSerializer
 from common.validators import (
     must_be_true_validator,
     state_code_validator,
@@ -20,7 +21,7 @@ from .models import Registration
 logger = logging.getLogger("register")
 
 
-class RegistrationSerializer(ActionSerializer):
+class RegistrationSerializer(TrackingSerializer, ActionSerializer):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator], required=True)
     previous_zipcode = serializers.CharField(validators=[zip_validator], required=False)
@@ -89,6 +90,8 @@ class RegistrationSerializer(ActionSerializer):
             "utm_medium",
             "utm_term",
             "utm_content",
+            "embed_url",
+            "session_id",
             "referring_tool",
         ]
 

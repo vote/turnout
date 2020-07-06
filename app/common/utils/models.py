@@ -19,11 +19,13 @@ class UUIDModel(models.Model):
 
 
 class TrackingModel(models.Model):
+    embed_url = models.TextField(null=True, blank=True)
     utm_campaign = models.TextField(null=True, blank=True)
     utm_source = models.TextField(null=True, blank=True)
     utm_medium = models.TextField(null=True, blank=True)
     utm_term = models.TextField(null=True, blank=True)
     utm_content = models.TextField(null=True, blank=True)
+    session_id = models.UUIDField(null=True, blank=True)
     source = models.TextField(null=True, blank=True)
 
     class Meta(object):

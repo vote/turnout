@@ -1,5 +1,6 @@
 import datetime
 from copy import copy
+from uuid import UUID
 
 import pytest
 from model_bakery import baker
@@ -42,6 +43,8 @@ VALID_REGISTRATION = {
     "state_id_number": "FOUNDER123",
     "party": "Other",
     "race_ethnicity": "White",
+    "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
+    "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
 }
 REGISTER_API_ENDPOINT_INCOMPLETE = "/v1/registration/register/?incomplete=true"
 
@@ -114,6 +117,8 @@ def test_register_object_created(submission_task_patch):
     assert registration.race_ethnicity == RaceEthnicity.WHITE
     assert registration.status == TurnoutActionStatus.PENDING
     assert registration.action == Action.objects.first()
+    assert registration.embed_url == "https://www.greatvoter.com/location/of/embed"
+    assert registration.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
 
     first_subscriber = Client.objects.first()
     assert registration.subscriber == first_subscriber
@@ -121,6 +126,21 @@ def test_register_object_created(submission_task_patch):
     submission_task_patch.delay.assert_called_once_with(
         registration.uuid, "FOUNDER123", True
     )
+
+
+@pytest.mark.django_db
+def test_non_url_embed_url(submission_task_patch):
+    client = APIClient()
+
+    new_valid_restration = copy(VALID_REGISTRATION)
+    new_valid_restration["embed_url"] = "completely random non url string"
+
+    response = client.post(REGISTER_API_ENDPOINT, new_valid_restration)
+    assert response.status_code == 200
+    assert "uuid" in response.json()
+
+    registration = Registration.objects.first()
+    assert registration.embed_url == "completely random non url string"
 
 
 @pytest.mark.django_db

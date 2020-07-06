@@ -49,6 +49,8 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("utm_campaign", "utm_campaign"),
     ("utm_content", "utm_content"),
     ("utm_term", "utm_term"),
+    ("embed_url", "Embed URL"),
+    ("session_id", "Session ID"),
 ]
 
 REGISTER_FIELDS: List[Tuple[str, str]] = [
@@ -100,6 +102,8 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("utm_campaign", "utm_campaign"),
     ("utm_content", "utm_content"),
     ("utm_term", "utm_term"),
+    ("embed_url", "Embed URL"),
+    ("session_id", "Session ID"),
     ("referring_tool", "Referring Tool"),
 ]
 
@@ -126,6 +130,8 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("utm_campaign", "utm_campaign"),
     ("utm_content", "utm_content"),
     ("utm_term", "utm_term"),
+    ("embed_url", "Embed URL"),
+    ("session_id", "Session ID"),
 ]
 
 

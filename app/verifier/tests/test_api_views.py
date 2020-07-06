@@ -3,6 +3,7 @@ import json
 import os
 from base64 import b64encode
 from copy import copy
+from uuid import UUID
 
 import pytest
 from model_bakery import baker
@@ -36,6 +37,8 @@ VALID_LOOKUP = {
     "utm_source": "django",
     "utm_content": "this-is-a-test",
     "utm_term": "voteamerica",
+    "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
+    "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
 }
 VALID_LOOKUP_ALLOY = {
     "first_name": "Donald",
@@ -215,6 +218,11 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     assert lookup.sms_opt_in_subscriber == False
     assert lookup.response == {"result": [], "too_many": False}
     assert lookup.action == action
+    assert (
+        lookup.embed_url
+        == "https://www.greatvoter.com/location/of/embed"
+    )
+    assert lookup.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
     first_subscriber = Client.objects.first()
     assert lookup.subscriber == first_subscriber
     assert (

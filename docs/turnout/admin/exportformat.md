@@ -42,6 +42,8 @@ As not every state has the same field requirements, not every method of completi
 |utm_campaign|The ?utm_campaign= query param|
 |utm_content|The ?utm_content= query param|
 |utm_term|The ?utm_term= query param|
+|Embed URL|For submissions done inside an embed, the URL of the embed|
+|Session ID|The ID of a user's session. For tracking users across multiple tools or visits.|
 
 
 ## Register Tool Export Format
@@ -96,6 +98,8 @@ As not every state has the same field requirements, not every method of completi
 |utm_campaign|The ?utm_campaign= query param|
 |utm_content|The ?utm_content= query param|
 |utm_term|The ?utm_term= query param|
+|Embed URL|For submissions done inside an embed, the URL of the embed|
+|Session ID|The ID of a user's session. For tracking users across multiple tools or visits.|
 |Referring Tool|For users who were linked to the register tool by another tool, perhaps after they found out they were not registered via the verify tool, the name of the tool|
 
 
@@ -126,3 +130,5 @@ As not every state has the same field requirements, not every method of completi
 |utm_campaign|The ?utm_campaign= query param|
 |utm_content|The ?utm_content= query param|
 |utm_term|The ?utm_term= query param|
+|Embed URL|For submissions done inside an embed, the URL of the embed|
+|Session ID|The ID of a user's session. For tracking users across multiple tools or visits.|

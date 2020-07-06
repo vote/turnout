@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from action.serializers import ActionSerializer
 from common.utils.fields import RequiredBooleanField
+from common.utils.serializers import TrackingSerializer
 from common.validators import (
     must_be_true_validator,
     state_code_validator,
@@ -17,7 +18,7 @@ from .models import BallotRequest
 logger = logging.getLogger("absentee")
 
 
-class BallotRequestSerializer(ActionSerializer):
+class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
     phone = PhoneNumberField(required=False)
     zipcode = serializers.CharField(validators=[zip_validator], required=True)
     mailing_zipcode = serializers.CharField(validators=[zip_validator], required=False)
@@ -69,6 +70,8 @@ class BallotRequestSerializer(ActionSerializer):
             "utm_medium",
             "utm_term",
             "utm_content",
+            "embed_url",
+            "session_id",
             "signature",
             "submit_date",
         ]
