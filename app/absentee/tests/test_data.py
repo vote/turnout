@@ -103,7 +103,7 @@ def make_test_data(state=None) -> Tuple[BallotRequest, Dict[str, Any]]:
         "county": addr.office.region.county,
         "region": addr.office.region.name,
         "address1_2": "some addr 1 some addr 2",
-        "address_1_2_city": "some addr 1 some addr 2, some city",
+        "address1_2_city": "some addr 1 some addr 2, some city",
         "address_city_state_zip": f"some city, {state.code} 12345",
         "full_address": f"some addr 1 some addr 2 some city, {state.code} 12345",
         "has_mailing_address": True,
