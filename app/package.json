@@ -9,7 +9,8 @@
     "file-loader": "^5.0.2",
     "jquery": "^3.4.1",
     "popper.js": "^1.16.0",
-    "simple-line-icons": "^2.4.1"
+    "simple-line-icons": "^2.4.1",
+    "simplemde": "^1.11.2"
   },
   "devDependencies": {
     "autoprefixer": "^9.7.3",
@@ -24,7 +25,7 @@
     "webpack-livereload-plugin": "^2.2.0"
   },
   "scripts": {
-    "develop": "node_modules/webpack-cli/bin/cli.js --watch --env production",
+    "develop": "npm install && node_modules/webpack-cli/bin/cli.js --watch --env production",
     "build": "node_modules/webpack-cli/bin/cli.js -p --env production"
   },
   "keywords": [],

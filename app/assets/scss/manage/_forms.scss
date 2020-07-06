@@ -40,4 +40,18 @@ form {
     .invalid-feedback {
         display: block;
     }
+
+    .preview-wrapper {
+        margin: 25px 25px 50px;
+    }
+
+    .markdown-preview {
+        padding: 10px;
+        border: 1px solid gray;
+        min-height: 20px;
+    }
+
+    .preview-header {
+        font-style: italic;
+    }
 }

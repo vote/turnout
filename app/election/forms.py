@@ -26,7 +26,9 @@ class StateInformationManageForm(forms.ModelForm):
             self.fields["text"].label = "Date"
             self.fields["text"].help_text = "A date in the format YYYY-MM-DD"
         else:
-            self.fields["text"].help_text = "Markdown allowed"
+            self.fields["text"].widget = forms.Textarea(
+                attrs={"class": "markdown-preview"}
+            )
 
     def clean_text(self) -> str:
         text = self.cleaned_data["text"]
