@@ -127,7 +127,9 @@ def geocode_to_regions(street, city, state, zipcode):
         street=street, city=city, state=state, zipcode=zipcode, fields="stateleg",
     )
     if not addrs:
-        logger.warning(f"address: Unable to geocode ({street}, {city}, {state} {zipcode})")
+        logger.warning(
+            f"address: Unable to geocode ({street}, {city}, {state} {zipcode})"
+        )
         statsd.increment("turnout.official.address.failed_geocode")
         return None
 

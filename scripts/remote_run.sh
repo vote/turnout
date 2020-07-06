@@ -62,7 +62,9 @@ export REGISTER_WA_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryp
 export REGISTER_WA_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_enabled | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_key | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC_DAILY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_daily | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
+export OPTIMIZELY_SDK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.optimizely_sdk_key | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -135,7 +137,9 @@ docker run -i -t \
     -e REGISTER_WA_VRD_ENABLED \
     -e ACTIONNETWORK_KEY \
     -e ACTIONNETWORK_SYNC \
+    -e ACTIONNETWORK_SYNC_DAILY \
     -e ACTIONNETWORK_SYNC_HOUR \
+    -e OPTIMIZELY_SDK_KEY \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

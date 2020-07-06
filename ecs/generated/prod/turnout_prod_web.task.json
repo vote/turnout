@@ -258,8 +258,16 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync"
             },
             {
+               "name": "ACTIONNETWORK_SYNC_DAILY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_daily"
+            },
+            {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.optimizely_sdk_key"
             }
          ]
       },
@@ -515,8 +523,16 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync"
             },
             {
+               "name": "ACTIONNETWORK_SYNC_DAILY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_daily"
+            },
+            {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.optimizely_sdk_key"
             }
          ]
       },
@@ -771,8 +787,16 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync"
             },
             {
+               "name": "ACTIONNETWORK_SYNC_DAILY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_daily"
+            },
+            {
                "name": "ACTIONNETWORK_SYNC_HOUR",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.actionnetwork_sync_hour"
+            },
+            {
+               "name": "OPTIMIZELY_SDK_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.optimizely_sdk_key"
             }
          ]
       },

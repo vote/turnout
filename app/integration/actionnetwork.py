@@ -157,7 +157,6 @@ def sync_all_items(cls):
 
 @tracer.wrap()
 def sync():
-    if settings.ACTIONNETWORK_SYNC:
-        sync_all_items(Lookup)
-        sync_all_items(BallotRequest)
-        sync_all_items(Registration)
+    sync_all_items(Lookup)
+    sync_all_items(BallotRequest)
+    sync_all_items(Registration)

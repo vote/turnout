@@ -1,6 +1,10 @@
 from celery import shared_task
 
-from .actionnetwork import sync, sync_item
+from absentee.models import BallotRequest
+from register.models import Registration
+from verifier.models import Lookup
+
+from .actionnetwork import sync, sync_all_items, sync_item
 
 
 @shared_task
@@ -27,3 +31,18 @@ def sync_registration_to_actionnetwork(pk: str) -> None:
 @shared_task
 def sync_actionnetwork():
     sync()
+
+
+@shared_task
+def sync_actionnetwork_registrations():
+    sync_all_items(Registration)
+
+
+@shared_task
+def sync_actionnetwork_lookups():
+    sync_all_items(Lookup)
+
+
+@shared_task
+def sync_actionnetwork_ballotrequests():
+    sync_all_items(BallotRequest)

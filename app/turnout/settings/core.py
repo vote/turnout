@@ -206,6 +206,7 @@ USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
 
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
+ACTIONNETWORK_SYNC_DAILY = env.bool("ACTIONNETWORK_SYNC_DAILY", False)
 ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
 ACTIONNETWORK_SYNC_MINUTE = env.int("ACTIONNETWORK_SYNC_MINUTE", 45)
 
@@ -235,7 +236,7 @@ if USVF_SYNC:
         "task": "official.tasks.sync_usvotefoundation",
         "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
     }
-if ACTIONNETWORK_SYNC:
+if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
     CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
         "task": "integration.tasks.sync_actionnetwork",
         "schedule": crontab(
