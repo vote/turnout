@@ -1,193 +1,42 @@
-signature_statement: |
-  I swear/affirm, under felony penalty for making willfully false material
-  statements, that (1) the information I have provided on this form is true, and
-  (2) I am not requesting a ballot or voting in any other jurisdiction in the
-  U.S., except the jurisdiction to which this application relates.
-
-form_fields:
-  - type: section
-    label: Election
-    content:
-      - type: radio
-        label: "I am applying to vote in:"
-        layout: horizontal
-        required: true
-        options:
-          - label: General or Special Election
-            slug: election_general
-          - label: Democratic Primary
-            slug: election_democratic
-          - label: Republican Primary
-            slug: election_republican
-      - type: election_date
-        label: Date of Election
-        slug: election_date
-        required: true
-  - type: section
-    label: Reason for Absentee Ballot
-    content:
-      - type: radio
-        slug: reason_code
-        required: true
-        options:
-          - label: Student attending college or university outside of locality of residence in Virginia
-            value: 1A
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of college or university
-          - label: Spouse of student attending college or university outside locality of residence in Virginia
-            value: 1B
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of college or university
-          - label: Business outside County/City of residence on election day
-            value: 1C
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of employer or business
-          - label: Personal business or vacation outside County/City of residence on election day
-            value: 1D
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Place of travel (VA county/city or state or country)
-          - label: I am working and commuting to/from home for 11 or more hours between 6:00 AM and 7:00 PM on election day
-            value: 1E
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of  employer or business and election day hours of working and commuting (AM to PM)
-          - label: I am a first responder (member of law enforcement, fire fighter, emergency technician, search and rescue)
-            value: 1F
-          - label: My disability or illness
-            value: 2A
-          - label: I am primarily and personally responsible for the care of a disabled/ill family member confined at home
-            value: 2B
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Family Relationship
-          - label: My pregnancy
-            value: 2C
-          - label: Confined, awaiting trial
-            value: 3A
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of institution
-          - label: Confined, convicted of a misdemeanor
-            value: 3B
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of institution
-          - label: An electoral board member, registrar, officer of election, or custodian of voting equipment
-            value: 4A
-          - label: I have a religious obligation
-            value: 5A
-          - label: Active Duty Merchant Marine or Armed Forces
-            value: 6A
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Branch of service
-          - label: Spouse or dependent living with a member of Active Duty Merchant Marine or Armed Forces
-            value: 6B
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Branch of service
-          - label: Temporarily residing outside of US
-            value: 6C
-            conditional:
-              - type: text
-                slug: reason_detail
-                label: Enter your last date of residency at your Virginia voting residence only if you have given up that address permanently or have no intent to return
-          - label: Temporarily residing outside of US for employment or spouse or  dependent residing with employee
-            value: 6D
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of business or employer
-          - label: I moved or plan to move less than 30 days before the presidential election and I am requesting a ballot for presidential and vice-presidential electors only (Ballots for other offices/issues will not be sent)
-            value: 7A
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: New state of residence and date moved from  Virginia.  Only eligible if you moved less than 30 days before the presidential election.
-          - label: Authorized representative of candidate or party serving inside the polling place
-            value: 8A
-          - label: Granted a protective order issued by or under the authority of a court of competent jurisdiction
-            value: 9A
-            conditional:
-              - type: text
-                slug: reason_detail
-                required: true
-                label: Name of the county or city in Virginia or the state of the issuing court.
-  - type: section
-    label: Identification
-    content:
-      - type: text
-        required: true
-        label: Last 4 digits of your social security number
-        slug: state_id_number
-        format: "^\\d{4}$"
-        format_error: Enter 4 numeric digits
-  - type: section
-    label: Change of Name/Address
-    note: Only complete this section if you are changing your registration name or address
-    content:
-      - type: checkbox
-        label: I am changing my name
-        conditional:
-          - type: text
-            label: Former Full Name
-            required: true
-            slug: previous_full_name
-      - type: checkbox
-        label: I am changing my address
-        conditional:
-          - type: text
-            label: Former Address
-            required: true
-            slug: previous_full_address
-          - type: text
-            label: Date Moved
-            required: true
-            slug: date_moved
-  - type: section
-    label: Assistance To Vote
-    content:
-      - type: checkbox
-        label: I will need assistance in completing my ballot due to a disability, blindness, or inability to read or write. If checked, assistance form will be provided with ballot.
-        slug: need_assistance
-
-
 auto_fields:
   - slug: date_signed
     type: todays_date
 
 manual_fields:
-  - region_is_county
-  - region_is_city
-  - Email 6A6D Only Provide in Part 4
-  - Fax 6A6D only Provide in Part 4
-  - date_moved
-  - need_assistance
+  - election_general
+  - election_dem_primary
+  - election_gop_primary
+  - election_region
+  - all_elections_yes
+  - all_elections_no
+  - party_democratic
+  - party_republican
+  - party_nonpartisan
+  - prev_name
+  - prev_address
+  - prev_city
+  - prev_state
+  - prev_zipcode
+  - move_date
+  - exemption
+  - overseas_cat
+  - residency_date
+  - deliver_addr
+  - deliver_mailing_addr
+  - deliver_email
+  - deliver_fax
+  - need_assist
+  - assist_full_name
+  - assist_phone
+  - assist_address1
+  - assist_address2
+  - assist_city
+  - assist_state
+  - assist_zipcode
+  - country
+  - election_month
+  - election_day
+  - election_year
 
-pages: 4
+
+pages: 2
