@@ -1,42 +1,77 @@
 signatures:
   1:
-    x: 20
-    y: 305
-    width: 150
-    height: 23
+    x: 309
+    y: 436
+    width: 270
+    height: 16
 
 signature_statement: null
 
 form_fields:
+  # For now, the only upcoming election is the general -- so we just auto-select
+  # that election and don't need to ask for party.
   - type: section
-    label: Election
-    content:
-      - type: election_date
-        slug: election_date
-        label: Date of Primary, Election, or Runoff
-  - type: section
-    label: Party
-    note: |
-      In Georgia, you can choose which party's primary you want to vote in. You
-      won't be registered with the party or commit to vote for that party. If
-      you choose “Non-partisan,” your ballot will only contain non-partisan
-      races like judges.
+    label: Election date
     content:
       - type: radio
-        layout: horizontal
+        label: Which election or runoff are you requesting a ballot for?
         required: true
+        slug: election_date
         options:
-          - label: Democratic
-            slug: party_democrat
-          - label: Republican
-            slug: party_republican
-          - label: Non-Partisan
-            slug: party_nonpartisan
+          - label: Nov. 3 General Election (Presidential Election)
+            value: 11/03/2020
+            default: true
+          - label: Aug. 11 Primary Runoff Election
+            value: 08/11/2020
+            conditional:
+              - type: radio
+                label: Which party's runoff election are you voting in?
+                required: true
+                options:
+                  - label: Democratic
+                    slug: party_democrat
+                  - label: Republican
+                    slug: party_republican
+                  - label: Non-partisan (will not have ANY party candidates listed)
+                    slug: party_nonpartisan
+          - label: Dec. 1 General Runoff Election
+            value: 12/01/2020
+
+
 auto_fields:
   - slug: application_date
     type: todays_date
 
 manual_fields:
-  - CheckBox2
+  - voter_registration_number
+  - update_address
+  - assist_date
+  - relationship
+  - relation_disabled
+  - relation_absent
+  - excuse_elderly
+  - excuse_uocava
+  - excuse_disabled
+  - excuse_ost
+  - excuse_osp
+  - excuse_mos
+  - excuse_mst
+  - uocava_email
+  - office_1
+  - office_2
+  - office_3
+  - office_4
+  - office_5
+  - office_6
+  - office_7
+  - office_8
+  - office_9
+  - office_10
+  - office_11
+  - office_12
+  - office_13
+  - office_14
+  - office_15
+  - office_16
 
 pages: 1
