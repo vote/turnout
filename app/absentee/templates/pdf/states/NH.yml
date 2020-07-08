@@ -1,0 +1,62 @@
+pages: 2
+
+signatures:
+  2:
+    x: 195
+    y: 476
+    width: 190
+    height: 28
+
+manual_fields:
+  - ward
+  - reg_not_registered
+  - excuse_primary
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date
+
+form_fields:
+  - type: section
+    label: Election date
+    note: "I am requesting an official absentee ballot for the following election:"
+    content:
+      - type: radio
+        required: true
+        options:
+        - label: General Election (November 3, 2020)
+          slug: election_general
+          default: true
+        - label: State Primary Election (September 8, 2020)
+          slug: election_primary
+          conditional:
+            - type: radio
+              required: true
+              label: "Required for Primary Elections:  I am a member of, or I am now declaring my affiliation with a party and I am requesting a ballot for that party’s primary"
+              options:
+              - label: Democratic Party
+                slug: party_democratic
+              - label: Republican Party
+                slug: party_republican
+  - type: section
+    label: Request reason
+    content:
+      - type: radio
+        required: true
+        options:
+        - label: I am concerned about COVID-19, or I am unable to vote in person due to a disability. Any voter may choose this option for the 2020 elections.
+          slug: excuse_disability
+          default: true
+        - label: I plan to be absent on the day of the election from the city, town, or unincorporated place where I am domiciled.
+          slug: excuse_absent
+        - label: I cannot appear in public on election day because of observance of a religious commitment.
+          slug: excuse_religion
+        - label: I cannot appear at any time during polling hours at my polling place because of an employment obligation. For the purposes of this application, the term “employment” shall include the care of children and infirm adults, with or without compensation.
+          slug: excuse_employment
+  - type: section
+    label: Declaration
+    content:
+      - type: checkbox
+        required: true
+        label: I hereby declare that I am a duly qualified voter who is currently registered to vote in this town/ward.
+        slug: reg_is_registered
