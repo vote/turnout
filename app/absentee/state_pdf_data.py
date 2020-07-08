@@ -64,7 +64,10 @@ def each_slug_with_type(
 
     if include_auto_fields:
         for auto_field in state_data.get("auto_fields", []):
-            yield (auto_field["slug"], "string")
+            if auto_field.get("slug"):
+                yield (auto_field["slug"], "unknown")
+            if auto_field.get("fill", {}).get("slug"):
+                yield (auto_field["fill"]["slug"], "unknown")
 
     if include_manual_fields:
         for slug in state_data.get("manual_fields", []):

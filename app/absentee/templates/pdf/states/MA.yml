@@ -1,80 +1,72 @@
 signatures:
   1:
-    x: 188
-    y: 50
-    width: 200
-    height: 28
+    x: 190
+    y: 352
+    width: 251
+    height: 30
 
 signature_statement: Signed (under penalty of perjury)
 
 form_fields:
   - type: section
-    label: Election
+    label: Election date
     content:
       - type: radio
         required: true
         options:
-          - label: All elections this year
+          - label: All elections this year (both the Nov. 3 General Election and the Sept. 1 State Primary)
             slug: election_all
             default: true
             conditional:
-              - type: text
-                label: Party (only required if requesting a primary ballot)
-                slug: party_presidential_primary
-          - label: All general elections (No primaries)
-            slug: election_general
-          - label: A specific election
-            slug: election_special
-            conditional:
-              - type: election_date
-                label: Date of Election
-                slug: election_date
+              - type: radio
                 required: true
-              - type: text
-                label: Party (only required if requesting a primary ballot)
-                slug: party_presidential_primary
+                label: |
+                  Which party's primary would you like to vote in on Sept. 1? If
+                  you are registered with a party, you can only vote in that
+                  party's primary. If you're unenrolled (also known as independent),
+                  or you're unsure if you're registered with a party, choose
+                  whichever party's primary you want to vote in.
+                options:
+                  - label: Democratic
+                    slug: party_democratic
+                  - label: Republican
+                    slug: party_republican
+                  - label: Green-Rainbow
+                    slug: party_green_rainbow
+                  - label: Libertarian
+                    slug: party_libertarian
 
-  - type: section
-    label: Special Circumstances
-    note: Only complete this section if it applies to you
-    content:
-      - type: radio
-        options:
-          - label: This application is being made by a family member of the voter
-            slug: special_circumstance_family_member
+          - label: Only the Nov. 3 General Election
+            slug: election_general
+          - label: Only the Sept. 1 State Primary
+            slug: election_primary
             conditional:
-              - type: text
-                label: Relationship to voter
-                slug: relationship_to_voter
+              - type: radio
                 required: true
-          - label: Voter is a member of military on active duty or dependent family member of active duty personnel
-            slug: special_circumstance_military
-          - label: Voter is a Massachusetts citizen residing overseas
-            slug: special_circumstance_overseas
-          - label: Voter has been admitted to a healthcare facility after noon on the fifth day before the election and has designated someone to hand-deliver the ballot
-            slug: special_circumstance_hand_deliver
-            conditional:
-              - type: text
-                label: Name of person delivering the ballot
-                slug: ballot_hand_deliver_name
-                required: true
-          - label: Voter required assistance in completing application due to physical disability
-            slug: special_circumstance_required_assistance
-            conditional:
-              - type: text
-                label: Assisting person's name
-                slug: assisting_person_name
-                required: true
-              - type: text
-                label: Assisting person's address
-                slug: assisting_person_address
-                required: true
+                label: |
+                  Which party's primary would you like to vote in on Sept. 1? If
+                  you are registered with a party, you can only vote in that
+                  party's primary. If you're unenrolled (also known as independent),
+                  or you're unsure if you're registered with a party, choose
+                  whichever party's primary you want to vote in.
+                options:
+                  - label: Democratic
+                    slug: party_democratic
+                  - label: Republican
+                    slug: party_republican
+                  - label: Green-Rainbow
+                    slug: party_green_rainbow
+                  - label: Libertarian
+                    slug: party_libertarian
+
 
 auto_fields:
   - slug: date_signed
     type: todays_date
-  - slug: party_state_primaries
-    type: copy
-    field: party_presidential_primary
 
-pages: 2
+pages: 1
+
+manual_fields:
+  - needed_assistance
+  - assisting_person_name
+  - assisting_person_address

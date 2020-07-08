@@ -282,6 +282,63 @@ def test_prepare_formdata_auto_static(mocker):
 
 
 @pytest.mark.django_db
+def test_prepare_formdata_auto_conditional(mocker):
+    addr = baker.make_recipe("official.absentee_ballot_address")
+    state = baker.make_recipe("election.state")
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request",
+        region=addr.office.region,
+        state=state,
+        date_of_birth=datetime.date(1992, 5, 10),
+        state_fields={"state_field_foo": "state_field_foo_val"},
+    )
+
+    mocker.patch.dict(
+        STATE_DATA,
+        {
+            state.code: {
+                "auto_fields": [
+                    # This one should activate
+                    {
+                        "type": "conditional",
+                        "condition": {
+                            "slug": "state_field_foo",
+                            "value": "state_field_foo_val",
+                        },
+                        "fill": {"slug": "filled_field", "value": "filled_value"},
+                    },
+                    # This one should be ignored
+                    {
+                        "type": "conditional",
+                        "condition": {
+                            "slug": "state_field_foo",
+                            "value": "state_field_bar_val",
+                        },
+                        "fill": {"slug": "wrong_fill", "value": "wrong_val"},
+                    },
+                    # This one should also be ignored
+                    {
+                        "type": "conditional",
+                        "condition": {
+                            "slug": "state_field_other",
+                            "value": "state_field_bar_val",
+                        },
+                        "fill": {"slug": "wrong_fill_2", "value": "wrong_val"},
+                    },
+                ]
+            }
+        },
+    )
+
+    form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
+
+    assert form_data["state_field_foo"] == "state_field_foo_val"
+    assert form_data["filled_field"] == "filled_value"
+    assert form_data.get("wrong_fill") is None
+    assert form_data.get("wrong_fill_2") is None
+
+
+@pytest.mark.django_db
 def test_get_submission_method():
     req = baker.make_recipe("absentee.ballot_request")
 

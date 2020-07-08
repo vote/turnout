@@ -218,6 +218,12 @@ def prepare_formdata(
                 form_data[auto_field["slug"]] = form_data.get(auto_field["field"])
             elif auto_type == "static":
                 form_data[auto_field["slug"]] = auto_field["value"]
+            elif auto_type == "conditional":
+                if (
+                    form_data.get(auto_field["condition"]["slug"])
+                    == auto_field["condition"]["value"]
+                ):
+                    form_data[auto_field["fill"]["slug"]] = auto_field["fill"]["value"]
             else:
                 raise RuntimeError(f"Invalid auto_field type: {auto_type}")
 

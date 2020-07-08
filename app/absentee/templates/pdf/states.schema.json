@@ -168,6 +168,32 @@
               "type": { "const": "copy" },
               "field": { "type": "string" }
             }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["condition", "type", "fill"],
+            "properties": {
+              "type": { "const": "conditional" },
+              "condition": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["slug", "value"],
+                "properties": {
+                  "slug": { "type": "string" },
+                  "value": {}
+                }
+              },
+              "fill": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["slug", "value"],
+                "properties": {
+                  "slug": { "type": "string" },
+                  "value": {}
+                }
+              }
+            }
           }
         ]
       }
