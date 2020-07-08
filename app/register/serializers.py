@@ -44,6 +44,9 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
     us_citizen = RequiredBooleanField(
         required=False, validators=[must_be_true_validator]
     )
+    declaration = RequiredBooleanField(
+        required=False, validators=[must_be_true_validator]
+    )
 
     class Meta:
         model = Registration
@@ -93,6 +96,8 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "embed_url",
             "session_id",
             "referring_tool",
+            "state_fields",
+            "declaration",
         ]
 
 

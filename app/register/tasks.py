@@ -1,10 +1,7 @@
 from celery import shared_task
-from django.conf import settings
 
 from common.analytics import statsd
 from common.enums import EventType, TurnoutActionStatus
-from integration.tasks import sync_registration_to_actionnetwork
-from smsbot.tasks import send_welcome_sms
 
 
 @shared_task
@@ -17,15 +14,6 @@ def process_registration_submission(
 
     registration = Registration.objects.select_related().get(pk=registration_pk)
     process_registration(registration, state_id_number, is_18_or_over)
-
-    if registration.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
-        send_welcome_sms.apply_async(
-            args=(str(registration.phone), "register"),
-            countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-        )
-
-    if settings.ACTIONNETWORK_SYNC:
-        sync_registration_to_actionnetwork.delay(registration.uuid)
 
 
 @shared_task

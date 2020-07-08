@@ -12,6 +12,8 @@ TRACKING_API_ENDPOINT = "/v1/event/track/"
 @pytest.mark.django_db
 def test_register_object_created(mocker):
     mocker.patch.object(RegistrationViewSet, "task")
+    mocker.patch("register.api_views.send_welcome_sms")
+    mocker.patch("register.api_views.sync_registration_to_actionnetwork")
     client = APIClient()
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)

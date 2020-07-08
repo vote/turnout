@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -89,6 +90,9 @@ class Registration(
     )
 
     referring_tool = TurnoutEnumField(enums.ToolName, null=True, blank=True)
+
+    state_fields = JSONField(null=True, blank=True)
+    state_api_result = JSONField(null=True, blank=True)
 
     custom_ovr_link = models.TextField(null=True, blank=True)
 

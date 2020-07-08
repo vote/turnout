@@ -11,6 +11,7 @@ from election.models import State
 
 class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     permission_classes = [AllowAny]
+    task = None
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -47,6 +48,12 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
         return Response(response)
 
+    def complete(self, serializer, action_object, state_id_number, is_18_or_over):
+        serializer.validated_data["status"] = TurnoutActionStatus.PENDING
+        action_object.save()
+        if self.task:
+            self.task.delay(action_object.uuid, state_id_number, is_18_or_over)
+
     @tracer.wrap()
     def process_serializer(self, serializer, is_create):
         serializer.is_valid(raise_exception=True)
@@ -65,14 +72,11 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
                 code=serializer.validated_data["mailing_state"]
             )
 
-        if serializer.incomplete:
-            serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
-        else:
-            serializer.validated_data["status"] = TurnoutActionStatus.PENDING
-
         # do not pass is_18_or_over or state_id_number to model, we are not storing it
         is_18_or_over = serializer.validated_data.pop("is_18_or_over", None)
         state_id_number = serializer.validated_data.pop("state_id_number", None)
+
+        serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
 
         action_object = serializer.save()
 
@@ -85,8 +89,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
 
         if serializer.incomplete:
             action_object.action.track_event(enums.EventType.START)
-
-        if not serializer.incomplete:
-            self.task.delay(action_object.uuid, state_id_number, is_18_or_over)
+        else:
+            self.complete(serializer, action_object, state_id_number, is_18_or_over)
 
         return action_object

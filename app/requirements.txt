@@ -65,3 +65,4 @@ pdfrw==0.4
 shapely==1.7.*
 django-tsvector-field==0.9.*
 optimizely-sdk==3.4.*
+ovrlib==0.0.3

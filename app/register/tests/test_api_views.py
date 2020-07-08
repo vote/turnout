@@ -2,9 +2,12 @@ import datetime
 from copy import copy
 from uuid import UUID
 
+import ovrlib
 import pytest
+from django.core.files.base import ContentFile
 from model_bakery import baker
 from rest_framework.test import APIClient
+from smalluuid import SmallUUID
 
 from action.models import Action
 from common.enums import (
@@ -12,6 +15,7 @@ from common.enums import (
     PersonTitle,
     PoliticalParties,
     RaceEthnicity,
+    SecureUploadType,
     TurnoutActionStatus,
 )
 from election.models import State
@@ -19,6 +23,7 @@ from event_tracking.models import Event
 from multi_tenant.models import Client
 from register.api_views import RegistrationViewSet
 from register.models import Registration
+from storage.models import SecureUploadItem
 
 REGISTER_API_ENDPOINT = "/v1/registration/register/"
 VALID_REGISTRATION = {
@@ -51,9 +56,89 @@ REGISTER_API_ENDPOINT_INCOMPLETE = "/v1/registration/register/?incomplete=true"
 STATUS_API_ENDPOINT = "/v1/registration/status/{uuid}/"
 STATUS_REFER_OVR = {"status": "ReferOVR"}
 
+PATCH_API_ENDPOINT = "/v1/registration/register/{uuid}/"
+
+PA_REGISTRATION_START = {
+    "title": "Mrs.",
+    "first_name": "Sally",
+    "last_name": "Penndot",
+    "address1": "123 a st",
+    "city": "Clarion",
+    "state": "PA",
+    "zipcode": "16214",
+    "date_of_birth": "1944-05-02",
+    "email": "sage@newdream.net",
+    "party": "Democratic",
+}
+
+PA_REGISTRATION_NODLSSNORSIG = {
+    "us_citizen": True,
+    "is_18_or_over": True,
+    "declaration": True,
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "id_type": None,
+        "federal_voter": False,
+    },
+}
+
+PA_REGISTRATION_DL = {
+    "us_citizen": True,
+    "is_18_or_over": True,
+    "declaration": True,
+    "state_id_number": "99007069",
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "id_type": "dl",
+        "federal_voter": False,
+    },
+}
+
+PA_REGISTRATION_SSN = {
+    "us_citizen": True,
+    "is_18_or_over": True,
+    "declaration": True,
+    "ssn4": "0451",
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "id_type": "ssn",
+        "federal_voter": False,
+    },
+}
+
+PA_REGISTRATION_BADDL = {
+    "us_citizen": True,
+    "declaration": True,
+    "is_18_or_over": True,
+    "state_id_number": "12345678",
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "id_type": "dl",
+        "federal_voter": False,
+    },
+}
+
+PA_REGISTRATION_SIG = {
+    "us_citizen": True,
+    "is_18_or_over": True,
+    "declaration": True,
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "federal_voter": False,
+        "signature": "...",
+    },
+}
+
 
 @pytest.fixture()
 def submission_task_patch(mocker):
+    mocker.patch("register.api_views.send_welcome_sms")
+    mocker.patch("register.api_views.sync_registration_to_actionnetwork")
     return mocker.patch.object(RegistrationViewSet, "task")
 
 
@@ -334,3 +419,153 @@ def test_bad_update_status():
         "status": ["Registration status can only be ReferOVR"]
     }
     assert registration.status == TurnoutActionStatus.INCOMPLETE
+
+
+@pytest.fixture
+def mock_region(mocker):
+    class FakeRegion(object):
+        def __init__(self, name):
+            self.name = name
+
+    return mocker.patch(
+        "register.api_views.Region.objects.get",
+        return_value=FakeRegion(name="Clarion County"),
+    )
+
+
+@pytest.fixture
+def mock_ovrlib_session_dl(mocker):
+    class FakeSession(object):
+        def __init__(self, api_key, staging):
+            pass
+
+        def register(self, registration):
+            return ovrlib.PAOVRResponse(
+                application_id="123",
+                application_date=datetime.date(year=2020, month=6, day=1),
+                signature_source="DL",
+            )
+
+    return mocker.patch("ovrlib.pa.PAOVRSession", FakeSession)
+
+
+@pytest.mark.django_db
+def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+
+    register_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid),
+        PA_REGISTRATION_NODLSSNORSIG,
+        format="json",
+    )
+    assert register_response.status_code == 200
+    assert register_response.json()["state_api_status"] == "failure"
+    assert register_response.json()["state_api_error"] == "no_dl_or_signature"
+
+
+@pytest.mark.django_db
+def test_pa_dl(mock_ovrlib_session_dl, mock_region):
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+
+    register_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid),
+        PA_REGISTRATION_DL,
+        format="json",
+    )
+    assert register_response.status_code == 200
+    assert register_response.json()["state_api_status"] == "success"
+
+
+@pytest.fixture
+def mock_ovrlib_session_baddl(mocker):
+    class FakeSession(object):
+        def __init__(self, api_key, staging):
+            pass
+
+        def register(self, request):
+            if request.dl_number:
+                raise ovrlib.exceptions.InvalidDLError
+            return ovrlib.PAOVRResponse(
+                application_id="123",
+                application_date=datetime.date(year=2020, month=6, day=1),
+                signature_source="signature",
+            )
+
+    return mocker.patch("ovrlib.pa.PAOVRSession", FakeSession)
+
+
+@pytest.fixture
+def mock_ovrlib_session_badssn(mocker):
+    class FakeSession(object):
+        def __init__(self, api_key, staging):
+            pass
+
+        def register(self, request):
+            if request.dl_number:
+                raise ovrlib.exceptions.InvalidDLError
+            return ovrlib.PAOVRResponse(
+                application_id="123",
+                application_date=datetime.date(year=2020, month=6, day=1),
+                signature_source="signature",
+            )
+
+    return mocker.patch("ovrlib.pa.PAOVRSession", FakeSession)
+
+
+@pytest.mark.django_db
+def test_pa_sig(mock_ovrlib_session_baddl, mock_region):
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+
+    register_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid),
+        PA_REGISTRATION_BADDL,
+        format="json",
+    )
+    assert register_response.status_code == 200
+    assert register_response.json()["state_api_status"] == "failure"
+    assert register_response.json()["state_api_error"] == "dl_invalid"
+
+    # image
+    item = SecureUploadItem.objects.create(
+        upload_type=SecureUploadType.SIGNATURE, content_type="image/jpeg",
+    )
+    item.file.save(
+        str(SmallUUID()), ContentFile("foo"), True,
+    )
+    item.save()
+    PA_REGISTRATION_SIG["state_fields"]["signature"] = item.uuid
+
+    register_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid),
+        PA_REGISTRATION_SIG,
+        format="json",
+    )
+    assert register_response.status_code == 200
+    assert register_response.json()["state_api_status"] == "success"
