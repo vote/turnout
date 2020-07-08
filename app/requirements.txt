@@ -45,7 +45,7 @@ redis==3.3.*
 model-bakery==1.1.*
 django-otp==0.8.*
 django-formtools==2.2
-django-two-factor-auth==1.11.*
+django-two-factor-auth==1.12.*
 qrcode==6.*
 requests-mock==1.7.*
 pytest-mock==2.0.*
