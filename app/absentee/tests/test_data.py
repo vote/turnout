@@ -29,6 +29,12 @@ ALL_STATES = (
     else [state_code for state_code, state_name in STATES]
 )
 
+STATE_ID_NUMBER_SLUGS = (
+    "state_id_number_opt_1",
+    "state_id_number_opt_2",
+    "state_id_number_opt_3",
+)
+
 
 def add_state_info(state: State, slug: str, value: str):
     ft = baker.make_recipe("election.markdown_field_type", slug=slug)

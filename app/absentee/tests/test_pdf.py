@@ -10,6 +10,7 @@ from ..generateform import process_ballot_request
 from ..state_pdf_data import STATE_DATA, each_slug_with_type
 from .test_data import (
     ALL_STATES,
+    STATE_ID_NUMBER_SLUGS,
     TEST_BALLOT_REQUEST_IS_18_OR_OVER,
     TEST_BALLOT_REQUEST_STATE_ID_NUMBER,
     make_test_data,
@@ -41,6 +42,8 @@ def test_gen_pdf(state, mocker):
         # General sample data for all the state-specific field
         ballot_request.state_fields = {}
 
+        has_set_state_id_number = False
+
         for slug, slug_type in each_slug_with_type(
             state_data, include_auto_fields=False
         ):
@@ -51,8 +54,13 @@ def test_gen_pdf(state, mocker):
             elif slug == "state_id_number":
                 expected_data[slug] = TEST_BALLOT_REQUEST_STATE_ID_NUMBER
             elif slug_type == "boolean":
-                expected_data[slug] = True
-                ballot_request.state_fields[slug] = True
+                if slug not in STATE_ID_NUMBER_SLUGS:
+                    expected_data[slug] = True
+                    ballot_request.state_fields[slug] = True
+                elif not has_set_state_id_number:
+                    has_set_state_id_number = True
+                    expected_data[slug] = TEST_BALLOT_REQUEST_STATE_ID_NUMBER
+                    ballot_request.state_fields[slug] = True
             elif slug_type == "string":
                 val = random_string()
                 expected_data[slug] = val

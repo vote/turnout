@@ -13,7 +13,12 @@ from ..state_pdf_data import (
     each_slug,
     each_slug_with_type,
 )
-from .test_data import STATES_WITH_METADATA, get_filled_slugs, make_test_data
+from .test_data import (
+    STATE_ID_NUMBER_SLUGS,
+    STATES_WITH_METADATA,
+    get_filled_slugs,
+    make_test_data,
+)
 
 schema_file = os.path.join(
     os.path.dirname(__file__), "../templates/pdf/states.schema.json"
@@ -126,6 +131,12 @@ def test_slugs_match_pdf(state):
     )
     pdf_slugs = [f["FieldName"][0] for f in pdf_fields]
 
+    # state_id_number_opt_* fields get filled in by state_id_number -- so if
+    # a state_id_number_opt_* is in the PDF, state_id_number is effectively in
+    # the PDF (it has to be present in the form fields)
+    if any((slug in pdf_slugs) for slug in STATE_ID_NUMBER_SLUGS):
+        pdf_slugs.append("state_id_number")
+
     # Ensure every field in the PDF matches up to either a slug from the YAML
     # or a slug that we auto-fill from the record
     missing_yaml_slugs = [slug for slug in pdf_slugs if slug not in valid_slugs]
@@ -141,7 +152,9 @@ def test_slugs_match_pdf(state):
 
     # Ensure every boolean slug points to a Button that uses On/Off as values
     for field in pdf_fields:
-        if field["FieldName"][0] in boolean_slugs:
+        if field["FieldName"][0] in boolean_slugs and (
+            field["FieldName"][0] not in STATE_ID_NUMBER_SLUGS
+        ):
             assert (
                 field["FieldType"][0] == "Button"
             ), f"Expected PDF field {field['FieldName']} to be a checkbox"
