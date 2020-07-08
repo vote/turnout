@@ -122,7 +122,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["type", "content"],
+        "required": ["type"],
         "properties": {
           "type": { "const": "section" },
           "label": { "type": "string" },

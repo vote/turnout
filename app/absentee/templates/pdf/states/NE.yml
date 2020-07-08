@@ -1,0 +1,38 @@
+pages: 1
+auto_fields:
+  - slug: date
+    type: todays_date
+  - slug: election_general
+    type: static
+    value: true
+  - slug: method_vbm
+    type: static
+    value: true
+  - slug: election_month
+    type: static
+    value: "November"
+  - slug: election_day
+    type: static
+    value: "3"
+  - slug: election_year
+    type: static
+    value: "2020"
+
+signature_statement: I, the undersigned, declare that I am a registered voter in Nebraska. The penalty for election falsification is imprisonment for up to two years imprisonment and twelve months post-release supervision, a fine of up to ten thousand dollars, or both.
+
+form_fields:
+  - type: section
+    label: Election date
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
+
+manual_fields:
+  - election_special
+  - method_inperson
+  - method_takehome
+
+signatures:
+  1:
+    x: 398
+    y: 310
+    width: 170
+    height: 21
