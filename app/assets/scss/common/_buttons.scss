@@ -1,0 +1,17 @@
+.btn-primary, .btn-secondary {
+    height: 60px;
+    min-width: 200px;
+    text-decoration: none;
+    padding: 19px 18px;
+    line-height: 120%;
+    border-radius: 0;
+    font-size: 18px;
+}
+
+.btn-small {
+    height: 40px;
+    min-width: 0;
+    font-size: 16px;
+    line-height: 20px;
+    padding: 10px 12px;
+}

@@ -6,3 +6,13 @@ html {
     margin-top: 50px;
     margin-bottom: 25px;
 }
+
+.hidden-submit {
+    overflow: visible;
+    height: 0;
+    width: 0;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    display: block;
+}

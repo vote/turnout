@@ -41,6 +41,8 @@
 
 @import "common/sticky-footer";
 @import "common/base";
+@import "common/buttons";
+@import "common/forms";
 
 @import "manage/typography";
 
@@ -50,7 +52,6 @@
     @import "manage/core";
     @import "manage/cards";
     @import "manage/footer";
-    @import "manage/forms";
     @import "manage/widgets";
     @import "manage/pagination";
     @import "manage/breadcrumb";

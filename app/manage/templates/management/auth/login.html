@@ -41,7 +41,7 @@
       <p>
         {% for other in other_devices %}
         <button name="challenge_device" value="{{ other.persistent_id }}"
-                class="btn btn-default btn-block" type="submit">
+                class="btn btn-default btn-block btn-secondary" type="submit">
           {{ other|device_action }}
         </button>
       {% endfor %}</p>
@@ -50,15 +50,18 @@
       <p>{% trans "As a last resort, you can use a backup token:" %}</p>
       <p>
         <button name="wizard_goto_step" type="submit" value="backup"
-                class="btn btn-default btn-block">{% trans "Use Backup Token" %}</button>
+                class="btn btn-default btn-block btn-secondary">{% trans "Use Backup Token" %}</button>
       </p>
     {% endif %}
 
 
     {% if wizard.steps.prev %}
+    <!-- Make the first submit button the one that advances the user,
+      so people who press enter won't be sent to the previous step -->
+    <button class="hidden-submit" type="submit" />
     <button name="wizard_goto_step" type="submit"
             value="{{ wizard.steps.prev }}"
-            class="btn btn-default">{% trans "Back" %}</button>
+            class="btn btn-default btn-secondary">{% trans "Back" %}</button>
     <button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
     {% else %}
     <p><small>By logging in you accept the <a href="https://www.voteamerica.com/subscriber-terms/"
