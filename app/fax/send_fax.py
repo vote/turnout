@@ -13,13 +13,20 @@ from storage.models import StorageItem
 
 from .api_views import handle_fax_callback
 
-sqs_client = boto3.client(
-    "sqs",
-    config=Config(retries={"max_attempts": 10, "mode": "standard"}),
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_DEFAULT_REGION,
-)
+if settings.AWS_ACCESS_KEY_ID:
+    sqs_client = boto3.client(
+        "sqs",
+        config=Config(retries={"max_attempts": 10, "mode": "standard"}),
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_DEFAULT_REGION,
+    )
+else:
+    sqs_client = boto3.client(
+        "sqs",
+        config=Config(retries={"max_attempts": 10, "mode": "standard"}),
+        region_name=settings.AWS_DEFAULT_REGION,
+    )
 
 logger = logging.getLogger("fax")
 
