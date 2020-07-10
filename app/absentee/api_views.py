@@ -13,6 +13,7 @@ from official.api_views import get_regions_for_address
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
+from .region_links import ovbm_link_for_ballot_request
 from .serializers import BallotRequestSerializer
 from .state_pdf_data import STATE_DATA
 from .tasks import process_ballotrequest_submission
@@ -143,6 +144,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             "esign_method": ballot_request.esign_method.value
             if ballot_request.esign_method
             else None,
+            "ovbm_link": ovbm_link_for_ballot_request(ballot_request),
         }
 
         response.update(extra_response_data)

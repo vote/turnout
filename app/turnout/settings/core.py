@@ -210,6 +210,11 @@ ACTIONNETWORK_SYNC_DAILY = env.bool("ACTIONNETWORK_SYNC_DAILY", False)
 ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
 ACTIONNETWORK_SYNC_MINUTE = env.int("ACTIONNETWORK_SYNC_MINUTE", 45)
 
+# This daily sync refreshes region-level OVBM links
+OVBM_SYNC = env.bool("OVBM_SYNC", False)
+OVBM_SYNC_HOUR = env.int("OVBM_SYNC_HOUR", 4)
+OVBM_SYNC_MINUTE = env.int("OVBM_SYNC_MINUTE", 30)
+
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -242,6 +247,11 @@ if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
         "schedule": crontab(
             minute=ACTIONNETWORK_SYNC_MINUTE, hour=ACTIONNETWORK_SYNC_HOUR
         ),
+    }
+if OVBM_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-ovbm-sync"] = {
+        "task": "absentee.tasks.refresh_region_links",
+        "schedule": crontab(minute=OVBM_SYNC_MINUTE, hour=OVBM_SYNC_HOUR),
     }
 
 #### END CELERY CONFIGURATION

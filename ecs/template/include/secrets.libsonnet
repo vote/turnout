@@ -197,5 +197,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.optimizely_sdk_key',
         name: 'OPTIMIZELY_SDK_KEY',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.ovbm_sync',
+        name: 'OVBM_SYNC',
+      },
     ],
 }

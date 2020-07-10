@@ -68,6 +68,14 @@ def process_ballotrequest_submission_task(mocker):
     return mocker.patch("absentee.api_views.process_ballotrequest_submission.delay")
 
 
+@pytest.fixture(autouse=True)
+def mock_ovbm_link(mocker):
+    mock = mocker.patch("absentee.api_views.ovbm_link_for_ballot_request")
+    mock.return_value = "mock-ovbm-link"
+
+    return mock
+
+
 def set_feature_flag(mocker, val):
     mocker.patch("absentee.api_views.flag_enabled_for_state").return_value = val
 
@@ -131,6 +139,7 @@ def test_incomplete_create_single_matching_region(
         "action_id": str(ballot_request.action.pk),
         "region": 12345,
         "esign_method": "self_print",
+        "ovbm_link": "mock-ovbm-link",
     }
 
     mock_get_regions_for_address.assert_called_with(
@@ -169,6 +178,7 @@ def test_incomplete_create_single_matching_region_email(
         "action_id": str(ballot_request.action.pk),
         "region": 12345,
         "esign_method": "leo_email",
+        "ovbm_link": "mock-ovbm-link",
     }
 
 
@@ -200,6 +210,7 @@ def test_incomplete_create_region_matching_error(
         "action_id": str(ballot_request.action.pk),
         "region": None,
         "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
         "regions": [
             {"name": "A", "external_id": 1},
             {"name": "B", "external_id": 2},
@@ -236,6 +247,7 @@ def test_incomplete_create_no_matching_regions(
         "action_id": str(ballot_request.action.pk),
         "region": None,
         "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
         "regions": [
             {"name": "A", "external_id": 1},
             {"name": "B", "external_id": 2},
@@ -272,6 +284,7 @@ def test_incomplete_create_multiple_matching_regions(
         "action_id": str(ballot_request.action.pk),
         "region": None,
         "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
         "regions": [{"name": "B", "external_id": 2}, {"name": "C", "external_id": 3},],
     }
 
@@ -306,6 +319,7 @@ def test_incomplete_create_no_region_matching(
         "action_id": str(ballot_request.action.pk),
         "region": None,
         "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
         "regions": [
             {"name": "A", "external_id": 1},
             {"name": "B", "external_id": 2},
@@ -348,6 +362,7 @@ def test_complete_create(
         "uuid": str(ballot_request.uuid),
         "action_id": str(ballot_request.action.pk),
         "esign_method": "leo_fax",
+        "ovbm_link": "mock-ovbm-link",
         "region": 12345,
     }
 
@@ -379,6 +394,7 @@ def test_incomplete_update_no_esign_filling():
         "uuid": str(ballot_request.uuid),
         "action_id": str(ballot_request.action.pk),
         "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
         "region": None,
     }
 
@@ -419,6 +435,7 @@ def test_incomplete_update_with_esign_filling(
         "uuid": str(ballot_request.uuid),
         "action_id": str(ballot_request.action.pk),
         "esign_method": "leo_fax",
+        "ovbm_link": "mock-ovbm-link",
         "region": 12345,
     }
 
@@ -461,6 +478,7 @@ def test_complete_update(
         "uuid": str(ballot_request.uuid),
         "action_id": str(ballot_request.action.pk),
         "esign_method": "leo_fax",
+        "ovbm_link": "mock-ovbm-link",
         "region": 12345,
     }
 

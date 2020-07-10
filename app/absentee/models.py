@@ -96,3 +96,13 @@ class LeoContactOverride(TimestampModel):
 
     class Meta:
         ordering = ["region__state__code", "region__name"]
+
+
+class RegionOVBMLink(TimestampModel):
+    region = models.OneToOneField(
+        "official.Region", on_delete=models.CASCADE, primary_key=True
+    )
+    url = models.URLField()
+
+    class Meta:
+        ordering = ["region__state__code", "region__name"]

@@ -94,3 +94,10 @@ def send_ballotrequest_leo_fax_sent_notification(
     else:
         ballot_request.action.track_event(EventType.FINISH_LEO_FAX_SENT)
         send_fax_sent_email(ballot_request)
+
+
+@shared_task
+def refresh_region_links():
+    from .region_links import refresh_region_links
+
+    refresh_region_links()

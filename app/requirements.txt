@@ -66,3 +66,4 @@ shapely==1.7.*
 django-tsvector-field==0.9.*
 optimizely-sdk==3.4.*
 ovrlib==0.0.3
+beautifulsoup4==4.9.*
