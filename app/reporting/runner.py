@@ -4,6 +4,7 @@ from operator import attrgetter
 from typing import Any, List, Tuple
 
 from django.core.files.base import ContentFile
+from django.db import connection
 from django.template.defaultfilters import slugify
 from django.utils.timezone import now
 
@@ -17,7 +18,7 @@ from .models import Report
 
 ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("subscriber.name", "Subscriber"),
+    ("subscriber_name", "Subscriber"),
     ("created_at", "Time Started (UTC)"),
     ("first_name", "First Name"),
     ("middle_name", "Middle Name"),
@@ -38,11 +39,11 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("mailing_zipcode", "Mailing Zipcode"),
     ("sms_opt_in", "VoteAmerica SMS Opt In"),
     ("sms_opt_in_subscriber", "Subscriber SMS Opt In"),
-    ("action.details.finished", "Completed"),
-    ("action.details.self_print", "PDF Emailed to Voter"),
-    ("action.details.finished_external_service", "Redirected To State Website"),
-    ("action.details.leo_message_sent", "PDF submitted to LEO"),
-    ("action.details.total_downloads", "PDF Download Count"),
+    ("finished", "Completed"),
+    ("self_print", "PDF Emailed to Voter"),
+    ("finished_external_service", "Redirected To State Website"),
+    ("leo_message_sent", "PDF submitted to LEO"),
+    ("total_downloads", "PDF Download Count"),
     ("source", "source"),
     ("utm_source", "utm_source"),
     ("utm_medium", "utm_medium"),
@@ -51,11 +52,12 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("utm_term", "utm_term"),
     ("embed_url", "Embed URL"),
     ("session_id", "Session ID"),
+    ("updated_at", "Updated At (UTC)"),
 ]
 
 REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("subscriber.name", "Subscriber"),
+    ("subscriber_name", "Subscriber"),
     ("created_at", "Time Started (UTC)"),
     ("previous_title", "Previous Title"),
     ("previous_first_name", "Previous First Name"),
@@ -91,11 +93,11 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("mailing_zipcode", "Mailing Zipcode"),
     ("sms_opt_in", "VoteAmerica SMS Opt In"),
     ("sms_opt_in_subscriber", "Subscriber SMS Opt In"),
-    ("action.details.finished", "Completed"),
-    ("action.details.self_print", "PDF Emailed to Voter"),
-    ("action.details.finished_external_service", "Redirected To State Website"),
-    ("action.details.leo_message_sent", "PDF Submitted to LEO"),
-    ("action.details.total_downloads", "Total Self Print Downloads"),
+    ("finished", "Completed"),
+    ("self_print", "PDF Emailed to Voter"),
+    ("finished_external_service", "Redirected To State Website"),
+    ("leo_message_sent", "PDF Submitted to LEO"),
+    ("total_downloads", "Total Self Print Downloads"),
     ("source", "source"),
     ("utm_source", "utm_source"),
     ("utm_medium", "utm_medium"),
@@ -105,11 +107,12 @@ REGISTER_FIELDS: List[Tuple[str, str]] = [
     ("embed_url", "Embed URL"),
     ("session_id", "Session ID"),
     ("referring_tool", "Referring Tool"),
+    ("updated_at", "Updated At (UTC)"),
 ]
 
 VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("uuid", "ID"),
-    ("subscriber.name", "Subscriber"),
+    ("subscriber_name", "Subscriber"),
     ("created_at", "Time Started (UTC)"),
     ("first_name", "First Name"),
     ("last_name", "Last Name"),
@@ -132,6 +135,7 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("utm_term", "utm_term"),
     ("embed_url", "Embed URL"),
     ("session_id", "Session ID"),
+    ("updated_at", "Updated At (UTC)"),
 ]
 
 
@@ -148,35 +152,41 @@ def generate_name(report: Report):
 
 
 def report_runner(report: Report):
-    model: Any = None
     if report.type == enums.ReportType.ABSENTEE:
-        model = BallotRequest
+        table = "reporting_ballotrequestreport"
         fields = ABSENTEE_FIELDS
     elif report.type == enums.ReportType.REGISTER:
-        model = Registration
+        table = "reporting_registerreport"
         fields = REGISTER_FIELDS
     elif report.type == enums.ReportType.VERIFY:
-        model = Lookup
+        table = "reporting_verifyreport"
         fields = VERIFIER_FIELDS
     else:
         raise Exception("Invalid Report Type")
 
-    objects = model.objects.select_related(
-        "subscriber", "subscriber__default_slug", "action", "action__details"
-    ).exclude(action__isnull=True)
-
     if report.subscriber:
-        objects = objects.filter(subscriber=report.subscriber)
+        sql = f"SELECT * FROM {table} WHERE subscriber_id = %s"
+        args = [report.subscriber.uuid.hex_grouped]
+    else:
+        sql = f"SELECT * FROM {table}"
+        args = []
 
     new_file = StringIO()
     reportwriter = csv.writer(new_file)
     reportwriter.writerow([field[1] for field in fields])
 
-    for object in objects:
-        new_row = []
-        for field in fields:
-            new_row.append(attrgetter(field[0])(object))
-        reportwriter.writerow(new_row)
+    with connection.cursor() as cursor:
+        cursor.execute(sql, args)
+        columns = [col[0] for col in cursor.description]
+
+        for row in cursor:
+            row_dict = dict(zip(columns, row))
+
+            new_row = []
+            for field in fields:
+                new_row.append(row_dict[field[0]])
+
+            reportwriter.writerow(new_row)
 
     encoded_file_content = new_file.getvalue().encode("utf-8")
 
