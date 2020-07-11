@@ -40,7 +40,7 @@ class StateRegionsViewSet(
 
     def get_queryset(self):
         state_code = self.kwargs["state"]
-        queryset = Region.objects.filter(state__code=state_code).order_by("name")
+        queryset = Region.visible.filter(state__code=state_code).order_by("name")
 
         county = self.request.query_params.get("county", None)
         if county:
@@ -142,7 +142,7 @@ def geocode_to_regions(street, city, state, zipcode):
         )
         return None
 
-    queryset = Region.objects.filter(state__code=state_code).order_by("name")
+    queryset = Region.visible.filter(state__code=state_code).order_by("name")
 
     if state_code in region_name_contains_county + county_method:
         # match any county in the address match list
@@ -466,7 +466,7 @@ def ts_to_region(
         )
         return None
 
-    queryset = Region.objects.filter(state__code=state_code).order_by("name")
+    queryset = Region.visible.filter(state__code=state_code).order_by("name")
 
     if state_code in region_name_contains_county + county_method:
         queryset = queryset.filter(name__icontains=county)

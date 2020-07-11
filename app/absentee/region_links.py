@@ -27,7 +27,7 @@ def normalize_county_name(name: str) -> str:
 def get_florida_data() -> List[RegionOVBMLink]:
     # Build a mapping of County -> region ID
     county_to_region = {
-        normalize_county_name(r.county): r for r in Region.objects.filter(state="FL")
+        normalize_county_name(r.county): r for r in Region.visible.filter(state="FL")
     }
 
     r = requests.get(

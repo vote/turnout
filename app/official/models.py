@@ -14,12 +14,21 @@ class USVFModel(TimestampModel):
         abstract = True
 
 
+class VisibleRegionManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().exclude(hidden=True)
+
+
 class Region(USVFModel):
     name = models.TextField(null=True)
     municipality = models.TextField(null=True, db_index=True)
     municipality_type = models.TextField(null=True)
     county = models.TextField(null=True, db_index=True)
     state = models.ForeignKey("election.State", null=True, on_delete=models.PROTECT)
+    hidden = models.BooleanField(null=True)
+
+    objects = models.Manager()
+    visible = VisibleRegionManager()
 
     class Meta:
         ordering = ["external_id"]

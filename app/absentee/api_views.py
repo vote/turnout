@@ -111,7 +111,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             if include_specific_regions:
                 extra_response_data["regions"] = include_specific_regions
             else:
-                absentee_regions = ballot_request.state.region_set
+                absentee_regions = ballot_request.state.region_set.exclude(hidden=True)
 
                 if ballot_request.state.code in ["MI", "WI"]:
                     # MI and WI process absentee ballots only at the municipality level
