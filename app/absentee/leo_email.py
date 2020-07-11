@@ -66,6 +66,7 @@ def send_email(ballot_request: BallotRequest, content: str, leo_email: str) -> N
         from_email=FROM_EMAIL,
         to=[leo_email],
         cc=[ballot_request.email],
+        reply_to=[FROM_EMAIL, leo_email, ballot_request.email],
     )
 
     attachment = ballot_request.result_item.file
