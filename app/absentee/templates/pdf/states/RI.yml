@@ -1,0 +1,12 @@
+pages: 2
+
+manual_fields:
+  - party_democrat
+  - party_republican
+  - fax
+  - uocava_email
+  - excuse_disability
+  - excuse_confined
+  - excuse_uocava
+  - excuse_absent
+  - mailing_address_name

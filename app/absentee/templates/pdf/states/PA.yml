@@ -1,0 +1,14 @@
+pages: 3
+
+manual_fields:
+  - municipality
+  - ward
+  - voting_district
+  - state_id_number_opt_1
+  - state_id_number_opt_2
+  - no_state_id
+  - date_signed
+  - date_witness_signed
+  - witness_address
+  - address_lived_since
+  - permanent_vbm
