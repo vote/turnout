@@ -43,8 +43,8 @@ def test_region_links(florida_regions, requests_mock):
 
 @pytest.mark.django_db
 def test_ovbm_link_for_ballot_request():
-    stateA = baker.make_recipe("election.state")
-    stateB = baker.make_recipe("election.state")
+    stateA = baker.make_recipe("election.state", code="AA")
+    stateB = baker.make_recipe("election.state", code="BB")
 
     regionA1 = baker.make_recipe("official.region", state=stateA)
     regionA2 = baker.make_recipe("official.region", state=stateA)

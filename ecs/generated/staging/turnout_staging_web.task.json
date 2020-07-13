@@ -272,6 +272,10 @@
             {
                "name": "OPTIMIZELY_SDK_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.optimizely_sdk_key"
+            },
+            {
+               "name": "OVBM_SYNC",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.ovbm_sync"
             }
          ]
       },
@@ -541,6 +545,10 @@
             {
                "name": "OPTIMIZELY_SDK_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.optimizely_sdk_key"
+            },
+            {
+               "name": "OVBM_SYNC",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.ovbm_sync"
             }
          ]
       },
@@ -809,6 +817,10 @@
             {
                "name": "OPTIMIZELY_SDK_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.optimizely_sdk_key"
+            },
+            {
+               "name": "OVBM_SYNC",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.ovbm_sync"
             }
          ]
       },
@@ -1144,6 +1156,10 @@
             {
                "name": "OPTIMIZELY_SDK_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.optimizely_sdk_key"
+            },
+            {
+               "name": "OVBM_SYNC",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.ovbm_sync"
             }
          ]
       }
