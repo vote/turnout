@@ -88,25 +88,16 @@ PA_REGISTRATION_DL = {
     "is_18_or_over": True,
     "declaration": True,
     "state_id_number": "99007069",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "dl",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_SSN = {
     "us_citizen": True,
     "is_18_or_over": True,
     "declaration": True,
-    "ssn4": "0451",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "ssn",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_BADDL = {
@@ -114,18 +105,15 @@ PA_REGISTRATION_BADDL = {
     "declaration": True,
     "is_18_or_over": True,
     "state_id_number": "12345678",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "dl",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_SIG = {
     "us_citizen": True,
     "is_18_or_over": True,
     "declaration": True,
+    "state_id_number_2": "1234",
     "state_fields": {
         "region_id": 432147,
         "vbm_opt_in": False,

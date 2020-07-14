@@ -28,7 +28,9 @@ class RegistrationViewSet(IncompleteActionViewSet):
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
     task = process_registration_submission
 
-    def process_pa_registration(self, registration, state_id_number, is_18_or_over):
+    def process_pa_registration(
+        self, registration, state_id_number, state_id_number_2, is_18_or_over
+    ):
         state_fields = registration.state_fields
 
         # prepare
@@ -58,10 +60,9 @@ class RegistrationViewSet(IncompleteActionViewSet):
             ]
         }
         if state_id_number:
-            if state_fields.get("id_type") == "dl":
-                r["dl_number"] = state_id_number
-            elif state_fields.get("id_type") == "ssn":
-                r["ssn4"] = state_id_number
+            r["dl_number"] = state_id_number
+        if state_id_number_2:
+            r["ssn4"] = state_id_number
 
         if state_fields.get("signature"):
             upload = SecureUploadItem.objects.get(pk=state_fields.get("signature"))
@@ -164,9 +165,18 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "exception": str(e),
             }
 
-    def complete(self, serializer, registration, state_id_number, is_18_or_over):
+    def complete(
+        self,
+        serializer,
+        registration,
+        state_id_number,
+        state_id_number_2,
+        is_18_or_over,
+    ):
         if registration.state_id == "PA" and registration.state_fields:
-            self.process_pa_registration(registration, state_id_number, is_18_or_over)
+            self.process_pa_registration(
+                registration, state_id_number, state_id_number_2, is_18_or_over
+            )
             registration.save()
             if registration.status != TurnoutActionStatus.PENDING:
                 return
