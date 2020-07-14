@@ -5,6 +5,11 @@ from multi_tenant import manage_views
 app_name = "multi_tenant"
 urlpatterns = [
     path("embed/", manage_views.EmbedCodeSampleView.as_view(), name="embed_code"),
+    path(
+        "settings/",
+        manage_views.SubscriberUpdateSettingsView.as_view(),
+        name="settings",
+    ),
     path("users/", manage_views.ManagerListView.as_view(), name="manager_list"),
     path(
         "users/<slug:pk>/remove/",

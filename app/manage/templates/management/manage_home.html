@@ -28,6 +28,9 @@
 			<li>
 				<a href="{% url 'manage:reporting:request' user.active_client_slug %}">Export your data</a>
 			</li>
+			<li>
+				<a href="{% url 'manage:multi_tenant:settings' user.active_client_slug %}">Update your settings</a>
+			</li>
 		</ul>
 		<div class="callout">
 			<h2>Have questions about the tools?</h2>

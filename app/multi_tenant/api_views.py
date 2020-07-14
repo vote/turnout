@@ -25,5 +25,6 @@ class SubscriberSlugViewSet(GenericViewSet):
                 "sms_checkbox_default": subscriber.sms_checkbox_default == True,
                 "sms_disclaimer": subscriber.sms_disclaimer,
                 "sms_checkbox": subscriber.sms_checkbox == True,
+                "disclaimer": subscriber.disclaimer,
             }
         )

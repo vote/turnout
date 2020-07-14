@@ -1,0 +1,34 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}Update {{ user.active_client }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <h1>Subscriber Settings</h1>
+        <p>Some parts of VoteAmerica's toolset can be customized on a per-subscriber basis. Updates made on this form take effect immediately.</p>
+        <div class="card">
+            <div class="card-header">{{ user.active_client }} Settings</div>
+            <div class="card-body">
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form.name|as_crispy_field }}
+                    <h3>URLs</h3>
+                    {{ form.url|as_crispy_field }}
+                    {{ form.privacy_policy|as_crispy_field }}
+                    <h3>SMS Program</h3>
+                    {{ form.sms_enabled|as_crispy_field }}
+                    {{ form.sms_checkbox|as_crispy_field }}
+                    {{ form.sms_checkbox_default|as_crispy_field }}
+                    <h3>Third Party Integrations</h3>
+                    <p><small>Bluelink and TMC syncs happen nightly. Your VoteAmerica subscriber ID is <code><small>{{ user.active_client_slug }}</small></code>.</small></p>
+                    {{ form.sync_bluelink|as_crispy_field }}
+                    {{ form.sync_tmc|as_crispy_field }}
+                    <button type="submit" class="btn btn-block btn-primary">Update</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

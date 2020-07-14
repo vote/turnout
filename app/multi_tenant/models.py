@@ -1,21 +1,26 @@
+import reversion
 from django.core.cache import cache
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 
+DISCLAIMER_TEMPLATE = "multi_tenant/disclaimer.txt"
 
+
+@reversion.register()
 class Client(UUIDModel, TimestampModel):
     name = models.CharField(max_length=200)
     url = models.URLField()
     email = models.EmailField(
         max_length=254, null=True, default="turnout@localhost.local"
     )
-    privacy_policy = models.URLField(null=True)
-    terms_of_service = models.URLField(null=True)
-    sms_enabled = models.BooleanField(default=False, null=True)
+    privacy_policy = models.URLField(null=True, blank=True)
+    terms_of_service = models.URLField(null=True, blank=True)
+    sms_enabled = models.BooleanField(default=True, null=True)
     sms_checkbox = models.BooleanField(default=True, null=True)
     sms_checkbox_default = models.BooleanField(default=False, null=True)
     sms_disclaimer = models.TextField(blank=True, null=True)
@@ -26,6 +31,7 @@ class Client(UUIDModel, TimestampModel):
 
     # Passed to Civis to determine if subscriber's data should be synced to TMC
     sync_tmc = models.BooleanField(default=False, null=True)
+    sync_bluelink = models.BooleanField(default=False, null=True)
 
     # Determines if we show our own donate asks when a user is interacting with
     # this client.
@@ -52,6 +58,12 @@ class Client(UUIDModel, TimestampModel):
     def stats(self):
         # NOTE: callers should be able to cope with getting an empty dict here
         return cache.get(f"client.stats/{self.uuid}") or {}
+
+    @cached_property
+    def disclaimer(self):
+        return render_to_string(DISCLAIMER_TEMPLATE, {"subscriber": self}).replace(
+            "\n", ""
+        )
 
 
 class SubscriberSlug(UUIDModel, TimestampModel):

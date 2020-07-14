@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.timezone import now
 from django.views.generic import (
     CreateView,
@@ -11,7 +11,9 @@ from django.views.generic import (
     FormView,
     ListView,
     TemplateView,
+    UpdateView,
 )
+from reversion.views import RevisionMixin
 
 from accounts.models import Invite, User, expire_date_time
 from manage.mixins import ManageViewMixin
@@ -21,6 +23,7 @@ from .forms import (
     ChangeSubscriberManageForm,
     InviteAssociationManageDeleteForm,
     InviteCreateForm,
+    SubscriberSettingsForm,
 )
 from .mixins_manage_views import SubscriberManageViewMixin
 from .models import Association, InviteAssociation
@@ -31,6 +34,18 @@ logger = logging.getLogger("multi_tenant")
 
 class EmbedCodeSampleView(SubscriberManageViewMixin, TemplateView):
     template_name = "multi_tenant/manage/embed.html"
+
+
+class SubscriberUpdateSettingsView(
+    SuccessMessageMixin, SubscriberManageViewMixin, RevisionMixin, UpdateView
+):
+    form_class = SubscriberSettingsForm
+    template_name = "multi_tenant/manage/settings.html"
+    success_message = "Subscriber settings have been updated"
+    success_url = reverse_lazy("manage:home_redirect")
+
+    def get_object(self):
+        return self.subscriber
 
 
 class ChangeSubscriberView(ManageViewMixin, FormView):
