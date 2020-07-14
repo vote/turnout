@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from common import enums
 from official.models import Address
 
 from .models import LeoContactOverride
@@ -12,6 +13,7 @@ class AbsenteeContactInfo:
     email: Optional[str] = None
     phone: Optional[str] = None
     fax: Optional[str] = None
+    submission_method_override: Optional[enums.SubmissionType] = None
 
     @property
     def full_address(self):
@@ -68,6 +70,7 @@ def get_absentee_contact_info(region_external_id: int) -> AbsenteeContactInfo:
         contact_info.email = override.email
         contact_info.fax = override.fax
         contact_info.phone = override.phone
+        contact_info.submission_method_override = override.submission_method
     except LeoContactOverride.DoesNotExist:
         pass
 

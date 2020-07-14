@@ -30,5 +30,10 @@
 
     .card-header-actions a {
         margin-left: 25px;
+
+        &:hover {
+            color: white;
+            text-decoration: none;
+        }
     }
 }

@@ -8,8 +8,9 @@ from rest_framework.views import APIView
 from action.mixin_apiview import IncompleteActionViewSet
 from common.enums import SubmissionType, TurnoutActionStatus
 from common.rollouts import flag_enabled_for_state
-from election.models import StateInformation
+from election.models import State, StateInformation
 from official.api_views import get_regions_for_address
+from official.models import Region
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
@@ -19,16 +20,26 @@ from .state_pdf_data import STATE_DATA
 from .tasks import process_ballotrequest_submission
 
 
-def get_esign_method(ballot_request: BallotRequest):
-    if not flag_enabled_for_state("vbm_esign", ballot_request.state.code):
+def get_esign_method_for_region(state: State, region: Region) -> SubmissionType:
+    if not flag_enabled_for_state("vbm_esign", state.code):
         return SubmissionType.SELF_PRINT
 
-    # Check that we have the right contact info for fax/email
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+    # Construct a list of submission options in order of preference
+    contact_info = get_absentee_contact_info(region.external_id)
 
+    submission_options = [SubmissionType.LEO_EMAIL, SubmissionType.LEO_FAX]
+    if contact_info.submission_method_override:
+        if contact_info.submission_method_override == SubmissionType.SELF_PRINT:
+            # If we've overridden to self-print, always do that
+            return SubmissionType.SELF_PRINT
+
+        submission_options = [contact_info.submission_method_override]
+
+    # From that prioritized list, select the first one that is legal in this
+    # state, and that we have the contact info for
     state_infos = StateInformation.objects.select_related("field_type").filter(
         field_type__slug__in=("vbm_app_submission_email", "vbm_app_submission_fax"),
-        state=ballot_request.state,
+        state=state,
     )
 
     email_allowed_for_state = any(
@@ -36,18 +47,31 @@ def get_esign_method(ballot_request: BallotRequest):
         for info in state_infos
         if info.field_type.slug == "vbm_app_submission_email"
     )
-    if email_allowed_for_state and contact_info.email:
-        return SubmissionType.LEO_EMAIL
+    email_allowed_for_region = email_allowed_for_state and contact_info.email
 
     fax_allowed_for_state = any(
         info.boolean_value()
         for info in state_infos
         if info.field_type.slug == "vbm_app_submission_fax"
     )
-    if fax_allowed_for_state and contact_info.fax:
-        return SubmissionType.LEO_FAX
+    fax_allowed_for_region = fax_allowed_for_state and contact_info.fax
+
+    for submission_option in submission_options:
+        if submission_option == SubmissionType.SELF_PRINT:
+            # always allowed
+            return SubmissionType.SELF_PRINT
+        elif (
+            submission_option == SubmissionType.LEO_EMAIL
+        ) and email_allowed_for_region:
+            return SubmissionType.LEO_EMAIL
+        elif (submission_option == SubmissionType.LEO_FAX) and fax_allowed_for_region:
+            return SubmissionType.LEO_FAX
 
     return SubmissionType.SELF_PRINT
+
+
+def get_esign_method(ballot_request: BallotRequest) -> SubmissionType:
+    return get_esign_method_for_region(ballot_request.state, ballot_request.region)
 
 
 def populate_esign_method(ballot_request: BallotRequest):

@@ -90,6 +90,7 @@ class LeoContactOverride(TimestampModel):
     region = models.OneToOneField(
         "official.Region", on_delete=models.CASCADE, primary_key=True
     )
+    submission_method = TurnoutEnumField(enums.SubmissionType, null=True)
     email = models.EmailField(null=True)
     phone = PhoneNumberField(null=True)
     fax = PhoneNumberField(null=True)

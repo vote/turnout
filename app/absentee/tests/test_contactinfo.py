@@ -2,6 +2,8 @@ import pytest
 from model_bakery import baker
 
 from absentee.contactinfo import AbsenteeContactInfo, get_absentee_contact_info
+from absentee.models import LeoContactOverride
+from common import enums
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 
@@ -136,4 +138,74 @@ def test_contact_info_address_lines_filtering():
     assert (
         get_absentee_contact_info(office.region.external_id).full_address
         == "Right Office\n123 Main Street\nFoo City, AA 12345"
+    )
+
+
+@pytest.mark.django_db
+def test_contact_info_full_override():
+    office = baker.make_recipe("official.office")
+
+    correct_addr = baker.make_recipe(
+        "official.absentee_ballot_address", office=office, is_physical=True
+    )
+
+    LeoContactOverride(
+        region=office.region,
+        email="override@example.com",
+        phone="+19875559876",
+        fax="+18765558765",
+        submission_method=enums.SubmissionType.LEO_FAX,
+    ).save()
+
+    contact_info = get_absentee_contact_info(office.region.external_id)
+
+    assert contact_info == AbsenteeContactInfo(
+        address=correct_addr,
+        email="override@example.com",
+        phone="+19875559876",
+        fax="+18765558765",
+        submission_method_override=enums.SubmissionType.LEO_FAX,
+    )
+
+
+@pytest.mark.django_db
+def test_contact_info_method_only_override():
+    office = baker.make_recipe("official.office")
+
+    correct_addr = baker.make_recipe(
+        "official.absentee_ballot_address", office=office, is_physical=True
+    )
+
+    LeoContactOverride(
+        region=office.region, submission_method=enums.SubmissionType.SELF_PRINT,
+    ).save()
+
+    contact_info = get_absentee_contact_info(office.region.external_id)
+
+    assert contact_info == AbsenteeContactInfo(
+        address=correct_addr,
+        email=correct_addr.email,
+        phone=correct_addr.phone,
+        fax=correct_addr.fax,
+        submission_method_override=enums.SubmissionType.SELF_PRINT,
+    )
+
+
+@pytest.mark.django_db
+def test_contact_info_email_only_override():
+    office = baker.make_recipe("official.office")
+
+    correct_addr = baker.make_recipe(
+        "official.absentee_ballot_address", office=office, is_physical=True
+    )
+
+    LeoContactOverride(region=office.region, email="override@example.com",).save()
+
+    contact_info = get_absentee_contact_info(office.region.external_id)
+
+    assert contact_info == AbsenteeContactInfo(
+        address=correct_addr,
+        email="override@example.com",
+        phone=correct_addr.phone,
+        fax=correct_addr.fax,
     )

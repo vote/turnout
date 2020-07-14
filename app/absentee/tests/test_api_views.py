@@ -488,28 +488,70 @@ def test_complete_update(
 
 
 @pytest.mark.parametrize(
-    "flag,email_allowed,fax_allowed,email_contact,fax_contact,expected",
+    "flag,email_allowed,fax_allowed,email_contact,fax_contact,submission_override,expected",
     [
         # Flag on, email and fax allowed, both contact infos -> email
-        (True, True, True, True, True, SubmissionType.LEO_EMAIL),
+        (True, True, True, True, True, None, SubmissionType.LEO_EMAIL),
         # Flag off, email and fax allowed, both contact info -> self-print
-        (False, True, True, True, True, SubmissionType.SELF_PRINT),
+        (False, True, True, True, True, None, SubmissionType.SELF_PRINT),
         # Flag on, email and fax allowed, only fax number -> fax
-        (True, True, True, False, True, SubmissionType.LEO_FAX),
+        (True, True, True, False, True, None, SubmissionType.LEO_FAX),
         # Flag on, email and fax allowed, no contact -> self-print
-        (True, True, True, False, False, SubmissionType.SELF_PRINT),
+        (True, True, True, False, False, None, SubmissionType.SELF_PRINT),
         # Flag on, email allowed, fax number -> self-print
-        (True, True, None, False, True, SubmissionType.SELF_PRINT),
+        (True, True, None, False, True, None, SubmissionType.SELF_PRINT),
         # Flag on, fax allowed, email and fax number -> fax
-        (True, None, True, True, True, SubmissionType.LEO_FAX),
+        (True, None, True, True, True, None, SubmissionType.LEO_FAX),
         # Flag on, email allowed, email -> email
-        (True, True, None, True, False, SubmissionType.LEO_EMAIL),
+        (True, True, None, True, False, None, SubmissionType.LEO_EMAIL),
         # Flag on, nothing allowed, both contact infos -> self-print
-        (True, None, None, True, True, SubmissionType.SELF_PRINT),
+        (True, None, None, True, True, None, SubmissionType.SELF_PRINT),
         # Flag on, email and fax explicitly disallowed, both contact infos -> self-print
-        (True, False, False, True, True, SubmissionType.SELF_PRINT),
+        (True, False, False, True, True, None, SubmissionType.SELF_PRINT),
         # Flag on, email disallowed, fax allowed, both contact infos -> fax
-        (True, False, True, True, True, SubmissionType.LEO_FAX),
+        (True, False, True, True, True, None, SubmissionType.LEO_FAX),
+        # Flag on, email and fax allowed, both contact infos, fax override -> fax
+        (True, True, True, True, True, SubmissionType.LEO_FAX, SubmissionType.LEO_FAX),
+        # Flag on, email allowed, both contact infos, fax override -> self-print
+        (
+            True,
+            True,
+            False,
+            True,
+            True,
+            SubmissionType.LEO_FAX,
+            SubmissionType.SELF_PRINT,
+        ),
+        # Flag on, both allowed, only email, fax override -> self-print
+        (
+            True,
+            True,
+            True,
+            True,
+            False,
+            SubmissionType.LEO_FAX,
+            SubmissionType.SELF_PRINT,
+        ),
+        # Flag on, email allowed, only email, email override -> email
+        (
+            True,
+            True,
+            False,
+            True,
+            False,
+            SubmissionType.LEO_EMAIL,
+            SubmissionType.LEO_EMAIL,
+        ),
+        # Flag on, email and fax allowed, both contact infos, self-print override -> self-print
+        (
+            True,
+            True,
+            True,
+            True,
+            True,
+            SubmissionType.SELF_PRINT,
+            SubmissionType.SELF_PRINT,
+        ),
     ],
 )
 @pytest.mark.django_db
@@ -519,6 +561,7 @@ def test_get_esign_method(
     fax_allowed,
     email_contact,
     fax_contact,
+    submission_override,
     expected,
     mocker,
     mock_get_absentee_contact_info,
@@ -551,6 +594,8 @@ def test_get_esign_method(
         contact_info["email"] = "foo@example.com"
     if fax_contact:
         contact_info["fax"] = "+16175551234"
+    if submission_override:
+        contact_info["submission_method_override"] = submission_override
 
     mock_get_absentee_contact_info.return_value = AbsenteeContactInfo(**contact_info)
 

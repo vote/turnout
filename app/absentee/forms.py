@@ -8,13 +8,15 @@ from .models import LeoContactOverride
 class LeoContactOverrideManageUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["submission_method"].required = False
+        self.fields["submission_method"].label = "Override Submission Method"
         self.fields["email"].required = False
         self.fields["phone"].required = False
         self.fields["fax"].required = False
 
     class Meta(object):
         model = LeoContactOverride
-        fields = ["email", "phone", "fax"]
+        fields = ["submission_method", "email", "phone", "fax"]
 
 
 class LeoContactOverrideManageDeleteForm(forms.ModelForm):
@@ -29,10 +31,13 @@ class LeoContactOverrideManageCreateForm(forms.ModelForm):
         self.fields["region"].widget = forms.TextInput()
         self.fields["region"].label = "Region ID"
 
+        self.fields["submission_method"].required = False
+        self.fields["submission_method"].label = "Override Submission Method"
+
         self.fields["email"].required = False
         self.fields["phone"].required = False
         self.fields["fax"].required = False
 
     class Meta(object):
         model = LeoContactOverride
-        fields = ["region", "email", "phone", "fax"]
+        fields = ["region", "submission_method", "email", "phone", "fax"]
