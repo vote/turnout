@@ -116,6 +116,7 @@ FIRST_PARTY_APPS = [
     "reporting",
     "fax",
     "integration",
+    "reminder",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS

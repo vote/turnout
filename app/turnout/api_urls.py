@@ -12,4 +12,5 @@ urlpatterns = [
     path("subscriber/", include("multi_tenant.api_urls")),
     path("smsbot/", include("smsbot.api_urls")),
     path("fax/", include("fax.api_urls")),
+    path("reminder/", include("reminder.api_urls")),
 ]
