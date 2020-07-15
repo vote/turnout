@@ -69,6 +69,7 @@ PA_REGISTRATION_START = {
     "date_of_birth": "1944-05-02",
     "email": "sage@newdream.net",
     "party": "Democratic",
+    "state_fields": {},
 }
 
 PA_REGISTRATION_NODLSSNORSIG = {
@@ -88,25 +89,16 @@ PA_REGISTRATION_DL = {
     "is_18_or_over": True,
     "declaration": True,
     "state_id_number": "99007069",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "dl",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_SSN = {
     "us_citizen": True,
     "is_18_or_over": True,
     "declaration": True,
-    "ssn4": "0451",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "ssn",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_BADDL = {
@@ -114,18 +106,15 @@ PA_REGISTRATION_BADDL = {
     "declaration": True,
     "is_18_or_over": True,
     "state_id_number": "12345678",
-    "state_fields": {
-        "region_id": 432147,
-        "vbm_opt_in": False,
-        "id_type": "dl",
-        "federal_voter": False,
-    },
+    "state_id_number_2": "1234",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
 }
 
 PA_REGISTRATION_SIG = {
     "us_citizen": True,
     "is_18_or_over": True,
     "declaration": True,
+    "state_id_number_2": "1234",
     "state_fields": {
         "region_id": 432147,
         "vbm_opt_in": False,
@@ -434,6 +423,11 @@ def mock_region(mocker):
 
 
 @pytest.fixture
+def mock_geocode(mocker):
+    return mocker.patch("register.api_views.geocode_to_regions", return_value=[432147])
+
+
+@pytest.fixture
 def mock_ovrlib_session_dl(mocker):
     class FakeSession(object):
         def __init__(self, api_key, staging):
@@ -450,13 +444,14 @@ def mock_ovrlib_session_dl(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
+def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -473,13 +468,14 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
 
 
 @pytest.mark.django_db
-def test_pa_dl(mock_ovrlib_session_dl, mock_region):
+def test_pa_dl(mock_ovrlib_session_dl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -531,13 +527,14 @@ def mock_ovrlib_session_badssn(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_sig(mock_ovrlib_session_baddl, mock_region):
+def test_pa_sig(mock_ovrlib_session_baddl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)

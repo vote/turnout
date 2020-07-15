@@ -48,7 +48,16 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
         return Response(response)
 
-    def complete(self, serializer, action_object, state_id_number, is_18_or_over):
+    def complete(
+        self,
+        serializer,
+        action_object,
+        state_id_number,
+        state_id_number_2,
+        is_18_or_over,
+    ):
+        # NOTE: we drop state_id_number_2 on the floor here since only register needs it, and it overrides
+        # this method.
         serializer.validated_data["status"] = TurnoutActionStatus.PENDING
         action_object.save()
         if self.task:
@@ -75,6 +84,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         # do not pass is_18_or_over or state_id_number to model, we are not storing it
         is_18_or_over = serializer.validated_data.pop("is_18_or_over", None)
         state_id_number = serializer.validated_data.pop("state_id_number", None)
+        state_id_number_2 = serializer.validated_data.pop("state_id_number_2", None)
 
         serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
 
@@ -90,6 +100,12 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         if serializer.incomplete:
             action_object.action.track_event(enums.EventType.START)
         else:
-            self.complete(serializer, action_object, state_id_number, is_18_or_over)
+            self.complete(
+                serializer,
+                action_object,
+                state_id_number,
+                state_id_number_2,
+                is_18_or_over,
+            )
 
         return action_object
