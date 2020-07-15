@@ -34,6 +34,18 @@ mypy:
 test:
 	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest /app/ && mypy /app/"
 
+testpdf:
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False ABSENTEE_TEST_ONLY=${STATE} pytest /app/absentee/tests/test_pdf.py /app/absentee/tests/test_metadata.py"
+
+testpdfsigbox:
+	docker-compose exec server bash -c "mkdir -p absentee/management/commands/out && python manage.py sig_sample ${STATE} --box"
+
+testpdfsig:
+	docker-compose exec server bash -c "mkdir -p absentee/management/commands/out && python manage.py sig_sample ${STATE}"
+
+cacheofficials:
+	docker-compose exec server python manage.py cacheofficials
+
 lint:
 	docker-compose exec server bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \

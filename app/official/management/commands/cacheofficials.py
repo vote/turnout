@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from official.usvf_sync import sync
+from official.usvf import sync
 
 
 class Command(BaseCommand):

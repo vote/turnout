@@ -1,0 +1,19 @@
+pages: 1
+
+manual_fields:
+  - election_primary
+  - election_general
+  - election_all
+  - election_permanent
+  - party_democratic
+  - party_republican
+  - party_green
+  - party_nonpartisan
+  - address_change
+  - name_change
+  - previous_full_address
+  - previous_full_name
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date

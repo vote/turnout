@@ -209,13 +209,3 @@ If the user does not check the box, or there is no `slug`, the client should not
 
 Remember that if `slug` is `us_citizen` or `is_18_or_over`, you MUST pass this in the top-level API fields rather than in `state_fields`.
 
-### `election_date`
-
-The date of the election. It's up to the frontend how to fill this in: it could auto-fill with the
-next upcoming election, or render a dropdown of options, or just a text box.
-
-If this is the only block in a section, and the UI chooses not to render it (because it's being autofilled with the date of the next election, for example), the UI may choose to not render the whole section.
-
-### Election Date Data Representation
-
-`election_date` fields work just like `text` fields. The date must be formatted as `MM/DD/YYYY`.
