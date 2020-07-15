@@ -69,6 +69,7 @@ PA_REGISTRATION_START = {
     "date_of_birth": "1944-05-02",
     "email": "sage@newdream.net",
     "party": "Democratic",
+    "state_fields": {},
 }
 
 PA_REGISTRATION_NODLSSNORSIG = {
@@ -422,6 +423,11 @@ def mock_region(mocker):
 
 
 @pytest.fixture
+def mock_geocode(mocker):
+    return mocker.patch("register.api_views.geocode_to_regions", return_value=[432147])
+
+
+@pytest.fixture
 def mock_ovrlib_session_dl(mocker):
     class FakeSession(object):
         def __init__(self, api_key, staging):
@@ -438,13 +444,14 @@ def mock_ovrlib_session_dl(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
+def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -461,13 +468,14 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
 
 
 @pytest.mark.django_db
-def test_pa_dl(mock_ovrlib_session_dl, mock_region):
+def test_pa_dl(mock_ovrlib_session_dl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -519,13 +527,14 @@ def mock_ovrlib_session_badssn(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_sig(mock_ovrlib_session_baddl, mock_region):
+def test_pa_sig(mock_ovrlib_session_baddl, mock_region, mock_geocode):
     client = APIClient()
     register_response = client.post(
-        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START
+        REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
     )
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
+    assert register_response.json().get("state_api_regions") == [432147]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)

@@ -10,6 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 from action.mixin_apiview import IncompleteActionViewSet
 from common.enums import TurnoutActionStatus
 from integration.tasks import sync_registration_to_actionnetwork
+from official.api_views import geocode_to_regions
 from official.models import Region
 from smsbot.tasks import send_welcome_sms
 from storage.models import SecureUploadItem
@@ -27,6 +28,27 @@ class RegistrationViewSet(IncompleteActionViewSet):
     serializer_class = RegistrationSerializer
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
     task = process_registration_submission
+
+    def after_create_or_update(self, registration):
+        if (
+            registration.state_id == "PA"
+            and registration.state_fields is not None
+            and not registration.state_fields.get("region_id")
+        ):
+            regions = geocode_to_regions(
+                street=registration.address1,
+                city=registration.city,
+                state="PA",
+                zipcode=registration.zipcode,
+            )
+            if not regions:
+                queryset = Region.visible.filter(state__code="PA").order_by("name")
+                regions = []
+                for region in queryset:
+                    regions.append(region.external_id)
+            if not registration.state_api_result:
+                registration.state_api_result = {}
+            registration.state_api_result["regions"] = regions
 
     def process_pa_registration(
         self, registration, state_id_number, state_id_number_2, is_18_or_over
@@ -209,8 +231,17 @@ class RegistrationViewSet(IncompleteActionViewSet):
             "custom_ovr_link": action_object.custom_ovr_link,
         }
         if action_object.state_api_result:
-            response["state_api_status"] = action_object.state_api_result.get("status")
-            response["state_api_error"] = action_object.state_api_result.get("error")
+            if "status" in action_object.state_api_result:
+                response["state_api_status"] = action_object.state_api_result.get(
+                    "status"
+                )
+                response["state_api_error"] = action_object.state_api_result.get(
+                    "error"
+                )
+            if "regions" in action_object.state_api_result:
+                response["state_api_regions"] = action_object.state_api_result.get(
+                    "regions"
+                )
         return Response(response)
 
 
