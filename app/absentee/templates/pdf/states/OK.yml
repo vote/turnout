@@ -1,0 +1,18 @@
+pages: 2
+
+manual_fields:
+  - 1_absentee
+  - 1_incapacitated
+  - 1_confined
+  - election_all
+  - election_all_year
+  - election_single
+  - election_single_date
+  - incap_nursing_home
+  - nursing_home_name
+  - incap_phys
+  - incap_caregiver
+  - incap_agent
+  - dem_check
+  - dem_party
+  - agent_name
