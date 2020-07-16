@@ -1,0 +1,38 @@
+pages: 2
+
+auto_fields:
+  - type: todays_date
+    slug: date_signed
+
+manual_fields:
+  - no_ssn
+  - previous_full_name
+  - party_democratic
+  - party_republican
+  - party_nonpartisan
+  - excuse_1
+  - excuse_2
+  - excuse_3
+  - excuse_4
+  - excuse_5
+  - excuse_6
+  - excuse_7
+  - excuse_8
+  - excuse_9
+  - excuse_10
+  - excuse_11
+  - excuse_12
+  - assist_name
+  - assist_dob_1
+  - assist_dob_2
+  - assist_dob_3
+  - assist_address
+  - assist_city_state_zip
+  - assist_mailing_address
+  - assist_mailing_city_state_zip
+  - assist_date_signed
+  - election_month
+  - election_day
+  - state_id_number
+  - assist_tel_day
+  - assist_tel_evening
