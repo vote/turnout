@@ -72,6 +72,8 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
             "utm_content",
             "embed_url",
             "session_id",
+            "email_referrer",
+            "mobile_referrer",
             "signature",
             "submit_date",
         ]

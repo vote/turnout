@@ -38,6 +38,8 @@ VALID_LOOKUP = {
     "utm_content": "this-is-a-test",
     "utm_term": "voteamerica",
     "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
+    "email_referrer": "abcd123",
+    "mobile_referrer": "efgh456",
     "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
 }
 VALID_LOOKUP_ALLOY = {
@@ -218,10 +220,6 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     assert lookup.sms_opt_in_subscriber == False
     assert lookup.response == {"result": [], "too_many": False}
     assert lookup.action == action
-    assert (
-        lookup.embed_url
-        == "https://www.greatvoter.com/location/of/embed"
-    )
     assert lookup.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
     first_subscriber = Client.objects.first()
     assert lookup.subscriber == first_subscriber
@@ -250,6 +248,9 @@ def test_sourcing(requests_mock, mocker, smsbot_patch):
     assert lookup.utm_source == "django"
     assert lookup.utm_content == "this-is-a-test"
     assert lookup.utm_term == "voteamerica"
+    assert lookup.email_referrer == "abcd123"
+    assert lookup.mobile_referrer == "efgh456"
+    assert lookup.embed_url == "https://www.greatvoter.com/location/of/embed"
 
 
 @pytest.mark.django_db

@@ -50,6 +50,8 @@ VALID_REGISTRATION = {
     "race_ethnicity": "White",
     "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
     "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
+    "email_referrer": "abcd123",
+    "mobile_referrer": "efgh456",
 }
 REGISTER_API_ENDPOINT_INCOMPLETE = "/v1/registration/register/?incomplete=true"
 
@@ -193,6 +195,8 @@ def test_register_object_created(submission_task_patch):
     assert registration.action == Action.objects.first()
     assert registration.embed_url == "https://www.greatvoter.com/location/of/embed"
     assert registration.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
+    assert registration.email_referrer == "abcd123"
+    assert registration.mobile_referrer == "efgh456"
 
     first_subscriber = Client.objects.first()
     assert registration.subscriber == first_subscriber

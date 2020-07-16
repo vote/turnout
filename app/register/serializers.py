@@ -94,6 +94,8 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "utm_term",
             "utm_content",
             "embed_url",
+            "email_referrer",
+            "mobile_referrer",
             "session_id",
             "referring_tool",
             "state_fields",

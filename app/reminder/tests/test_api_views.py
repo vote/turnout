@@ -30,6 +30,8 @@ VALID_SIGNUP = {
     "utm_term": "voteamerica",
     "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
     "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
+    "email_referrer": "abcd123",
+    "mobile_referrer": "efgh456",
 }
 
 

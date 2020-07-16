@@ -41,4 +41,6 @@ class ReminderRequestSerializer(TrackingSerializer, ActionSerializer):
             "source",
             "embed_url",
             "session_id",
+            "email_referrer",
+            "mobile_referrer",
         ]

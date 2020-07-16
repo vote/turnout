@@ -28,6 +28,10 @@ class TrackingModel(models.Model):
     session_id = models.UUIDField(null=True, blank=True)
     source = models.TextField(null=True, blank=True)
 
+    # Fields needed for ActionNetwork email and SMS integration
+    email_referrer = models.TextField(null=True, blank=True)
+    mobile_referrer = models.TextField(null=True, blank=True)
+
     class Meta(object):
         abstract = True
 
