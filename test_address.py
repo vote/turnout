@@ -96,6 +96,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("500 holly st", "ashland", "OR", "97530", [{'name': 'Jackson County', 'external_id': 432109}]),
 
         # ma
+        ("52A St Paul St", "Brookline", "MA", "02446", [{"name":"Town of Brookline","external_id":431178}]),
         ("11 saddle club dr", "lexington", "MA", "02420", [{'name': 'Town of Lexington', 'external_id': 431274}]),
         ("175 Grove St", "Cambridge", "MA", "02138", [{'name': 'City of Cambridge', 'external_id': 431101}]),
         ("180 Grove St", "Belmont", "MA", "02138", [{'name': 'Town of Belmont', 'external_id': 431161}]),
@@ -103,7 +104,7 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("85 Treadwell Hollow Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
         ("554 Sloan Rd", "Williamstown", "MA", "01267", [{'external_id': 431441, 'name': 'Town of Williamstown'}]),
         ("po box 1", "HOUSATONIC", "MA", "01236", [{'name': 'Town of West Stockbridge', 'external_id': 431427}]),
-        ("69 pleasant st", "gardner", "MA", "01440", [{"name":"Ctiy of Gardner","external_id":431107}]),
+        ("69 pleasant st", "gardner", "MA", "01440", [{"name":"City of Gardner","external_id":431107}]),
 
         # mi
         ("301 S 5th St", "Grand Haven", "MI", "49417", [{'external_id': 435266, 'name': 'Grand Haven City, Ottawa County'}]),

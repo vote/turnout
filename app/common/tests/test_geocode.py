@@ -3,7 +3,12 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from rest_framework.test import APIClient
 
-from common.geocode import API_ENDPOINT, al_jefferson_county_bessemer_division, geocode
+from common.geocode import (
+    API_ENDPOINT,
+    al_jefferson_county_bessemer_division,
+    geocode,
+    strip_address_number_alpha_suffix,
+)
 
 
 def test_well_formed_request(requests_mock):
@@ -73,3 +78,17 @@ def test_well_formed_request(requests_mock):
 )
 def test_al_jefferson_county_bessemer_division(location, inside):
     assert al_jefferson_county_bessemer_division(location) == inside
+
+
+@pytest.mark.parametrize(
+    "before,after",
+    [
+        ("52A St Paul St", "52 St Paul St"),
+        ("123 A St", "123 A St"),
+        ("A St", "A St"),
+        ("A 50B St", "A 50B St"),
+    ],
+)
+def test_strip_address_number_alpha_suffix(before, after):
+    r = strip_address_number_alpha_suffix(before)
+    assert r == after

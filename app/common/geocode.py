@@ -1,4 +1,5 @@
 import logging
+import re
 from urllib.parse import urlencode
 
 import requests
@@ -14,6 +15,8 @@ from official.models import RegionGeomMA, RegionGeomWI
 
 API_ENDPOINT = "https://api.geocod.io/v1.5/geocode"
 
+ODD_STREET_NUMBER_RE = re.compile(r"^(\d+)[a-zA-Z]+$")
+
 
 logger = logging.getLogger("official")
 
@@ -26,6 +29,23 @@ class GISDataError(Exception):
     pass
 
 
+def strip_address_number_alpha_suffix(address):
+    """
+    Remove any alpha suffix from the street number ("40A St Paul St" ->
+    "40 St Paul St").  This works around some buggy address parsing at
+    geocod.io.
+    """
+    ls = address.split(" ")
+    if not ls:
+        return address
+    m = ODD_STREET_NUMBER_RE.match(ls[0])
+    if not m:
+        return address
+    # replace with integer prefix portion only
+    ls[0] = m[1]
+    return " ".join(ls)
+
+
 def geocode(**kwargs):
     RETRIES = 2
     TIMEOUT = 2.0
@@ -33,7 +53,10 @@ def geocode(**kwargs):
     args = {}
     for k in ["street", "city", "state", "q", "fields"]:
         if k in kwargs:
-            args[k] = kwargs[k]
+            if k == "street":
+                args[k] = strip_address_number_alpha_suffix(kwargs[k])
+            else:
+                args[k] = kwargs[k]
     if "zipcode" in kwargs:
         args["postal_code"] = kwargs["zipcode"]
     url = f"{API_ENDPOINT}?{urlencode({**args, 'api_key': settings.GEOCODIO_KEY})}"
