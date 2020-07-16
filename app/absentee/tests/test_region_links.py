@@ -10,9 +10,10 @@ from absentee.region_links import (
     ovbm_link_for_ballot_request,
     refresh_region_links,
 )
-from absentee.tests.fixtures.florida_regions import florida_regions
 from common.enums import StateFieldFormats
 from election.models import StateInformation, StateInformationFieldType
+
+from absentee.tests.fixtures.florida_regions import florida_regions  # isort:skip
 
 
 @pytest.mark.django_db(transaction=True)

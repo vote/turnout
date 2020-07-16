@@ -1,8 +1,6 @@
 import json
-import uuid
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.mail.backends.smtp import EmailBackend
 
 

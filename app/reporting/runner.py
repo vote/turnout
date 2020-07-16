@@ -1,18 +1,14 @@
 import csv
 from io import StringIO
-from operator import attrgetter
-from typing import Any, List, Tuple
+from typing import List, Tuple
 
 from django.core.files.base import ContentFile
 from django.db import connection
 from django.template.defaultfilters import slugify
 from django.utils.timezone import now
 
-from absentee.models import BallotRequest
 from common import enums
-from register.models import Registration
 from storage.models import StorageItem
-from verifier.models import Lookup
 
 from .models import Report
 

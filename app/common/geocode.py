@@ -54,9 +54,7 @@ def geocode(**kwargs):
                 extra=extra,
             )
             sentry_sdk.capture_exception(
-                GeocodioAPIError(
-                    f"Error querying {API_ENDPOINT}, exception {str(e)}"
-                )
+                GeocodioAPIError(f"Error querying {API_ENDPOINT}, exception {str(e)}")
             )
             return None
     if r.status_code != 200:

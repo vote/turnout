@@ -2,9 +2,9 @@ import re
 from typing import List, Optional
 
 import requests
+from bs4 import BeautifulSoup
 from django.db import transaction
 
-from bs4 import BeautifulSoup
 from election.models import StateInformation
 from official.models import Region
 
