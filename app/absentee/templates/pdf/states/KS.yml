@@ -1,0 +1,42 @@
+pages: 2
+
+auto_fields:
+  - slug: sign_date
+    type: todays_date
+  - slug: election_date
+    type: static
+    value: 11/03/2020
+
+manual_fields:
+  - middle_initial
+  - democratic
+  - republican
+
+signatures:
+  1:
+    x: 87
+    y: 125
+    width: 178
+    height: 37
+
+signature_statement: >
+  I do solemnly affirm under penalty of perjury that I am a qualified elector residing at the
+  address listed above, or I am authorized to sign for the above named voter who has a disability
+  preventing the voter from signing an application. I am entitled to vote an advance voting ballot
+  and I have not voted and will not otherwise vote at the election to be held on November 3, 2020
+  (date).
+
+form_fields:
+  - type: section
+    label: Election date
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
+  - type: section
+    label: Identification
+    note: >
+      A current and valid Kansas driver’s license number or Kansas nondriver’s identification card
+      number must be provided in order to receive a ballot.
+    content:
+      - type: text
+        label: Current Kansas driver’s license number or nondriver’s identification card number
+        slug: state_id_number
+        required: true
