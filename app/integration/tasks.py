@@ -29,6 +29,13 @@ def sync_registration_to_actionnetwork(pk: str) -> None:
 
 
 @shared_task
+def sync_reminderrequest_to_actionnetwork(pk: str) -> None:
+    from reminder.models import ReminderRequest
+
+    sync_item(ReminderRequest.objects.get(uuid=pk))
+
+
+@shared_task
 def sync_actionnetwork():
     sync()
 
@@ -46,3 +53,8 @@ def sync_actionnetwork_lookups():
 @shared_task
 def sync_actionnetwork_ballotrequests():
     sync_all_items(BallotRequest)
+
+
+@shared_task
+def sync_actionnetwork_reminderrequests():
+    sync_all_items(ReminderRequest)

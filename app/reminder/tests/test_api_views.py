@@ -60,7 +60,8 @@ def test_blank_api_request(requests_mock):
 
 
 @pytest.mark.django_db
-def test_reminder_object_created():
+def test_reminder_object_created(mocker):
+    mocker.patch("reminder.api_views.sync_reminderrequest_to_actionnetwork")
     client = APIClient()
     response = client.post(SIGNUP_API_ENDPOINT, VALID_SIGNUP)
     assert response.status_code == 200

@@ -1,9 +1,11 @@
+from django.conf import settings
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from election.models import State
+from integration.tasks import sync_reminderrequest_to_actionnetwork
 
 from .models import ReminderRequest
 from .serializers import ReminderRequestSerializer
@@ -26,5 +28,8 @@ class ReminderRequestViewSet(CreateModelMixin, GenericViewSet):
         instance = serializer.save()
 
         response = {"action_id": instance.action.pk}
+
+        if settings.ACTIONNETWORK_SYNC:
+            sync_reminderrequest_to_actionnetwork.delay(instance.uuid)
 
         return Response(response)

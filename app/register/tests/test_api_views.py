@@ -472,7 +472,9 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, mock_geocode):
 
 
 @pytest.mark.django_db
-def test_pa_dl(mock_ovrlib_session_dl, mock_region, mock_geocode):
+def test_pa_dl(
+    submission_task_patch, mock_ovrlib_session_dl, mock_region, mock_geocode
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -531,7 +533,9 @@ def mock_ovrlib_session_badssn(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_sig(mock_ovrlib_session_baddl, mock_region, mock_geocode):
+def test_pa_sig(
+    submission_task_patch, mock_ovrlib_session_baddl, mock_region, mock_geocode
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
