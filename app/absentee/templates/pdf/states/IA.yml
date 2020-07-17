@@ -1,0 +1,31 @@
+pages: 1
+
+manual_fields:
+    - drivers_license_number
+    - exclude_contact_voter_record
+    - drivers_license_number
+    - mailing_country
+    - voter_pin
+    - election_choice_general
+    - election_choice_primary
+    - election_choice_city_school
+    - election_choice_special
+    - election_choice_special_election_name
+    - political_party_democrat
+    - political_party_republican
+
+    # These are not in Acrobat but PDFTK gets caught on them
+    - "Driver&apos;s LIcenese 1"
+    - "Driver&apos;s LIcenese 2"
+    - "Driver&apos;s LIcenese 3"
+    - "Driver&apos;s LIcenese 4"
+    - "Driver&apos;s LIcenese 5"
+    - "Driver&apos;s LIcenese 6"
+    - "Driver&apos;s LIcenese 7"
+    - "Driver&apos;s LIcenese 8"
+    - "Driver&apos;s LIcenese 9"
+
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date
