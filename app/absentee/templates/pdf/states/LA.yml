@@ -1,0 +1,32 @@
+pages: 1
+
+auto_fields:
+  - slug: sig_date
+    type: todays_date
+
+manual_fields:
+  - mothers_maiden_name
+  - parish
+  - ssn4
+  - dl_num
+  - ward
+  - primary_election
+  - general_election
+  - reason1
+  - reason2
+  - reason3
+  - reason4
+  - reason5
+  - reason6
+  - reason7
+  - reason8
+  - reason9
+  - reason10
+  - reason11
+  - reason12
+  - this_election_only
+  - all_elections
+  - absent_from
+  - absent_thru
+  - submit_by
+  - relationship_to
