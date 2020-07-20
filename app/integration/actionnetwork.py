@@ -24,7 +24,7 @@ logger = logging.getLogger("integration")
 # actionnetwork ids must be lowercase, so we need both lower and CamelCase here
 ACTIONS = {
     "lookup": "Lookup",
-    "register": "Register",
+    "registration": "Registration",
     "ballotrequest": "BallotRequest",
     "reminderrequest": "ReminderRequest",
 }
