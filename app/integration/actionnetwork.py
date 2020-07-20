@@ -50,15 +50,15 @@ def get_api_key(subscriber_id):
     return settings.ACTIONNETWORK_KEY
 
 
-def get_form_ids(ids):
+def get_form_ids(ids, prefix):
     an_id = None
     va_action = None
     for gid in ids:
         (org, pid) = gid.split(":")
         if org == "action_network":
             an_id = pid
-        elif org == "voteamerica":
-            va_action = pid
+        elif org == "voteamerica" and pid.startswith(prefix + "_"):
+            va_action = pid[len(prefix) + 1 :]
     return an_id, va_action
 
 
@@ -78,6 +78,7 @@ def setup_action_forms(subscriber_id):
 
     logger.info(f"Fetching forms from ActionNetwork for subscriber {subscriber_id}")
     api_key = get_api_key(subscriber_id)
+    prefix = settings.ACTIONNETWORK_FORM_PREFIX
     forms = {}
     with tracer.trace("an.form", service="actionnetwork"):
         nexturl = FORM_ENDPOINT
@@ -85,7 +86,7 @@ def setup_action_forms(subscriber_id):
             logger.info(nexturl)
             response = requests.get(nexturl, headers={"OSDI-API-Token": api_key},)
             for form in response.json()["_embedded"]["osdi:forms"]:
-                an_id, va_action = get_form_ids(form["identifiers"])
+                an_id, va_action = get_form_ids(form["identifiers"], prefix)
                 if an_id and va_action:
                     forms[va_action] = an_id
             nexturl = response.json().get("_links", {}).get("next", {}).get("href")
@@ -93,18 +94,19 @@ def setup_action_forms(subscriber_id):
     for action, action_desc in ACTIONS.items():
         if action not in forms:
             # This code runs once per action, ever.
-            logger.info(f"Creating action form for {action_desc}")
+            logger.info(f"Creating action form for {action_desc} ({prefix})")
             with tracer.trace("an.form.create", service="actionnetwork"):
                 response = requests.post(
                     FORM_ENDPOINT,
                     headers={"OSDI-API-Token": api_key},
                     json={
-                        "identifiers": [f"voteamerica:{action}"],
-                        "title": f"VoteAmerica {action_desc}",
+                        "identifiers": [f"voteamerica:{prefix}_{action}"],
+                        "title": f"VoteAmerica {action_desc} ({prefix})",
                         "origin_system": "voteamerica",
                     },
                 )
-                an_id, va_action = get_form_ids(response.json()["identifiers"])
+                logger.info(response.json())
+                an_id, va_action = get_form_ids(response.json()["identifiers"], prefix)
                 if an_id and va_action:
                     forms[va_action] = an_id
 
