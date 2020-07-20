@@ -5,8 +5,7 @@ from common.analytics import statsd
 
 @shared_task
 @statsd.timed("turnout.multi_tenant.invite_notification")
-def send_invite_notifcation(invite_pk: str, subscriber_pk: str):
-    from .models import Client
+def send_invite_notification(invite_pk: str, subscriber_pk: str):
     from accounts.models import Invite
     from .notification import trigger_notification
 

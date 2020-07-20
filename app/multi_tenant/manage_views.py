@@ -27,7 +27,7 @@ from .forms import (
 )
 from .mixins_manage_views import SubscriberManageViewMixin
 from .models import Association, InviteAssociation
-from .tasks import send_invite_notifcation
+from .tasks import send_invite_notification
 
 logger = logging.getLogger("multi_tenant")
 
@@ -210,7 +210,7 @@ class ManagerInviteView(SuccessMessageMixin, SubscriberManageViewMixin, CreateVi
         invite.save()
         invite.clients.add(self.subscriber)
 
-        send_invite_notifcation.delay(invite.pk, self.subscriber.pk)
+        send_invite_notification.delay(invite.pk, self.subscriber.pk)
 
         messages.success(self.request, self.success_message % form.cleaned_data)
 
