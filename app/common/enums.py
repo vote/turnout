@@ -198,3 +198,11 @@ class SubmissionType(Enum, metaclass=EnumMeta):
 
 class ExternalToolType(Enum, metaclass=EnumMeta):
     ACTIONNETWORK = "actionnetwork"
+
+
+class SubscriberLeadStatus(Enum, metaclass=EnumMeta):
+    PENDING_C3_VERIFICATION = "pending_c3_verification"
+    PENDING_PAYMENT = "pending_payment"
+    APPROVED = "approved"
+    DENIED = "denied"
+    ABANDONED = "abandoned"

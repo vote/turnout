@@ -79,3 +79,23 @@ class InviteCreateForm(forms.ModelForm):
     class Meta:
         model = Invite
         fields: List[str] = ["email"]
+
+
+class SignupForm(forms.Form):
+    name = forms.CharField(required=True, label="Organization name",)
+    email = forms.EmailField(
+        required=True,
+        label="Contact Email",
+        help_text="Primary contact email address for this subscription",
+    )
+    slug = forms.CharField(
+        required=True,
+        label="Slug",
+        help_text="Short, alphanumeric identifier for your organization that will be included in URLs",
+    )
+    url = forms.URLField(
+        label="URL", required=False, help_text="URL for your organization's web site"
+    )
+    is_c3 = forms.BooleanField(
+        label="501(c)3", required=False, help_text="Check if you are a 501(c)3"
+    )

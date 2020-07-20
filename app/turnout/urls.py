@@ -27,4 +27,5 @@ urlpatterns = [
     path("manage/", include("manage.urls", namespace="manage")),
     path("account/", include("accounts.urls", namespace="accounts")),
     path("download/", include("storage.urls", namespace="storage")),
+    path("multi_tenant/", include("multi_tenant.urls", namespace="multi_tenant")),
 ]

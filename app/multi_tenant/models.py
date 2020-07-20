@@ -37,6 +37,11 @@ class Client(UUIDModel, TimestampModel):
     # this client.
     is_first_party = models.BooleanField(default=False)
 
+    active = models.BooleanField(null=True)
+    active_subscription = models.ForeignKey(
+        "multi_tenant.SubscriptionInterval", on_delete=models.SET_NULL, null=True
+    )
+
     class Meta:
         ordering = ["created_at"]
         verbose_name = "Subscriber"
@@ -79,6 +84,12 @@ class SubscriberSlug(UUIDModel, TimestampModel):
         return self.slug
 
 
+class SubscriptionInterval(UUIDModel, TimestampModel):
+    subscriber = models.ForeignKey(Client, on_delete=models.CASCADE)
+    begin = models.DateTimeField(null=True)
+    end = models.DateTimeField(null=True)
+
+
 class Association(UUIDModel, TimestampModel):
     client = models.ForeignKey("multi_tenant.Client", on_delete=models.CASCADE)
     user = models.ForeignKey("accounts.User", on_delete=models.CASCADE)
@@ -94,6 +105,23 @@ class SubscriberIntegrationProperty(UUIDModel, TimestampModel):
     external_tool = TurnoutEnumField(enums.ExternalToolType, null=True)
     name = models.TextField(null=True)
     value = models.TextField(null=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class SubscriberLead(UUIDModel, TimestampModel):
+    name = models.CharField(max_length=200)
+    url = models.URLField()
+    email = models.EmailField(max_length=254, null=True)
+    slug = models.CharField(max_length=40, null=True)
+
+    is_c3 = models.BooleanField(null=True)
+
+    status = TurnoutEnumField(enums.SubscriberLeadStatus, null=True)
+
+    subscriber = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True)
+    stripe_customer_id = models.TextField(null=True)
 
     class Meta:
         ordering = ["-created_at"]

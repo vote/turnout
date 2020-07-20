@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block body %}
+  <h1>Signup for VoteAmerica</h1>
+<p>Your signup is pending approval.</p>
+<p>{% if is_c3 %}
+  Once we confirm your 501(c)3 status, your account will be activated.
+  {% else %}
+  Once we confirm payment, your account will be activated.
+  {% endif %}
+</p>
+<p>
+  If you don't hear from us shortly, please contact <a href="mailto:info@voteamerica.com">info@voteamerica.com</a>.
+</p>
+{% endblock %}

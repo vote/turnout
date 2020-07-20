@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n two_factor crispy_forms_tags %}
+
+{% block body %}
+<div id="wrap" class="wrap">
+  {% block content_wrapper %}
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 offset-md-3 public-page-wrap">
+
+{% block content %}
+  <h1>Sign up for VoteAmerica</h1>
+  <p>Blah blah blah.</p>
+    
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary btn-block">Sign up</button>
+  </form>
+{% endblock %}
+
+        </div>
+      </div>
+    </div>
+  {% endblock %}
+</div>
+{% endblock %}
