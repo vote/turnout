@@ -2,3 +2,35 @@ pages: 1
 auto_fields:
   - slug: submit_date
     type: todays_date
+form_fields:
+  - type: section
+    label: Election date
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
+signature_statement: |
+  I certify that I reside at the address specified above, in the stated precinct
+  and county, that I have lived at such address for 30 days or more preceding
+  this election, that I am lawfully entitled to vote in such precinct at said
+  election to be held therein, and that I wish to vote by vote by mail ballot.
+
+  I hereby make application for an official ballot or ballots to be voted by me
+  at such election, and I agree that I shall return such ballot or ballots to
+  the official issuing the same prior to the closing of the polls on the date of
+  the election or, if returned by mail, postmarked no later than election day,
+  for counting no later than during the period for counting provisional ballots,
+  the last day of which is the 14th day following election day.
+
+  I understand that this application is made for an official vote by mail ballot
+  or ballots to be voted by me at the election specified in this application and
+  that I must submit a separate application for an official vote by mail ballot
+  or ballots to be voted by me at any subsequent election.
+
+  Under penalties as provided by law pursuant to 10 ILCS 5/29-10, the
+  undersigned certifies that the statements set forth in this application are
+  true and correct.
+
+signatures:
+  1:
+    x: 79
+    y: 145
+    width: 266
+    height: 32
