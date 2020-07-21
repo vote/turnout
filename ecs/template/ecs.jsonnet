@@ -3,7 +3,6 @@ local secrets = import 'include/secrets.libsonnet';
 
 local env = std.extVar('env');
 local capitalEnv = std.asciiUpper(env[0]) + env[1:];
-local migrations = std.extVar('migrations');
 
 {
   executionRoleArn: 'arn:aws:iam::719108811834:role/Turnout-ECS-' + capitalEnv,
@@ -38,14 +37,7 @@ local migrations = std.extVar('migrations');
           containerName: 'log_router',
           condition: 'START',
         },
-      ] + (
-        if !migrations then [] else [
-          {
-            containerName: 'migration',
-            condition: 'COMPLETE',
-          },
-        ]
-      ),
+      ],
       logConfiguration: {
         logDriver: 'awsfirelens',
         options: {
@@ -93,14 +85,7 @@ local migrations = std.extVar('migrations');
           containerName: 'log_router',
           condition: 'START',
         },
-      ] + (
-        if !migrations then [] else [
-          {
-            containerName: 'migration',
-            condition: 'COMPLETE',
-          },
-        ]
-      ),
+      ],
       logConfiguration: {
         logDriver: 'awsfirelens',
         options: {
@@ -147,14 +132,7 @@ local migrations = std.extVar('migrations');
           containerName: 'log_router',
           condition: 'START',
         },
-      ] + (
-        if !migrations then [] else [
-          {
-            containerName: 'migration',
-            condition: 'COMPLETE',
-          },
-        ]
-      ),
+      ],
       logConfiguration: {
         logDriver: 'awsfirelens',
         options: {
@@ -252,48 +230,7 @@ local migrations = std.extVar('migrations');
         },
       },
     },
-  ] + (
-    if !migrations then [] else [
-      {
-        image: 'nginx/nginx:latest',
-        name: 'migration',
-        command: ['ddtrace-run', 'python', 'manage.py', 'migrate'],
-        essential: false,
-        dependsOn: [
-          {
-            containerName: 'datadog-agent',
-            condition: 'START',
-          },
-          {
-            containerName: 'log_router',
-            condition: 'START',
-          },
-        ],
-        logConfiguration: {
-          logDriver: 'awsfirelens',
-          options: {
-            Name: 'datadog',
-            host: 'http-intake.logs.datadoghq.com',
-            dd_service: 'turnoutmigrate',
-            dd_source: 'djangomigrate',
-            dd_message_key: 'log',
-            dd_tags: 'env:prod',
-            TLS: 'on',
-            Host: 'http-intake.logs.datadoghq.com',
-            provider: 'ecs',
-          },
-          secretOptions: [
-            {
-              valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey',
-              name: 'apikey',
-            },
-          ],
-        },
-        environment: datadog.for_service('turnoutmigrate', env),
-        secrets: secrets.for_env(env),
-      },
-    ]
-  ),
+  ],
   memory: '8192',
   requiresCompatibilities: ['FARGATE'],
   networkMode: 'awsvpc',
