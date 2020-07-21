@@ -287,6 +287,7 @@ def test_prepare_formdata_auto_conditional(mocker):
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
         "absentee.ballot_request",
+        email="foo@example.com",
         region=addr.office.region,
         state=state,
         date_of_birth=datetime.date(1992, 5, 10),
@@ -307,6 +308,15 @@ def test_prepare_formdata_auto_conditional(mocker):
                         },
                         "fill": {"slug": "filled_field", "value": "filled_value"},
                     },
+                    # This one should activate
+                    {
+                        "type": "conditional",
+                        "condition": {
+                            "slug": "state_field_foo",
+                            "value": "state_field_foo_val",
+                        },
+                        "fill": {"slug": "filled_field_2", "value_from": "email"},
+                    },
                     # This one should be ignored
                     {
                         "type": "conditional",
@@ -323,7 +333,7 @@ def test_prepare_formdata_auto_conditional(mocker):
                             "slug": "state_field_other",
                             "value": "state_field_bar_val",
                         },
-                        "fill": {"slug": "wrong_fill_2", "value": "wrong_val"},
+                        "fill": {"slug": "wrong_fill_2", "value_from": "email"},
                     },
                 ]
             }
@@ -334,6 +344,7 @@ def test_prepare_formdata_auto_conditional(mocker):
 
     assert form_data["state_field_foo"] == "state_field_foo_val"
     assert form_data["filled_field"] == "filled_value"
+    assert form_data["filled_field_2"] == "foo@example.com"
     assert form_data.get("wrong_fill") is None
     assert form_data.get("wrong_fill_2") is None
 

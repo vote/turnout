@@ -106,6 +106,35 @@ def test_copy_targets(state):
         ), f"In auto_field {auto_field['slug']}, copy target {auto_field['field']} is not a valid field"
 
 
+@pytest.mark.parametrize("state", STATES_WITH_METADATA)
+@pytest.mark.django_db
+def test_conditional_targets(state):
+    state_data = STATE_DATA[state]
+
+    # Valid targets for a "copy" are the fields from form_fields, as well
+    # as all of the automatic fields we fill from the BallotRequest record
+    _, record_filled_fields = make_test_data()
+
+    slugs = [
+        s
+        for s in each_slug(
+            state_data, include_auto_fields=False, include_manual_fields=False
+        )
+    ] + list(record_filled_fields.keys())
+
+    for auto_field in state_data.get("auto_fields", []):
+        # Only looking at copy fields
+        if auto_field["type"] != "conditional":
+            continue
+
+        if not auto_field["fill"].get("value_from"):
+            continue
+
+        assert (
+            auto_field["fill"]["value_from"] in slugs
+        ), f"In auto_field {auto_field['fill']['slug']}, value_from target {auto_field['fill']['value_from']} is not a valid field"
+
+
 # Make sure the fields in the YAML match the fields in the PDF
 @pytest.mark.parametrize("state", STATES_WITH_METADATA)
 @pytest.mark.django_db

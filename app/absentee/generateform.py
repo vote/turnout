@@ -223,7 +223,14 @@ def prepare_formdata(
                     form_data.get(auto_field["condition"]["slug"])
                     == auto_field["condition"]["value"]
                 ):
-                    form_data[auto_field["fill"]["slug"]] = auto_field["fill"]["value"]
+                    if auto_field["fill"].get("value"):
+                        form_data[auto_field["fill"]["slug"]] = auto_field["fill"][
+                            "value"
+                        ]
+                    else:
+                        form_data[auto_field["fill"]["slug"]] = form_data.get(
+                            auto_field["fill"]["value_from"]
+                        )
             else:
                 raise RuntimeError(f"Invalid auto_field type: {auto_type}")
 

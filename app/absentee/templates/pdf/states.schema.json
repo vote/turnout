@@ -185,13 +185,26 @@
                 }
               },
               "fill": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["slug", "value"],
-                "properties": {
-                  "slug": { "type": "string" },
-                  "value": {}
-                }
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["slug", "value"],
+                    "properties": {
+                      "slug": { "type": "string" },
+                      "value": {}
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["slug", "value_from"],
+                    "properties": {
+                      "slug": { "type": "string" },
+                      "value_from": { "type": "string" }
+                    }
+                  }
+                ]
               }
             }
           }
