@@ -1,0 +1,50 @@
+pages: 1
+
+signatures:
+  1:
+    x: 144
+    y: 410
+    width: 295
+    height: 25
+
+signature_statement: "I do solemnly affirm that I have resided or will reside in the precinct, where my residential voting address is located, for at least thirty days next preceding the election and will be a qualified elector of the precinct."
+
+auto_fields:
+  - type: todays_date
+    slug: date_signed
+  - type: static
+    slug: election_general
+    value: On
+
+manual_fields:
+  - id_long_term_care
+  - id_none
+  - election_primary
+  - election_all
+  - election_city
+  - election_special
+  - election_school
+
+form_fields:
+  - type: section
+    label: Election date
+    note: This form will request an absentee ballot for the Nov. 3 General Election
+  - type: section
+    label: Identification
+    content:
+      - type: radio
+        label: North Dakota ID Type
+        required: true
+        options:
+          - label: Driver's License
+            slug: id_driver
+          - label: Non-driver's ID
+            slug: id_nondriver
+          - label: Tribal ID
+            slug: id_tribal_id
+          - label: Passport or Military ID (only for voters outside the United States)
+            slug: id_passport
+      - type: text
+        label: ID Number
+        required: true
+        slug: state_id_number
