@@ -32,11 +32,23 @@ form_fields:
     note: This form will request a ballot for the General Election on Nov. 3, 2020.
   - type: section
     label: Identification
-    note: >
-      A current and valid Kansas driver’s license number or Kansas nondriver’s identification card
-      number must be provided in order to receive a ballot.
     content:
-      - type: text
-        label: Current Kansas driver’s license number or nondriver’s identification card number
-        slug: state_id_number
+      - type: radio
+        label: Do you have a Kansas driver’s license or nondriver’s identification card?
         required: true
+        options:
+        - label: "Yes"
+          slug: drivers_license_yes
+          default: true
+          conditional:
+          - type: text
+            label: Current Kansas driver’s license number or nondriver’s identification card number
+            slug: state_id_number
+            required: true
+        - label: "No"
+          slug: drivers_license_no
+          blocks_esign: true
+
+virtual_fields:
+  - drivers_license_yes
+  - drivers_license_no

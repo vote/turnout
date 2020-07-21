@@ -36,6 +36,7 @@
               "slug": { "type": "string" },
               "value": { "type": "string" },
               "default": { "type": "boolean" },
+              "blocks_esign": { "type": "boolean" },
               "conditional": {
                 "type": "array",
                 "items": {
@@ -212,6 +213,12 @@
       }
     },
     "manual_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "virtual_fields": {
       "type": "array",
       "items": {
         "type": "string"

@@ -157,7 +157,9 @@ def test_slugs_match_pdf(state):
     pdf_fields = PyPDFTK().dump_data_fields(
         os.path.join(os.path.dirname(__file__), f"../templates/pdf/states/{state}.pdf")
     )
-    pdf_slugs = [f["FieldName"][0] for f in pdf_fields]
+    pdf_slugs = [f["FieldName"][0] for f in pdf_fields] + state_data.get(
+        "virtual_fields", []
+    )
 
     # state_id_number_opt_* fields get filled in by state_id_number -- so if
     # a state_id_number_opt_* is in the PDF, state_id_number is effectively in
