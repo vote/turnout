@@ -1,0 +1,41 @@
+pages: 1
+
+manual_fields:
+  - party
+
+auto_fields:
+  - type: static
+    slug: election_general
+    value: true
+  - type: static
+    slug: election_primary
+    value: false
+  - type: todays_date
+    slug: date_signed
+
+form_fields:
+  - type: section
+    label: Election date
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
+  - type: section
+    label: Active duty military
+    content:
+    - type: radio
+      label: Are you on active duty with the military?
+      slug: military
+      required: true
+      options:
+      - label: "No"
+        value: "No"
+        default: true
+      - label: "Yes"
+        value: "Yes"
+
+signatures:
+  1:
+    x: 0
+    y: 175
+    width: 350
+    height: 35
+
+signature_statement: I hereby state that I am a registered voter and entitled to vote in the General Election on Nov. 3, 2020.
