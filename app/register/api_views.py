@@ -42,13 +42,16 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 zipcode=registration.zipcode,
             )
             if not regions:
-                queryset = Region.visible.filter(state__code="PA").order_by("name")
                 regions = []
-                for region in queryset:
-                    regions.append(region.external_id)
+                for region in Region.visible.filter(state__code="PA").order_by("name"):
+                    regions.append(region)
             if not registration.state_api_result:
                 registration.state_api_result = {}
-            registration.state_api_result["regions"] = regions
+            registration.state_api_result["regions"] = [
+                {
+                    "external_id": region.external_id,
+                    "name": region.name,
+                } for region in regions]
 
     def process_pa_registration(
         self, registration, state_id_number, state_id_number_2, is_18_or_over
