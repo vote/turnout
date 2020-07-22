@@ -71,6 +71,7 @@ PA_REGISTRATION_START = {
     "date_of_birth": "1944-05-02",
     "email": "sage@newdream.net",
     "party": "Democratic",
+    "gender": "Female",
     "state_fields": {},
 }
 

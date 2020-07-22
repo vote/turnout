@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from action.mixin_apiview import IncompleteActionViewSet
-from common.enums import TurnoutActionStatus
+from common.enums import TurnoutActionStatus, RegistrationGender
 from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import geocode_to_regions
 from official.models import Region
@@ -81,7 +81,6 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "mailing_city",
                 "mailing_state",
                 "mailing_zipcode",
-                "gender",
             ]
         }
         if state_id_number:
@@ -147,11 +146,17 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 return a
             return a + " " + b
 
+        if registration.gender in [RegistrationGender.MALE, RegistrationGender.FEMALE]:
+            gender = str(registration.gender).lower()
+        else:
+            gender = 'unknown'
+
         session = ovrlib.pa.PAOVRSession(
             api_key=settings.PA_OVR_KEY, staging=settings.PA_OVR_STAGING
         )
         req = ovrlib.pa.PAOVRRequest(
             **r,
+            gender=gender,
             party=str(registration.party),
             mailing_address=combine_addr(
                 registration.mailing_address1, registration.mailing_address2
