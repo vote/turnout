@@ -1,0 +1,15 @@
+.region-coverage {
+  font-weight: bold;
+  font-size: 120%;
+  margin-bottom: 10px;
+}
+
+.container {
+  max-width: inherit;
+  width: 100%;
+}
+
+.table-responsive-lg table.dataTable thead th {
+  position: sticky;
+  top: 0;
+}

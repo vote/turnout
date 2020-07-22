@@ -1,3 +1,5 @@
+import math
+
 import reversion
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -94,6 +96,7 @@ class LeoContactOverride(TimestampModel):
     email = models.EmailField(null=True)
     phone = PhoneNumberField(null=True)
     fax = PhoneNumberField(null=True)
+    notes = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ["region__state__code", "region__name"]
@@ -107,3 +110,71 @@ class RegionOVBMLink(TimestampModel):
 
     class Meta:
         ordering = ["region__state__code", "region__name"]
+
+
+class RegionEsignMethod(models.Model):
+    region = models.OneToOneField(
+        "official.Region",
+        on_delete=models.DO_NOTHING,
+        primary_key=True,
+        related_name="esign",
+    )
+
+    state = models.ForeignKey("election.State", on_delete=models.DO_NOTHING)
+
+    has_override = models.BooleanField()
+    submission_method = TurnoutEnumField(enums.SubmissionType)
+
+    class Meta:
+        managed = False
+        ordering = ["state_id", "region__name"]
+
+
+class StateDashboardData(models.Model):
+    state = models.OneToOneField(
+        "election.State",
+        on_delete=models.DO_NOTHING,
+        primary_key=True,
+        related_name="absentee_dashboard_data",
+    )
+
+    has_statewide_link = models.BooleanField()
+    num_region_links = models.IntegerField()
+    fax_allowed = models.BooleanField()
+    email_allowed = models.BooleanField()
+    num_regions = models.IntegerField()
+    num_regions_email = models.IntegerField()
+    num_regions_fax = models.IntegerField()
+    num_regions_self_print = models.IntegerField()
+    num_regions_with_override = models.IntegerField()
+
+    def region_coverage_percentage(self):
+        return "%.1d%%" % (
+            math.floor(
+                (self.num_regions_email + self.num_regions_fax) / self.num_regions * 100
+            )
+        )
+
+    class Meta:
+        managed = False
+        ordering = ["state_id"]
+
+
+class EsignSubmitStats(models.Model):
+    region = models.OneToOneField(
+        "official.Region",
+        on_delete=models.DO_NOTHING,
+        primary_key=True,
+        related_name="esign_stats",
+    )
+
+    state = models.ForeignKey("election.State", on_delete=models.DO_NOTHING)
+
+    emails_sent_7d = models.IntegerField()
+    faxes_sent_7d = models.IntegerField()
+    emails_sent_1d = models.IntegerField()
+    faxes_sent_1d = models.IntegerField()
+
+    class Meta:
+        managed = False
+        ordering = ["state_id", "region__name"]

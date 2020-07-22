@@ -6,6 +6,7 @@
   "dependencies": {
     "@mdi/font": "^4.7.95",
     "bootstrap": "^4.4.1",
+    "datatables.net-bs4": "^1.10.21",
     "file-loader": "^5.0.2",
     "jquery": "^3.4.1",
     "popper.js": "^1.16.0",

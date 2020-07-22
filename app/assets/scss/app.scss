@@ -38,6 +38,7 @@
 //@import "~bootstrap/scss/carousel";
 @import "~bootstrap/scss/utilities";
 //@import "~bootstrap/scss/print";
+@import "~datatables.net-bs4/css/dataTables.bootstrap4.css";
 
 @import "common/sticky-footer";
 @import "common/base";
@@ -62,6 +63,10 @@
     @import "manage/election";
 }
 
+.esign_dashboard {
+    @import "manage/esign_dashboard";
+}
+
 .api_browse {
     @import "api/api";
 }
@@ -73,3 +78,5 @@ $simple-line-font-path: "~simple-line-icons/fonts/";
 @import "~simple-line-icons/scss/simple-line-icons";
 
 @import "~simplemde/dist/simplemde.min.css";
+
+

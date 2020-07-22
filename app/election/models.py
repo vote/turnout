@@ -29,11 +29,6 @@ class State(TimestampModel):
         "StateInformationFieldType", through="StateInformation"
     )
 
-    # TODO: remove this field
-    vbm_submission_type = TurnoutEnumField(
-        enums.SubmissionType, default=enums.SubmissionType.SELF_PRINT, null=True
-    )
-
     class Meta(object):
         ordering = ["code"]
 

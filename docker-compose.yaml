@@ -29,7 +29,7 @@ services:
     entrypoint: wait-for-it postgres:5432 redis:6379 --
     command: watchmedo auto-restart --directory /app/ --pattern=*.yml --recursive -- python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./app:/app
+      - ./app:/app:cached
     ports:
       - "9001:8000"
     environment:

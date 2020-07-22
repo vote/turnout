@@ -11,3 +11,6 @@ class Event(UUIDModel, TimestampModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["event_type", "created_at"]),
+        ]

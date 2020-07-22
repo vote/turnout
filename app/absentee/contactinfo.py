@@ -62,17 +62,20 @@ def absentee_address_score(addr: Address) -> int:
         return 3
 
 
-def get_absentee_contact_info(region_external_id: int) -> AbsenteeContactInfo:
+def get_absentee_contact_info(
+    region_external_id: int, skip_overrides=False
+) -> AbsenteeContactInfo:
     contact_info = AbsenteeContactInfo()
 
-    try:
-        override = LeoContactOverride.objects.get(pk=region_external_id)
-        contact_info.email = override.email
-        contact_info.fax = override.fax
-        contact_info.phone = override.phone
-        contact_info.submission_method_override = override.submission_method
-    except LeoContactOverride.DoesNotExist:
-        pass
+    if not skip_overrides:
+        try:
+            override = LeoContactOverride.objects.get(pk=region_external_id)
+            contact_info.email = override.email
+            contact_info.fax = override.fax
+            contact_info.phone = override.phone
+            contact_info.submission_method_override = override.submission_method
+        except LeoContactOverride.DoesNotExist:
+            pass
 
     office_addresses = sorted(
         Address.objects.filter(office__region__external_id=region_external_id),

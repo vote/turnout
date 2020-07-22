@@ -4,12 +4,18 @@
 {% block title %}{{ leo_contact_override.region.name }} | {{ block.super }}{% endblock title %}
 
 {% block content %}
+{% add_data "body-class" "esign_dashboard" %}
 <div class="content-wrapper">
-    <div class="col-lg-12">
+    <div class="col-lg-10 offset-lg-1">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'manage:absentee_override:leo_contact_override_list' %}">LEO Contact Overrides</a></li>
                 <li class="breadcrumb-item">
+                    <a href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">States</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.code %}">{{ state }} Regions</a>
+                </li>
+                <li class="breadcrumb-item active">
                   {{ leo_contact_override.region.name }}
                 </li>
             </ol>
@@ -19,11 +25,11 @@
             <div class="card-header card-header-with-actions">
                 <div>{{ leo_contact_override.region.name }} ( {{ leo_contact_override.pk }} )</div>
                 <div class="card-header-actions">
-                    <a title="Edit" href="{% url 'manage:absentee_override:leo_contact_override_update' leo_contact_override.pk %}">
+                    <a title="Edit" href="{% url 'manage:absentee_dashboard:leo_contact_override_update' state=state.code pk=leo_contact_override.pk %}">
                         <span class="mdi mdi-pencil"></span>
                         Edit
                     </a>
-                    <a title="Edit" href="{% url 'manage:absentee_override:leo_contact_override_delete' leo_contact_override.pk %}">
+                    <a title="Edit" href="{% url 'manage:absentee_dashboard:leo_contact_override_delete' state=state.code pk=leo_contact_override.pk %}">
                         <span class="mdi mdi-delete"></span>
                         Delete
                     </a>
@@ -36,23 +42,29 @@
                 <table class="table">
                     <thead>
                         <th>Contact Method</th>
+                        <th>USVF Value</th>
                         <th>Override Value</th>
                     </thead>
                     <tbody>
                     <tr>
                         <td>Email</td>
+                        <td>{{ usvf_data.email }}</td>
                         <td>{{ leo_contact_override.email }}</td>
                     </tr>
                     <tr>
                         <td>Phone</td>
+                        <td>{{ usvf_data.phone }}</td>
                         <td>{{ leo_contact_override.phone }}</td>
                     </tr>
                     <tr>
                         <td>Fax</td>
+                        <td>{{ usvf_data.fax }}</td>
                         <td>{{ leo_contact_override.fax }}</td>
                     </tr>
                     </tbody>
                 </table>
+                <h5 style="margin-top: 20px">Notes</h5>
+                <p>{{ leo_contact_override.notes | linebreaks }}</p>
             </div>
         </div>
     </div>

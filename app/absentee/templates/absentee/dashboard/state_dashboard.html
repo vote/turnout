@@ -1,0 +1,65 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}List of E-Sign States | {{ block.super }}{% endblock title %}
+
+{% block content %}
+{% add_data "body-class" "esign_dashboard" %}
+<div class="content-wrapper">
+    <div class="col-lg-10 offset-lg-1">
+        <h1>E-Sign States</h1>
+        <!-- Table -->
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th>Region Coverage</th>
+                        <th>Overrides</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for state in states %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.state.code %}">{{ state.state }}</a>
+                        </td>
+                        <td>
+                            <div class="region-coverage">{{ state.region_coverage_percentage }}</div>
+                            <div>
+                                <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.state.code %}?filter=leo_email">
+                                    {{ state.num_regions_email }}/{{state.num_regions}} Email
+                                </a>
+                            </div>
+                            <div>
+                                <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.state.code %}?filter=leo_fax">
+                                    {{ state.num_regions_fax }}/{{state.num_regions}} Fax
+                                </a>
+                            </div>
+                            <div>
+                                <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.state.code %}?filter=self_print">
+                                    {{ state.num_regions_self_print }}/{{state.num_regions}} Self-Print
+                                </a>
+                            </div>
+                        </td>
+                        <td>
+                            {% if state.num_regions_with_override > 0 %}
+                                <a href="{% url 'manage:absentee_dashboard:esign_region_dashboard' pk=state.state.code %}?overrides_only=1">
+                                    {{ state.num_regions_with_override }} Overrides
+                                </a>
+                            {% else %}
+                                {{ state.num_regions_with_override }} Overrides
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        {% include "management/inc/pagination.html" %}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

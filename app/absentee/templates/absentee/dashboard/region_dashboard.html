@@ -1,0 +1,112 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}{{state}} Regions | {{ block.super }}{% endblock title %}
+
+{% block content %}
+{% add_data "body-class" "esign_dashboard" %}
+<div class="content-wrapper">
+    <div class="col-lg-10 offset-lg-1">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">States</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">{{ state.name }} Regions</li>
+            </ol>
+        </nav>
+        <h1>{{state}} Regions</h1>
+        <p>
+            Emails sent, last 24 hours: <strong>{{ total_stats.emails_sent_1d }}</strong><br />
+            Faxes sent, last 24 hours: <strong>{{ total_stats.faxes_sent_1d }}</strong><br />
+            Emails sent, last 7 days: <strong>{{ total_stats.emails_sent_7d }}</strong><br />
+            Faxes sent, last 7 days: <strong>{{ total_stats.faxes_sent_7d }}</strong><br />
+        </p>
+        <form class="form-inline" action="" method="get">
+            <div class="form-check form-check-inline">
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input" type="radio" name="filter" id="filter_all" value="all"
+                        {% if request.GET.filter == "all" or not request.GET.filter %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="filter_all">All</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input" type="radio" name="filter" id="filter_email" value="leo_email"
+                        {% if request.GET.filter == "leo_email" %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="filter_email">LEO Email</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input" type="radio" name="filter" id="filter_fax" value="leo_fax"
+                        {% if request.GET.filter == "leo_fax" %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="filter_fax">LEO Fax</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input" type="radio" name="filter" id="filter_self_print" value="self_print"
+                        {% if request.GET.filter == "self_print" %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="filter_self_print">Print at Home</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input
+                        class="form-check-input" type="checkbox" id="overrides_only" name="overrides_only" value="1"
+                        {% if request.GET.overrides_only %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="overrides_only">Overrides Only</label>
+                  </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-small mb-2">Filter</button>
+        </form>
+        <!-- Table -->
+        <div class="table-responsive-lg">
+            <table class="table esign-regions-datatable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Submission Method</th>
+                        <th>Emails Sent (24h)</th>
+                        <th>Faxes Sent (24h)</th>
+                        <th>Emails Sent (7d)</th>
+                        <th>Faxes Sent (7d)</th>
+                        <th>Override</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for region in regions %}
+                    <tr>
+                        <td>
+                            {{ region.region.name }}
+                        </td>
+                        <td>
+                            {{ region.submission_method }}
+                        </td>
+                        <td>{{ region.region.esign_stats.emails_sent_1d }}</td>
+                        <td>{{ region.region.esign_stats.faxes_sent_1d }}</td>
+                        <td>{{ region.region.esign_stats.emails_sent_7d }}</td>
+                        <td>{{ region.region.esign_stats.faxes_sent_7d }}</td>
+                        <td>
+                            {% if region.has_override %}
+                                <a href="{% url 'manage:absentee_dashboard:leo_contact_override_detail' state=state.code pk=region.region_id %}">View Override &raquo;</a>
+                            {% else %}
+                                No Override,
+                                <a href="{% url 'manage:absentee_dashboard:leo_contact_override_create' state=state.code pk=region.region_id %}">
+                                    Create One &raquo;
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        {% include "management/inc/pagination.html" %}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -3,9 +3,10 @@ from model_bakery import baker
 from rest_framework.test import APIClient
 
 from absentee.contactinfo import AbsenteeContactInfo
-from absentee.models import BallotRequest
+from absentee.models import BallotRequest, LeoContactOverride, RegionEsignMethod
 from common.enums import StateFieldFormats, SubmissionType
 from election.models import StateInformation, StateInformationFieldType
+from official.models import Address, Office
 
 ABSENTEE_API_ENDPOINT_INCOMPLETE = (
     "/v1/absentee/request/?incomplete=true&match_region=true"
@@ -564,7 +565,6 @@ def test_get_esign_method(
     submission_override,
     expected,
     mocker,
-    mock_get_absentee_contact_info,
     mock_get_regions_for_address,
 ):
     set_feature_flag(mocker, flag)
@@ -585,19 +585,38 @@ def test_get_esign_method(
 
     # Set mock contact info
     mock_get_regions_for_address.return_value = (
-        [baker.make_recipe("official.region", external_id=12345)],
+        [baker.make_recipe("official.region", external_id=12345, state_id="MA")],
         False,
     )
 
-    contact_info = {}
-    if email_contact:
-        contact_info["email"] = "foo@example.com"
-    if fax_contact:
-        contact_info["fax"] = "+16175551234"
     if submission_override:
-        contact_info["submission_method_override"] = submission_override
+        # set up the submission_override
+        props = {
+            "region_id": 12345,
+            "submission_method": submission_override,
+        }
 
-    mock_get_absentee_contact_info.return_value = AbsenteeContactInfo(**contact_info)
+        if email_contact:
+            props["email"] = "foo@example.com"
+
+        if fax_contact:
+            props["fax"] = "+16175551234"
+
+        LeoContactOverride(**props).save()
+    else:
+        # set up USVF contact info
+        office = Office(region_id=12345, external_id=67890)
+        office.save()
+
+        address = Address(office=office, external_id=11111)
+
+        if email_contact:
+            address.email = "foo@example.com"
+
+        if fax_contact:
+            address.fax = "+16175551234"
+
+        address.save()
 
     # Run the test!
     client = APIClient()
@@ -607,3 +626,8 @@ def test_get_esign_method(
     ballot_request = BallotRequest.objects.first()
 
     assert ballot_request.esign_method == expected
+
+    # Also check the view -- ensure the view logic matches the python logic
+    if flag:
+        esign_method_record = RegionEsignMethod.objects.get(region_id=12345)
+        assert esign_method_record.submission_method == expected
