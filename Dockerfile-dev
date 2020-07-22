@@ -8,6 +8,8 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
     apt-get install -y nodejs pdftk-java imagemagick ghostscript wait-for-it gdal-bin postgis && \
     apt-get clean
 
+COPY docker/imagemagick-dev-policy.xml /etc/ImageMagick-6/policy.xml
+
 COPY app/package.json app/package-lock.json $APP_DIR/
 RUN npm install
 
