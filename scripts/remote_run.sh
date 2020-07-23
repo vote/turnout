@@ -71,6 +71,8 @@ export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-d
 export ACTIONNETWORK_FORM_PREFIX=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_form_prefix | jq '.Parameter["Value"]' -r)
 export OPTIMIZELY_SDK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.optimizely_sdk_key | jq '.Parameter["Value"]' -r)
 export OVBM_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.ovbm_sync | jq '.Parameter["Value"]' -r)
+export PA_OVR_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_key | jq '.Parameter["Value"]' -r)
+export PA_OVR_STAGING=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_staging | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -148,6 +150,8 @@ docker run -i -t \
     -e ACTIONNETWORK_FORM_PREFIX \
     -e OPTIMIZELY_SDK_KEY \
     -e OVBM_SYNC \
+    -e PA_OVR_KEY \
+    -e PA_OVR_STAGING \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
