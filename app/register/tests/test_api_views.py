@@ -93,7 +93,9 @@ PA_REGISTRATION_DL = {
     "declaration": True,
     "state_id_number": "99007069",
     "state_id_number_2": "1234",
-    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,},
+    "party": "Other",
+    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,
+                     "party_other": "Foo"},
 }
 
 PA_REGISTRATION_SSN = {
@@ -118,6 +120,7 @@ PA_REGISTRATION_SIG = {
     "is_18_or_over": True,
     "declaration": True,
     "state_id_number_2": "1234",
+    "party": "None",
     "state_fields": {
         "region_id": 432147,
         "vbm_opt_in": False,
@@ -614,6 +617,10 @@ def test_pa_dl(
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "success"
 
+    registration = Registration.objects.first()
+    assert registration.party == PoliticalParties.OTHER
+    assert registration.state_fields["party_other"] == "Foo"
+
 
 @pytest.fixture
 def mock_ovrlib_session_baddl(mocker):
@@ -697,3 +704,6 @@ def test_pa_sig(
     )
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "success"
+
+    registration = Registration.objects.first()
+    assert registration.party == PoliticalParties.NONE

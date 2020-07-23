@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from action.mixin_apiview import IncompleteActionViewSet
-from common.enums import TurnoutActionStatus, RegistrationGender
+from common.enums import TurnoutActionStatus, RegistrationGender, PoliticalParties
 from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import geocode_to_regions
 from official.models import Region
@@ -151,13 +151,17 @@ class RegistrationViewSet(IncompleteActionViewSet):
         else:
             gender = 'unknown'
 
+        party = str(registration.party)
+        if party == PoliticalParties.OTHER:
+            party = state_fields.get("party_other")
+
         session = ovrlib.pa.PAOVRSession(
             api_key=settings.PA_OVR_KEY, staging=settings.PA_OVR_STAGING
         )
         req = ovrlib.pa.PAOVRRequest(
             **r,
             gender=gender,
-            party=str(registration.party),
+            party=party,
             mailing_address=combine_addr(
                 registration.mailing_address1, registration.mailing_address2
             ),
