@@ -181,12 +181,17 @@ class RegistrationViewSet(IncompleteActionViewSet):
             }
             registration.status = TurnoutActionStatus.PENDING
         except ovrlib.exceptions.InvalidDLError as e:
-            registration.state_api_result = {"status": "failure", "error": "dl_invalid"}
+            registration.state_api_result = {
+                "status": "failure",
+                "error": "dl_invalid",
+                "exception": str(e),
+            }
         except ovrlib.exceptions.InvalidSignatureError as e:
             registration.state_api_result = {
                 "status": "failure",
                 "error": "signature_invalid",
-            }
+                "exception": str(e),
+           }
         except Exception as e:
             logger.warning(f"PA API failure: {str(e)}")
             registration.state_api_result = {
@@ -194,6 +199,12 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "error": "unknown_error",
                 "exception": str(e),
             }
+        if "error" in registration.state_api_result:
+            logger.warning(
+                "PA OVR status %(status)s, error %(error)s, exception %(exception)s",
+                registration.state_api_result,
+                extra=registration.state_api_result,
+            )
 
     def complete(
         self,
