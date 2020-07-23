@@ -1,0 +1,20 @@
+{% extends "email/base.html" %}
+{% block content %}
+
+Hello,<br><br>
+
+Your account application has been rejected:
+
+<br><br>
+
+{{ reason }}
+
+<br><br>
+
+If you have any questions or concerns, please contact <a href="mailto:subscriber@voteamerica.com">subscriber@voteamerica.com</a>.<br><br>
+
+Thank you for your interest,<br><br>
+
+~ VoteAmerica Team
+
+{% endblock %}

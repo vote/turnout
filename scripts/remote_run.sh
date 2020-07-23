@@ -73,6 +73,8 @@ export OPTIMIZELY_SDK_KEY=$(aws ssm get-parameter --region $REGION --with-decryp
 export OVBM_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.ovbm_sync | jq '.Parameter["Value"]' -r)
 export PA_OVR_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_key | jq '.Parameter["Value"]' -r)
 export PA_OVR_STAGING=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_staging | jq '.Parameter["Value"]' -r)
+export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_enabled | jq '.Parameter["Value"]' -r)
+export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -152,6 +154,8 @@ docker run -i -t \
     -e OVBM_SYNC \
     -e PA_OVR_KEY \
     -e PA_OVR_STAGING \
+    -e SLACK_SUBSCRIBER_INTEREST_ENABLED \
+    -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

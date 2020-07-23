@@ -15,7 +15,7 @@ from django.views.generic import (
 )
 from reversion.views import RevisionMixin
 
-from accounts.models import Invite, User, expire_date_time
+from accounts.models import Invite
 from manage.mixins import ManageViewMixin
 
 from .forms import (
@@ -25,9 +25,9 @@ from .forms import (
     InviteCreateForm,
     SubscriberSettingsForm,
 )
+from .invite import invite_user
 from .mixins_manage_views import SubscriberManageViewMixin
 from .models import Association, InviteAssociation
-from .tasks import send_invite_notifcation
 
 logger = logging.getLogger("multi_tenant")
 
@@ -62,7 +62,9 @@ class ChangeSubscriberView(ManageViewMixin, FormView):
         # Explicitly set the choices by changing the queryset of the "subscriber"
         # field. Django will validate that the submission is inside of this
         # queryset.
-        form.fields["subscriber"].queryset = self.request.user.allowed_clients
+        form.fields["subscriber"].queryset = self.request.user.allowed_clients.order_by(
+            "name"
+        )
         return form
 
     def form_valid(self, form):
@@ -135,84 +137,10 @@ class ManagerInviteView(SuccessMessageMixin, SubscriberManageViewMixin, CreateVi
     model = Invite
     template_name = "multi_tenant/manage/invite_create.html"
     form_class = InviteCreateForm
-    success_message = "Your invite to %(email)s has been sent."
+    success_message = "%(email)s has been invited"
 
     def form_valid(self, form):
-        # Handle an existing user
-        try:
-            existing_user = User.objects.get(email__iexact=form.cleaned_data["email"])
-            # If the existing user is client-less, make that user a member of this client
-            if existing_user.active_client == None:
-                existing_user.active_client = self.subscriber
-            # Add the user to this subscriber
-            existing_user.clients.add(self.subscriber)
-            existing_user.save()
-            messages.success(self.request, f"User {existing_user} has been added.")
-
-            extra = {
-                "subscriber_uuid": self.subscriber.pk,
-                "user_uuid": existing_user.pk,
-                "manager_uuid": self.request.user.pk,
-            }
-            logger.info(
-                "User Management: %(manager_uuid)s added %(user_uuid)s to subscriber %(subscriber_uuid)s",
-                extra,
-                extra=extra,
-            )
-
-            return HttpResponseRedirect(
-                reverse(
-                    "manage:multi_tenant:manager_list", args=(self.subscriber.slug,)
-                )
-            )
-        except User.DoesNotExist:
-            pass
-
-        # Handle a user with a pending invite in the system
-        existing_invite = Invite.actives.filter(
-            email__iexact=form.cleaned_data["email"]
-        ).first()
-        if existing_invite:
-            # Add the current subscriber. This will automatically dedupe
-            existing_invite.clients.add(self.subscriber)
-            # Change the invite's primary subscriber to the current one.
-            existing_invite.primary_client = self.subscriber
-            # Reset the expiration time
-            existing_invite.expires = expire_date_time()
-            existing_invite.save()
-
-            extra = {
-                "subscriber_uuid": self.subscriber.pk,
-                "invitee_email": existing_invite.email,
-                "manager_uuid": self.request.user.pk,
-            }
-            logger.info(
-                "User Management: %(manager_uuid)s re-invited %(invitee_email)s to subscriber %(subscriber_uuid)s",
-                extra,
-                extra=extra,
-            )
-
-            messages.success(
-                self.request,
-                f"Invite {existing_invite.email} has been added or updated.",
-            )
-
-            return HttpResponseRedirect(
-                reverse(
-                    "manage:multi_tenant:manager_list", args=(self.subscriber.slug,)
-                )
-            )
-
-        # Handle a user new to the system
-        invite = form.save(commit=False)
-        # Set the primary client as this subscriber
-        invite.primary_client = self.subscriber
-        invite.save()
-        invite.clients.add(self.subscriber)
-
-        send_invite_notifcation.delay(invite.pk, self.subscriber.pk)
-
-        messages.success(self.request, self.success_message % form.cleaned_data)
+        invite_user(form.cleaned_data["email"], self.subscriber)
 
         extra = {
             "subscriber_uuid": self.subscriber.pk,
@@ -224,6 +152,8 @@ class ManagerInviteView(SuccessMessageMixin, SubscriberManageViewMixin, CreateVi
             extra,
             extra=extra,
         )
+
+        messages.success(self.request, self.success_message % form.cleaned_data)
 
         return HttpResponseRedirect(
             reverse("manage:multi_tenant:manager_list", args=(self.subscriber.slug,))

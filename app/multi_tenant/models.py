@@ -14,24 +14,46 @@ DISCLAIMER_TEMPLATE = "multi_tenant/disclaimer.txt"
 @reversion.register()
 class Client(UUIDModel, TimestampModel):
     name = models.CharField(max_length=200)
-    url = models.URLField()
+    url = models.URLField(verbose_name="Homepage URL")
     email = models.EmailField(
-        max_length=254, null=True, default="turnout@localhost.local"
+        verbose_name="Default 'From' Email Address",
+        max_length=254,
+        null=True,
+        default="info@voteamerica.com",
     )
-    privacy_policy = models.URLField(null=True, blank=True)
-    terms_of_service = models.URLField(null=True, blank=True)
-    sms_enabled = models.BooleanField(default=True, null=True)
-    sms_checkbox = models.BooleanField(default=True, null=True)
-    sms_checkbox_default = models.BooleanField(default=False, null=True)
-    sms_disclaimer = models.TextField(blank=True, null=True)
+    privacy_policy = models.URLField(
+        verbose_name="Privacy Policy URL", null=True, blank=True
+    )
+    terms_of_service = models.URLField(
+        verbose_name="Terms of Service URL", null=True, blank=True
+    )
+    sms_enabled = models.BooleanField(
+        verbose_name="SMS Program Enabled", default=True, null=True
+    )
+    sms_checkbox = models.BooleanField(
+        verbose_name="SMS Checkbox Enabled", default=True, null=True
+    )
+    sms_checkbox_default = models.BooleanField(
+        verbose_name="SMS Checkbox Checked By Default", default=False, null=True
+    )
+    sms_disclaimer = models.TextField(
+        verbose_name="Custom SMS Disclaimer", blank=True, null=True
+    )
     # In order to create this in the admin, we need blank=True
     default_slug = models.ForeignKey(
         "multi_tenant.SubscriberSlug", null=True, on_delete=models.PROTECT, blank=True
     )
+    status = TurnoutEnumField(
+        enums.SubscriberStatus, default=enums.SubscriberStatus.ACTIVE, null=True
+    )
 
     # Passed to Civis to determine if subscriber's data should be synced to TMC
-    sync_tmc = models.BooleanField(default=False, null=True)
-    sync_bluelink = models.BooleanField(default=False, null=True)
+    sync_tmc = models.BooleanField(
+        verbose_name="TMC Sync Enabled", default=False, null=True
+    )
+    sync_bluelink = models.BooleanField(
+        verbose_name="Bluelink Sync Enabled", default=False, null=True
+    )
 
     # Determines if we show our own donate asks when a user is interacting with
     # this client.

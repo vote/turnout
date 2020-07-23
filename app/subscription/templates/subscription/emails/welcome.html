@@ -1,0 +1,35 @@
+{% extends "email/base.html" %}
+{% block content %}
+
+Hello,<br><br>
+
+Your account has been activated.<br><br>
+
+In a separate email, you will receive an invitation to the VoteAmerica Admin Portal. Upon entering your information
+and enabling two-factor authentication, you will be ready to begin using the VoteAmerica tools.<br><br>
+
+The following are important links to be aware of:<br><br>
+
+<a href="{{ custom_embed_code_link }}">Click here</a> to access your custom embed code<br>
+
+<a href="{{ export_code_link }}">Click here</a> to generate CSV exports for your organization’s data<br>
+
+<a href="{{ user_management_link }}">Click here</a> if you'd like to invite new users to view your data and generate their own exports<br>
+
+<a href="{{ settings_link }}">Click here</a> to adjust your embed settings, such as enabling or disabling a SMS disclaimer checkbox or syncing data to a
+3rd party like Bluelink<br><br>
+
+Please also read through our <a href="https://docs.voteamerica.com/">documentation</a>, we regularly update it with important information, and most questions can be
+answered there.<br><br>
+
+However, <strong>you should rely on your organization’s specific embed code, found in the <a href="{{ custom_embed_code_link }}">embed section of the admin</a>, not the
+code found in the VoteAmerica documentation</strong>.<br><br>
+
+If you have additional questions not covered above, feel free to reach out to <a href="mailto:subscriber@voteamerica.com">subscriber@voteamerica.com</a> and you’ll
+receive a response within 48 hours.<br><br>
+
+Thank you for signing up.<br><br>
+
+~ VoteAmerica Team
+
+{% endblock %}

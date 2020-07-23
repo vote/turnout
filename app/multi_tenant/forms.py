@@ -29,12 +29,6 @@ class SubscriberSettingsForm(forms.ModelForm):
             "sync_bluelink",
         ]
         labels = {
-            "url": "Homepage URL",
-            "privacy_policy": "Privacy Policy URL",
-            "sms_enabled": "SMS Program Enabled",
-            "sms_checkbox": "SMS Checkbox Enabled",
-            "sms_checkbox_default": "SMS Checkbox Checked By Default",
-            "sms_disclaimer": "SMS Disclaimer",
             "sync_tmc": "Enable The Movement Cooperative Sync",
             "sync_bluelink": "Enable Bluelink Sync",
         }

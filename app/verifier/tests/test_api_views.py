@@ -10,7 +10,7 @@ from model_bakery import baker
 from rest_framework.test import APIClient
 
 from action.models import Action
-from common.enums import EventType, VoterStatus
+from common.enums import EventType, SubscriberStatus, VoterStatus
 from election.models import State
 from event_tracking.models import Event
 from multi_tenant.models import Client
@@ -318,6 +318,47 @@ def test_invalid_subscriber_key(requests_mock, smsbot_patch):
 
     lookup = Lookup.objects.first()
     assert lookup.subscriber == first_subscriber
+
+
+@pytest.mark.django_db
+def test_inactive_subscriber(requests_mock, smsbot_patch):
+    client = APIClient()
+    targetsmart_call = requests_mock.register_uri(
+        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    )
+
+    first_subscriber = Client.objects.first()
+    second_subscriber = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe(
+        "multi_tenant.subscriberslug",
+        subscriber=second_subscriber,
+        slug="verifierslugtwo",
+    )
+    assert Client.objects.count() == 2
+
+    url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
+    response = client.post(url, VALID_LOOKUP)
+    assert response.status_code == 200
+    action = Action.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+
+    lookup = Lookup.objects.first()
+    assert lookup.subscriber == second_subscriber
+
+    # Set the second subscriber to disabled and try another verification
+    second_subscriber.status = SubscriberStatus.DISABLED
+    second_subscriber.save()
+
+    inactive_subscriber_response = client.post(url, VALID_LOOKUP)
+    assert inactive_subscriber_response.status_code == 200
+
+    assert Lookup.objects.count() == 2
+    inactive_lookup = Lookup.objects.first()
+    assert inactive_subscriber_response.json() == {
+        "registered": False,
+        "action_id": str(inactive_lookup.action.pk),
+    }
+    assert inactive_lookup.subscriber == first_subscriber
 
 
 def test_invalid_zipcode(requests_mock):

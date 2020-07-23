@@ -213,5 +213,13 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pa_ovr_staging',
         name: 'PA_OVR_STAGING',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_subscriber_interest_enabled',
+        name: 'SLACK_SUBSCRIBER_INTEREST_ENABLED',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_subscriber_interest_webhook',
+        name: 'SLACK_SUBSCRIBER_INTEREST_WEBHOOK',
+      },
     ],
 }

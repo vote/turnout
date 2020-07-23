@@ -1,0 +1,29 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags tz %}
+
+{% block title %}Reject {{ interest.organization_name }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:subscription:list_interests' %}">Leads</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'manage:subscription:interests_detail' interest.uuid %}">{{ interest.organization_name }}</a></li>
+                <li class="breadcrumb-item">Activate</li>
+            </ol>
+        </nav>
+        <h1>Reject New Subscriber</h1>
+        <div class="card">
+            <div class="card-header">Reject {{ interest.organization_name }}</div>
+            <div class="card-body">
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-block btn-primary">Reject</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -11,6 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_smalluuid.models import SmallUUIDField, uuid_default
 from timezone_field import TimeZoneField
 
+from common import enums
 from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.models import Association, Client
 
@@ -65,6 +66,9 @@ class User(
     is_election_admin = models.BooleanField(
         "Election Information Admin", default=False, null=True
     )
+    is_subscriber_admin = models.BooleanField(
+        "Subscriber Admin", default=False, null=True
+    )
 
     email = models.EmailField(_("Email Address"), editable=False, unique=True)
     first_name = models.CharField(_("First Name"), max_length=100, blank=True)
@@ -105,16 +109,23 @@ class User(
         else:
             return self.is_election_admin
 
+    @property
+    def can_manage_subscribers(self):
+        if self.is_superuser:
+            return True
+        else:
+            return self.is_subscriber_admin
+
     @cached_property
     def active_client_slug(self):
         return self.active_client.slug
 
     @cached_property
     def allowed_clients(self):
-        if self.is_superuser:
+        if self.can_manage_subscribers:
             return Client.objects.all()
         else:
-            return self.clients.all()
+            return self.clients.filter(status=enums.SubscriberStatus.ACTIVE)
 
     @cached_property
     def multi_client_admin(self):

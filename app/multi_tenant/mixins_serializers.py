@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Dict
 
 from rest_framework import serializers
 
+from common import enums
 from common.analytics import statsd
 
 from .models import Client, SubscriberSlug
@@ -24,7 +25,8 @@ class SubscriberSerializerMixin(_Base):
         if request and "subscriber" in request.GET:
             try:
                 subscriber_slug = SubscriberSlug.objects.only("subscriber").get(
-                    slug=request.GET["subscriber"]
+                    slug=request.GET["subscriber"],
+                    subscriber__status=enums.SubscriberStatus.ACTIVE,
                 )
                 subscriber = subscriber_slug.subscriber
             except SubscriberSlug.DoesNotExist:

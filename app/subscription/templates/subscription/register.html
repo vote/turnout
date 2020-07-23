@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static sekizai_tags crispy_forms_tags %}
+
+{% block body %}
+<div id="wrap" class="wrap">
+    <div class="container" id="main">
+        <div class="row">
+            <div class="col-md-6 offset-md-3 public-page-wrap">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h1>Sign up for premium tools</h1>
+                        <p>Someone from VoteAmerica will respond within 1 business day.</p>
+                        <form action="" method="post">
+                            {{ form|crispy }}
+
+                            <button type="submit" class="btn btn-block btn-primary">Submit</button>
+                            {% csrf_token %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

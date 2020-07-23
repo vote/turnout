@@ -1,0 +1,77 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags pretty_json %}
+
+{% block title %}{{ interest }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:subscription:list_interests' %}">Leads</a></li>
+                <li class="breadcrumb-item">{{ interest.organization_name }}</li>
+            </ol>
+        </nav>
+        <h1>{{ interest.organization_name }}</h1>
+        <div class="table-responsive-lg">
+        <table class="table">
+            <thead>
+                <th>Field</th>
+                <th>Value</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Organization Name</td>
+                    <td>{{interest.organization_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Website</td>
+                    <td><a href="{{interest.website}}" target="_blank" rel="noopener noreferrer">{{interest.website}}</a></td>
+                </tr>
+                <tr>
+                    <td>First Name</td>
+                    <td>{{interest.first_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Last Name</td>
+                    <td>{{interest.last_name|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><a href="mailto:{{interest.email }}">{{interest.email }}</a></td>
+                </tr>
+                <tr>
+                    <td>Phone</td>
+                    <td>{{interest.phone|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Product</td>
+                    <td>{{interest.product|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>Nonprofit</td>
+                    <td>{{interest.nonprofit|default_if_none:""}}</td>
+                </tr>
+                <tr>
+                    <td>EIN</td>
+                    <td>{{interest.ein|default_if_none:""}}{% if interest.ein %} (<a href="https://apps.irs.gov/app/eos/allSearch.do?ein1={{interest.ein}}&dispatchMethod=searchAll" target="_blank" rel="noopener noreferrer">IRS search</a>) {% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>{{interest.status|default_if_none:""}}</td>
+                </tr>
+		{% if interest.reject_reason %}
+                <tr>
+                    <td>Reject Reason</td>
+                    <td>{{interest.reject_reason|default_if_none:""}}</td>
+                </tr>
+		{% endif %}
+            </tbody>
+        </table>
+        {% if not interest.consumed %}
+	<a href="{% url 'manage:subscription:interests_activate' interest.uuid %}" class="btn btn-primary">Activate Subscriber</a>
+	<a href="{% url 'manage:subscription:interests_reject' interest.uuid %}" class="btn btn-primary">Reject Subscriber</a>
+	{% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -38,6 +38,17 @@
                                 <a class="dropdown-item" href="{% url 'manage:multi_tenant:settings' user.active_client_slug %}">Settings</a>
                             </div>
                         </li>
+                        {% if user.can_manage_subscribers %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown__subscribers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Subscriptions
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown__tools">
+                                <a class="dropdown-item" href="{% url 'manage:subscription:list_subscribers' %}">Subscribers</a>
+                                <a class="dropdown-item" href="{% url 'manage:subscription:list_interests' %}">Leads</a>
+                            </div>
+                        </li>
+                        {% endif %}
                         {% if user.can_manage_election_information %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__elections" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

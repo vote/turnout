@@ -198,3 +198,21 @@ class SubmissionType(Enum, metaclass=EnumMeta):
 
 class ExternalToolType(Enum, metaclass=EnumMeta):
     ACTIONNETWORK = "actionnetwork"
+
+
+class SubscriptionInterestStatus(Enum, metaclass=EnumMeta):
+    PENDING = "pending"
+    SUBSCRIBED = "subscribed"
+    AWAITING_PAYMENT = "awaiting_payment"
+    REJECTED = "rejected"
+
+    class Labels:
+        PENDING = "Pending Review"
+        SUBSCRIBED = "Subscribed"
+        AWAITING_PAYMENT = "Awaiting Payment"
+        REJECTED = "Rejected"
+
+
+class SubscriberStatus(Enum, metaclass=EnumMeta):
+    ACTIVE = "active"
+    DISABLED = "disabled"

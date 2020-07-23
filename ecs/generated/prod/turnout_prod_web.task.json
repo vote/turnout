@@ -284,6 +284,14 @@
             {
                "name": "PA_OVR_STAGING",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.pa_ovr_staging"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_ENABLED",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_enabled"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_webhook"
             }
          ]
       },
@@ -565,6 +573,14 @@
             {
                "name": "PA_OVR_STAGING",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.pa_ovr_staging"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_ENABLED",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_enabled"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_webhook"
             }
          ]
       },
@@ -845,6 +861,14 @@
             {
                "name": "PA_OVR_STAGING",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.pa_ovr_staging"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_ENABLED",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_enabled"
+            },
+            {
+               "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.slack_subscriber_interest_webhook"
             }
          ]
       },

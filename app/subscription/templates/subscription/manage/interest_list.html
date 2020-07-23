@@ -1,0 +1,42 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}Interests | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">Leads</li>
+            </ol>
+        </nav>
+        <h1>Leads</h1>
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interest in interests %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'manage:subscription:interests_detail' interest.uuid %}">{{ interest.organization_name }}</a>
+                        </td>
+                        <td>
+                            {{ interest.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        {% include "management/inc/pagination.html" %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

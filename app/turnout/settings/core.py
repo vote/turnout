@@ -95,6 +95,7 @@ THIRD_PARTY_APPS = [
     "two_factor",
     "s3_folder_storage",
     "nested_inline",
+    # "formtools",
 ]
 
 FIRST_PARTY_APPS = [
@@ -116,6 +117,7 @@ FIRST_PARTY_APPS = [
     "reporting",
     "fax",
     "integration",
+    "subscription",
     "reminder",
 ]
 
@@ -606,8 +608,12 @@ ABSENTEE_LEO_FAX_EMAIL_REPLY_TO = env.str(
 #### SLACK DATA ERROR CONFIGURATION
 
 SLACK_DATA_ERROR_ENABLED = env.bool("SLACK_DATA_ERROR_ENABLED", default=False)
-SLACK_DATA_ERROR_WEBHOOK = env.str(
-    "SLACK_DATA_ERROR_WEBHOOK", default="http://localhost"
+SLACK_DATA_ERROR_WEBHOOK = env.str("SLACK_DATA_ERROR_WEBHOOK", default=None)
+SLACK_SUBSCRIBER_INTEREST_ENABLED = env.bool(
+    "SLACK_SUBSCRIBER_INTEREST_ENABLED", default=False
+)
+SLACK_SUBSCRIBER_INTEREST_WEBHOOK = env.str(
+    "SLACK_SUBSCRIBER_INTEREST_WEBHOOK", default=None
 )
 
 #### END SLACK DATA ERROR CONFIGURATION
