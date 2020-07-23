@@ -38,8 +38,12 @@ local docker_env_lines = [
 
   if [ $1 ]; then
 
-  echo "Logging into ECR"
-  eval $(aws ecr get-login --no-include-email --region $REGION)
+    echo "Logging into ECR"
+    if aws --version | grep -q aws-cli/1; then
+      eval $(aws ecr get-login --no-include-email --region $REGION)
+    else
+      aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+    fi
 
   fi
 
