@@ -29,7 +29,7 @@ def notify_slack_interest(interest_pk: str) -> None:
     from .models import Interest
 
     interest = Interest.objects.get(uuid=interest_pk)
-    if settings.SLACK_SUBSCRIBER_INTEREST_WEBHOOK:
+    if settings.SLACK_SUBSCRIBER_INTEREST_ENABLED:
         try:
             message = f"New subscription interest: {interest.organization_name} {interest.website} ({interest.first_name} {interest.last_name} <{interest.email}>)"
             if interest.nonprofit:
