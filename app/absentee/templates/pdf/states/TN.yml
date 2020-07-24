@@ -1,13 +1,62 @@
 manual_fields:
-  - 'Election Type'
-  - 'Reason'
-  - 'CDL or TWIC Number'
-  - 'Transmission'
-  - 'assist_address'
-  - 'assist_date'
-  - 'witness_address'
-  - 'witness_date'
+  - cdl_number
+  - excuse_cdl
+
 pages: 1
+
 auto_fields:
-  - slug: submit_date
+  - slug: date_signed
     type: todays_date
+
+signature_statement: I swear or affirm under penalty of perjury that all of the information on this form is true and correct and that I am eligible to vote in the election.
+
+signatures:
+  1:
+    x: 248
+    y: 70
+    width: 330
+    height: 53
+
+form_fields:
+  - type: section
+    label: Identification
+    content:
+    - type: text
+      label: Full Social Security Number
+      format: "^\\d{3}-?\\d{2}-?\\d{4}$"
+      format_error: "Please enter your full, 9-digit social security number (123-45-6789)"
+      slug: state_id_number
+      required: true
+  - type: section
+    label: Eligibility
+    content:
+    - type: radio
+      label: Why are you unable to vote in person?
+      required: true
+      options:
+      - label: I have determined it is impossible or unreasonable to vote in-person due to the COVID-19 situation. ANY VOTER MAY CHOOSE THIS OPTION.
+        slug: excuse_covid
+        default: true
+      - label: I am 60 years of age or older.
+        slug: excuse_age
+      - label: I will be outside my county during all hours of early voting and before the polls close on Election Day.
+        slug: excuse_absence
+      - label: I am hospitalized, ill or physically disabled and unable to appear at my polling place to vote.
+        slug: excuse_disabled
+      - label: I am a caretaker of a hospitalized, ill or physically disabled person
+        slug: excuse_caretaker
+      - label: I reside in a licensed facility, outside my county, providing relatively permanent domiciliary care, i.e. Nursing Home.
+        slug: excuse_facility
+      - label: I am a full-time student or spouse of a full-time student outside my county.
+        slug: excuse_student
+      - label: I am a candidate for office in the election for which I am applying to vote absentee by mail.
+        slug: excuse_candidate
+      - label: I am observing a religious holiday that prevents me from voting during early voting or on Election Day.
+        slug: excuse_religion
+      - label: I will be serving as an election official or a member or employee of the election commission on Election Day.
+        slug: excuse_officer
+      - label: I will be serving on jury duty in state or federal court.
+        slug: excuse_jury
+      - label: I am a voter with a disability and my polling place is inaccessible.
+        slug: excuse_access
+
