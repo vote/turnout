@@ -1,0 +1,18 @@
+pages: 2
+
+manual_fields:
+  - election_primary
+  - election_special
+  - election_all
+  - military_domestic
+  - military_overseas
+  - civilian_overseas
+  - provided_by
+  - permanent_vbm
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date
+  - slug: election_general
+    type: static
+    value: true
