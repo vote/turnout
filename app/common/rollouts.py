@@ -5,7 +5,7 @@ from optimizely.config_manager import PollingConfigManager
 conf_manager = PollingConfigManager(
     sdk_key=settings.OPTIMIZELY_SDK_KEY,
     update_interval=settings.OPTIMIZELY_UPDATE_INTERVAL_SECONDS,
-    url_template="https://optimizely.s3.amazonaws.com/datafiles/{sdk_key}.json"
+    url_template="https://optimizely.s3.amazonaws.com/datafiles/{sdk_key}.json",
 )
 
 optimizely_client = optimizely.Optimizely(config_manager=conf_manager)

@@ -464,17 +464,14 @@ def mock_all_regions(mocker):
             self.external_id = external_id
 
     mocker.patch(
-        "register.api_views.geocode_to_regions",
-        return_value=[],
+        "register.api_views.geocode_to_regions", return_value=[],
     )
     mocker.patch(
         "register.api_views.Region.objects.get",
         return_value=FakeRegion(name="Clarion County", external_id=432147),
     )
-    m = mocker.patch(
-        "register.api_views.Region.visible.filter",
-    )
-    m.return_value.order_by.return_value=[
+    m = mocker.patch("register.api_views.Region.visible.filter",)
+    m.return_value.order_by.return_value = [
         FakeRegion(name="Clarion County", external_id=432147),
         FakeRegion(name="A County", external_id=432141),
         FakeRegion(name="B County", external_id=432142),
@@ -509,10 +506,8 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
     assert register_response.json().get("state_api_regions") == [
-        {
-            "external_id": 432147,
-            "name": "Clarion County",
-        }]
+        {"external_id": 432147, "name": "Clarion County",}
+    ]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -537,18 +532,9 @@ def test_pa_nodlorsig_few_regions(mock_ovrlib_session_dl, mock_few_regions):
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
     assert register_response.json().get("state_api_regions") == [
-        {
-            "external_id": 432147,
-            "name": "Clarion County",
-        },
-        {
-            "external_id": 123456,
-            "name": "Foo County",
-        },
-        {
-            "external_id": 789012,
-            "name": "Bar County",
-        },
+        {"external_id": 432147, "name": "Clarion County",},
+        {"external_id": 123456, "name": "Foo County",},
+        {"external_id": 789012, "name": "Bar County",},
     ]
 
     registration = Registration.objects.first()
@@ -590,9 +576,7 @@ def test_pa_nodlorsig_all_regions(mock_ovrlib_session_dl, mock_all_regions):
 
 
 @pytest.mark.django_db
-def test_pa_dl(
-    submission_task_patch, mock_ovrlib_session_dl, mock_region
-):
+def test_pa_dl(submission_task_patch, mock_ovrlib_session_dl, mock_region):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -600,10 +584,8 @@ def test_pa_dl(
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
     assert register_response.json().get("state_api_regions") == [
-        {
-            "external_id": 432147,
-            "name": "Clarion County",
-        }]
+        {"external_id": 432147, "name": "Clarion County",}
+    ]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
@@ -659,9 +641,7 @@ def mock_ovrlib_session_badssn(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_sig(
-    submission_task_patch, mock_ovrlib_session_baddl, mock_region
-):
+def test_pa_sig(submission_task_patch, mock_ovrlib_session_baddl, mock_region):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -669,10 +649,8 @@ def test_pa_sig(
     assert register_response.status_code == 200
     assert "uuid" in register_response.json()
     assert register_response.json().get("state_api_regions") == [
-        {
-            "external_id": 432147,
-            "name": "Clarion County",
-        }]
+        {"external_id": 432147, "name": "Clarion County",}
+    ]
 
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
