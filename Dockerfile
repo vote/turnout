@@ -20,4 +20,4 @@ ENV TAG=$TAG_ARG
 ENV BUILD=$BUILD_ARG
 
 EXPOSE 8000
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "-c", "/app/turnout/gunicorn.conf.py", "turnout.wsgi_prod"]
+CMD ["/app/ops/web_launch.sh"]

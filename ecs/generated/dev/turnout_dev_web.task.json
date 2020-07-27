@@ -41,11 +41,11 @@
          "healthCheck": {
             "command": [
                "CMD-SHELL",
-               "curl --fail http://localhost:8000/-/health/ || exit 1"
+               "/app/ops/web_health.sh || exit 1"
             ],
-            "interval": 30,
+            "interval": 120,
             "retries": 3,
-            "timeout": 5
+            "timeout": 15
          },
          "image": "nginx/nginx:latest",
          "logConfiguration": {
@@ -301,14 +301,8 @@
       },
       {
          "command": [
-            "ddtrace-run",
-            "celery",
-            "-A",
-            "turnout.celery_app",
-            "worker",
-            "-Q",
-            "default",
-            "--without-heartbeat"
+            "/app/ops/worker_launch.sh",
+            "default"
          ],
          "dependsOn": [
             {
@@ -347,6 +341,15 @@
             }
          ],
          "essential": true,
+         "healthCheck": {
+            "command": [
+               "CMD-SHELL",
+               "/app/ops/worker_health.sh || exit 1"
+            ],
+            "interval": 120,
+            "retries": 3,
+            "timeout": 15
+         },
          "image": "nginx/nginx:latest",
          "logConfiguration": {
             "logDriver": "awsfirelens",
@@ -594,13 +597,7 @@
       },
       {
          "command": [
-            "ddtrace-run",
-            "celery",
-            "-A",
-            "turnout.celery_app",
-            "beat",
-            "--scheduler",
-            "redbeat.RedBeatScheduler"
+            "/app/ops/beat_launch.sh"
          ],
          "dependsOn": [
             {
@@ -639,6 +636,15 @@
             }
          ],
          "essential": true,
+         "healthCheck": {
+            "command": [
+               "CMD-SHELL",
+               "/app/ops/beat_health.sh || exit 1"
+            ],
+            "interval": 120,
+            "retries": 3,
+            "timeout": 15
+         },
          "image": "nginx/nginx:latest",
          "logConfiguration": {
             "logDriver": "awsfirelens",
@@ -1008,7 +1014,7 @@
                "dd_message_key": "log",
                "dd_service": "turnoutmigrate",
                "dd_source": "djangomigrate",
-               "dd_tags": "env:prod",
+               "dd_tags": "env:dev",
                "host": "http-intake.logs.datadoghq.com",
                "provider": "ecs"
             },

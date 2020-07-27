@@ -1,9 +1,12 @@
-local datadog = import 'include/datadog.libsonnet';
+local datadogContainers = import 'include/datadog_containers.libsonnet';
+local datadogEnv = import 'include/datadog_env.libsonnet';
 local secrets = import 'include/secrets.libsonnet';
 
 local env = std.extVar('env');
 local capitalEnv = std.asciiUpper(env[0]) + env[1:];
 local migrations = std.extVar('migrations');
+local cpu = std.extVar('cpu');
+local memory = std.extVar('memory');
 
 {
   executionRoleArn: 'arn:aws:iam::719108811834:role/Turnout-ECS-' + capitalEnv,
@@ -20,10 +23,10 @@ local migrations = std.extVar('migrations');
       healthCheck: {
         command: [
           'CMD-SHELL',
-          'curl --fail http://localhost:8000/-/health/ || exit 1',
+          '/app/ops/web_health.sh || exit 1',
         ],
-        interval: 30,
-        timeout: 5,
+        interval: 120,
+        timeout: 15,
         retries: 3,
       },
       image: 'nginx/nginx:latest',
@@ -66,7 +69,7 @@ local migrations = std.extVar('migrations');
           },
         ],
       },
-      environment: datadog.for_service('turnoutweb', env),
+      environment: datadogEnv.for_service('turnoutweb', env),
       secrets: secrets.for_env(env),
     },
 
@@ -74,15 +77,18 @@ local migrations = std.extVar('migrations');
       image: 'nginx/nginx:latest',
       name: 'worker',
       command: [
-        'ddtrace-run',
-        'celery',
-        '-A',
-        'turnout.celery_app',
-        'worker',
-        '-Q',
+        '/app/ops/worker_launch.sh',
         'default',
-        '--without-heartbeat',
       ],
+      healthCheck: {
+        command: [
+          'CMD-SHELL',
+          '/app/ops/worker_health.sh || exit 1',
+        ],
+        interval: 120,
+        timeout: 15,
+        retries: 3,
+      },
       essential: true,
       dependsOn: [
         {
@@ -121,7 +127,7 @@ local migrations = std.extVar('migrations');
           },
         ],
       },
-      environment: datadog.for_service('turnoutworker', env),
+      environment: datadogEnv.for_service('turnoutworker', env),
       secrets: secrets.for_env(env),
     },
 
@@ -129,14 +135,17 @@ local migrations = std.extVar('migrations');
       image: 'nginx/nginx:latest',
       name: 'beat',
       command: [
-        'ddtrace-run',
-        'celery',
-        '-A',
-        'turnout.celery_app',
-        'beat',
-        '--scheduler',
-        'redbeat.RedBeatScheduler',
+        '/app/ops/beat_launch.sh',
       ],
+      healthCheck: {
+        command: [
+          'CMD-SHELL',
+          '/app/ops/beat_health.sh || exit 1',
+        ],
+        interval: 120,
+        timeout: 15,
+        retries: 3,
+      },
       essential: true,
       dependsOn: [
         {
@@ -175,84 +184,10 @@ local migrations = std.extVar('migrations');
           },
         ],
       },
-      environment: datadog.for_service('turnoutbeat', env),
+      environment: datadogEnv.for_service('turnoutbeat', env),
       secrets: secrets.for_env(env),
     },
-
-    {
-      environment: [
-        {
-          name: 'ECS_FARGATE',
-          value: 'true',
-        },
-        {
-          name: 'DD_DOCKER_LABELS_AS_TAGS',
-          value: '{"spinnaker.stack":"spinnaker_stack", "spinnaker.servergroup":"spinnaker_servergroup", "spinnaker.detail":"spinnaker_detail", "spinnaker.stack":"env"}',
-        },
-        {
-          name: 'DD_APM_ENABLED',
-          value: 'true',
-        },
-        {
-          name: 'DD_DOGSTATSD_NON_LOCAL_TRAFFIC',
-          value: 'true',
-        },
-      ],
-      secrets: [
-        {
-          valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey',
-          name: 'DD_API_KEY',
-        },
-      ],
-      image: 'datadog/agent:latest',
-      name: 'datadog-agent',
-      essential: true,
-      dependsOn: [
-        {
-          containerName: 'log_router',
-          condition: 'START',
-        },
-      ],
-      logConfiguration: {
-        logDriver: 'awsfirelens',
-        options: {
-          Name: 'datadog',
-          host: 'http-intake.logs.datadoghq.com',
-          dd_service: 'turnout-datadog',
-          dd_source: 'datadog',
-          dd_message_key: 'log',
-          dd_tags: 'env:' + env,
-          TLS: 'on',
-          Host: 'http-intake.logs.datadoghq.com',
-          provider: 'ecs',
-        },
-        secretOptions: [
-          {
-            valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey',
-            name: 'apikey',
-          },
-        ],
-      },
-    },
-
-    {
-      essential: true,
-      image: 'amazon/aws-for-fluent-bit:latest',
-      name: 'log_router',
-      firelensConfiguration: {
-        type: 'fluentbit',
-        options: { 'enable-ecs-log-metadata': 'true' },
-      },
-      logConfiguration: {
-        logDriver: 'awslogs',
-        options: {
-          'awslogs-group': '/voteamerica/ecs/turnout/' + env,
-          'awslogs-region': 'us-west-2',
-          'awslogs-stream-prefix': 'turnout-fluentbit',
-        },
-      },
-    },
-  ] + (
+  ] + datadogContainers.for_env(env) + (
     if !migrations then [] else [
       {
         image: 'nginx/nginx:latest',
@@ -277,7 +212,7 @@ local migrations = std.extVar('migrations');
             dd_service: 'turnoutmigrate',
             dd_source: 'djangomigrate',
             dd_message_key: 'log',
-            dd_tags: 'env:prod',
+            dd_tags: 'env:' + env,
             TLS: 'on',
             Host: 'http-intake.logs.datadoghq.com',
             provider: 'ecs',
@@ -289,7 +224,7 @@ local migrations = std.extVar('migrations');
             },
           ],
         },
-        environment: datadog.for_service('turnoutmigrate', env),
+        environment: datadogEnv.for_service('turnoutmigrate', env),
         secrets: secrets.for_env(env),
       },
     ]
