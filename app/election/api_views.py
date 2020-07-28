@@ -3,6 +3,7 @@ from django.views.generic.base import RedirectView
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from cdn.views_mixin import CDNCachedView
+from register.custom_ovr_links import get_custom_ovr_link
 
 from .models import State, StateInformation, StateInformationFieldType
 from .serializers import FieldSerializer, StateFieldSerializer, StateSerializer
@@ -33,6 +34,11 @@ class StateExternalToolRedirectView(RedirectView):
     permanent = False
 
     def get_redirect_url(self, state, slug, **kwargs):
+        if slug == "external_tool_ovr":
+            custom = get_custom_ovr_link(state)
+            if custom:
+                return custom
+
         for field in StateInformation.objects.filter(
             state_id=state, field_type__slug=slug
         ):
