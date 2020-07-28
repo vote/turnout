@@ -44,6 +44,10 @@ class State(TimestampModel):
             data[item.field_type.slug] = item.formal_format
         return data
 
+    @property
+    def url_suffix(self):
+        return self.name.lower().replace(" ", "-")
+
 
 class StateInformationFieldType(UUIDModel, TimestampModel):
     slug = models.SlugField("Name", max_length=50, unique=True)
