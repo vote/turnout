@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 import pytz
 from model_bakery import baker
+from smalluuid import SmallUUID
 
 from common import enums
 from event_tracking.models import Event
@@ -49,3 +50,17 @@ def test_track_first_download(client, freezer):
     assert refreshed_item.first_download == datetime(
         2009, 1, 20, 11, 30, tzinfo=pytz.utc
     )
+
+
+@pytest.mark.django_db
+def test_smalluuid_key(client):
+    storage_item = baker.make_recipe("storage.registration_form")
+    registration = baker.make_recipe("register.registration", result_item=storage_item)
+
+    smalluuid = SmallUUID(bytes=storage_item.pk.bytes)
+
+    client.get(f"/download/{smalluuid}/?token={storage_item.token}", follow=False)
+
+    assert Event.objects.count() == 1
+    first_event = Event.objects.first()
+    assert first_event.action == registration.action

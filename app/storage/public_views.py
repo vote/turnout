@@ -3,6 +3,7 @@ import time
 
 from django.views.generic import RedirectView
 from django.views.generic.detail import SingleObjectMixin
+from smalluuid import SmallUUID
 
 from common.analytics import statsd
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
@@ -14,6 +15,15 @@ logger = logging.getLogger("storage")
 
 class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
     model = StorageItem
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            kwargs["pk"] = SmallUUID(kwargs["pk"]).hex_grouped
+            self.kwargs["pk"] = kwargs["pk"]
+            statsd.increment("turnout.storage.download_smalluuid_key_usage")
+        except (TypeError, ValueError):
+            pass
+        return super().dispatch(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
         item = self.get_object()

@@ -4,7 +4,6 @@ from enumfields.drf.fields import EnumField
 from rest_framework import serializers
 
 from common import enums
-from common.utils.fields import SmallUUIDField
 
 
 class TimestampField(serializers.Field):
@@ -16,7 +15,7 @@ class TimestampField(serializers.Field):
 
 
 class GatewayCallbackSerializer(serializers.Serializer):
-    fax_id = SmallUUIDField(required=True)
+    fax_id = serializers.UUIDField(required=True)
     status = EnumField(enum=enums.FaxStatus, required=True)
     message = serializers.CharField(required=True)
     timestamp = TimestampField(required=True)

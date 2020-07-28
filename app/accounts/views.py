@@ -4,7 +4,9 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import FormView
+from smalluuid import SmallUUID
 
+from common.analytics import statsd
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
 
 from .forms import InviteConsumeForm
@@ -18,6 +20,15 @@ class InviteConsumeFormView(UUIDSlugMixin, SingleObjectMixin, FormView):
     slug_field = "token"
     context_object_name = "invite"
     success_url = "/"
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            kwargs["slug"] = SmallUUID(kwargs["slug"]).hex_grouped
+            self.kwargs["slug"] = kwargs["slug"]
+            statsd.increment("turnout.accounts.invite_smalluuid_key_usage")
+        except (TypeError, ValueError):
+            pass
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

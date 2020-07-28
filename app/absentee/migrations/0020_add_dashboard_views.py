@@ -13,8 +13,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("absentee", "0019_actionnetwork_tracking"),
         ("official", "0006_region_hidden"),
-        ("election", "0008_auto_20200629_2252"),
-        ("event_tracking", "0004_add_event_type_created_at_index"),
+        ("election", "0001_initial"),
+        ("event_tracking", "0002_enumchartotextfield"),
     ]
 
     operations = [

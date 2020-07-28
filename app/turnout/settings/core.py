@@ -285,6 +285,18 @@ TWILIO_CALLER_ID = env.str("TWO_FACTOR_SMS_NUMBER", default=None)
 #### END AUTH CONFIGURATION
 
 
+#### SESSION AND COOKIE CONFIGURATION
+
+SESSION_COOKIE_NAME = env.str("SESSION_COOKIE_NAME", default="turnout_sessionid")
+SESSION_COOKIE_SECURE = DEBUG == False
+SESSION_ENGINE = env.str(
+    "SESSION_ENGINE", default="django.contrib.sessions.backends.cached_db"
+)
+CSRF_COOKIE_NAME = env.str("CSRF_COOKIE_NAME", default="turnout_csrftoken")
+
+#### END SESSION AND COOKIE CONFIGURATION
+
+
 #### DJANGO-ALIVE CONFIGURATION
 
 ALIVE_CHECKS: Dict[str, Dict[Optional[str], Optional[str]]] = {

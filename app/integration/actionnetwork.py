@@ -179,7 +179,7 @@ def _sync_item(item, subscriber_id):
     external_id = post_person(
         {
             "person": {
-                "identifiers": [f"voteamerica_action:{item.action_id.hex_grouped}"],
+                "identifiers": [f"voteamerica_action:{item.action_id}"],
                 "given_name": item.first_name,
                 "family_name": item.last_name,
                 "email_addresses": [{"address": item.email}],

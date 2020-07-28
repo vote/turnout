@@ -1,5 +1,6 @@
+import uuid
+
 from django.db import models
-from django_smalluuid.models import SmallUUIDField, uuid_default
 from phonenumber_field.modelfields import PhoneNumberField
 
 from common import enums
@@ -8,7 +9,7 @@ from common.utils.models import TimestampModel, UUIDModel
 
 
 class Fax(UUIDModel, TimestampModel):
-    token = SmallUUIDField(default=uuid_default())
+    token = models.UUIDField(default=uuid.uuid4)
     storage_item = models.ForeignKey("storage.StorageItem", on_delete=models.PROTECT,)
 
     status = TurnoutEnumField(enums.FaxStatus)

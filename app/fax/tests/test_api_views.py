@@ -1,9 +1,9 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
-from smalluuid import SmallUUID
 
 from common.enums import FaxStatus
 from fax.api_views import handle_fax_callback
@@ -98,7 +98,7 @@ def test_handle_fax_callback_perm_fail(mocker):
 @pytest.mark.django_db
 def test_callback(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
+    token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -134,8 +134,8 @@ def test_callback(mocker):
 @pytest.mark.django_db
 def test_callback_no_fax(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
-    wrong_id = SmallUUID()
+    token = uuid.uuid4()
+    wrong_id = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -163,8 +163,8 @@ def test_callback_no_fax(mocker):
 @pytest.mark.django_db
 def test_callback_wrong_token(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
-    wrong_token = SmallUUID()
+    token = uuid.uuid4()
+    wrong_token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -192,7 +192,7 @@ def test_callback_wrong_token(mocker):
 @pytest.mark.django_db
 def test_callback_no_token(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
+    token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -220,7 +220,7 @@ def test_callback_no_token(mocker):
 @pytest.mark.django_db
 def test_callback_old_timestamp(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
+    token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -248,7 +248,7 @@ def test_callback_old_timestamp(mocker):
 @pytest.mark.django_db
 def test_callback_new_timestamp(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
+    token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mock_statsd = mocker.patch("fax.api_views.statsd")
@@ -284,7 +284,7 @@ def test_callback_new_timestamp(mocker):
 @pytest.mark.django_db
 def test_callback_bad_request(mocker):
     ts = datetime(2020, 6, 1, 1, 2, 3, tzinfo=timezone.utc)
-    token = SmallUUID()
+    token = uuid.uuid4()
 
     mock_handle = mocker.patch("fax.api_views.handle_fax_callback")
     mocker.patch("fax.api_views.statsd")

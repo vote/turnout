@@ -1,8 +1,8 @@
 import os
+import uuid
 from io import BytesIO
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django_smalluuid.models import uuid_default
 from model_bakery.recipe import Recipe, foreign_key
 
 from common import enums
@@ -41,7 +41,7 @@ ballot_request = Recipe(
     us_citizen=True,
     sms_opt_in=True,
     region=foreign_key(region),
-    uuid=uuid_default(),
+    uuid=uuid.uuid4,
     signature=foreign_key(signature),
     esign_method=enums.SubmissionType.SELF_PRINT,
     search=None,

@@ -1,6 +1,7 @@
+import uuid
+
 import tsvector_field
 from django.db import models
-from django_smalluuid.models import SmallUUIDField, uuid_default
 
 
 class TimestampModel(models.Model):
@@ -12,7 +13,7 @@ class TimestampModel(models.Model):
 
 
 class UUIDModel(models.Model):
-    uuid = SmallUUIDField(default=uuid_default(), editable=False, primary_key=True)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
 
     class Meta(object):
         abstract = True

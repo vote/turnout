@@ -1,11 +1,11 @@
 import logging
+import uuid
 from datetime import datetime
 
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from smalluuid import SmallUUID
 from typing_extensions import TypedDict
 
 from common.analytics import statsd
@@ -19,7 +19,7 @@ logger = logging.getLogger("fax")
 
 CallbackPayload = TypedDict(
     "CallbackPayload",
-    {"fax_id": SmallUUID, "message": str, "timestamp": datetime, "status": FaxStatus},
+    {"fax_id": uuid.UUID, "message": str, "timestamp": datetime, "status": FaxStatus},
 )
 
 

@@ -162,7 +162,7 @@ def report_runner(report: Report):
 
     if report.subscriber:
         sql = f"SELECT * FROM {table} WHERE subscriber_id = %s"
-        args = [report.subscriber.uuid.hex_grouped]
+        args = [report.subscriber.uuid]
     else:
         sql = f"SELECT * FROM {table}"
         args = []
