@@ -1,3 +1,4 @@
+import requests
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
@@ -8,9 +9,9 @@ from rest_framework.permissions import AllowAny
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
+from common.analytics import statsd
 from common.enums import MessageDirectionType
 from smsbot.models import Number, SMSMessage
-
 
 """
 Twilio's advanced opt-in should be configured with these messages:
@@ -38,6 +39,20 @@ Default keywords: help
   Reply HELP for help, STOP to cancel.
 
 """
+
+
+def proxy_twilio_request(request, target):
+    validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
+    sig = validator.compute_signature(target, request.data)
+    response = requests.post(
+        target, headers={"X-Twilio-Signature": sig}, data=request.data,
+    )
+    statsd.increment("turnout.smsbot.proxy_twilio_webhook")
+    return HttpResponse(
+        response.text,
+        status=response.status_code,
+        content_type=response.headers["content-type"],
+    )
 
 
 @api_view(["POST"])
@@ -134,6 +149,10 @@ def twilio(request):
                 "Reply HELP for help, STOP to cancel."
             )
 
+    if settings.TWILIO_PROXY_TO:
+        return proxy_twilio_request(request, settings.TWILIO_PROXY_TO)
+
+    statsd.increment("turnout.smsbot.twilio_webhook")
     if reply:
         SMSMessage.objects.create(
             phone=number, direction=MessageDirectionType.OUT, message=reply,
