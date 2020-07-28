@@ -158,6 +158,10 @@
         name: 'USVF_SYNC_HOUR',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.usvf_geocode',
+        name: 'USVF_GEOCODE',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/general.datadogkey',
         name: 'DD_API_KEY',
       },

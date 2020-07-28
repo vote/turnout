@@ -19,6 +19,9 @@ importfromprod:
 importgisdata:
 	docker-compose exec server python manage.py importgisdata
 
+syncusvf:
+	docker-compose exec server python manage.py syncusvf
+
 shell:
 	docker-compose exec server /bin/bash
 

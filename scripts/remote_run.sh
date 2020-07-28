@@ -59,6 +59,7 @@ export SLACK_DATA_ERROR_ENABLED=$(aws ssm get-parameter --region $REGION --with-
 export SLACK_DATA_ERROR_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_webhook | jq '.Parameter["Value"]' -r)
 export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
 export USVF_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync_hour | jq '.Parameter["Value"]' -r)
+export USVF_GEOCODE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_geocode | jq '.Parameter["Value"]' -r)
 export DD_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name general.datadogkey | jq '.Parameter["Value"]' -r)
 export REGISTER_CO_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_co_vrd_id | jq '.Parameter["Value"]' -r)
 export REGISTER_CO_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_co_vrd_enabled | jq '.Parameter["Value"]' -r)
@@ -140,6 +141,7 @@ docker run -i -t \
     -e SLACK_DATA_ERROR_WEBHOOK \
     -e USVF_SYNC \
     -e USVF_SYNC_HOUR \
+    -e USVF_GEOCODE \
     -e DD_API_KEY \
     -e REGISTER_CO_VRD_ID \
     -e REGISTER_CO_VRD_ENABLED \

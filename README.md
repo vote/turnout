@@ -54,6 +54,11 @@ run `make importfromprod` (while server is running)
 
 To download GIS data for address matching, run `make importgisdata` (while the server is running)
 
+To sync the LEO office data from USVF, ensure that the
+USVOTEFOUNDATION_KEY is in your .env, and then run `make usvf`.  By
+default we won't geocode every address (this takes a few hours), but
+you can add USVF_GEOCODE=True to enable that.
+
 
 ### Shell Access
 

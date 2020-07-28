@@ -153,7 +153,7 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
                     else:
                         address_action = Action.INSERT
                         location = None
-                    if not location:
+                    if not location and settings.USVF_GEOCODE:
                         addrs = geocode(
                             street=address.get("street1"),
                             city=address.get("city"),
