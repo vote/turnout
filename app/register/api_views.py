@@ -240,7 +240,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
             sync_registration_to_actionnetwork.delay(registration.uuid)
 
     def after_create(self, action_object):
-        custom_link = get_custom_ovr_link(action_object)
+        custom_link = get_custom_ovr_link(action_object.state.code, action_object)
 
         if custom_link:
             action_object.custom_ovr_link = custom_link
