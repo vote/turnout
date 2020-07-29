@@ -2,6 +2,7 @@ from celery import shared_task
 
 from absentee.models import BallotRequest
 from register.models import Registration
+from reminder.models import ReminderRequest
 from verifier.models import Lookup
 
 from .actionnetwork import sync, sync_all_items, sync_item
@@ -9,29 +10,21 @@ from .actionnetwork import sync, sync_all_items, sync_item
 
 @shared_task
 def sync_lookup_to_actionnetwork(pk: str) -> None:
-    from verifier.models import Lookup
-
     sync_item(Lookup.objects.get(uuid=pk))
 
 
 @shared_task
 def sync_ballotrequest_to_actionnetwork(pk: str) -> None:
-    from absentee.models import BallotRequest
-
     sync_item(BallotRequest.objects.get(uuid=pk))
 
 
 @shared_task
 def sync_registration_to_actionnetwork(pk: str) -> None:
-    from register.models import Registration
-
     sync_item(Registration.objects.get(uuid=pk))
 
 
 @shared_task
 def sync_reminderrequest_to_actionnetwork(pk: str) -> None:
-    from reminder.models import ReminderRequest
-
     sync_item(ReminderRequest.objects.get(uuid=pk))
 
 
