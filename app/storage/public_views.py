@@ -18,8 +18,8 @@ class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
 
     def dispatch(self, request, *args, **kwargs):
         try:
+            self.kwargs["pk"] = SmallUUID(kwargs["pk"]).hex_grouped
             kwargs["pk"] = SmallUUID(kwargs["pk"]).hex_grouped
-            self.kwargs["pk"] = kwargs["pk"]
             statsd.increment("turnout.storage.download_smalluuid_key_usage")
         except (TypeError, ValueError):
             pass

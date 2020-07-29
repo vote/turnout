@@ -23,8 +23,8 @@ class InviteConsumeFormView(UUIDSlugMixin, SingleObjectMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         try:
+            self.kwargs["slug"] = SmallUUID(kwargs["slug"]).hex_grouped
             kwargs["slug"] = SmallUUID(kwargs["slug"]).hex_grouped
-            self.kwargs["slug"] = kwargs["slug"]
             statsd.increment("turnout.accounts.invite_smalluuid_key_usage")
         except (TypeError, ValueError):
             pass
