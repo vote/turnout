@@ -5,6 +5,7 @@ nav:
     - 'Election Information API': '/api/'
     - 'Tool Embed':
         - 'Embed Codes': '/embed/'
+        - 'Form Prefilling': '/embed/prefill/'
         - 'Free Embed Code': '/embed/free/'
         - 'Events and Google Tag Manager': '/embed/gtm/'
         - 'Source Tracking': '/embed/tracking/'

@@ -243,3 +243,5 @@ dist
 import
 app/tmp
 
+# Apple system files
+.DS_Store
