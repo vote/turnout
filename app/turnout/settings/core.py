@@ -119,6 +119,7 @@ FIRST_PARTY_APPS = [
     "integration",
     "subscription",
     "reminder",
+    "apikey",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -674,3 +675,10 @@ PA_OVR_KEY = env.str("PA_OVR_KEY", default=None)
 PA_OVR_STAGING = env.bool("PA_OVR_STAGING", default=True)
 
 #### END PA OVR CONFIGURATION
+
+
+#### API CONFIGURATION
+
+API_KEY_PEPPER = env.str("API_KEY_PEEPER", default="somepepper")
+
+#### END API CONFIGURATION

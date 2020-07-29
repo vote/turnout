@@ -13,4 +13,5 @@ urlpatterns = [
     path("smsbot/", include("smsbot.api_urls")),
     path("fax/", include("fax.api_urls")),
     path("reminder/", include("reminder.api_urls")),
+    path("apikey/", include("apikey.api_urls")),
 ]

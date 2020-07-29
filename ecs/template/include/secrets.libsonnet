@@ -225,5 +225,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_subscriber_interest_webhook',
         name: 'SLACK_SUBSCRIBER_INTEREST_WEBHOOK',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.api_key_pepper',
+        name: 'API_KEY_PEPPER',
+      },
     ],
 }
