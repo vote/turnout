@@ -130,7 +130,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
 ##### MIDDLEWARE CONFIGURATION
 
 MIDDLEWARE = [
-    "cdn.middleware.CDNMiddleware",
+    #"cdn.middleware.CDNMiddleware",
     "django_alive.middleware.healthcheck_bypass_host_check",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -504,11 +504,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
-        "cdn": {
-            "handlers": [handler],
-            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
-            "propagate": False,
-        },
+        #"cdn": {
+        #    "handlers": [handler],
+        #    "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+        #    "propagate": False,
+        #},
         "reporting": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),

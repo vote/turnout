@@ -8,7 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.functional import cached_property
 
-from cdn.utils import purge_cdn_tag, purge_cdn_tags
+#from cdn.utils import purge_cdn_tag, purge_cdn_tags
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
@@ -134,18 +134,3 @@ class UpdateNotificationWebhook(UUIDModel, TimestampModel):
 
     def __str__(self):
         return self.name
-
-
-@receiver(post_save, sender=StateInformationFieldType)
-def process_information_field(sender, instance, **kwargs):
-    purge_cdn_tags(["state", "stateinformationfield", "stateinformationfieldtype"])
-    if kwargs["created"]:
-        for state in State.objects.all():
-            with reversion.create_revision():
-                StateInformation(state=state, field_type=instance).save()
-
-
-@receiver(post_save, sender=StateInformation)
-def process_state_information(sender, instance, **kwargs):
-    if not kwargs["created"]:
-        purge_cdn_tag(str(instance.state_id))
