@@ -10,6 +10,8 @@ from whitenoise import WhiteNoise
 import logging
 from common.apm import tracer
 
+logging.basicConfig(level=logging.DEBUG)
+
 ddtrace.patch_all()
 ddtrace.patch(gevent=True)
 
@@ -19,7 +21,6 @@ ddtrace.Pin.override(redis, tracer=tracer)
 
 monkey.patch_all()
 
-logging.basicConfig(level=logging.DEBUG)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "turnout.settings")
 
