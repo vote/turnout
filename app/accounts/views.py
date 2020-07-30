@@ -21,15 +21,6 @@ class InviteConsumeFormView(UUIDSlugMixin, SingleObjectMixin, FormView):
     context_object_name = "invite"
     success_url = "/"
 
-    def dispatch(self, request, *args, **kwargs):
-        try:
-            self.kwargs["slug"] = SmallUUID(kwargs["slug"]).hex_grouped
-            kwargs["slug"] = SmallUUID(kwargs["slug"]).hex_grouped
-            statsd.increment("turnout.accounts.invite_smalluuid_key_usage")
-        except (TypeError, ValueError):
-            pass
-        return super().dispatch(request, *args, **kwargs)
-
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.object.user:
