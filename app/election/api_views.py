@@ -1,18 +1,18 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from cdn.views_mixin import CDNCachedView
+#from cdn.views_mixin import CDNCachedView
 
 from .models import State, StateInformationFieldType
 from .serializers import FieldSerializer, StateFieldSerializer, StateSerializer
 
 
-class StateViewSet(CDNCachedView, ReadOnlyModelViewSet):
+class StateViewSet(ReadOnlyModelViewSet):
     model = State
     serializer_class = StateSerializer
     queryset = State.objects.all()
 
 
-class StateFieldsViewSet(CDNCachedView, ReadOnlyModelViewSet):
+class StateFieldsViewSet(ReadOnlyModelViewSet):
     model = StateInformationFieldType
 
     queryset = StateInformationFieldType.objects.all()
