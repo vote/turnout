@@ -1,11 +1,11 @@
-import hmac
 import hashlib
+import hmac
+import uuid
+from base64 import b64encode
+
 import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
-from requests.auth import HTTPBasicAuth
-from base64 import b64encode
-import uuid
 
 API_KEY_SECRET = "foo"
 API_KEY_PEPPER = "pepp"
@@ -136,4 +136,3 @@ def test_deleted_key(api_key, mock_pepper):
 
     assert response.status_code == 401
     assert response.json() == {"detail": "No such API key"}
-

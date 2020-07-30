@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from action.mixin_apiview import IncompleteActionViewSet
-from common.enums import TurnoutActionStatus, RegistrationGender, PoliticalParties
+from common.enums import PoliticalParties, RegistrationGender, TurnoutActionStatus
 from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import geocode_to_regions
 from official.models import Region
@@ -148,7 +148,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
         if registration.gender in [RegistrationGender.MALE, RegistrationGender.FEMALE]:
             gender = str(registration.gender).lower()
         else:
-            gender = 'unknown'
+            gender = "unknown"
 
         party = str(registration.party)
         if party == PoliticalParties.OTHER:
@@ -194,7 +194,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "status": "failure",
                 "error": "signature_invalid",
                 "exception": str(e),
-           }
+            }
         except Exception as e:
             logger.warning(f"PA API failure: {str(e)}")
             registration.state_api_result = {

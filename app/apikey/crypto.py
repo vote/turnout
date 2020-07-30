@@ -7,9 +7,10 @@
 # against a threat model where an attacker has read-only access to a portion of
 # our database.
 
-from django.conf import settings
-import hmac
 import hashlib
+import hmac
+
+from django.conf import settings
 
 PEPPER = settings.API_KEY_PEPPER.encode()
 

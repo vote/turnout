@@ -1,9 +1,10 @@
-from rest_framework import authentication, exceptions, permissions
 import base64
 from typing import Optional, Tuple
 
-from .models import ApiKey
+from rest_framework import authentication, exceptions, permissions
+
 from .crypto import check_key_secret
+from .models import ApiKey
 
 
 class ApiKeyAuthentication(authentication.BaseAuthentication):

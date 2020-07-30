@@ -2,7 +2,6 @@ from django.urls import path
 from rest_framework import routers
 
 from .api_views import BallotRequestViewSet, StateMetadataView
-from apikey.auth import ApiKeyAuthentication, ApiKeyRequired
 
 router = routers.SimpleRouter()
 router.register(r"request", BallotRequestViewSet)

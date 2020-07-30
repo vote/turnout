@@ -300,6 +300,10 @@
             {
                "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.slack_subscriber_interest_webhook"
+            },
+            {
+               "name": "API_KEY_PEPPER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.api_key_pepper"
             }
          ]
       },
@@ -600,6 +604,10 @@
             {
                "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.slack_subscriber_interest_webhook"
+            },
+            {
+               "name": "API_KEY_PEPPER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.api_key_pepper"
             }
          ]
       },
@@ -899,6 +907,10 @@
             {
                "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.slack_subscriber_interest_webhook"
+            },
+            {
+               "name": "API_KEY_PEPPER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.api_key_pepper"
             }
          ]
       },
@@ -1262,6 +1274,10 @@
             {
                "name": "SLACK_SUBSCRIBER_INTEREST_WEBHOOK",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.slack_subscriber_interest_webhook"
+            },
+            {
+               "name": "API_KEY_PEPPER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.api_key_pepper"
             }
          ]
       }

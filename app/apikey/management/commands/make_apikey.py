@@ -1,5 +1,3 @@
-import shutil
-
 from django.core.management.base import BaseCommand
 
 from apikey.models import ApiKey

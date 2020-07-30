@@ -1,11 +1,10 @@
-from django.db import models
 import secrets
 
-from common.utils.models import (
-    TimestampModel,
-    UUIDModel,
-)
+from django.db import models
+
+from common.utils.models import TimestampModel, UUIDModel
 from multi_tenant.mixins_models import SubscriberModel
+
 from .crypto import hash_key_secret
 
 # From python docs: https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use

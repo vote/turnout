@@ -1,5 +1,5 @@
-import requests
 from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
     help = "Sync USVF LEO data"
@@ -7,4 +7,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from official.usvf import sync
+
         sync()

@@ -94,8 +94,12 @@ PA_REGISTRATION_DL = {
     "state_id_number": "99007069",
     "state_id_number_2": "1234",
     "party": "Other",
-    "state_fields": {"region_id": 432147, "vbm_opt_in": False, "federal_voter": False,
-                     "party_other": "Foo"},
+    "state_fields": {
+        "region_id": 432147,
+        "vbm_opt_in": False,
+        "federal_voter": False,
+        "party_other": "Foo",
+    },
 }
 
 PA_REGISTRATION_SSN = {
