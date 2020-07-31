@@ -5,5 +5,9 @@ from apikey import models
 from multi_tenant.baker_recipes import client
 
 apikey = Recipe(
-    models.ApiKey, subscriber=foreign_key(client), created_by=foreign_key(user)
+    models.ApiKey,
+    subscriber=foreign_key(client),
+    created_by=foreign_key(user),
+    deactivated_by=None,
+    _fill_optional=True,
 )

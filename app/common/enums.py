@@ -53,6 +53,14 @@ class PersonTitle(Enum, metaclass=EnumMeta):
     MS = "Ms"
     MX = "Mx"
 
+    def guess_registration_gender(self):
+        if self == PersonTitle.MR:
+            return RegistrationGender.MALE
+        elif self in [PersonTitle.MRS, PersonTitle.MISS, PersonTitle.MS]:
+            return RegistrationGender.FEMALE
+        else:
+            return None
+
     class Labels:
         MR = "Mr."
         MRS = "Mrs."
@@ -224,3 +232,9 @@ class ProxyStatus(Enum, metaclass=EnumMeta):
     UP = "up"
     BURNED = "burned"
     DOWN = "down"
+
+
+class RegistrationFlowType(Enum, metaclass=EnumMeta):
+    OVR_OR_PRINT = "ovr_or_print"
+    PRINT_ONLY = "print_only"
+    INELIGIBLE = "ineligible"

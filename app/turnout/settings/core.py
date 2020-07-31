@@ -633,6 +633,12 @@ REGISTER_CO_VRD_ID = env.str("REGISTER_CO_VRD_ID", default=None)
 REGISTER_WA_VRD_ENABLED = env.bool("REGISTER_WA_VRD_ENABLED", default=False)
 REGISTER_WA_VRD_ID = env.str("REGISTER_WA_VRD_ID", default=None)
 
+REGISTER_RESUME_URL = env.str(
+    "REGISTER_RESUME_URL", default="http://localhost:8000/register-to-vote/resume/"
+)
+
+REGISTER_JWT_EXPIRATION_MINUTES = env.int("REGISTER_JWT_EXPIRATION_MINUTES", default=60)
+
 #### END REGISTER CONFIGURATION
 
 

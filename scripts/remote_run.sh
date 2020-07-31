@@ -87,6 +87,7 @@ export PROXY_SSH_KEY=$(aws ssm get-parameter --region $REGION --with-decryption 
 export PROXY_SSH_PUB=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_pub | jq '.Parameter["Value"]' -r)
 export PROXY_TAG=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_tag | jq '.Parameter["Value"]' -r)
 export SELENIUM_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.selenium_url | jq '.Parameter["Value"]' -r)
+export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -180,6 +181,7 @@ docker run -i -t \
     -e PROXY_SSH_PUB \
     -e PROXY_TAG \
     -e SELENIUM_URL \
+    -e REGISTER_RESUME_URL \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

@@ -4,7 +4,9 @@ from enumfields.drf.fields import EnumField
 from enumfields.drf.serializers import EnumSupportSerializerMixin
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
+from rest_framework.serializers import ValidationError
 
+from action.models import Action
 from action.serializers import ActionSerializer
 from common import enums
 from common.utils.fields import RequiredBooleanField
@@ -116,3 +118,95 @@ class StatusSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
                 f"Registration status can only be {enums.TurnoutActionStatus.OVR_REFERRED.value}"
             )
         return value
+
+
+class ExternalRegistrationSerializer(
+    EnumSupportSerializerMixin, serializers.ModelSerializer
+):
+    title = EnumField(required=False, enum=enums.PersonTitle)
+    first_name = serializers.CharField(required=True, max_length=256)
+    middle_name = serializers.CharField(required=False, max_length=256)
+    last_name = serializers.CharField(required=True, max_length=256)
+    suffix = serializers.CharField(required=False, max_length=256)
+
+    date_of_birth = serializers.DateField(required=True, input_formats=["iso-8601"])
+
+    email = serializers.EmailField(required=True, max_length=256)
+    phone = PhoneNumberField(required=False)
+
+    address1 = serializers.CharField(required=True, max_length=256)
+    address2 = serializers.CharField(required=False, max_length=256)
+    city = serializers.CharField(required=True, max_length=256)
+    state = serializers.ChoiceField(
+        choices=STATES,
+        validators=[state_code_validator],
+        required=True,
+        source="state_id",
+    )
+    zipcode = serializers.CharField(validators=[zip_validator], required=True)
+
+    sms_opt_in = RequiredBooleanField(
+        required=True, validators=[must_be_true_validator]
+    )
+    sms_opt_in_subscriber = RequiredBooleanField(
+        required=False, validators=[must_be_true_validator]
+    )
+
+    def validate(self, data):
+        """
+        To guarantee our ability to maintain backwards-compatibility, we reject
+        extra fields -- we don't want someone to be passing, e.g., "previous_name"
+        (which we would ignore), and then run into issues if we add a field with
+        that name with different validation requirements than their assumptions.
+        """
+        if hasattr(self, "initial_data"):
+            unknown_keys = set(self.initial_data.keys()) - set(self.fields.keys())
+            if unknown_keys:
+                raise ValidationError("Got unknown fields: {}".format(unknown_keys))
+
+        if (
+            data.get("state_id").lower() == "tn"
+            and data.get("title") == enums.PersonTitle.MX
+        ):
+            raise ValidationError("Tennesee does not allow a title of Mx.")
+
+        return data
+
+    def create(self, validated_data):
+        validated_data["action"] = Action.objects.create()
+        validated_data["subscriber"] = self.request_subscriber(validated_data)
+        validated_data["gender"] = self.guess_gender_from_title(validated_data)
+        validated_data["status"] = enums.TurnoutActionStatus.INCOMPLETE
+        return super().create(validated_data)
+
+    def request_subscriber(self, data):
+        return self.context.get("request").auth.subscriber
+
+    def guess_gender_from_title(self, data):
+        if data.get("title"):
+            return data.get("title").guess_registration_gender()
+        else:
+            return None
+
+    class Meta:
+        model = Registration
+        fields = (
+            "title",
+            "first_name",
+            "middle_name",
+            "last_name",
+            "suffix",
+            "date_of_birth",
+            "email",
+            "phone",
+            "address1",
+            "address2",
+            "city",
+            "state",
+            "zipcode",
+            "sms_opt_in",
+            "sms_opt_in_subscriber",
+            "subscriber",
+            "gender",
+            "status",
+        )

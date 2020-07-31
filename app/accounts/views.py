@@ -4,9 +4,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import FormView
-from smalluuid import SmallUUID
 
-from common.analytics import statsd
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
 
 from .forms import InviteConsumeForm

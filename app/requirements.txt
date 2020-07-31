@@ -70,3 +70,4 @@ beautifulsoup4==4.9.*
 tweepy==3.8.0
 selenium==3.141.*
 paramiko==2.7.*
+pyjwt==1.7.*

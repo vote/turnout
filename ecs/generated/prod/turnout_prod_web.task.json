@@ -340,6 +340,10 @@
             {
                "name": "SELENIUM_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.selenium_url"
+            },
+            {
+               "name": "REGISTER_RESUME_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.register_resume_url"
             }
          ]
       },
@@ -680,6 +684,10 @@
             {
                "name": "SELENIUM_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.selenium_url"
+            },
+            {
+               "name": "REGISTER_RESUME_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.register_resume_url"
             }
          ]
       },
@@ -1019,6 +1027,10 @@
             {
                "name": "SELENIUM_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.selenium_url"
+            },
+            {
+               "name": "REGISTER_RESUME_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.register_resume_url"
             }
          ]
       },
