@@ -52,11 +52,16 @@ documentation, we are using TypeScript notation for the data types. In
 particular, a `?` after an object key indicates that that field is optional.
 Otherwise, the field is required.
 
-As part of the partnership setup process with VoteAmerica, we will give you
-the base URL to send requests to. DO NOT send your requests to
-`api.voteamerica.com`: that URL is behind CloudFlare and has rate-limiting
-restrictions. We will set up a URL for you to hit with IP whitelisting that
-can bypass the rate-limiting. All requests MUST be sent over HTTPS.
+The base URL is `https://api.voteamerica.com` (or
+`https://api-staging.voteamerica.com` for staging). As part of the partnership
+process, you will provide us with your IPs and we will whitelist those IPs so
+they are not subject to our normal rate-limits. Access to `POST` endpoints
+will also be restricted on production so that you can ONLY make requests to
+that endpoint from your whitelisted IPs (you can make requests to `api-staging.voteamerica.com`
+from any IP; this restriction only applies to the production `api.voteamerica.com`
+hostname).
+
+All requests MUST be sent over HTTPS.
 
 You will need to create an API key. You can do this from the VoteAmerica
 admin tools.
