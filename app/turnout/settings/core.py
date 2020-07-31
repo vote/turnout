@@ -120,6 +120,7 @@ FIRST_PARTY_APPS = [
     "subscription",
     "reminder",
     "apikey",
+    "leouptime",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -194,6 +195,8 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ),
     "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
+    "PAGE_SIZE": 100,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
 }
 
 #### END REST FRAMEWORK CONFIGURATION
@@ -207,6 +210,11 @@ CALC_STATS_INTERVAL = 5
 USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
 USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
+
+UPTIME_ENABLED = env.bool("UPTIME_ENABLED", default=False)
+UPTIME_CHECK_CRON_MINUTE = env.str("UPTIME_CHECK_CRON_MINUTE", default="*/15")
+UPTIME_CHECK_DOWN_CRON_MINUTE = env.str("UPTIME_CHECK_DOWN_CRON_MINUTE", default="*/5")
+UPTIME_TWITTER_CRON_MINUTE = env.str("UPTIME_TWITTER_CRON_MINUTE", default="*/5")
 
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
@@ -227,6 +235,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
+    Queue("uptime"),
 }
 CELERY_BEAT_SCHEDULE = {
     "trigger-netlify-updated-information": {
@@ -257,6 +266,26 @@ if OVBM_SYNC:
         "task": "absentee.tasks.refresh_region_links",
         "schedule": crontab(minute=OVBM_SYNC_MINUTE, hour=OVBM_SYNC_HOUR),
     }
+if UPTIME_ENABLED:
+    if UPTIME_CHECK_CRON_MINUTE:
+        CELERY_BEAT_SCHEDULE["trigger-check-uptime"] = {
+            "task": "leouptime.tasks.check_uptime",
+            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+        }
+        CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
+            "task": "leouptime.tasks.check_proxies",
+            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+        }
+    if UPTIME_CHECK_DOWN_CRON_MINUTE:
+        CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
+            "task": "leouptime.tasks.check_uptime_downsites",
+            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+        }
+    if UPTIME_TWITTER_CRON_MINUTE:
+        CELERY_BEAT_SCHEDULE["trigger-tweet-uptime"] = {
+            "task": "leouptime.tasks.tweet_uptime",
+            "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
+        }
 
 #### END CELERY CONFIGURATION
 
@@ -519,6 +548,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "leouptime": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
     },
 }
 
@@ -682,3 +716,24 @@ PA_OVR_STAGING = env.bool("PA_OVR_STAGING", default=True)
 API_KEY_PEPPER = env.str("API_KEY_PEEPER", default="somepepper")
 
 #### END API CONFIGURATION
+
+#### UPTIME CONFIGURATION
+
+UPTIME_TWITTER_CONSUMER_KEY = env.str("UPTIME_TWITTER_CONSUMER_KEY", default=None)
+UPTIME_TWITTER_CONSUMER_SECRET = env.str("UPTIME_TWITTER_CONSUMER_SECRET", default=None)
+UPTIME_TWITTER_ACCESS_TOKEN = env.str("UPTIME_TWITTER_ACCESS_TOKEN", default=None)
+UPTIME_TWITTER_ACCESS_TOKEN_SECRET = env.str(
+    "UPTIME_TWITTER_ACCESS_TOKEN_SECRET", default=None
+)
+
+DIGITALOCEAN_KEY = env.str("DIGITALOCEAN_KEY", default=None)
+
+PROXY_SSH_KEY = env.str("PROXY_SSH_KEY", default=None)
+PROXY_SSH_PUB = env.str("PROXY_SSH_PUB", default=None)
+PROXY_SSH_KEY_ID = env.int("PROXY_SSH_KEY_ID", default=None)
+PROXY_COUNT = env.int("PROXY_COUNT", 5)
+PROXY_TAG = env.str("PROXY_TAG", "env:dev")
+
+SELENIUM_URL = env.str("SELENIUM_URL", None)
+
+#### END UPTIME CONFIGURATION

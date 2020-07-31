@@ -14,4 +14,5 @@ urlpatterns = [
     path("fax/", include("fax.api_urls")),
     path("reminder/", include("reminder.api_urls")),
     path("apikey/", include("apikey.api_urls")),
+    path("leouptime/", include("leouptime.api_urls")),
 ]

@@ -229,5 +229,45 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.api_key_pepper',
         name: 'API_KEY_PEPPER',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.digitalocean_key',
+        name: 'DIGITALOCEAN_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_enabled',
+        name: 'UPTIME_ENABLED',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_consumer_key',
+        name: 'UPTIME_TWITTER_CONSUMER_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_consumer_secret',
+        name: 'UPTIME_TWITTER_CONSUMER_SECRET',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_access_token',
+        name: 'UPTIME_TWITTER_ACCESS_TOKEN',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_access_token_secret',
+        name: 'UPTIME_TWITTER_ACCESS_TOKEN_SECRET',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_key',
+        name: 'PROXY_SSH_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_pub',
+        name: 'PROXY_SSH_PUB',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_tag',
+        name: 'PROXY_TAG',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.selenium_url',
+        name: 'SELENIUM_URL',
+      },
     ],
 }

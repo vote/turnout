@@ -216,3 +216,11 @@ class SubscriptionInterestStatus(Enum, metaclass=EnumMeta):
 class SubscriberStatus(Enum, metaclass=EnumMeta):
     ACTIVE = "active"
     DISABLED = "disabled"
+
+
+class ProxyStatus(Enum, metaclass=EnumMeta):
+    CREATING = "creating"
+    PREPARING = "preparing"
+    UP = "up"
+    BURNED = "burned"
+    DOWN = "down"
