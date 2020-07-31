@@ -375,8 +375,11 @@ def test_generate_response_ineligible(mocker):
 
 
 @pytest.mark.django_db
-def test_create_and_resume_minimal(basic_state_info):
+def test_create_and_resume_minimal(basic_state_info, mocker):
     key = baker.make_recipe("apikey.apikey")
+    mocker.patch(
+        "register.external_views.get_custom_ovr_link"
+    ).return_value = "some link"
 
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=basicauth(str(key.uuid), key.hashed_secret()))
@@ -399,6 +402,8 @@ def test_create_and_resume_minimal(basic_state_info):
     assert response.json() == {
         "uuid": str(registration.pk),
         "state": MINIMAL_REGISTRATION["state"],
+        "action_id": str(registration.action_id),
+        "custom_ovr_link": "some link",
     }
 
     uuid_response = unauth_client.get(f"{RESUME_ENDPOINT}?uuid={registration.uuid}")
@@ -407,6 +412,8 @@ def test_create_and_resume_minimal(basic_state_info):
     assert response.json() == {
         "uuid": str(registration.pk),
         "state": MINIMAL_REGISTRATION["state"],
+        "action_id": str(registration.action_id),
+        "custom_ovr_link": "some link",
     }
 
 

@@ -162,5 +162,11 @@ class RegistrationResumeView(APIView):
             registration = Registration.objects.get(action_id=action_id)
 
         return Response(
-            {"uuid": registration.uuid, "state": registration.state_id}, status=200
+            {
+                "uuid": registration.uuid,
+                "state": registration.state_id,
+                "action_id": registration.action_id,
+                "custom_ovr_link": get_custom_ovr_link(registration),
+            },
+            status=200,
         )
