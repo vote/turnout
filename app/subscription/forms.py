@@ -7,7 +7,9 @@ from .models import Interest, Product
 
 class InterestForm(forms.ModelForm):
     product = forms.ModelChoiceField(
-        queryset=Product.objects.filter(public=True), widget=forms.RadioSelect
+        label="Term",
+        queryset=Product.objects.filter(public=True),
+        widget=forms.RadioSelect,
     )
 
     class Meta:
@@ -18,7 +20,6 @@ class InterestForm(forms.ModelForm):
             "first_name",
             "last_name",
             "email",
-            "phone",
             "product",
             "nonprofit",
             "ein",
@@ -27,12 +28,11 @@ class InterestForm(forms.ModelForm):
             "organization_name": "Organization Name",
             "first_name": "First Name",
             "last_name": "Last Name",
-            "product": "Term requested:",
-            "nonprofit": "Are you a 501(c)3 nonprofit?",
+            "nonprofit": "Check here if you are a 501(c)3 nonprofit",
             "ein": "If yes to 501(c)3 please enter the EIN below",
         }
         help_texts = {
-            "nonprofit": "If so, you will receive a 100% discount for the entirety of 2020."
+            "nonprofit": "If so, you will receive a 100% discount for the entirety of 2020.",
         }
         field_classes = {
             "nonprofit": forms.BooleanField,
