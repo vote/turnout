@@ -21,12 +21,14 @@ ADD_ENDPOINT = "https://actionnetwork.org/api/v2/forms/{form_id}/submissions/"
 
 logger = logging.getLogger("integration")
 
-# actionnetwork ids must be lowercase, so we need both lower and CamelCase here
+# ActionNetwork ids (the key) must be lowercase, and match the table name in the
+# turnout db.  The form description shows up in the ActionNetwork UI
+# and matches the tool name, with title case (value).  See get_form_title().
 ACTIONS = {
     "lookup": "Lookup",
-    "registration": "Registration",
-    "ballotrequest": "BallotRequest",
-    "reminderrequest": "ReminderRequest",
+    "registration": "Register",
+    "ballotrequest": "Absentee",
+    "reminderrequest": "Reminder",
 }
 
 CACHE_KEY = "actionnetwork-forms"
@@ -34,6 +36,13 @@ CACHE_KEY = "actionnetwork-forms"
 
 class ActionNetworkError(Exception):
     pass
+
+
+def get_form_title(action_desc, prefix):
+    title = f"VoteAmerica {action_desc}"
+    if prefix != "prod":
+        title += f" ({prefix})"
+    return title
 
 
 def get_api_key(subscriber_id):
@@ -62,7 +71,7 @@ def get_form_ids(ids, prefix):
     return an_id, va_action
 
 
-def setup_action_forms(subscriber_id):
+def setup_action_forms(subscriber_id, api_key):
     if subscriber_id:
         key = f"{CACHE_KEY}-{subscriber_id}"
     else:
@@ -77,7 +86,6 @@ def setup_action_forms(subscriber_id):
         return forms
 
     logger.info(f"Fetching forms from ActionNetwork for subscriber {subscriber_id}")
-    api_key = get_api_key(subscriber_id)
     prefix = settings.ACTIONNETWORK_FORM_PREFIX
     forms = {}
     with tracer.trace("an.form", service="actionnetwork"):
@@ -89,6 +97,18 @@ def setup_action_forms(subscriber_id):
                 an_id, va_action = get_form_ids(form["identifiers"], prefix)
                 if an_id and va_action:
                     forms[va_action] = an_id
+                    if va_action in ACTIONS:
+                        title = get_form_title(ACTIONS[va_action], prefix)
+                        if title != form["title"]:
+                            logger.info(f"Fixing title for {va_action} form {an_id}")
+                            response = requests.put(
+                                FORM_ENDPOINT + f"/{an_id}",
+                                headers={"OSDI-API-Token": api_key},
+                                json={
+                                    "title": title,
+                                }
+                            )
+
             nexturl = response.json().get("_links", {}).get("next", {}).get("href")
 
     for action, action_desc in ACTIONS.items():
@@ -101,7 +121,7 @@ def setup_action_forms(subscriber_id):
                     headers={"OSDI-API-Token": api_key},
                     json={
                         "identifiers": [f"voteamerica:{prefix}_{action}"],
-                        "title": f"VoteAmerica {action_desc} ({prefix})",
+                        "title": get_form_title(action_desc, prefix),
                         "origin_system": "voteamerica",
                     },
                 )
@@ -166,7 +186,12 @@ def _sync_item(item, subscriber_id):
     if not api_key:
         return
 
-    forms = setup_action_forms(subscriber_id)
+    if item.subscriber.default_slug:
+        slug = item.subscriber.default_slug.slug
+    else:
+        slug = None        # this is not good
+
+    forms = setup_action_forms(subscriber_id, api_key)
     action = str(item.__class__.__name__).lower()
     form_id = forms.get(action)
 
@@ -192,6 +217,9 @@ def _sync_item(item, subscriber_id):
                         "country": "US",
                     },
                 ],
+                "custom_fields": {
+                    "subscriber": slug,
+                },
             },
             "action_network:referrer_data": {
                 "source": item.source or f"voteamerica_{action}",
