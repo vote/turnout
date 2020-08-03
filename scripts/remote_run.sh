@@ -78,6 +78,7 @@ export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGIO
 export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
 export API_KEY_PEPPER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.api_key_pepper | jq '.Parameter["Value"]' -r)
 export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
+export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -162,6 +163,7 @@ docker run -i -t \
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
     -e API_KEY_PEPPER \
     -e REGISTER_RESUME_URL \
+    -e STATE_TOOL_REDIRECT_SYNC \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

@@ -273,5 +273,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_resume_url',
         name: 'REGISTER_RESUME_URL',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.state_tool_redirect_sync',
+        name: 'STATE_TOOL_REDIRECT_SYNC',
+      },
     ],
 }

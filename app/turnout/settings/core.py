@@ -585,6 +585,22 @@ USVF_GEOCODE = env.bool("USVF_GEOCODE", default=False)
 PHONENUMBER_DEFAULT_REGION = "US"
 PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
 
+STATE_TOOL_REDIRECT_BUCKET = env.str(
+    "STATE_TOOL_REDIRECT_BUCKET", default=f"turnout{ENV}-public"
+)
+STATE_TOOL_REDIRECT_SYNC = env.bool("STATE_TOOL_REDIRECT_CRON", default=False)
+STATE_TOOL_REDIRECT_CRON_HOUR = env.str("STATE_TOOL_REDIRECT_CRON_HOUR", default="*/12")
+STATE_TOOL_REDIRECT_CRON_MINUTE = env.str(
+    "STATE_TOOL_REDIRECT_CRON_MINUTE", default="10"
+)
+if STATE_TOOL_REDIRECT_SYNC:
+    CELERY_BEAT_SCHEDULE["publish-external-tool-redirects"] = {
+        "task": "election.tasks.publish_external_tool_redirects",
+        "schedule": crontab(
+            minute=STATE_TOOL_REDIRECT_CRON_MINUTE, hour=STATE_TOOL_REDIRECT_CRON_HOUR
+        ),
+    }
+
 #### END ELECTION OFFICIALS CONFIGURATION
 
 

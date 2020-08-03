@@ -45,3 +45,10 @@ def trigger_netlify_if_updates():
     timeout = 60 * 60
     for webhook in todo_webhooks:
         res = trigger_netlify.apply_async(args=(webhook.pk,), expires=timeout)
+
+
+@shared_task
+def publish_external_tool_redirects():
+    from .external_redirects import publish
+
+    publish()

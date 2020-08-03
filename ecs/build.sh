@@ -7,7 +7,8 @@ cd "$(dirname "$0")"
 # the container assumes the uid is 1000; mangle permissions to behave
 # if we're not.
 TARGETS="../scripts/remote_run.sh */*/*.json ./template/include/*.libsonnet ./template/*.jsonnet"
-chmod 777 $TARGETS
+TARGETDIRS="generated/*"
+chmod 777 $TARGETS $TARGETDIRS
 
 cat <<"EOF" | docker run --rm -i --entrypoint bash -v $PWD/..:/app -w /app/ecs bitnami/jsonnet:latest
 jsonnetfmt -i ./template/*.jsonnet
@@ -24,8 +25,9 @@ jq -c . < ./generated/dev/turnout_dev_web.task.temp.json > ./generated/dev/turno
 jq -c . < ./generated/staging/turnout_staging_web.task.temp.json > ./generated/staging/turnout_staging_web.task.json
 jq -c . < ./generated/prod/turnout_prod_web.task.temp.json > ./generated/prod/turnout_prod_web.task.json
 
-rm ./generated/dev/turnout_dev_web.task.temp.json
-rm ./generated/staging/turnout_staging_web.task.temp.json
-rm ./generated/prod/turnout_prod_web.task.temp.json
+rm -f ./generated/dev/turnout_dev_web.task.temp.json
+rm -f ./generated/staging/turnout_staging_web.task.temp.json
+rm -f ./generated/prod/turnout_prod_web.task.temp.json
 
 chmod 644 $TARGETS
+chmod 755 $TARGETDIRS
