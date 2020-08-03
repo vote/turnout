@@ -653,7 +653,7 @@ ABSENTEE_LEO_EMAIL_OVERRIDE_ADDRESS = env.str(
 )
 
 ABSENTEE_LEO_EMAIL_FROM = env.str(
-    "ABSENTEE_LEO_EMAIL_FROM", default="noreply@voteamerica.com"
+    "ABSENTEE_LEO_EMAIL_FROM", default="transmission-staging@voteamerica.com"
 )
 
 ABSENTEE_LEO_FAX_EMAIL_REPLY_TO = env.str(

@@ -1,15 +1,14 @@
 {% extends "email/base.html" %}
 {% block content %}
 
-To the local election official for {{ballot_request.region.name}},
+Dear Election Official,
 <br><br>
-Attached please find an absentee ballot application from
-{{ballot_request.first_name}} {{ballot_request.last_name}}.
-Their manual signature was scanned onto the form and submitted with their consent.
-
-If you have any questions, please do not hesitate to contact
-{{ballot_request.first_name}} {{ballot_request.last_name}} at
-{{ballot_request.email}} (cc'd on this email).
+This transmission of the attached form for {{ballot_request.first_name}} {{ballot_request.last_name}}
+was effectuated by {{ballot_request.first_name}} {{ballot_request.last_name}}.
+{{ballot_request.first_name}} {{ballot_request.last_name}} manually filled, signed, and initiated
+this transmission of the attached form without intervention or assistance from a 3rd party.
+Replying to this transmission will reply directly to {{ballot_request.first_name}} {{ballot_request.last_name}}.
+Please process the attached form for {{ballot_request.first_name}} {{ballot_request.last_name}}.
 <br><br>
 Thank you.
 <br><br>

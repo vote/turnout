@@ -1,3 +1,4 @@
+import email.utils
 from typing import Tuple
 
 from django.conf import settings
@@ -63,7 +64,7 @@ def send_email(ballot_request: BallotRequest, content: str, leo_email: str) -> N
     msg = EmailMessage(
         subject=subject,
         body=content,
-        from_email=FROM_EMAIL,
+        from_email=f'"{email.utils.quote(ballot_request.first_name)} {email.utils.quote(ballot_request.last_name)}" <{FROM_EMAIL}>',
         to=[leo_email],
         cc=[ballot_request.email],
         reply_to=[FROM_EMAIL, leo_email, ballot_request.email],
