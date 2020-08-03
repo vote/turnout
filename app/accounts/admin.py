@@ -26,7 +26,7 @@ class UserAdmin(BaseUserAdmin):
         ("Personal info", {"fields": ("first_name", "last_name")}),
         (
             "Permissions",
-            {"fields": ("is_election_admin", "is_active", "is_staff", "is_superuser")},
+            {"fields": ("is_election_admin", "is_subscriber_admin", "is_active", "is_staff", "is_superuser")},
         ),
         ("Important dates", {"fields": ("last_login", "created_at", "modified_at")}),
     )
