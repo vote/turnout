@@ -33,7 +33,7 @@ def notify_slack_interest(interest_pk: str) -> None:
         try:
             message = f"New subscription interest: {interest.organization_name} {interest.website} ({interest.first_name} {interest.last_name} <{interest.email}>)"
             if interest.nonprofit:
-                interest += " (Non-profit)"
+                message += " (Non-profit)"
             r = requests.post(
                 settings.SLACK_SUBSCRIBER_INTEREST_WEBHOOK, json={"text": message},
             )
