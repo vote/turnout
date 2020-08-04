@@ -1,6 +1,8 @@
+from uuid import UUID
+
 from django.core.files import File
 from django.http import Http404
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,11 +21,20 @@ class ResetView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = SmallUUIDKeySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        uuid_or_smalluuid = request.data.get("id")
+        if not uuid_or_smalluuid:
+            raise serializers.ValidationError({"id": "Required"})
 
         try:
-            item = StorageItem.objects.get(pk=serializer.validated_data["id"],)
+            uuid = UUID(uuid_or_smalluuid)
+        except (TypeError, ValueError):
+            try:
+                uuid = UUID(SmallUUID(uuid_or_smalluuid).hex_grouped)
+            except (TypeError, ValueError):
+                raise serializers.ValidationError({"id": "Must be a uuid or smalluuid"})
+
+        try:
+            item = StorageItem.objects.get(pk=uuid)
         except StorageItem.DoesNotExist:
             statsd.increment("turnout.storage.reset_failure_missing")
             raise Http404
