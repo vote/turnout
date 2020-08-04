@@ -104,9 +104,7 @@ def setup_action_forms(subscriber_id, api_key):
                             response = requests.put(
                                 FORM_ENDPOINT + f"/{an_id}",
                                 headers={"OSDI-API-Token": api_key},
-                                json={
-                                    "title": title,
-                                }
+                                json={"title": title,},
                             )
 
             nexturl = response.json().get("_links", {}).get("next", {}).get("href")
@@ -189,7 +187,7 @@ def _sync_item(item, subscriber_id):
     if item.subscriber.default_slug:
         slug = item.subscriber.default_slug.slug
     else:
-        slug = None        # this is not good
+        slug = None  # this is not good
 
     forms = setup_action_forms(subscriber_id, api_key)
     action = str(item.__class__.__name__).lower()
@@ -217,9 +215,7 @@ def _sync_item(item, subscriber_id):
                         "country": "US",
                     },
                 ],
-                "custom_fields": {
-                    "subscriber": slug,
-                },
+                "custom_fields": {"subscriber": slug,},
             },
             "action_network:referrer_data": {
                 "source": item.source or f"voteamerica_{action}",

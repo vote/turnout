@@ -3,19 +3,19 @@ import logging
 import random
 
 import sentry_sdk
-from django.conf import settings
-
 import tweepy
-from common import enums
-from common.apm import tracer
-from common.rollouts import get_feature_bool
-from election.models import StateInformation
+from django.conf import settings
 from selenium import webdriver
 from selenium.common.exceptions import (
     RemoteDriverServerException,
     SessionNotCreatedException,
     WebDriverException,
 )
+
+from common import enums
+from common.apm import tracer
+from common.rollouts import get_feature_bool
+from election.models import StateInformation
 
 from .models import Proxy, Site, SiteCheck, SiteDowntime
 

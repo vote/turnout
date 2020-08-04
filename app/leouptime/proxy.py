@@ -5,10 +5,10 @@ import tempfile
 import time
 import uuid
 
+import paramiko
 import requests
 from django.conf import settings
 
-import paramiko
 from common import enums
 from common.rollouts import get_feature_int
 
