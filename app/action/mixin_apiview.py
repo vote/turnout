@@ -81,6 +81,12 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
                 code=serializer.validated_data["mailing_state"]
             )
 
+        if not is_create:
+            # Forbid changing email or phone (but don't error, for backwards
+            # compatiblity)
+            serializer.validated_data.pop("email", None)
+            serializer.validated_data.pop("phone", None)
+
         # do not pass is_18_or_over or state_id_number to model, we are not storing it
         is_18_or_over = serializer.validated_data.pop("is_18_or_over", None)
         state_id_number = serializer.validated_data.pop("state_id_number", None)
