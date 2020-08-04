@@ -77,6 +77,16 @@ export PA_OVR_STAGING=$(aws ssm get-parameter --region $REGION --with-decryption
 export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
 export API_KEY_PEPPER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.api_key_pepper | jq '.Parameter["Value"]' -r)
+export DIGITALOCEAN_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.digitalocean_key | jq '.Parameter["Value"]' -r)
+export UPTIME_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_enabled | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_CONSUMER_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_key | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_CONSUMER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_secret | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_ACCESS_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token | jq '.Parameter["Value"]' -r)
+export UPTIME_TWITTER_ACCESS_TOKEN_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token_secret | jq '.Parameter["Value"]' -r)
+export PROXY_SSH_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_key | jq '.Parameter["Value"]' -r)
+export PROXY_SSH_PUB=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_pub | jq '.Parameter["Value"]' -r)
+export PROXY_TAG=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_tag | jq '.Parameter["Value"]' -r)
+export SELENIUM_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.selenium_url | jq '.Parameter["Value"]' -r)
 export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
 export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
 
@@ -162,6 +172,16 @@ docker run -i -t \
     -e SLACK_SUBSCRIBER_INTEREST_ENABLED \
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
     -e API_KEY_PEPPER \
+    -e DIGITALOCEAN_KEY \
+    -e UPTIME_ENABLED \
+    -e UPTIME_TWITTER_CONSUMER_KEY \
+    -e UPTIME_TWITTER_CONSUMER_SECRET \
+    -e UPTIME_TWITTER_ACCESS_TOKEN \
+    -e UPTIME_TWITTER_ACCESS_TOKEN_SECRET \
+    -e PROXY_SSH_KEY \
+    -e PROXY_SSH_PUB \
+    -e PROXY_TAG \
+    -e SELENIUM_URL \
     -e REGISTER_RESUME_URL \
     -e STATE_TOOL_REDIRECT_SYNC \
 -e DEBUG=$DEBUG \

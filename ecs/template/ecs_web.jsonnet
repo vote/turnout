@@ -12,7 +12,7 @@ local memory = std.extVar('memory');
   executionRoleArn: 'arn:aws:iam::719108811834:role/Turnout-ECS-' + capitalEnv,
   taskRoleArn: 'arn:aws:iam::719108811834:role/Turnout-ECS-' + capitalEnv + '-TaskRole',
   containerDefinitions: [
-    turnoutContainer.essential('turnoutweb', 'django', '/app/ops/web_health.sh || exit 1') + {
+    turnoutContainer.essential_secrets('turnoutweb', 'django', '/app/ops/web_health.sh || exit 1') + {
       name: 'web',
       portMappings: [
         {
@@ -23,7 +23,7 @@ local memory = std.extVar('memory');
       ],
     },
 
-    turnoutContainer.essential('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
+    turnoutContainer.essential_secrets('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
       name: 'worker',
       command: ['/app/ops/worker_launch.sh', 'default'],
     },
@@ -48,7 +48,7 @@ local memory = std.extVar('memory');
           },
         ],
         essential: false,
-      } + turnoutContainer.common('turnoutmigrate', 'djangomigrate'),
+      } + turnoutContainer.common_secrets('turnoutmigrate', 'djangomigrate'),
     ]
   ),
   memory: '8192',

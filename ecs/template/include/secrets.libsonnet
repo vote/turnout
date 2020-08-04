@@ -229,7 +229,7 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.api_key_pepper',
         name: 'API_KEY_PEPPER',
       },
-      /*{
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.digitalocean_key',
         name: 'DIGITALOCEAN_KEY',
       },
@@ -268,7 +268,7 @@
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.selenium_url',
         name: 'SELENIUM_URL',
-      },*/
+      },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_resume_url',
         name: 'REGISTER_RESUME_URL',

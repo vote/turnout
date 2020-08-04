@@ -28,42 +28,61 @@ local common(ddname, ddsource) =
       ],
     },
     environment: datadogEnv.for_service(ddname, env),
+  };
+
+local common_secrets(ddname, ddsource) =
+  common(ddname, ddsource) +
+  {
     secrets: secrets.for_env(env),
   };
 
+local essential(ddname, ddsource, health_command) =
+  common(ddname, ddsource) + {
+    healthCheck: {
+      command: [
+        'CMD-SHELL',
+        health_command,
+      ],
+      interval: 120,
+      timeout: 15,
+      retries: 3,
+    },
+    dependsOn: [
+      {
+        containerName: 'datadog-agent',
+        condition: 'START',
+      },
+      {
+        containerName: 'log_router',
+        condition: 'START',
+      },
+    ] + (
+      if !migrations then [] else [
+        {
+          containerName: 'migration',
+          condition: 'COMPLETE',
+        },
+      ]
+    ),
+    essential: true,
+  };
+
+local essential_secrets(ddname, ddsource, health_command) =
+  essential(ddname, ddsource, health_command) +
+  {
+    secrets: secrets.for_env(env),
+  };
 
 {
   common(ddname, ddsource)::
     common(ddname, ddsource),
 
+  common_secrets(ddname, ddsource)::
+    common_secrets(ddname, ddsource),
+
   essential(ddname, ddsource, health_command)::
-    common(ddname, ddsource) + {
-      healthCheck: {
-        command: [
-          'CMD-SHELL',
-          health_command,
-        ],
-        interval: 120,
-        timeout: 15,
-        retries: 3,
-      },
-      dependsOn: [
-        {
-          containerName: 'datadog-agent',
-          condition: 'START',
-        },
-        {
-          containerName: 'log_router',
-          condition: 'START',
-        },
-      ] + (
-        if !migrations then [] else [
-          {
-            containerName: 'migration',
-            condition: 'COMPLETE',
-          },
-        ]
-      ),
-      essential: true,
-    },
+    essential(ddname, ddsource, health_command),
+
+  essential_secrets(ddname, ddsource, health_command)::
+    essential_secrets(ddname, ddsource, health_command),
 }
