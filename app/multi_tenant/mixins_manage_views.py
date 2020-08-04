@@ -6,6 +6,9 @@ from multi_tenant.models import Client
 
 
 class SubscriberManageViewMixin(ManageViewMixin):
+    def check_subscriber_access(self):
+        pass
+
     def dispatch(self, request, *args, **kwargs):
         self.subscriber = get_object_or_404(
             Client, default_slug__slug=kwargs["subscriber"]
@@ -15,6 +18,9 @@ class SubscriberManageViewMixin(ManageViewMixin):
             or self.subscriber not in request.user.allowed_clients
         ):
             raise Http404
+
+        self.check_subscriber_access()
+
         return super().dispatch(request, *args, **kwargs)
 
 

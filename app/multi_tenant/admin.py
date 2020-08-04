@@ -16,7 +16,7 @@ class SubscriptionInline(admin.TabularInline):
 
 @admin.register(models.Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ("name", "url", "default_slug", "status")
+    list_display = ("name", "url", "default_slug", "status", "has_api_access")
     inlines = (SubscriberSlugInline,)
 
     def has_delete_permission(self, request, obj=None):

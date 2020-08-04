@@ -59,6 +59,8 @@ class Client(UUIDModel, TimestampModel):
     # this client.
     is_first_party = models.BooleanField(default=False)
 
+    has_api_access = models.BooleanField(default=False, null=True)
+
     class Meta:
         ordering = ["created_at"]
         verbose_name = "Subscriber"

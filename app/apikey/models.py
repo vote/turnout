@@ -30,11 +30,13 @@ class ApiKey(SubscriberModel, UUIDModel, TimestampModel):
 
     secret = models.TextField(null=True, default=secret_token)
 
+    description = models.TextField(null=True)
+
     class Meta(object):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"API Key for {self.subscriber} - {self.pk}"
+        return f"API Key for {self.subscriber} - {self.description} - {self.pk}"
 
     def hashed_secret(self) -> str:
         return hash_key_secret(self.secret)

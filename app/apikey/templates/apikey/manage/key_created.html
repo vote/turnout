@@ -1,0 +1,28 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags tz %}
+
+{% block title %}Created {{ key.description }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:apikey:key_list' user.active_client_slug %}">API Keys</a></li>
+                <li class="breadcrumb-item">Create API Key</li>
+            </ol>
+        </nav>
+        <h1>API Key Created</h1>
+        <div>
+	  <p>Please record the secret value below.  Note that this is the only time you will see it.  If you lose this string, you will need to create a new API key (and deactivate this one).</p>
+	  <p>
+	    <b>Key ID:</b> <tt>{{ uuid }}</tt>
+	    <br>
+	    <b>Secret:</b> <tt>{{ hashed_secret }}</tt>
+	  </p>
+	  <p>For more information on using this key, please refer to the <a href="https://docs.voteamerica.com/api/action/">Action API</a> documentation.</p>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

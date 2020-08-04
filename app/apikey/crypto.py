@@ -22,7 +22,7 @@ JWT_EXPIRATION_LEEWAY_SECONDS = 30
 SECRET_KEY = force_str(settings.SECRET_KEY)
 JWT_ISSUER = settings.PRIMARY_ORIGIN
 
-logger = logging.getLogger("api_crypto")
+logger = logging.getLogger("apikey")
 
 
 def hash_key_secret(secret: str) -> str:

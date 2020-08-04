@@ -1,0 +1,60 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}API Keys | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div>
+        <h1>{{ user.active_client }} API Keys</h1>
+	<div>
+	  <p>API Keys enable access to our <a href="https://docs.voteamerica.com/api/action/">Action API</a>.</p>
+	</div>
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <tr>
+                      <th>Key ID</th>
+                      <th>Description</th>
+                      <th>Created</th>
+                      <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key in apikeys %}
+                    <tr>
+                        <td>
+                          {{ key.uuid }}
+                        </td>
+                        <td>
+                            {{ key.description }}
+                        </td>
+                        <td>
+                            {{ key.created_at }}
+                        </td>
+			<td>
+                            <a
+                              title="Deactivate"
+                              class="btn btn-small btn-primary"
+		              href="{% url 'manage:apikey:key_deactivate' user.active_client_slug key.pk %}">
+			      <span class="mdi mdi-key-minus"></span> Deactivate</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-right">
+            <a
+                href="{% url 'manage:apikey:key_create' user.active_client_slug %}"
+                class="btn btn-small btn-primary"
+            >
+                <span class="mdi mdi-key-plus"></span>
+                Create new API Key
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

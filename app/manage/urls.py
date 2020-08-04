@@ -16,5 +16,6 @@ urlpatterns = [
     path("<slug:subscriber>/reports/", include("reporting.manage_urls")),
     path("<slug:subscriber>/", views.ManageView.as_view(), name="home"),
     path("<slug:subscriber>/", include("multi_tenant.manage_urls")),
+    path("<slug:subscriber>/", include("apikey.manage_urls")),
     path("", views.RedirectToSubscriberManageView.as_view(), name="home_redirect"),
 ]

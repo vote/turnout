@@ -1,0 +1,29 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags tz %}
+
+{% block title %}Deactivate {{ key.description }} | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'manage:apikey:key_list' user.active_client_slug %}">API Keys</a></li>
+                <li class="breadcrumb-item">Deactivate</li>
+            </ol>
+        </nav>
+        <h1>Deactivate API Key</h1>
+	<p>By deactivating this key, you will revoke API access from any application using it.  If you have multiple keys on your account, please be sure you are revoking the right one!</p>
+        <div class="card">
+            <div class="card-header">Deactivate API Key "{{ apikey.description }}"?</div>
+            <div class="card-body">
+                <form role="form" method="POST" action="" novalidate>
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-block btn-primary">Deactivate</button>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
