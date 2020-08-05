@@ -1,6 +1,6 @@
+local base_secrets = import './base_secrets.libsonnet';
 local datadogEnv = import './datadog_env.libsonnet';
 local secrets = import './secrets.libsonnet';
-local base_secrets = import './base_secrets.libsonnet';
 local migrations = std.extVar('migrations');
 local env = std.extVar('env');
 
@@ -97,4 +97,7 @@ local essential_base_secrets(ddname, ddsource, health_command) =
 
   essential_secrets(ddname, ddsource, health_command)::
     essential_secrets(ddname, ddsource, health_command),
+
+  essential_base_secrets(ddname, ddsource, health_command)::
+    essential_base_secrets(ddname, ddsource, health_command),
 }
