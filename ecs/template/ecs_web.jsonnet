@@ -28,7 +28,7 @@ local memory = std.extVar('memory');
       command: ['/app/ops/worker_launch.sh', 'default'],
     },
 
-    turnoutContainer.essential('turnoutbeat', 'celerybeat', '/app/ops/beat_health.sh || exit 1') + {
+    turnoutContainer.essential_base_secrets('turnoutbeat', 'celerybeat', '/app/ops/beat_health.sh || exit 1') + {
       name: 'beat',
       command: ['/app/ops/beat_launch.sh'],
     },
