@@ -89,6 +89,8 @@ export PROXY_TAG=$(aws ssm get-parameter --region $REGION --with-decryption --na
 export SELENIUM_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.selenium_url | jq '.Parameter["Value"]' -r)
 export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
 export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
+export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
+export FILE_PURGE_DAYS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_purge_days | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -184,6 +186,8 @@ docker run -i -t \
     -e SELENIUM_URL \
     -e REGISTER_RESUME_URL \
     -e STATE_TOOL_REDIRECT_SYNC \
+    -e FILE_TOKEN_PURGED_URL \
+    -e FILE_PURGE_DAYS \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

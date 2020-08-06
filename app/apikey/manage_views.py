@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import (
     CreateView,
@@ -14,7 +14,6 @@ from django.views.generic import (
 )
 
 from multi_tenant.mixins_manage_views import SubscriberManageViewMixin
-from multi_tenant.models import Client
 
 from .forms import ApiKeyCreateForm, ApiKeyDeactivateForm
 from .models import ApiKey

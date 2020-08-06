@@ -2,7 +2,7 @@ from model_bakery.recipe import Recipe
 
 from common import enums
 
-from .models import StorageItem
+from .models import SecureUploadItem, StorageItem
 
 registration_form = Recipe(
     StorageItem, app=enums.FileType.REGISTRATION_FORM, _create_files=True
@@ -11,3 +11,5 @@ registration_form = Recipe(
 ballot_request_form = Recipe(
     StorageItem, app=enums.FileType.ABSENTEE_REQUEST_FORM, _create_files=True
 )
+
+secureupload = Recipe(SecureUploadItem, _create_files=True)

@@ -352,6 +352,17 @@ FILE_TOKEN_RESET_URL = env.str(
     "FILE_TOKEN_RESET_URL", default="http://localhost:8000/download/?id={item_id}"
 )
 
+FILE_PURGE_DAYS = env.int("FILE_PURGE_DAYS", default=None)
+FILE_TOKEN_PURGED_URL = env.str(
+    "FILE_TOKEN_PURGED_URL",
+    default="http://localhost:8000/download-purged/?id={item_id}&filetype={filetype}&purge_days={purge_days}",
+)
+if FILE_PURGE_DAYS and FILE_PURGE_DAYS >= 1:
+    CELERY_BEAT_SCHEDULE["purge-old-storage"] = {
+        "task": "storage.tasks.purge_old_storage",
+        "schedule": crontab(minute=45, hour="*/12"),
+    }
+
 if env.bool("ATTACHMENT_USE_S3", False):
     ATTACHMENT_STORAGE_ENGINE = "s3_folder_storage.s3.DefaultStorage"
 

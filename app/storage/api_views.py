@@ -1,8 +1,9 @@
+import logging
 from uuid import UUID
 
 from django.core.files import File
-from django.http import Http404
-from rest_framework import status, serializers
+from django.http import Http404, HttpResponseRedirect
+from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,11 +11,12 @@ from smalluuid import SmallUUID
 
 from common import enums
 from common.analytics import statsd
-from common.utils.serializers import SmallUUIDKeySerializer
 
 from .models import SecureUploadItem, StorageItem
 from .notification import trigger_notification
 from .parsers import UnnamedFileUploadParser
+
+logger = logging.getLogger("storage")
 
 
 class ResetView(APIView):
@@ -38,6 +40,10 @@ class ResetView(APIView):
         except StorageItem.DoesNotExist:
             statsd.increment("turnout.storage.reset_failure_missing")
             raise Http404
+
+        if item.purged:
+            logger.info(f"Purged file at {item.purged}. Redirecting.")
+            return HttpResponseRedirect(item.purged_url)
 
         item.refresh_token()
         trigger_notification(item)

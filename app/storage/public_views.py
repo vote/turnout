@@ -32,6 +32,9 @@ class DownloadFileView(UUIDSlugMixin, SingleObjectMixin, RedirectView):
             "turnout.storage.token_validity_seconds",
             time.time() - item.expires.timestamp(),
         )
+        if item.purged:
+            logger.info(f"Purged file at {item.purged}. Redirecting.")
+            return item.purged_url
         if token and item.validate_token(token):
             logger.info(f"Valid token {item.pk}. Redirecting to file url.")
 

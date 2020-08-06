@@ -277,5 +277,13 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.state_tool_redirect_sync',
         name: 'STATE_TOOL_REDIRECT_SYNC',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_token_purged_url',
+        name: 'FILE_TOKEN_PURGED_URL',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_purge_days',
+        name: 'FILE_PURGE_DAYS',
+      },
     ],
 }

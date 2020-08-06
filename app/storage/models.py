@@ -28,6 +28,7 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
     email = models.EmailField(blank=True, null=True)
     expires = models.DateTimeField(default=storage_expire_date_time)
     first_download = models.DateTimeField(blank=True, null=True)
+    purged = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -55,6 +56,12 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
     def reset_url(self):
         return settings.FILE_TOKEN_RESET_URL.format(item_id=self.pk)
 
+    @property
+    def purged_url(self):
+        return settings.FILE_TOKEN_PURGED_URL.format(
+            item_id=self.pk, filetype=self.app, purge_days=settings.FILE_PURGE_DAYS
+        )
+
     def track_download(self):
         if self.app == enums.FileType.REGISTRATION_FORM:
             registration = Registration.objects.get(result_item=self)
@@ -71,6 +78,7 @@ class SecureUploadItem(UUIDModel, TimestampModel):
     file = models.FileField(storage=HighValueStorage())
     upload_type = TurnoutEnumField(enums.SecureUploadType)
     content_type = models.TextField()
+    purged = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         ordering = ["-created_at"]
