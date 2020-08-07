@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Tuple
 from model_bakery import baker
 
 from absentee.models import BallotRequest
-from election.choices import STATES
+from election.choices import REGISTRATION_STATES
 from election.models import State, StateInformation
 from official.baker_recipes import (
     ABSENTEE_BALLOT_MAILING_ADDRESS,
@@ -26,7 +26,7 @@ STATES_WITH_METADATA = (
 ALL_STATES = (
     os.environ["ABSENTEE_TEST_ONLY"].split(",")
     if os.environ.get("ABSENTEE_TEST_ONLY")
-    else [state_code for state_code, state_name in STATES]
+    else [state_code for state_code, state_name in REGISTRATION_STATES]
 )
 
 STATE_ID_NUMBER_SLUGS = (

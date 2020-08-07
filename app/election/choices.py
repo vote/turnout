@@ -1,5 +1,5 @@
 # From https://github.com/democrats/election-calendar
-STATES = (
+REGISTRATION_STATES = (
     ("AL", "Alabama"),
     ("AK", "Alaska"),
     ("AZ", "Arizona"),
@@ -52,3 +52,14 @@ STATES = (
     ("WY", "Wyoming"),
     ("DC", "District of Columbia"),
 )
+
+TERRITORIES = (
+    ("AS", "American Samoa"),
+    ("GU", "Guam"),
+    ("MP", "Northern Mariana Islands"),
+    ("PR", "Puerto Rico"),
+    ("VI", "U.S. Virgin Islands"),
+)
+
+
+STATES = REGISTRATION_STATES + TERRITORIES
