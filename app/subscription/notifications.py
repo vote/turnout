@@ -8,10 +8,9 @@ from django.urls import reverse
 if TYPE_CHECKING:
     from multi_tenant.models import Client
 
-WELCOME_EMAIL_SUBJECT = "Welcome to VoteAmerica"
 WELCOME_EMAIL_TEMPLATE = "subscription/emails/welcome.html"
 
-REJECTION_EMAIL_SUBJECT = "Your VoteAmerica application has been rejected"
+REJECTION_EMAIL_SUBJECT = "Your VoteAmerica account has been rejected"
 REJECTION_EMAIL_TEMPLATE = "subscription/emails/rejected.html"
 
 
@@ -37,25 +36,24 @@ def compile_email(subscriber: "Client", initial_user_email: str) -> str:
             "manage:multi_tenant:settings", subscriber
         ),
         "recipient": recipient,
+        "subscriber": subscriber,
     }
 
     return render_to_string(WELCOME_EMAIL_TEMPLATE, context)
 
 
-def send_welcome_email(initial_user_email: str, content: str) -> None:
+def send_welcome_email(subject: str, initial_user_email: str, content: str) -> None:
     msg = EmailMessage(
-        WELCOME_EMAIL_SUBJECT,
-        content,
-        settings.MANAGEMENT_NOTIFICATION_FROM,
-        [initial_user_email],
+        subject, content, settings.MANAGEMENT_NOTIFICATION_FROM, [initial_user_email],
     )
     msg.content_subtype = "html"
     msg.send()
 
 
 def trigger_welcome_notification(subscriber: "Client", initial_user_email: str) -> None:
+    subject = f"The {subscriber.name} account at VoteAmerica is now active"
     content = compile_email(subscriber, initial_user_email)
-    send_welcome_email(initial_user_email, content)
+    send_welcome_email(subject, initial_user_email, content)
 
 
 def trigger_rejection_notification(email: str, reason: str) -> None:

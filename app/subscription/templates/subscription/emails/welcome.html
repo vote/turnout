@@ -3,33 +3,32 @@
 
 Hello,<br><br>
 
-Your account has been activated.<br><br>
+The {{ subscriber }} account has been activated.<br><br>
 
-In a separate email, you will receive an invitation to the VoteAmerica Admin Portal. Upon entering your information
-and enabling two-factor authentication, you will be ready to begin using the VoteAmerica tools.<br><br>
+You will receive a separate email inviting you to create your personal account
+within the {{ subscriber_name }} team. You’ll need to activate your personal
+account in order to access the VoteAmerica admin portal.<br><br>
 
-The following are important links to be aware of:<br><br>
+The admin portal portal allows you to do the following:<br>
+<ul>
+<li>Access your custom embed code</li>
+<li>View usage stats</li>
+<li>Export a CSV of your voter data</li>
+<li>Enable or disable a SMS disclaimer checkbox</li>
+<li>Sync to a 3rd party system, such as Bluelink</li>
+</ul><br>
 
-<a href="{{ custom_embed_code_link }}">Click here</a> to access your custom embed code<br>
+You might also want to check out the
+<a href="https://docs.voteamerica.com/">VoteAmerica developer documentation.</a>
+We update it regularly.<br><br>
 
-<a href="{{ export_code_link }}">Click here</a> to generate CSV exports for your organization’s data<br>
+If you have additional questions not covered above, feel free to reach out to
+<a href="mailto:premium@voteamerica.com">premium@voteamerica.com</a>. We will
+respond within 48 hours.<br><br>
 
-<a href="{{ user_management_link }}">Click here</a> if you'd like to invite new users to view your data and generate their own exports<br>
+Thank you for helping to increase voter turnout.<br><br>
 
-<a href="{{ settings_link }}">Click here</a> to adjust your embed settings, such as enabling or disabling a SMS disclaimer checkbox or syncing data to a
-3rd party like Bluelink<br><br>
+~ The VoteAmerica team
 
-Please also read through our <a href="https://docs.voteamerica.com/">documentation</a>, we regularly update it with important information, and most questions can be
-answered there.<br><br>
-
-However, <strong>you should rely on your organization’s specific embed code, found in the <a href="{{ custom_embed_code_link }}">embed section of the admin</a>, not the
-code found in the VoteAmerica documentation</strong>.<br><br>
-
-If you have additional questions not covered above, feel free to reach out to <a href="mailto:subscriber@voteamerica.com">subscriber@voteamerica.com</a> and you’ll
-receive a response within 48 hours.<br><br>
-
-Thank you for signing up.<br><br>
-
-~ VoteAmerica Team
 
 {% endblock %}

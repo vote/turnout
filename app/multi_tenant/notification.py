@@ -8,7 +8,7 @@ from common.apm import tracer
 from .models import Client
 
 NOTIFICATION_TEMPLATE = "multi_tenant/email/new_invite.html"
-SUBJECT = "You've been invited to join the VoteAmerica toolset"
+SUBJECT = "You have been added to a VoteAmerica subscriber team"
 
 
 @tracer.wrap()
