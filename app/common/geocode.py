@@ -48,7 +48,7 @@ def strip_address_number_alpha_suffix(address):
 
 def geocode(**kwargs):
     RETRIES = 2
-    TIMEOUT = 2.0
+    TIMEOUT = 6.0  # seems to be enough to handle slow apartment build queries
 
     args = {}
     for k in ["street", "city", "state", "q", "fields"]:
