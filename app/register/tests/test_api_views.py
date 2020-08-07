@@ -140,6 +140,11 @@ def submission_task_patch(mocker):
     return mocker.patch("register.api_views.process_registration")
 
 
+@pytest.fixture()
+def state_confirmation_email(mocker):
+    return mocker.patch("register.api_views.send_registration_state_confirmation.delay")
+
+
 def test_get_request_disallowed():
     client = APIClient()
     response = client.get(REGISTER_API_ENDPOINT)
@@ -493,7 +498,7 @@ def mock_ovrlib_session_dl(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
+def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, state_confirmation_email):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -516,10 +521,13 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region):
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "failure"
     assert register_response.json()["state_api_error"] == "no_dl_or_signature"
+    assert not state_confirmation_email.called
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig_few_regions(mock_ovrlib_session_dl, mock_few_regions):
+def test_pa_nodlorsig_few_regions(
+    mock_ovrlib_session_dl, mock_few_regions, state_confirmation_email
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -544,10 +552,13 @@ def test_pa_nodlorsig_few_regions(mock_ovrlib_session_dl, mock_few_regions):
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "failure"
     assert register_response.json()["state_api_error"] == "no_dl_or_signature"
+    assert not state_confirmation_email.called
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig_all_regions(mock_ovrlib_session_dl, mock_all_regions):
+def test_pa_nodlorsig_all_regions(
+    mock_ovrlib_session_dl, mock_all_regions, state_confirmation_email
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -568,10 +579,13 @@ def test_pa_nodlorsig_all_regions(mock_ovrlib_session_dl, mock_all_regions):
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "failure"
     assert register_response.json()["state_api_error"] == "no_dl_or_signature"
+    assert not state_confirmation_email.called
 
 
 @pytest.mark.django_db
-def test_pa_dl(submission_task_patch, mock_ovrlib_session_dl, mock_region):
+def test_pa_dl(
+    submission_task_patch, mock_ovrlib_session_dl, mock_region, state_confirmation_email
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -597,6 +611,8 @@ def test_pa_dl(submission_task_patch, mock_ovrlib_session_dl, mock_region):
     registration = Registration.objects.first()
     assert registration.party == PoliticalParties.OTHER
     assert registration.state_fields["party_other"] == "Foo"
+
+    state_confirmation_email.assert_called_once_with(registration.pk)
 
 
 @pytest.fixture
@@ -636,7 +652,12 @@ def mock_ovrlib_session_badssn(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_sig(submission_task_patch, mock_ovrlib_session_baddl, mock_region):
+def test_pa_sig(
+    submission_task_patch,
+    mock_ovrlib_session_baddl,
+    mock_region,
+    state_confirmation_email,
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -659,6 +680,7 @@ def test_pa_sig(submission_task_patch, mock_ovrlib_session_baddl, mock_region):
     assert register_response.status_code == 200
     assert register_response.json()["state_api_status"] == "failure"
     assert register_response.json()["state_api_error"] == "dl_invalid"
+    assert not state_confirmation_email.called
 
     # image
     item = SecureUploadItem.objects.create(
@@ -680,3 +702,5 @@ def test_pa_sig(submission_task_patch, mock_ovrlib_session_baddl, mock_region):
 
     registration = Registration.objects.first()
     assert registration.party == PoliticalParties.NONE
+
+    state_confirmation_email.assert_called_once_with(registration.uuid)

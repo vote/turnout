@@ -31,3 +31,13 @@ def send_registration_notification(registration_pk: str) -> None:
     registration.action.track_event(EventType.FINISH_SELF_PRINT)
 
     trigger_notification(registration)
+
+
+@shared_task
+@statsd.timed("turnout.register.send_registration_state_confirmation")
+def send_registration_state_confirmation(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_state_confirmation
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    trigger_state_confirmation(registration)

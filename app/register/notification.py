@@ -6,6 +6,7 @@ from common.apm import tracer
 from .models import Registration
 
 NOTIFICATION_TEMPLATE = "register/email/file_notification.html"
+STATE_CONFIRMATION_TEMPLATE = "register/email/state_confirmation.html"
 SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
 
 
@@ -42,4 +43,21 @@ def send_email(registration: Registration, content: str) -> None:
 
 def trigger_notification(registration: Registration) -> None:
     content = compile_email(registration)
+    send_email(registration, content)
+
+
+def trigger_state_confirmation(registration: Registration) -> None:
+    content = render_to_string(
+        NOTIFICATION_TEMPLATE,
+        {
+            "registration": registration,
+            "subscriber": registration.subscriber,
+            "recipient": {
+                "first_name": registration.first_name,
+                "last_name": registration.last_name,
+                "email": registration.email,
+            },
+            "state_info": registration.state.data,
+        },
+    )
     send_email(registration, content)

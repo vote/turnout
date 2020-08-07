@@ -8,7 +8,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from action.mixin_apiview import IncompleteActionViewSet
-from common.enums import PoliticalParties, RegistrationGender, TurnoutActionStatus
+from common.enums import (
+    EventType,
+    PoliticalParties,
+    RegistrationGender,
+    TurnoutActionStatus,
+)
 from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import geocode_to_regions
 from official.models import Region
@@ -19,6 +24,7 @@ from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration
 from .models import Registration
 from .serializers import RegistrationSerializer, StatusSerializer
+from .tasks import process_registration_submission, send_registration_state_confirmation
 
 logger = logging.getLogger("register")
 
@@ -98,7 +104,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "status": "failure",
                 "error": "no_dl_or_signature",
             }
-            return
+            return False
 
         # derive county/city from region
         region = Region.objects.get(external_id=state_fields.get("region_id"))
@@ -107,7 +113,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "status": "failure",
                 "error": "invalid_region_id",
             }
-            return
+            return False
         if region.name.startswith("City of "):
             r["county"] = region.name[8:]
         elif region.name.endswith(" County"):
@@ -117,7 +123,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "status": "failure",
                 "error": "invalid_region_name",
             }
-            return
+            return False
 
         # pass through some state_fields
         for k in [
@@ -182,6 +188,9 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 "signature_source": res.signature_source,
             }
             registration.status = TurnoutActionStatus.PENDING
+            registration.action.track_event(EventType.FINISH_EXTERNAL_API)
+            send_registration_state_confirmation.delay(registration.pk)
+            return True
         except ovrlib.exceptions.InvalidDLError as e:
             registration.state_api_result = {
                 "status": "failure",
@@ -207,6 +216,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 registration.state_api_result,
                 extra=registration.state_api_result,
             )
+        return False
 
     def complete(
         self,
@@ -217,11 +227,11 @@ class RegistrationViewSet(IncompleteActionViewSet):
         is_18_or_over,
     ):
         if registration.state_id == "PA" and registration.state_fields:
-            self.process_pa_registration(
+            success = self.process_pa_registration(
                 registration, state_id_number, state_id_number_2, is_18_or_over
             )
             registration.save()
-            if registration.status != TurnoutActionStatus.PENDING:
+            if not success:
                 return
         else:
             registration.status = TurnoutActionStatus.PENDING
@@ -229,6 +239,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
 
             process_registration(registration, state_id_number, is_18_or_over)
 
+        # common reg completion path
         if registration.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
             send_welcome_sms.apply_async(
                 args=(str(registration.phone), "register"),
