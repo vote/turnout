@@ -16,9 +16,11 @@ from django.views.generic import (
 from reversion.views import RevisionMixin
 
 from accounts.models import Invite
+from common.enums import ExternalToolType
 from manage.mixins import ManageViewMixin
 
 from .forms import (
+    API_KEY_PLACEHOLDER,
     AssociationManageDeleteForm,
     ChangeSubscriberManageForm,
     InviteAssociationManageDeleteForm,
@@ -27,7 +29,7 @@ from .forms import (
 )
 from .invite import invite_user
 from .mixins_manage_views import SubscriberManageViewMixin
-from .models import Association, InviteAssociation
+from .models import Association, InviteAssociation, SubscriberIntegrationProperty
 
 logger = logging.getLogger("multi_tenant")
 
@@ -44,8 +46,47 @@ class SubscriberUpdateSettingsView(
     success_message = "Subscriber settings have been updated"
     success_url = reverse_lazy("manage:home_redirect")
 
+    def get_actionnetwork_key(self, subscriber):
+        return SubscriberIntegrationProperty.objects.filter(
+            subscriber=subscriber,
+            external_tool=ExternalToolType.ACTIONNETWORK,
+            name="api_key",
+        ).first()
+
     def get_object(self):
         return self.subscriber
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        old_key = self.get_actionnetwork_key(data["form"].instance)
+        if old_key:
+            data["form"].initial["sync_actionnetwork"] = True
+            data["form"].initial["actionnetwork_api_key"] = API_KEY_PLACEHOLDER
+
+        return data
+
+    def form_valid(self, form):
+        an = form.cleaned_data.pop("sync_actionnetwork", False)
+        an_key = form.cleaned_data.pop("actionnetwork_api_key", None)
+        old_key = self.get_actionnetwork_key(form.instance)
+        if an:
+            if an_key and an_key != API_KEY_PLACEHOLDER:
+                if old_key:
+                    if old_key.value != an_key:
+                        old_key.value = an_key
+                        old_key.save()
+                else:
+                    SubscriberIntegrationProperty.objects.create(
+                        subscriber=form.instance,
+                        external_tool=ExternalToolType.ACTIONNETWORK,
+                        name="api_key",
+                        value=an_key,
+                    )
+        else:
+            if old_key:
+                old_key.delete()
+        return super().form_valid(form)
 
 
 class ChangeSubscriberView(ManageViewMixin, FormView):

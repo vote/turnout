@@ -4,8 +4,16 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from accounts.models import Invite
+from common.enums import ExternalToolType
 
-from .models import Association, Client, InviteAssociation
+from .models import (
+    Association,
+    Client,
+    InviteAssociation,
+    SubscriberIntegrationProperty,
+)
+
+API_KEY_PLACEHOLDER = "________________________________"
 
 
 class ChangeSubscriberManageForm(forms.Form):
@@ -16,6 +24,39 @@ class ChangeSubscriberManageForm(forms.Form):
 
 
 class SubscriberSettingsForm(forms.ModelForm):
+    sync_actionnetwork = forms.BooleanField(
+        required=False,
+        label="Enable ActionNetwork Sync",
+        help_text="If new contacts should be added to your <a href='https://actionnetwork.org/'>ActionNetwork</a> email list",
+    )
+    actionnetwork_api_key = forms.CharField(
+        max_length=64,
+        required=False,
+        label="ActionNetwork API Key",
+        help_text="New ActionNetwork API key (leave blank if unchanged)",
+        widget=forms.PasswordInput(render_value=True),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        an = cleaned_data.get("sync_actionnetwork")
+        an_key = cleaned_data.get("actionnetwork_api_key")
+        if an_key and an_key != API_KEY_PLACEHOLDER and not an:
+            self.add_error(
+                "actionnetwork_api_key",
+                "Cannot provide ActionNetwork API key without enabling ActionNetwork sync",
+            )
+        old_key = SubscriberIntegrationProperty.objects.filter(
+            subscriber=self.instance,
+            external_tool=ExternalToolType.ACTIONNETWORK,
+            name="api_key",
+        ).first()
+        if an and not an_key and not old_key:
+            self.add_error(
+                "actionnetwork_api_key",
+                "Must provide API key to enable ActionNetwork sync",
+            )
+
     class Meta:
         model = Client
         fields = [

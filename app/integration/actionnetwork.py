@@ -67,11 +67,11 @@ def get_form_ids(ids, prefix):
         if org == "action_network":
             an_id = pid
         elif org == "voteamerica" and pid.startswith(prefix + "_"):
-            va_action = pid[len(prefix) + 1 :]
+            va_action = pid.split("_", 2)[1]
     return an_id, va_action
 
 
-def setup_action_forms(subscriber_id, api_key):
+def setup_action_forms(subscriber_id, api_key, slug):
     if subscriber_id:
         key = f"{CACHE_KEY}-{subscriber_id}"
     else:
@@ -114,11 +114,14 @@ def setup_action_forms(subscriber_id, api_key):
             # This code runs once per action, ever.
             logger.info(f"Creating action form for {action_desc} ({prefix})")
             with tracer.trace("an.form.create", service="actionnetwork"):
+                form_id = f"voteamerica:{prefix}_{action}"
+                if subscriber_id and slug:
+                    form_id += "_" + slug
                 response = requests.post(
                     FORM_ENDPOINT,
                     headers={"OSDI-API-Token": api_key},
                     json={
-                        "identifiers": [f"voteamerica:{prefix}_{action}"],
+                        "identifiers": [form_id],
                         "title": get_form_title(action_desc, prefix),
                         "origin_system": "voteamerica",
                     },
@@ -189,7 +192,7 @@ def _sync_item(item, subscriber_id):
     else:
         slug = None  # this is not good
 
-    forms = setup_action_forms(subscriber_id, api_key)
+    forms = setup_action_forms(subscriber_id, api_key, slug)
     action = str(item.__class__.__name__).lower()
     form_id = forms.get(action)
 
