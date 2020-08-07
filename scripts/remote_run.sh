@@ -91,6 +91,8 @@ export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decry
 export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
 export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
 export FILE_PURGE_DAYS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_purge_days | jq '.Parameter["Value"]' -r)
+export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
+export PDF_GENERATION_LAMBDA_FUNCTION=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_function | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -188,6 +190,8 @@ docker run -i -t \
     -e STATE_TOOL_REDIRECT_SYNC \
     -e FILE_TOKEN_PURGED_URL \
     -e FILE_PURGE_DAYS \
+    -e PDF_GENERATION_LAMBDA_ENABLED \
+    -e PDF_GENERATION_LAMBDA_FUNCTION \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

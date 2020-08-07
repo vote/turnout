@@ -99,10 +99,11 @@ def fill_pdf_template_local(
     signature: Optional[SecureUploadItem] = None,
 ):
     # Call into PDFTemplate directly
+    signature_image = None
     if signature:
-        Image.open(signature.file)
+        signature_image = Image.open(signature.file)
 
-    with template.fill(data) as filled_pdf:
+    with template.fill(data, signature_image) as filled_pdf:
         item.file.save(file_name, File(filled_pdf), True)
 
 

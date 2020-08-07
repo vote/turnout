@@ -285,5 +285,13 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_purge_days',
         name: 'FILE_PURGE_DAYS',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pdf_generation_lambda_enabled',
+        name: 'PDF_GENERATION_LAMBDA_ENABLED',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pdf_generation_lambda_function',
+        name: 'PDF_GENERATION_LAMBDA_FUNCTION',
+      },
     ],
 }
