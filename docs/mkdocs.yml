@@ -1,4 +1,4 @@
-site_name: VoteAmerica Knowledgebase
+site_name: VoteAmerica Developer Documentation
 docs_dir: 'turnout'
 nav:
     - Home: 'index.md'
