@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from model_bakery import baker
+from pdf_template import PDFTemplateSection, SignatureBoundingBox
 
 from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
 from absentee.generateform import (
@@ -9,12 +10,11 @@ from absentee.generateform import (
     FAX_COVER_SHEET_PATH,
     SELF_PRINT_COVER_SHEET_PATH,
     generate_name,
-    generate_pdf,
+    generate_pdf_template,
     get_submission_method,
     prepare_formdata,
 )
 from common.enums import SubmissionType
-from common.pdf.pdftemplate import PDFTemplateSection, SignatureBoundingBox
 from official.baker_recipes import ABSENTEE_BALLOT_MAILING_ADDRESS
 
 from ..state_pdf_data import STATE_DATA
@@ -389,26 +389,17 @@ def test_generate_pdf_email(mocker):
         },
     )
 
-    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
+    template, num_pages = generate_pdf_template("XX", SubmissionType.LEO_EMAIL)
 
-    generate_pdf({"some": "data",}, "XX", SubmissionType.LEO_EMAIL, "some-sig")
-
-    MockPDFTemplate.assert_called_with(
-        [
-            PDFTemplateSection(
-                path="absentee/templates/pdf/states/XX.pdf",
-                is_form=True,
-                flatten_form=False,
-                signature_locations={
-                    2: SignatureBoundingBox(x=1, y=2, width=3, height=4),
-                },
-            )
-        ]
-    )
-
-    MockPDFTemplate().fill.assert_called_with(
-        {"some": "data", "num_pages": "2"}, signature="some-sig"
-    )
+    assert num_pages == 2
+    assert template.template_files == [
+        PDFTemplateSection(
+            path="absentee/templates/pdf/states/XX.pdf",
+            is_form=True,
+            flatten_form=False,
+            signature_locations={2: SignatureBoundingBox(x=1, y=2, width=3, height=4),},
+        )
+    ]
 
 
 def test_generate_pdf_fax(mocker):
@@ -416,45 +407,29 @@ def test_generate_pdf_fax(mocker):
         STATE_DATA, {"XX": {"pages": 3,}},
     )
 
-    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
-
-    generate_pdf({"some": "data"}, "XX", SubmissionType.LEO_FAX, "some-sig")
-
-    MockPDFTemplate.assert_called_with(
-        [
-            PDFTemplateSection(path=FAX_COVER_SHEET_PATH, is_form=True),
-            PDFTemplateSection(
-                path="absentee/templates/pdf/states/XX.pdf",
-                is_form=True,
-                flatten_form=False,
-                signature_locations=None,
-            ),
-        ]
-    )
-
-    MockPDFTemplate().fill.assert_called_with(
-        {"some": "data", "num_pages": "4"}, signature="some-sig"
-    )
+    template, num_pages = generate_pdf_template("XX", SubmissionType.LEO_FAX)
+    assert num_pages == 4
+    assert template.template_files == [
+        PDFTemplateSection(path=FAX_COVER_SHEET_PATH, is_form=True),
+        PDFTemplateSection(
+            path="absentee/templates/pdf/states/XX.pdf",
+            is_form=True,
+            flatten_form=False,
+            signature_locations=None,
+        ),
+    ]
 
 
 def test_generate_pdf_self_print(mocker):
-    MockPDFTemplate = mocker.patch("absentee.generateform.PDFTemplate")
-
-    generate_pdf({"some": "data"}, "XX", SubmissionType.SELF_PRINT, "some-sig")
-
-    MockPDFTemplate.assert_called_with(
-        [
-            PDFTemplateSection(path=SELF_PRINT_COVER_SHEET_PATH, is_form=True),
-            PDFTemplateSection(
-                path="absentee/templates/pdf/states/XX.pdf",
-                is_form=True,
-                flatten_form=False,
-                signature_locations=None,
-            ),
-            PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
-        ]
-    )
-
-    MockPDFTemplate().fill.assert_called_with(
-        {"some": "data", "num_pages": "3"}, signature="some-sig"
-    )
+    template, num_pages = generate_pdf_template("XX", SubmissionType.SELF_PRINT)
+    assert num_pages == 3
+    assert template.template_files == [
+        PDFTemplateSection(path=SELF_PRINT_COVER_SHEET_PATH, is_form=True),
+        PDFTemplateSection(
+            path="absentee/templates/pdf/states/XX.pdf",
+            is_form=True,
+            flatten_form=False,
+            signature_locations=None,
+        ),
+        PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
+    ]

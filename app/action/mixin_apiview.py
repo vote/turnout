@@ -11,7 +11,6 @@ from election.models import State
 
 class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet):
     permission_classes = [AllowAny]
-    task = None
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -60,8 +59,11 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         # this method.
         serializer.validated_data["status"] = TurnoutActionStatus.PENDING
         action_object.save()
-        if self.task:
-            self.task.delay(action_object.uuid, state_id_number, is_18_or_over)
+
+        self.after_complete(action_object, state_id_number, is_18_or_over)
+
+    def after_complete(self, action_object, state_id_number, is_18_or_over):
+        pass
 
     @tracer.wrap()
     def process_serializer(self, serializer, is_create):

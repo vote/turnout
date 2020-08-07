@@ -1,12 +1,12 @@
 import logging
 
-from django.core.files import File
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
+from pdf_template import PDFTemplate, PDFTemplateSection
 
 from common import enums
 from common.apm import tracer
-from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection
+from common.pdf.pdftemplate import fill_pdf_template
 from election.models import StateInformation
 from storage.models import StorageItem
 
@@ -18,22 +18,19 @@ logger = logging.getLogger("register")
 TEMPLATE_PATH = "register/templates/pdf/eac-nvra.pdf"
 COVER_SHEET_PATH = "register/templates/pdf/cover.pdf"
 
+PDF_TEMPLATE = PDFTemplate(
+    [
+        PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True),
+        PDFTemplateSection(path=TEMPLATE_PATH, is_form=True, flatten_form=False),
+    ]
+)
+
 
 def generate_name(registration):
     filename = slugify(
         f"{registration.state.code} {registration.last_name} registrationform"
     ).lower()
     return f"{filename}.pdf"
-
-
-@tracer.wrap()
-def generate_pdf(form_data):
-    return PDFTemplate(
-        [
-            PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True),
-            PDFTemplateSection(path=TEMPLATE_PATH, is_form=True, flatten_form=False),
-        ]
-    ).fill(form_data)
 
 
 @tracer.wrap()
@@ -112,13 +109,13 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
 def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
 
-    with generate_pdf(form_data) as filled_pdf:
-        item = StorageItem(
-            app=enums.FileType.REGISTRATION_FORM,
-            email=registration.email,
-            subscriber=registration.subscriber,
-        )
-        item.file.save(generate_name(registration), File(filled_pdf), True)
+    item = StorageItem(
+        app=enums.FileType.REGISTRATION_FORM,
+        email=registration.email,
+        subscriber=registration.subscriber,
+    )
+
+    fill_pdf_template(PDF_TEMPLATE, form_data, item, generate_name(registration))
 
     registration.result_item = item
     registration.save(update_fields=["result_item"])

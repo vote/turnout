@@ -11,7 +11,9 @@ from smsbot.tasks import send_welcome_sms
 
 log = logging.getLogger("absentee")
 
-
+# DEPRECATED
+# TODO: Delete. Leaving this in so that in-flight tasks don't fail during the
+# deploy.
 @shared_task
 @statsd.timed("turnout.absentee.process_ballotrequest_submission")
 def process_ballotrequest_submission(

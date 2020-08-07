@@ -3,8 +3,7 @@ import string
 
 import pytest
 from model_bakery import baker
-
-from common.pdf.pypdftk import PyPDFTK
+from pdf_template import PyPDFTK
 
 from ..generateform import process_ballot_request
 from ..state_pdf_data import STATE_DATA, each_slug_with_type
@@ -25,7 +24,9 @@ def random_string(length=8):
 # Test generating a PDF for each state
 @pytest.mark.parametrize("state", ALL_STATES)
 @pytest.mark.django_db
-def test_gen_pdf(state, mocker):
+def test_gen_pdf(state, mocker, settings):
+    settings.PDF_GENERATION_LAMBDA_ENABLED = False
+
     patched_leo_email = mocker.patch(
         "absentee.generateform.send_ballotrequest_leo_email"
     )

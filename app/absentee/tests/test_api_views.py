@@ -65,8 +65,8 @@ def mock_get_regions_for_address(mocker):
 
 
 @pytest.fixture
-def process_ballotrequest_submission_task(mocker):
-    return mocker.patch("absentee.api_views.process_ballotrequest_submission.delay")
+def process_ballot_request(mocker):
+    return mocker.patch("absentee.api_views.process_ballot_request")
 
 
 @pytest.fixture(autouse=True)
@@ -334,7 +334,7 @@ def test_incomplete_create_no_region_matching(
 def test_complete_create(
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
-    process_ballotrequest_submission_task,
+    process_ballot_request,
     feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
@@ -369,14 +369,14 @@ def test_complete_create(
 
     assert ballot_request.region.external_id == 12345
 
-    process_ballotrequest_submission_task.assert_called_with(
-        ballot_request.pk, None, True
-    )
+    process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
 # Incomplete update, not filling in esign method
 @pytest.mark.django_db
 def test_incomplete_update_no_esign_filling():
+    state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
+
     client = APIClient()
     client.post(
         ABSENTEE_API_ENDPOINT_INCOMPLETE_NO_REGION_MATCH, VALID_ABSENTEE_INITIAL
@@ -444,9 +444,7 @@ def test_incomplete_update_with_esign_filling(
 # Complete update
 @pytest.mark.django_db
 def test_complete_update(
-    mock_get_absentee_contact_info,
-    process_ballotrequest_submission_task,
-    feature_flag_on,
+    mock_get_absentee_contact_info, process_ballot_request, feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_fax_allowed(state)
@@ -483,9 +481,7 @@ def test_complete_update(
         "region": 12345,
     }
 
-    process_ballotrequest_submission_task.assert_called_with(
-        ballot_request.pk, None, True
-    )
+    process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
 @pytest.mark.parametrize(

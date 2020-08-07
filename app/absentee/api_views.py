@@ -13,11 +13,11 @@ from official.api_views import get_regions_for_address
 from official.models import Region
 
 from .contactinfo import get_absentee_contact_info
+from .generateform import process_ballot_request
 from .models import BallotRequest
 from .region_links import ovbm_link_for_ballot_request
 from .serializers import BallotRequestSerializer
 from .state_pdf_data import STATE_DATA
-from .tasks import process_ballotrequest_submission
 
 
 def get_esign_method_for_region(state: State, region: Region) -> SubmissionType:
@@ -84,7 +84,6 @@ class BallotRequestViewSet(IncompleteActionViewSet):
     model = BallotRequest
     serializer_class = BallotRequestSerializer
     queryset = BallotRequest.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
-    task = process_ballotrequest_submission
 
     def create(self, request, *args, **kwargs):
         incomplete = request.GET.get("incomplete") == "true"
@@ -174,6 +173,9 @@ class BallotRequestViewSet(IncompleteActionViewSet):
         response.update(extra_response_data)
 
         return Response(response)
+
+    def after_complete(self, action_object, state_id_number, is_18_or_over):
+        process_ballot_request(action_object, state_id_number, is_18_or_over)
 
 
 class StateMetadataView(APIView):

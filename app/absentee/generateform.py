@@ -1,17 +1,16 @@
 import logging
-from typing import IO, Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
-from django.core.files import File
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
-from PIL import Image
+from pdf_template import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 
 from common import enums
 from common.apm import tracer
-from common.pdf.pdftemplate import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
+from common.pdf.pdftemplate import fill_pdf_template
 from common.utils.format import StringFormatter
 from election.models import StateInformation
-from storage.models import SecureUploadItem, StorageItem
+from storage.models import StorageItem
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
@@ -255,22 +254,9 @@ def get_signature_locations(
 
 
 @tracer.wrap()
-def load_signature_image(
-    signature_attachment: Optional[SecureUploadItem],
-) -> Optional[Image.Image]:
-    if not signature_attachment:
-        return None
-
-    return Image.open(signature_attachment.file)
-
-
-@tracer.wrap()
-def generate_pdf(
-    form_data: Dict[str, Any],
-    state_code: str,
-    submission_method: enums.SubmissionType,
-    signature: Optional[Image.Image] = None,
-) -> IO:
+def generate_pdf_template(
+    state_code: str, submission_method: enums.SubmissionType,
+) -> Tuple[PDFTemplate, int]:
     # We assume a 1-page form if there's no YAML file with the number of pages.
     # This is usually true, and we also don't use the page count except in
     # esign states, where we always have the YAML file with the accurate page
@@ -314,9 +300,7 @@ def generate_pdf(
 
         num_pages = state_template_pages + 2
 
-    form_data.update({"num_pages": str(num_pages)})
-
-    return PDFTemplate(sections).fill(form_data, signature=signature)
+    return (PDFTemplate(sections), num_pages)
 
 
 def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType:
@@ -331,22 +315,24 @@ def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
     form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
-    signature = load_signature_image(ballot_request.signature)
     submission_method = get_submission_method(ballot_request)
 
-    with generate_pdf(
-        form_data, ballot_request.state.code, submission_method, signature,
-    ) as filled_pdf:
-        item = StorageItem(
-            app=enums.FileType.ABSENTEE_REQUEST_FORM,
-            email=ballot_request.email,
-            subscriber=ballot_request.subscriber,
-        )
-        item.file.save(
-            generate_name(ballot_request.state.code, ballot_request.last_name),
-            File(filled_pdf),
-            True,
-        )
+    pdf_template, num_pages = generate_pdf_template(
+        ballot_request.state.code, submission_method
+    )
+    form_data.update({"num_pages": str(num_pages)})
+
+    item = StorageItem(
+        app=enums.FileType.ABSENTEE_REQUEST_FORM,
+        email=ballot_request.email,
+        subscriber=ballot_request.subscriber,
+    )
+
+    file_name = generate_name(ballot_request.state.code, ballot_request.last_name)
+
+    fill_pdf_template(
+        pdf_template, form_data, item, file_name, ballot_request.signature
+    )
 
     ballot_request.result_item = item
     ballot_request.save(update_fields=["result_item"])

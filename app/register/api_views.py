@@ -16,9 +16,9 @@ from smsbot.tasks import send_welcome_sms
 from storage.models import SecureUploadItem
 
 from .custom_ovr_links import get_custom_ovr_link
+from .generateform import process_registration
 from .models import Registration
 from .serializers import RegistrationSerializer, StatusSerializer
-from .tasks import process_registration_submission
 
 logger = logging.getLogger("register")
 
@@ -27,7 +27,6 @@ class RegistrationViewSet(IncompleteActionViewSet):
     model = Registration
     serializer_class = RegistrationSerializer
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
-    task = process_registration_submission
 
     def after_create_or_update(self, registration):
         if (
@@ -228,7 +227,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
             registration.status = TurnoutActionStatus.PENDING
             registration.save()
 
-            self.task.delay(registration.uuid, state_id_number, is_18_or_over)
+            process_registration(registration, state_id_number, is_18_or_over)
 
         if registration.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
             send_welcome_sms.apply_async(

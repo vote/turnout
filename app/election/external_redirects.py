@@ -3,6 +3,8 @@ import logging
 import boto3
 from django.conf import settings
 
+from common.aws import s3_client
+
 from .models import State, StateInformation
 
 URL_PREFIX = "state-redirect"
@@ -19,7 +21,6 @@ logger = logging.getLogger("election")
 
 
 def publish():
-    s3_client = boto3.client("s3")
     bucket = settings.STATE_TOOL_REDIRECT_BUCKET
 
     for state in State.objects.all():

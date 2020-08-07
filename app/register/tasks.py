@@ -4,6 +4,9 @@ from common.analytics import statsd
 from common.enums import EventType, TurnoutActionStatus
 
 
+# DEPRECATED.
+# TODO: Delete this -- leaving it in for now so in-flight tasks don't fail
+# during the deploy.
 @shared_task
 @statsd.timed("turnout.register.process_registration_submission")
 def process_registration_submission(

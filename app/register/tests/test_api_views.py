@@ -21,7 +21,6 @@ from common.enums import (
 from election.models import State
 from event_tracking.models import Event
 from multi_tenant.models import Client
-from register.api_views import RegistrationViewSet
 from register.models import Registration
 from storage.models import SecureUploadItem
 
@@ -138,7 +137,7 @@ PA_REGISTRATION_SIG = {
 def submission_task_patch(mocker):
     mocker.patch("register.api_views.send_welcome_sms")
     mocker.patch("register.api_views.sync_registration_to_actionnetwork")
-    return mocker.patch.object(RegistrationViewSet, "task")
+    return mocker.patch("register.api_views.process_registration")
 
 
 def test_get_request_disallowed():
@@ -209,9 +208,7 @@ def test_register_object_created(submission_task_patch):
     first_subscriber = Client.objects.first()
     assert registration.subscriber == first_subscriber
 
-    submission_task_patch.delay.assert_called_once_with(
-        registration.uuid, "FOUNDER123", True
-    )
+    submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
 
 
 @pytest.mark.django_db
@@ -245,9 +242,7 @@ def test_default_subscriber(submission_task_patch):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.subscriber == first_subscriber
 
-    submission_task_patch.delay.assert_called_once_with(
-        registration.uuid, "FOUNDER123", True
-    )
+    submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
 
 
 @pytest.mark.django_db
@@ -271,9 +266,7 @@ def test_custom_subscriber(submission_task_patch):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.subscriber == second_subscriber
 
-    submission_task_patch.delay.assert_called_once_with(
-        registration.uuid, "FOUNDER123", True
-    )
+    submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
 
 
 @pytest.mark.django_db
@@ -294,9 +287,7 @@ def test_invalid_subscriber_key(submission_task_patch):
     assert response.json()["uuid"] == str(registration.uuid)
     assert registration.subscriber == first_subscriber
 
-    submission_task_patch.delay.assert_called_once_with(
-        registration.uuid, "FOUNDER123", True
-    )
+    submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
 
 
 def test_not_us_citizen():

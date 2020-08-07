@@ -1,150 +1,119 @@
-# simple wrappers around pdfrw
-import tempfile
-from dataclasses import dataclass
-from typing import IO, Any, Dict, List, Optional
+import base64
+import json
+import logging
+import os
+from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.core.files import File
+from django.core.files.base import ContentFile
+from pdf_template import PDFTemplate
 from PIL import Image
-from reportlab.lib.utils import ImageReader
-from reportlab.pdfgen import canvas
 
-from common.analytics import statsd
+from common.apm import tracer
+from common.aws import lambda_client, s3_client
+from storage.models import SecureUploadItem, StorageItem
 
-from .pypdftk import PyPDFTK
+from .lambdahelpers import clean_data, serialize_template
 
-
-@dataclass
-class SignatureBoundingBox:
-    x: int
-    y: int
-    width: int
-    height: int
+logger = logging.getLogger("pypdftk")
 
 
-@dataclass
-class PDFTemplateSection:
-    path: str
-    is_form: bool = False
-    flatten_form: bool = True
-
-    # page number -> signature location
-    signature_locations: Optional[Dict[int, SignatureBoundingBox]] = None
+class PDFFillerLambdaError(Exception):
+    def __init__(self, logs, message="PDF Filler lambda function failed"):
+        self.logs = logs
+        self.message = message
+        super().__init__(message)
 
 
-class PDFTemplate:
-    """
-    Constructs a template out a set of input PDFs with fillable AcroForms.
-    """
+@tracer.wrap()
+def fill_pdf_template_lambda(
+    template: PDFTemplate,
+    data: Dict[str, Any],
+    item: StorageItem,
+    file_name: str,
+    signature: Optional[SecureUploadItem] = None,
+):
+    # Call out to lambda
+    signature_url = None
+    if signature:
+        signature_url = signature.file.url
 
-    def __init__(self, template_files: List[PDFTemplateSection]):
-        self.template_files = template_files
-        self.pypdftk = PyPDFTK()
+    cleaned_data = clean_data(data)
 
-    def fill(
-        self, raw_data: Dict[str, Any], signature: Optional[Image.Image] = None
-    ) -> IO:
-        """
-        Concatenates all the template_files in this PDFTemplate, and fills in
-        the concatenated form with the given data.
-        """
+    template_data = serialize_template(template)
 
-        # remove "None" values from data and map True -> "On"
-        data = {}
-        for k, v in raw_data.items():
-            if v is None:
-                continue
+    with tracer.trace("common.pdf.pdftemplate.save_blank"):
+        # Save an empty blob to S3 to set the headers, etc., then generate
+        # a presigned PUT
+        item.file.save(file_name, ContentFile(""), False)
 
-            if v == True:
-                data[k] = "On"
-                continue
+    output_url = s3_client.generate_presigned_url(
+        "put_object",
+        Params={
+            "Bucket": settings.AWS_STORAGE_PRIVATE_BUCKET_NAME,  # type:ignore
+            "Key": os.path.join(item.file.storage.location, item.file.name),
+        },
+    )
 
-            data[k] = v
+    with tracer.trace("common.pdf.pdftemplate.generate_payload"):
+        lambda_payload = bytes(
+            json.dumps(
+                {
+                    "template": template_data,
+                    "data": cleaned_data,
+                    "signature": signature_url,
+                    "output": output_url,
+                }
+            ),
+            "utf-8",
+        )
 
-        # Create the final output file and track all the temp files we'll have
-        # to close at the end
-        final_pdf = tempfile.NamedTemporaryFile("rb+", delete=not settings.PDF_DEBUG)
-        handles_to_close: List[IO] = []
+    with tracer.trace("common.pdf.pdftemplate.call_lambda"):
+        response = lambda_client.invoke(
+            FunctionName="pdf-filler-local-fill",
+            InvocationType="RequestResponse",
+            LogType="Tail",
+            Payload=lambda_payload,
+        )
 
-        try:
-            # Fill in all of the forms
-            filled_templates = []
-            for template_file in self.template_files:
-                signed_pdf_path = template_file.path
-                if signature and template_file.signature_locations:
-                    signature_stamp_file = self._make_signature_stamp(
-                        signature, template_file.signature_locations, template_file.path
-                    )
-                    handles_to_close.append(signature_stamp_file)
+    if response.get("FunctionError"):
+        logs = base64.b64decode(response["LogResult"]).decode()
+        msg = f"Error from PDF Filler Lambda function: {response['FunctionError']}"
 
-                    signed_pdf_file = tempfile.NamedTemporaryFile(
-                        "r", delete=not settings.PDF_DEBUG
-                    )
-                    handles_to_close.append(signed_pdf_file)
+        logger.error(
+            msg, extra={"lambda_logs": logs},
+        )
 
-                    self.pypdftk.stamp(
-                        template_file.path,
-                        signature_stamp_file.name,
-                        signed_pdf_file.name,
-                    )
+        raise PDFFillerLambdaError(logs, msg)
 
-                    signed_pdf_path = signed_pdf_file.name
+    item.save()
 
-                if not template_file.is_form:
-                    filled_templates.append(signed_pdf_path)
-                    continue
 
-                filled_template = tempfile.NamedTemporaryFile(
-                    "r", delete=not settings.PDF_DEBUG
-                )
-                handles_to_close.append(filled_template)
-                self.pypdftk.fill_form(
-                    pdf_path=signed_pdf_path,
-                    datas=data,
-                    out_file=filled_template.name,
-                    flatten=template_file.flatten_form,
-                )
+@tracer.wrap()
+def fill_pdf_template_local(
+    template: PDFTemplate,
+    data: Dict[str, Any],
+    item: StorageItem,
+    file_name: str,
+    signature: Optional[SecureUploadItem] = None,
+):
+    # Call into PDFTemplate directly
+    if signature:
+        Image.open(signature.file)
 
-                filled_templates.append(filled_template.name)
+    with template.fill(data) as filled_pdf:
+        item.file.save(file_name, File(filled_pdf), True)
 
-            # Join the filled forms
-            self.pypdftk.concat(files=filled_templates, out_file=final_pdf.name)
 
-        except:
-            statsd.increment("turnout.pdf.pdftk_exception")
-            final_pdf.close()
-            raise
-        finally:
-            for handle in handles_to_close:
-                handle.close()
-
-        return final_pdf
-
-    def _make_signature_stamp(
-        self,
-        signature: Image.Image,
-        signature_locations: Dict[int, SignatureBoundingBox],
-        pdf_path: str,
-    ) -> IO:
-        stamp_file = tempfile.NamedTemporaryFile("r", delete=not settings.PDF_DEBUG)
-        stampPDF = canvas.Canvas(stamp_file.name)
-
-        # for each page of the PDF, we generate either a page with a signature,
-        # or a blank page if there's no signature on that page
-        for page_num in range(1, self.pypdftk.get_num_pages(pdf_path) + 1):
-            if page_num in signature_locations:
-                loc = signature_locations[page_num]
-
-                stampPDF.drawImage(
-                    ImageReader(signature),
-                    loc.x,
-                    loc.y,
-                    loc.width,
-                    loc.height,
-                    preserveAspectRatio=True,
-                )
-
-            stampPDF.showPage()
-
-        stampPDF.save()
-
-        return stamp_file
+def fill_pdf_template(
+    template: PDFTemplate,
+    data: Dict[str, Any],
+    item: StorageItem,
+    file_name: str,
+    signature: Optional[SecureUploadItem] = None,
+):
+    if settings.PDF_GENERATION_LAMBDA_ENABLED:
+        fill_pdf_template_lambda(template, data, item, file_name, signature)
+    else:
+        fill_pdf_template_local(template, data, item, file_name, signature)

@@ -3,8 +3,7 @@ import os
 
 import pytest
 from jsonschema import validate
-
-from common.pdf.pypdftk import PyPDFTK
+from pdf_template import PyPDFTK
 
 from ..state_pdf_data import (
     STATE_DATA,
