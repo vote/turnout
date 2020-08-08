@@ -71,7 +71,7 @@ def fill_pdf_template_lambda(
 
     with tracer.trace("common.pdf.pdftemplate.call_lambda"):
         response = lambda_client.invoke(
-            FunctionName="pdf-filler-local-fill",
+            FunctionName=settings.PDF_GENERATION_LAMBDA_FUNCTION,
             InvocationType="RequestResponse",
             LogType="Tail",
             Payload=lambda_payload,
