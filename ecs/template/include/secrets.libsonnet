@@ -1,33 +1,15 @@
+local base_secrets = import './base_secrets.libsonnet';
+
 {
   for_env(env)::
-    [
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.database_url',
-        name: 'DATABASE_URL',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.database_max_connections',
-        name: 'DATABASE_MAX_CONNECTIONS',
-      },
+    base_secrets.for_env(env) + [
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.targetsmart_key',
         name: 'TARGETSMART_KEY',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.redis_url',
-        name: 'REDIS_URL',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.secret_key',
-        name: 'SECRET_KEY',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.allowed_hosts',
         name: 'ALLOWED_HOSTS',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.sentry_dsn',
-        name: 'SENTRY_DSN',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.multifactor_issuer',
@@ -150,14 +132,6 @@
         name: 'SLACK_DATA_ERROR_WEBHOOK',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.usvf_sync',
-        name: 'USVF_SYNC',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.usvf_sync_hour',
-        name: 'USVF_SYNC_HOUR',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.usvf_geocode',
         name: 'USVF_GEOCODE',
       },
@@ -186,28 +160,12 @@
         name: 'ACTIONNETWORK_KEY',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync',
-        name: 'ACTIONNETWORK_SYNC',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync_daily',
-        name: 'ACTIONNETWORK_SYNC_DAILY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_sync_hour',
-        name: 'ACTIONNETWORK_SYNC_HOUR',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_form_prefix',
         name: 'ACTIONNETWORK_FORM_PREFIX',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.optimizely_sdk_key',
         name: 'OPTIMIZELY_SDK_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.ovbm_sync',
-        name: 'OVBM_SYNC',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pa_ovr_key',
@@ -232,10 +190,6 @@
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.digitalocean_key',
         name: 'DIGITALOCEAN_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_enabled',
-        name: 'UPTIME_ENABLED',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_consumer_key',
@@ -274,16 +228,8 @@
         name: 'REGISTER_RESUME_URL',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.state_tool_redirect_sync',
-        name: 'STATE_TOOL_REDIRECT_SYNC',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_token_purged_url',
         name: 'FILE_TOKEN_PURGED_URL',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_purge_days',
-        name: 'FILE_PURGE_DAYS',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pdf_generation_lambda_enabled',

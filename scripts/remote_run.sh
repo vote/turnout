@@ -22,11 +22,20 @@ fi
 echo "Account ID: $ACCOUNT_ID"
 export DATABASE_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_url | jq '.Parameter["Value"]' -r)
 export DATABASE_MAX_CONNECTIONS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_max_connections | jq '.Parameter["Value"]' -r)
-export TARGETSMART_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.targetsmart_key | jq '.Parameter["Value"]' -r)
 export REDIS_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.redis_url | jq '.Parameter["Value"]' -r)
 export SECRET_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.secret_key | jq '.Parameter["Value"]' -r)
-export ALLOWED_HOSTS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.allowed_hosts | jq '.Parameter["Value"]' -r)
 export SENTRY_DSN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sentry_dsn | jq '.Parameter["Value"]' -r)
+export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
+export USVF_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync_hour | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC_DAILY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_daily | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
+export OVBM_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.ovbm_sync | jq '.Parameter["Value"]' -r)
+export UPTIME_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_enabled | jq '.Parameter["Value"]' -r)
+export FILE_PURGE_DAYS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_purge_days | jq '.Parameter["Value"]' -r)
+export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
+export TARGETSMART_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.targetsmart_key | jq '.Parameter["Value"]' -r)
+export ALLOWED_HOSTS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.allowed_hosts | jq '.Parameter["Value"]' -r)
 export MULTIFACTOR_ISSUER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.multifactor_issuer | jq '.Parameter["Value"]' -r)
 export ATTACHMENT_USE_S3=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.use_s3 | jq '.Parameter["Value"]' -r)
 export AWS_STORAGE_BUCKET_NAME=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.public_storage_bucket | jq '.Parameter["Value"]' -r)
@@ -57,8 +66,6 @@ export FAX_GATEWAY_CALLBACK_URL=$(aws ssm get-parameter --region $REGION --with-
 export FAX_GATEWAY_SQS_QUEUE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.fax_gateway_sqs_queue | jq '.Parameter["Value"]' -r)
 export SLACK_DATA_ERROR_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_DATA_ERROR_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_data_error_webhook | jq '.Parameter["Value"]' -r)
-export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
-export USVF_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync_hour | jq '.Parameter["Value"]' -r)
 export USVF_GEOCODE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_geocode | jq '.Parameter["Value"]' -r)
 export DD_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name general.datadogkey | jq '.Parameter["Value"]' -r)
 export REGISTER_CO_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_co_vrd_id | jq '.Parameter["Value"]' -r)
@@ -66,19 +73,14 @@ export REGISTER_CO_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-d
 export REGISTER_WA_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_id | jq '.Parameter["Value"]' -r)
 export REGISTER_WA_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_enabled | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_key | jq '.Parameter["Value"]' -r)
-export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync | jq '.Parameter["Value"]' -r)
-export ACTIONNETWORK_SYNC_DAILY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_daily | jq '.Parameter["Value"]' -r)
-export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_FORM_PREFIX=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_form_prefix | jq '.Parameter["Value"]' -r)
 export OPTIMIZELY_SDK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.optimizely_sdk_key | jq '.Parameter["Value"]' -r)
-export OVBM_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.ovbm_sync | jq '.Parameter["Value"]' -r)
 export PA_OVR_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_key | jq '.Parameter["Value"]' -r)
 export PA_OVR_STAGING=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_staging | jq '.Parameter["Value"]' -r)
 export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
 export API_KEY_PEPPER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.api_key_pepper | jq '.Parameter["Value"]' -r)
 export DIGITALOCEAN_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.digitalocean_key | jq '.Parameter["Value"]' -r)
-export UPTIME_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_enabled | jq '.Parameter["Value"]' -r)
 export UPTIME_TWITTER_CONSUMER_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_key | jq '.Parameter["Value"]' -r)
 export UPTIME_TWITTER_CONSUMER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_secret | jq '.Parameter["Value"]' -r)
 export UPTIME_TWITTER_ACCESS_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token | jq '.Parameter["Value"]' -r)
@@ -88,9 +90,7 @@ export PROXY_SSH_PUB=$(aws ssm get-parameter --region $REGION --with-decryption 
 export PROXY_TAG=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_tag | jq '.Parameter["Value"]' -r)
 export SELENIUM_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.selenium_url | jq '.Parameter["Value"]' -r)
 export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
-export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
 export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
-export FILE_PURGE_DAYS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_purge_days | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_FUNCTION=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_function | jq '.Parameter["Value"]' -r)
 
@@ -121,11 +121,20 @@ echo "Running Image $IMAGE"
 docker run -i -t \
     -e DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
-    -e TARGETSMART_KEY \
     -e REDIS_URL \
     -e SECRET_KEY \
-    -e ALLOWED_HOSTS \
     -e SENTRY_DSN \
+    -e USVF_SYNC \
+    -e USVF_SYNC_HOUR \
+    -e ACTIONNETWORK_SYNC \
+    -e ACTIONNETWORK_SYNC_DAILY \
+    -e ACTIONNETWORK_SYNC_HOUR \
+    -e OVBM_SYNC \
+    -e UPTIME_ENABLED \
+    -e FILE_PURGE_DAYS \
+    -e STATE_TOOL_REDIRECT_SYNC \
+    -e TARGETSMART_KEY \
+    -e ALLOWED_HOSTS \
     -e MULTIFACTOR_ISSUER \
     -e ATTACHMENT_USE_S3 \
     -e AWS_STORAGE_BUCKET_NAME \
@@ -156,8 +165,6 @@ docker run -i -t \
     -e FAX_GATEWAY_SQS_QUEUE \
     -e SLACK_DATA_ERROR_ENABLED \
     -e SLACK_DATA_ERROR_WEBHOOK \
-    -e USVF_SYNC \
-    -e USVF_SYNC_HOUR \
     -e USVF_GEOCODE \
     -e DD_API_KEY \
     -e REGISTER_CO_VRD_ID \
@@ -165,19 +172,14 @@ docker run -i -t \
     -e REGISTER_WA_VRD_ID \
     -e REGISTER_WA_VRD_ENABLED \
     -e ACTIONNETWORK_KEY \
-    -e ACTIONNETWORK_SYNC \
-    -e ACTIONNETWORK_SYNC_DAILY \
-    -e ACTIONNETWORK_SYNC_HOUR \
     -e ACTIONNETWORK_FORM_PREFIX \
     -e OPTIMIZELY_SDK_KEY \
-    -e OVBM_SYNC \
     -e PA_OVR_KEY \
     -e PA_OVR_STAGING \
     -e SLACK_SUBSCRIBER_INTEREST_ENABLED \
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
     -e API_KEY_PEPPER \
     -e DIGITALOCEAN_KEY \
-    -e UPTIME_ENABLED \
     -e UPTIME_TWITTER_CONSUMER_KEY \
     -e UPTIME_TWITTER_CONSUMER_SECRET \
     -e UPTIME_TWITTER_ACCESS_TOKEN \
@@ -187,9 +189,7 @@ docker run -i -t \
     -e PROXY_TAG \
     -e SELENIUM_URL \
     -e REGISTER_RESUME_URL \
-    -e STATE_TOOL_REDIRECT_SYNC \
     -e FILE_TOKEN_PURGED_URL \
-    -e FILE_PURGE_DAYS \
     -e PDF_GENERATION_LAMBDA_ENABLED \
     -e PDF_GENERATION_LAMBDA_FUNCTION \
 -e DEBUG=$DEBUG \
