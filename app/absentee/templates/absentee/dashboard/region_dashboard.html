@@ -72,6 +72,7 @@
                         <th>Faxes Sent (24h)</th>
                         <th>Emails Sent (7d)</th>
                         <th>Faxes Sent (7d)</th>
+                        <th>Applications</th>
                         <th>Override</th>
                     </tr>
                 </thead>
@@ -88,6 +89,9 @@
                         <td>{{ region.region.esign_stats.faxes_sent_1d }}</td>
                         <td>{{ region.region.esign_stats.emails_sent_7d }}</td>
                         <td>{{ region.region.esign_stats.faxes_sent_7d }}</td>
+                        <td>
+                            <a href="{% url 'manage:absentee_dashboard:esign_application_list' %}?region={{ region.region_id }}">Applications &raquo;</a>
+                        </td>
                         <td>
                             {% if region.has_override %}
                                 <a href="{% url 'manage:absentee_dashboard:leo_contact_override_detail' state=state.code pk=region.region_id %}">View Override &raquo;</a>

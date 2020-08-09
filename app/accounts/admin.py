@@ -30,6 +30,7 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "is_election_admin",
                     "is_subscriber_admin",
+                    "is_esign_admin",
                     "is_active",
                     "is_staff",
                     "is_superuser",

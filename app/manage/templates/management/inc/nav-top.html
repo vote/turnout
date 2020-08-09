@@ -52,15 +52,19 @@
                             </div>
                         </li>
                         {% endif %}
-                        {% if user.can_manage_election_information %}
+                        {% if user.can_manage_election_information or user.can_manage_esign %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__elections" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Elections
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdown__tools">
-                                <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
-                                <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
-                                <a class="dropdown-item" href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">Absentee E-Sign Dashboard</a>
+                                {% if user.can_manage_election_information %}
+                                    <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
+                                    <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
+                                {% endif %}
+                                {% if user.can_manage_esign %}
+                                  <a class="dropdown-item" href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">Absentee E-Sign Dashboard</a>
+                                {% endif %}
                             </div>
                         </li>
                         {% endif %}

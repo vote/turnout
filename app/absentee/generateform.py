@@ -310,9 +310,11 @@ def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType
     return ballot_request.esign_method or enums.SubmissionType.SELF_PRINT
 
 
-@tracer.wrap()
-def process_ballot_request(
-    ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
+def populate_storage_item(
+    item: StorageItem,
+    ballot_request: BallotRequest,
+    state_id_number: str,
+    is_18_or_over: bool,
 ):
     form_data = prepare_formdata(ballot_request, state_id_number, is_18_or_over)
     submission_method = get_submission_method(ballot_request)
@@ -322,16 +324,27 @@ def process_ballot_request(
     )
     form_data.update({"num_pages": str(num_pages)})
 
+    file_name = generate_name(ballot_request.state.code, ballot_request.last_name)
+
+    fill_pdf_template(
+        pdf_template, form_data, item, file_name, ballot_request.signature
+    )
+
+    return submission_method
+
+
+@tracer.wrap()
+def process_ballot_request(
+    ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
+):
     item = StorageItem(
         app=enums.FileType.ABSENTEE_REQUEST_FORM,
         email=ballot_request.email,
         subscriber=ballot_request.subscriber,
     )
 
-    file_name = generate_name(ballot_request.state.code, ballot_request.last_name)
-
-    fill_pdf_template(
-        pdf_template, form_data, item, file_name, ballot_request.signature
+    submission_method = populate_storage_item(
+        item, ballot_request, state_id_number, is_18_or_over
     )
 
     ballot_request.result_item = item

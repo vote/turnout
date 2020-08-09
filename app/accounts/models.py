@@ -69,6 +69,7 @@ class User(
     is_subscriber_admin = models.BooleanField(
         "Subscriber Admin", default=False, null=True
     )
+    is_esign_admin = models.BooleanField("Esign Admin", default=False, null=True)
 
     email = models.EmailField(_("Email Address"), editable=False, unique=True)
     first_name = models.CharField(_("First Name"), max_length=100, blank=True)
@@ -115,6 +116,13 @@ class User(
             return True
         else:
             return self.is_subscriber_admin
+
+    @property
+    def can_manage_esign(self):
+        if self.is_superuser:
+            return True
+        else:
+            return self.is_esign_admin
 
     @cached_property
     def active_client_slug(self):

@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 
 from common import enums
 from event_tracking.models import Event
-from register.api_views import RegistrationViewSet
 from register.tests.test_api_views import REGISTER_API_ENDPOINT, VALID_REGISTRATION
 
 TRACKING_API_ENDPOINT = "/v1/event/track/"

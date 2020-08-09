@@ -1,6 +1,5 @@
 import logging
 
-import boto3
 from django.conf import settings
 
 from common.aws import s3_client

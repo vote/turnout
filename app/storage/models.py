@@ -29,6 +29,9 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
     expires = models.DateTimeField(default=storage_expire_date_time)
     first_download = models.DateTimeField(blank=True, null=True)
     purged = models.DateTimeField(blank=True, null=True)
+    preview_of = models.ForeignKey(
+        "self", on_delete=models.CASCADE, blank=True, null=True, db_index=True
+    )
 
     class Meta:
         ordering = ["-created_at"]

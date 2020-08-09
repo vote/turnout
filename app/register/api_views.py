@@ -24,7 +24,7 @@ from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration
 from .models import Registration
 from .serializers import RegistrationSerializer, StatusSerializer
-from .tasks import process_registration_submission, send_registration_state_confirmation
+from .tasks import send_registration_state_confirmation
 
 logger = logging.getLogger("register")
 

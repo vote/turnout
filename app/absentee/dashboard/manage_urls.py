@@ -6,6 +6,16 @@ app_name = "absentee_dashboard"
 urlpatterns = [
     path("", manage_views.EsignDashboardView.as_view(), name="esign_dashboard"),
     path(
+        "applications/",
+        manage_views.BallotRequestListView.as_view(),
+        name="esign_application_list",
+    ),
+    path(
+        "applications/<slug:pk>/",
+        manage_views.BallotRequestDetailView.as_view(),
+        name="esign_application",
+    ),
+    path(
         "<slug:pk>/",
         manage_views.EsignRegionDashboardView.as_view(),
         name="esign_region_dashboard",

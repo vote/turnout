@@ -1,0 +1,67 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}List of Ballot Requests | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">States</a>
+                </li>
+                <li class="breadcrumb-item">E-Signed Applications</li>
+            </ol>
+        </nav>
+
+        <h1>E-Signed Applications</h1>
+        <form class="form-inline" action="" method="get">
+            <label class="sr-only" for="searchquery">Search Query</label>
+            <input type="text" class="form-control mb-2 mr-sm-2" id="searchquery" name="q" value="{{ request.GET.q }}"
+              placeholder="Search Query">
+            <label class="sr-only" for="regionquery">Region ID</label>
+            <input type="text" class="form-control mb-2 mr-sm-2" id="regionquery" name="region" value="{{ request.GET.region }}"
+              placeholder="Region ID">
+            <button type="submit" class="btn btn-primary btn-small mb-2">Search</button>
+        </form>
+        <div class="table-responsive-lg">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Date of Birth</th>
+                        <th>State</th>
+                        <th>Start Time <small>({{ user.timezone }})</small></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ballot_request in ballot_requests %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'manage:absentee_dashboard:esign_application' ballot_request.pk %}">{{ ballot_request.first_name }} {{ ballot_request.last_name }}</a>
+                        </td>
+                        <td>
+                            {{ ballot_request.email }}
+                        </td>
+                        <td>
+                            {{ ballot_request.date_of_birth|date:"Y-m-d" }}
+                        </td>
+                        <td>
+                            {{ ballot_request.state.pk }}
+                        </td>
+                        <td>
+                            {{ ballot_request.created_at|timezone:user.timezone|date:"Y-m-d g:i a" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        {% include "management/inc/pagination.html" %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
