@@ -37,13 +37,18 @@ def send_report_notification(report_pk: str):
 @shared_task
 @statsd.timed("turnout.reporting.calc_all_subscriber_stats")
 def calc_all_subscriber_stats():
-    logger.info("Recalculating all subscriber stats")
+    OFFSET_SECONDS = 2
+
+    expiration = settings.CALC_STATS_INTERVAL * 60
+    limit = expiration / OFFSET_SECONDS
+
+    logger.info(f"Recalculating all subscriber stats (limit {limit})")
     n = 0
-    for client in Client.objects.all():
+    for client in Client.objects.order_by("?")[:limit]:
         calc_subscriber_stats.apply_async(
-            (client.uuid,), countdown=n, expires=settings.CALC_STATS_INTERVAL
+            (client.uuid,), countdown=n, expires=expiration
         )
-        n += 2
+        n += OFFSET_SECONDS
 
 
 @shared_task
