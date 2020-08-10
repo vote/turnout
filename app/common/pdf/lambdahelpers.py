@@ -10,13 +10,25 @@ from common.apm import tracer
 
 MAX_FIELD_LEN = 1024
 
+# These characters are in the unicode category Cc (control characters) which we
+# mostly want to exclude (because it includes things like null bytes) but
+# we don't want to remove newlines. List from: https://stackoverflow.com/a/14245311
+WHITESPACE = {"\t", "\n", "\v", "\r", "\f"}
+
+
+def chr_is_valid(c: str) -> bool:
+    if c in WHITESPACE:
+        return True
+
+    return unicodedata.category(c) not in ["Cc", "Cn"]
+
 
 def clean_data_str(field: str) -> str:
     if len(field) > MAX_FIELD_LEN:
         field = field[:MAX_FIELD_LEN]
 
     # Filter out control characters like null bytes
-    return "".join(c for c in field if unicodedata.category(c) not in ["Cc", "Cn"])
+    return "".join(c for c in field if chr_is_valid(c))
 
 
 def clean_data_field(field: Any) -> Any:
