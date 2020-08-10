@@ -16,6 +16,11 @@ from common.utils.models import TimestampModel, UUIDModel
 from .choices import STATES
 
 
+class NonTerritoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().exclude(territory=True)
+
+
 class State(TimestampModel):
     code = models.CharField(
         "Code",
@@ -28,6 +33,10 @@ class State(TimestampModel):
     state_information = models.ManyToManyField(
         "StateInformationFieldType", through="StateInformation"
     )
+    territory = models.BooleanField(default=False, null=True)
+
+    objects = models.Manager()
+    states = NonTerritoryManager()
 
     class Meta(object):
         ordering = ["code"]
@@ -140,7 +149,7 @@ class UpdateNotificationWebhook(UUIDModel, TimestampModel):
 def process_information_field(sender, instance, **kwargs):
     purge_cdn_tags(["state", "stateinformationfield", "stateinformationfieldtype"])
     if kwargs["created"]:
-        for state in State.objects.all():
+        for state in State.states.all():
             with reversion.create_revision():
                 StateInformation(state=state, field_type=instance).save()
 

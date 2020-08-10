@@ -51,7 +51,7 @@ def acquire_data(session: requests.Session, url: str) -> Dict[(str, Any)]:
 def scrape_regions(session: requests.Session) -> List[Region]:
     session = authenticated_session()
     regions: List[Region] = []
-    supported_states = State.objects.values_list("code", flat=True)
+    supported_states = State.states.values_list("code", flat=True)
 
     # The USVF API is buggy and does not paginate reliably.  Make
     # multiple passes with different page sizes to ensure we capture

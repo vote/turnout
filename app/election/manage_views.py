@@ -16,6 +16,7 @@ class ElectionView(TemplateView):
 
 class StateListView(ManageViewMixin, ElectionAdminView, ListView):
     model = State
+    queryset = State.states.all()
     context_object_name = "states"
     template_name = "election/manage/state_list.html"
     ordering = ["name"]

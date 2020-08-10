@@ -22,7 +22,7 @@ logger = logging.getLogger("election")
 def publish():
     bucket = settings.STATE_TOOL_REDIRECT_BUCKET
 
-    for state in State.objects.all():
+    for state in State.states.all():
         for slug, fallback in SLUG_FALLBACK_URLS.items():
             item = StateInformation.objects.get(state=state, field_type__slug=slug)
             if item and item.text:

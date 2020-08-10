@@ -9,7 +9,7 @@ from .serializers import FieldSerializer, StateFieldSerializer, StateSerializer
 class StateViewSet(CDNCachedView, ReadOnlyModelViewSet):
     model = State
     serializer_class = StateSerializer
-    queryset = State.objects.all()
+    queryset = State.states.all()
 
 
 class StateFieldsViewSet(CDNCachedView, ReadOnlyModelViewSet):
