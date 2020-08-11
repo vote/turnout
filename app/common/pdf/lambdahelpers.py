@@ -47,7 +47,7 @@ def clean_data_field(field: Any) -> Any:
     if isinstance(field, str):
         return clean_data_str(field)
 
-    return None
+    return clean_data_str(str(field))
 
 
 def clean_data(in_data: Dict[str, Any]) -> Dict[str, Any]:

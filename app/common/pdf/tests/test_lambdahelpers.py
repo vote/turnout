@@ -5,6 +5,8 @@ from common.pdf.lambdahelpers import (
     serialize_template,
 )
 
+from phonenumber_field.phonenumber import PhoneNumber
+
 
 def test_clean_data():
     assert clean_data(
@@ -18,6 +20,7 @@ def test_clean_data():
             "G": set(),
             "H": [],
             "I": {},
+            "J": PhoneNumber.from_string("+16175551234"),
         }
     ) == {
         "A": 1,
@@ -26,7 +29,8 @@ def test_clean_data():
         "D": "foobar",
         "E": "foobar\nbaz",
         "F": "x" * MAX_FIELD_LEN,
-        "G": None,
-        "H": None,
-        "I": None,
+        "G": "set()",
+        "H": "[]",
+        "I": "{}",
+        "J": "(617) 555-1234",
     }
