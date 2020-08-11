@@ -25,7 +25,7 @@ from common import enums
 from common.aws import s3_client
 from common.rollouts import flag_enabled_for_state
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
-from election.choices import STATES
+from election.choices import REGISTRATION_STATES
 from election.models import State
 from manage.mixins import ManageViewMixin
 from official.models import Region
@@ -50,7 +50,7 @@ class EsignDashboardView(
 
         esign_states = [
             state_code
-            for (state_code, state_name) in STATES
+            for (state_code, state_name) in REGISTRATION_STATES
             if flag_enabled_for_state("vbm_esign", state_code)
         ]
 
