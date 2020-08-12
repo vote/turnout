@@ -11,9 +11,14 @@ env:
 jobs:
   include:
     - stage: build
+      before_install:
+      - touch .env
+      - docker pull $CACHE_IMAGE:latest || true
+
       script:
-        - docker pull $CACHE_IMAGE:latest || true
         - docker-compose build
+
+      after_success:
         - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
         - docker push $CACHE_IMAGE:latest
 
