@@ -1,23 +1,38 @@
 manual_fields:
   - cdl_number
   - excuse_cdl
+  - excuse_mil
+  - excuse_ng
+  - excuse_overseas
+  - uocava_mail
+  - uocava_email
+  - assist_date
+  - assist_address
+  - witness_date
+  - witness_address
 
 pages: 1
 
 auto_fields:
   - slug: date_signed
     type: todays_date
+  - slug: election_general
+    type: static
+    value: true
 
 signature_statement: I swear or affirm under penalty of perjury that all of the information on this form is true and correct and that I am eligible to vote in the election.
 
 signatures:
   1:
-    x: 248
-    y: 70
-    width: 330
-    height: 53
+    x: 160
+    y: 229
+    width: 250
+    height: 29
 
 form_fields:
+  - type: section
+    label: Election date
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
   - type: section
     label: Identification
     content:
@@ -34,21 +49,18 @@ form_fields:
       label: Why are you unable to vote in person?
       required: true
       options:
-      - label: I have determined it is impossible or unreasonable to vote in-person due to the COVID-19 situation. ANY VOTER MAY CHOOSE THIS OPTION.
-        slug: excuse_covid
-        default: true
       - label: I am 60 years of age or older.
         slug: excuse_age
       - label: I will be outside my county during all hours of early voting and before the polls close on Election Day.
         slug: excuse_absence
-      - label: I am hospitalized, ill or physically disabled and unable to appear at my polling place to vote.
+      - label: I am hospitalized, ill or physically disabled and unable to appear at my polling place to vote. Voters who have an illness, physical disability or other underlying health condition that makes them especially vulnerable to COVID-19, and who, because of that condition, are unable to appear in the polling place on Election Day and instead wish to vote by-mail should check this box. A physician’s statement is not required to check this box.
         slug: excuse_disabled
-      - label: I am a caretaker of a hospitalized, ill or physically disabled person
+      - label: I am a caretaker of a hospitalized, ill or physically disabled person. Voters who the caretaker of someone an illness, physical disability or other underlying health condition that makes them especially vulnerable to COVID-19, and who, because of that condition, are unable to appear in the polling place on Election Day and instead wish to vote by-mail should check this box. A physician’s statement is not required to check this box.
         slug: excuse_caretaker
-      - label: I reside in a licensed facility, outside my county, providing relatively permanent domiciliary care, i.e. Nursing Home.
-        slug: excuse_facility
       - label: I am a full-time student or spouse of a full-time student outside my county.
         slug: excuse_student
+      - label: I reside in a licensed facility, outside my county, providing relatively permanent domiciliary care, i.e. Nursing Home.
+        slug: excuse_facility
       - label: I am a candidate for office in the election for which I am applying to vote absentee by mail.
         slug: excuse_candidate
       - label: I am observing a religious holiday that prevents me from voting during early voting or on Election Day.

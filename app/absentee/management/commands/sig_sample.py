@@ -3,7 +3,7 @@ import shutil
 from django.core.management.base import BaseCommand
 from PIL import Image, ImageDraw
 
-from absentee.generateform import generate_pdf
+from absentee.generateform import generate_pdf_template
 from absentee.state_pdf_data import STATE_DATA
 from common import enums
 
@@ -35,9 +35,8 @@ class Command(BaseCommand):
 
         out = f"absentee/management/commands/out/{state}.pdf"
 
-        with generate_pdf(
-            {}, state, enums.SubmissionType.LEO_EMAIL, signature,
-        ) as filled_pdf:
+        template, n_pages = generate_pdf_template(state, enums.SubmissionType.LEO_EMAIL)
+        with template.fill({}, signature) as filled_pdf:
             with open(out, "wb") as of:
                 shutil.copyfileobj(filled_pdf, of)
 
