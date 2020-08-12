@@ -1,42 +1,50 @@
 dist: bionic
-language: python
-python:
-  - "3.7"
 
-env:
-  global:
-    CACHE_IMAGE: voteamerica/turnout-ci-cache
+jobs:
+  include:
+    - stage: test
+      language: python
+      python:
+        - "3.7"
 
-before_install:
-  - touch .env
-  - docker pull $CACHE_IMAGE:latest || true
+      env:
+        global:
+          - CACHE_IMAGE=voteamerica/turnout-ci-cache
+        jobs:
+          - TEST_GROUP=1
+          - TEST_GROUP=2
 
-install:
-  - docker-compose build
+      before_install:
+      - touch .env
+      - docker pull $CACHE_IMAGE:latest || true
 
-before_script:
-  - docker-compose up -d
+      install:
+        - docker-compose build
 
-script:
-  - docker-compose exec server pytest -n auto /app/
-  - docker-compose exec server mypy /app/
+      before_script:
+        - docker-compose up -d
 
-after_success:
-  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-  - docker push $CACHE_IMAGE:latest
+      script:
+        - docker-compose exec server pytest -n auto --test-group-count 2 --test-group=$TEST_GROUP /app/
+        - docker-compose exec server mypy /app/
 
-notifications:
-  email: false
+      after_success:
+        - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+        - docker push $CACHE_IMAGE:latest
 
-deploy:
-  - provider: script
-    script: bash scripts/travis_deploy_tags.sh
-    on:
-      tags: true
-      all_branches: true
-      repo: vote/turnout
-  - provider: script
-    script: bash scripts/travis_deploy_master.sh
-    on:
-      branch: master
-      repo: vote/turnout
+    - stage: deploy
+      script: /bin/true
+
+      deploy:
+        - provider: script
+          script: bash scripts/travis_deploy_tags.sh
+          on:
+            tags: true
+            all_branches: true
+            repo: vote/turnout
+
+        - provider: script
+          script: bash scripts/travis_deploy_master.sh
+          on:
+            branch: master
+            repo: vote/turnout
