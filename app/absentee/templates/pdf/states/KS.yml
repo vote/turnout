@@ -9,8 +9,8 @@ auto_fields:
 
 manual_fields:
   - middle_initial
-  - democratic
-  - republican
+  - Democratic
+  - Republican
 
 signatures:
   1:
