@@ -18,7 +18,7 @@ before_script:
   - docker-compose up -d
 
 script:
-  - docker-compose exec server pytest /app/
+  - docker-compose exec server pytest -n auto /app/
   - docker-compose exec server mypy /app/
 
 after_success:
