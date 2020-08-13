@@ -2,6 +2,7 @@ from celery import shared_task
 
 from common.analytics import statsd
 from common.enums import EventType, TurnoutActionStatus
+from mailer.retry import EMAIL_RETRY_PROPS
 
 
 # DEPRECATED.
@@ -19,7 +20,7 @@ def process_registration_submission(
     process_registration(registration, state_id_number, is_18_or_over)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_registration_notification")
 def send_registration_notification(registration_pk: str) -> None:
     from .models import Registration
@@ -33,7 +34,7 @@ def send_registration_notification(registration_pk: str) -> None:
     trigger_notification(registration)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_registration_state_confirmation")
 def send_registration_state_confirmation(registration_pk: str) -> None:
     from .models import Registration

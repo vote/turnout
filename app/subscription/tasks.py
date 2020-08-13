@@ -4,12 +4,14 @@ import requests
 from celery import shared_task
 from django.conf import settings
 
+from mailer.retry import EMAIL_RETRY_PROPS
+
 from .notifications import trigger_rejection_notification, trigger_welcome_notification
 
 logger = logging.getLogger("subscription")
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 def send_organization_welcome_notification(
     subscriber_pk: str, initial_user_email: str
 ) -> None:
@@ -19,7 +21,7 @@ def send_organization_welcome_notification(
     trigger_welcome_notification(subscriber, initial_user_email)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 def send_organization_rejection_notification(email: str, reason: str) -> None:
     trigger_rejection_notification(email, reason)
 

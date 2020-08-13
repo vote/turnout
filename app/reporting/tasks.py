@@ -8,6 +8,7 @@ from django.db.models import Count
 
 from absentee.models import BallotRequest
 from common.analytics import statsd
+from mailer.retry import EMAIL_RETRY_PROPS
 from multi_tenant.models import Client
 from register.models import Registration
 from verifier.models import Lookup
@@ -27,7 +28,7 @@ def process_report(report_pk: str):
     send_report_notification.delay(report_pk)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.reporting.send_notification")
 def send_report_notification(report_pk: str):
     report = Report.objects.select_related("subscriber", "author").get(pk=report_pk)

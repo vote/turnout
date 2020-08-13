@@ -436,16 +436,27 @@ STATSD_TAGS = [
 #### END STATSD CONFIGURATION
 
 
-#### SENDGRID CONFIGURATION
+#### EMAIL CONFIGURATION
 
 SENDGRID_API_KEY = env.str("SENDGRID_API_KEY", default="")
 SENDGRID_SANDBOX_MODE_IN_DEBUG = env.bool(
     "SENDGRID_SANDBOX_MODE_IN_DEBUG", default=False
 )
-EMAIL_SEND_TIMEOUT = env.int("EMAIL_SEND_TIMEOUT", default=60 * 60 * 24)
+EMAIL_SEND_TIMEOUT = env.int("EMAIL_SEND_TIMEOUT", default=60)
 EMAIL_BACKEND = "mailer.backend.TurnoutBackend"
 
-#### END SENDGRID CONFIGURATION
+EMAIL_TASK_RETRIES = 3
+
+# Set initial backoff to 5 minutes. Backoff doubles each time so we'll retry
+# at 5 minutes, then 10 minutes, then 20 minutes.
+#
+# Backoffs are jittered, so the backoff is treated as a maximum and the
+# actual value is randomly selected between 0 and the backoff.
+EMAIL_TASK_RETRY_BACKOFF = 2
+EMAIL_TASK_RETRY_BACKOFF_MAX = 20 * 60
+EMAIL_TASK_RETRY_JITTER = True
+
+#### END EMAIL CONFIGURATION
 
 
 #### SENTRY CONFIGURATION

@@ -7,6 +7,7 @@ from django.conf import settings
 from common.analytics import statsd
 from common.enums import EventType, FaxStatus
 from integration.tasks import sync_ballotrequest_to_actionnetwork
+from mailer.retry import EMAIL_RETRY_PROPS
 from smsbot.tasks import send_welcome_sms
 
 log = logging.getLogger("absentee")
@@ -29,7 +30,7 @@ def ballotrequest_followup(ballotrequest_pk: str) -> None:
         sync_ballotrequest_to_actionnetwork.delay(ballot_request.uuid)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_ballotrequest_notification")
 def send_ballotrequest_notification(ballotrequest_pk: str) -> None:
     from .models import BallotRequest
@@ -41,7 +42,7 @@ def send_ballotrequest_notification(ballotrequest_pk: str) -> None:
     trigger_notification(ballot_request)
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_ballotrequest_leo_email")
 def send_ballotrequest_leo_email(ballotrequest_pk: str) -> None:
     from .models import BallotRequest
@@ -53,7 +54,17 @@ def send_ballotrequest_leo_email(ballotrequest_pk: str) -> None:
     trigger_leo_email(ballot_request)
 
 
-@shared_task
+# For faxing, the retry is covering both sending the fax to SQS and sending the
+# email to the voter. We don't want to duplicate faxes, so all retries must
+# complete within SQS's 5-minute retry window.
+SQS_RETRY_WINDOW = (5 * 60) - 30  # 30 second slop
+FAX_RETRY_PROPS = {
+    **EMAIL_RETRY_PROPS,
+    "retry_backoff_max": SQS_RETRY_WINDOW / settings.EMAIL_TASK_RETRIES,
+}
+
+
+@shared_task(**FAX_RETRY_PROPS)
 @statsd.timed("turnout.absentee.send_ballotrequest_leo_fax")
 def send_ballotrequest_leo_fax(ballotrequest_pk: str) -> None:
     from .models import BallotRequest
@@ -69,7 +80,7 @@ class FaxSubmissionFailedException(Exception):
     pass
 
 
-@shared_task
+@shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.absentee.send_ballotrequest_leo_fax_sent_notification")
 def send_ballotrequest_leo_fax_sent_notification(
     fax_status_str: str, ballotrequest_pk: str
