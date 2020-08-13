@@ -216,6 +216,10 @@ local base_secrets = import './base_secrets.libsonnet';
         name: 'PROXY_SSH_PUB',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_key_id',
+        name: 'PROXY_SSH_KEY_ID',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_tag',
         name: 'PROXY_TAG',
       },
