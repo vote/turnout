@@ -35,6 +35,11 @@ VALID_SIGNUP = {
 }
 
 
+@pytest.fixture
+def mock_followup(mocker):
+    return mocker.patch("reminder.api_views.reminderrequest_followup")
+
+
 def test_get_request_disallowed():
     client = APIClient()
     response = client.get(SIGNUP_API_ENDPOINT)
@@ -60,8 +65,7 @@ def test_blank_api_request(requests_mock):
 
 
 @pytest.mark.django_db
-def test_reminder_object_created(mocker):
-    mocker.patch("reminder.api_views.sync_reminderrequest_to_actionnetwork")
+def test_reminder_object_created(mocker, mock_followup):
     client = APIClient()
     response = client.post(SIGNUP_API_ENDPOINT, VALID_SIGNUP)
     assert response.status_code == 200

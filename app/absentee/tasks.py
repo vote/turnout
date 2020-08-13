@@ -11,21 +11,15 @@ from smsbot.tasks import send_welcome_sms
 
 log = logging.getLogger("absentee")
 
-# DEPRECATED
-# TODO: Delete. Leaving this in so that in-flight tasks don't fail during the
-# deploy.
+
 @shared_task
-@statsd.timed("turnout.absentee.process_ballotrequest_submission")
-def process_ballotrequest_submission(
-    ballotrequest_pk: str, state_id_number: str, is_18_or_over: bool
-) -> None:
+@statsd.timed("turnout.absentee.ballotrequest_followup")
+def ballotrequest_followup(ballotrequest_pk: str) -> None:
     from .models import BallotRequest
-    from .generateform import process_ballot_request
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
-    process_ballot_request(ballot_request, state_id_number, is_18_or_over)
 
-    if ballot_request.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
+    if settings.SMS_POST_SIGNUP_ALERT:
         send_welcome_sms.apply_async(
             args=(str(ballot_request.phone), "absentee"),
             countdown=settings.SMS_OPTIN_REMINDER_DELAY,

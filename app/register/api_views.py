@@ -240,7 +240,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
             process_registration(registration, state_id_number, is_18_or_over)
 
         # common reg completion path
-        if registration.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
+        if settings.SMS_POST_SIGNUP_ALERT:
             send_welcome_sms.apply_async(
                 args=(str(registration.phone), "register"),
                 countdown=settings.SMS_OPTIN_REMINDER_DELAY,
@@ -255,6 +255,12 @@ class RegistrationViewSet(IncompleteActionViewSet):
         if custom_link:
             action_object.custom_ovr_link = custom_link
             action_object.save(update_fields=["custom_ovr_link"])
+
+        if settings.SMS_POST_SIGNUP_ALERT:
+            send_welcome_sms.apply_async(
+                args=(str(action_object.phone), "register"),
+                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
+            )
 
     def create_or_update_response(self, request, action_object):
         response = {

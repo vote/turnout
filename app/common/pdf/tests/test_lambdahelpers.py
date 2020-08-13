@@ -1,11 +1,11 @@
+from phonenumber_field.phonenumber import PhoneNumber
+
 from common.pdf.lambdahelpers import (
     BASE64_PDF_CACHE,
     MAX_FIELD_LEN,
     clean_data,
     serialize_template,
 )
-
-from phonenumber_field.phonenumber import PhoneNumber
 
 
 def test_clean_data():

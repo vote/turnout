@@ -29,7 +29,6 @@ VALID_LOOKUP = {
     "date_of_birth": "1961-08-04",
     "zipcode": "60657",
     "phone": "+13129289292",
-    "sms_opt_in": True,
     "sms_opt_in_subscriber": False,
     "source": "mysource",
     "utm_campaign": "mycampaign",
@@ -52,7 +51,6 @@ VALID_LOOKUP_ALLOY = {
     "date_of_birth": "1946-06-14",
     "zipcode": "33480",
     "phone": "+15618675309",
-    "sms_opt_in": False,
     "sms_opt_in_subscriber": True,
 }
 TARGETSMART_EXPECTED_QUERYSTRING = {
@@ -174,7 +172,7 @@ def test_targetsmart_request_address2(requests_mock, mocker, settings, smsbot_pa
 
 
 @pytest.mark.django_db
-def test_proper_alloy_request(requests_mock):
+def test_proper_alloy_request(requests_mock, smsbot_patch):
     client = APIClient()
     alloy_call = requests_mock.register_uri(
         "GET", ALLOY_ENDPOINT, json={"data": {}, "api_version": "v1"},
@@ -216,7 +214,6 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     assert lookup.date_of_birth == datetime.date(year=1961, month=8, day=4)
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
-    assert lookup.sms_opt_in == True
     assert lookup.sms_opt_in_subscriber == False
     assert lookup.response == {"result": [], "too_many": False}
     assert lookup.action == action
@@ -464,7 +461,7 @@ def test_targetsmart_response_active_voter(requests_mock, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_alloy_response_active_voter(requests_mock):
+def test_alloy_response_active_voter(requests_mock, smsbot_patch):
     client = APIClient()
     with open(os.path.join(ALLOY_RESPONSES_PATH, "active.json")) as json_file:
         data = json.load(json_file)

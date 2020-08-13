@@ -123,7 +123,7 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         instance = serializer.save()
         instance.action.track_event(EventType.FINISH)
 
-        if instance.sms_opt_in and settings.SMS_POST_SIGNUP_ALERT:
+        if settings.SMS_POST_SIGNUP_ALERT:
             send_welcome_sms.apply_async(
                 args=(str(instance.phone), "verifier"),
                 countdown=settings.SMS_OPTIN_REMINDER_DELAY,

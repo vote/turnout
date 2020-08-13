@@ -31,7 +31,6 @@ VALID_ABSENTEE_INITIAL = {
     "date_of_birth": "1737-01-23",
     "zipcode": "02108",
     "phone": "+16175557890",
-    "sms_opt_in": True,
     "sms_opt_in_subscriber": True,
 }
 
@@ -46,12 +45,21 @@ VALID_ABSENTEE_FULL = {
     "date_of_birth": "1737-01-23",
     "zipcode": "02108",
     "phone": "+16175557890",
-    "sms_opt_in": True,
     "sms_opt_in_subscriber": True,
     "region": 12345,
     "us_citizen": True,
     "is_18_or_over": True,
 }
+
+
+@pytest.fixture
+def mock_followup(mocker):
+    return mocker.patch("absentee.api_views.ballotrequest_followup")
+
+
+@pytest.fixture
+def mock_sms(mocker):
+    return mocker.patch("absentee.api_views.send_welcome_sms")
 
 
 @pytest.fixture
@@ -119,7 +127,10 @@ def set_fax_forbidden(state):
 # Incomplete create, matching region
 @pytest.mark.django_db
 def test_incomplete_create_single_matching_region(
-    mock_get_absentee_contact_info, mock_get_regions_for_address, feature_flag_off
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    feature_flag_off,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -154,7 +165,10 @@ def test_incomplete_create_single_matching_region(
 # Incomplete create, matching region, email
 @pytest.mark.django_db
 def test_incomplete_create_single_matching_region_email(
-    mock_get_absentee_contact_info, mock_get_regions_for_address, feature_flag_on
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_email_allowed(state)
@@ -186,7 +200,7 @@ def test_incomplete_create_single_matching_region_email(
 # Incomplete create, region matching error
 @pytest.mark.django_db
 def test_incomplete_create_region_matching_error(
-    mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -223,7 +237,7 @@ def test_incomplete_create_region_matching_error(
 # Incomplete create, no matching regions
 @pytest.mark.django_db
 def test_incomplete_create_no_matching_regions(
-    mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -260,7 +274,7 @@ def test_incomplete_create_no_matching_regions(
 # Incomplete create, multiple matching regions
 @pytest.mark.django_db
 def test_incomplete_create_multiple_matching_regions(
-    mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -293,7 +307,7 @@ def test_incomplete_create_multiple_matching_regions(
 # Incomplete create, no region matching requested
 @pytest.mark.django_db
 def test_incomplete_create_no_region_matching(
-    mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -332,8 +346,10 @@ def test_incomplete_create_no_region_matching(
 # Complete create
 @pytest.mark.django_db
 def test_complete_create(
+    mock_sms,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
+    mock_followup,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -374,7 +390,7 @@ def test_complete_create(
 
 # Incomplete update, not filling in esign method
 @pytest.mark.django_db
-def test_incomplete_update_no_esign_filling():
+def test_incomplete_update_no_esign_filling(mock_sms):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
     client = APIClient()
@@ -408,7 +424,7 @@ def test_incomplete_update_no_esign_filling():
 # Incomplete update, filling in esign method
 @pytest.mark.django_db
 def test_incomplete_update_with_esign_filling(
-    mock_get_absentee_contact_info, feature_flag_on
+    mock_sms, mock_get_absentee_contact_info, feature_flag_on
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_fax_allowed(state)
@@ -444,7 +460,11 @@ def test_incomplete_update_with_esign_filling(
 # Complete update
 @pytest.mark.django_db
 def test_complete_update(
-    mock_get_absentee_contact_info, process_ballot_request, feature_flag_on,
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_followup,
+    process_ballot_request,
+    feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_fax_allowed(state)
@@ -561,6 +581,7 @@ def test_get_esign_method(
     submission_override,
     expected,
     mocker,
+    mock_sms,
     mock_get_regions_for_address,
 ):
     set_feature_flag(mocker, flag)

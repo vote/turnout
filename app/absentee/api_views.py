@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+from django.conf import settings
 from django.http import Http404
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from common.rollouts import flag_enabled_for_state
 from election.models import State, StateInformation
 from official.api_views import get_regions_for_address
 from official.models import Region
+from smsbot.tasks import send_welcome_sms
 
 from .contactinfo import get_absentee_contact_info
 from .generateform import process_ballot_request
@@ -18,6 +20,7 @@ from .models import BallotRequest
 from .region_links import ovbm_link_for_ballot_request
 from .serializers import BallotRequestSerializer
 from .state_pdf_data import STATE_DATA
+from .tasks import ballotrequest_followup
 
 
 def get_esign_method_for_region(state: State, region: Region) -> SubmissionType:
@@ -146,6 +149,12 @@ class BallotRequestViewSet(IncompleteActionViewSet):
                     "name"
                 ).values("name", "external_id")
 
+        if settings.SMS_POST_SIGNUP_ALERT:
+            send_welcome_sms.apply_async(
+                args=(str(ballot_request.phone), "register"),
+                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
+            )
+
         return self.create_or_update_response(
             request, ballot_request, extra_response_data
         )
@@ -176,6 +185,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
 
     def after_complete(self, action_object, state_id_number, is_18_or_over):
         process_ballot_request(action_object, state_id_number, is_18_or_over)
+        ballotrequest_followup.delay(action_object.pk)
 
 
 class StateMetadataView(APIView):

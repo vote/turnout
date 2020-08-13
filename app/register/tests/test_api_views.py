@@ -134,6 +134,11 @@ PA_REGISTRATION_SIG = {
 
 
 @pytest.fixture()
+def mock_sms(mocker):
+    mocker.patch("register.api_views.send_welcome_sms")
+
+
+@pytest.fixture()
 def submission_task_patch(mocker):
     mocker.patch("register.api_views.send_welcome_sms")
     mocker.patch("register.api_views.sync_registration_to_actionnetwork")
@@ -341,7 +346,7 @@ def test_invalid_state():
 
 
 @pytest.mark.django_db
-def test_update_status():
+def test_update_status(mock_sms):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -371,7 +376,7 @@ def test_update_status():
 
 
 @pytest.mark.django_db
-def test_invalid_update_status():
+def test_invalid_update_status(mock_sms):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -394,7 +399,7 @@ def test_invalid_update_status():
 
 
 @pytest.mark.django_db
-def test_bad_update_status():
+def test_bad_update_status(mock_sms):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -498,7 +503,9 @@ def mock_ovrlib_session_dl(mocker):
 
 
 @pytest.mark.django_db
-def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, state_confirmation_email):
+def test_pa_nodlorsig(
+    mock_sms, mock_ovrlib_session_dl, mock_region, state_confirmation_email
+):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, PA_REGISTRATION_START, format="json",
@@ -526,7 +533,7 @@ def test_pa_nodlorsig(mock_ovrlib_session_dl, mock_region, state_confirmation_em
 
 @pytest.mark.django_db
 def test_pa_nodlorsig_few_regions(
-    mock_ovrlib_session_dl, mock_few_regions, state_confirmation_email
+    mock_sms, mock_ovrlib_session_dl, mock_few_regions, state_confirmation_email
 ):
     client = APIClient()
     register_response = client.post(
@@ -557,7 +564,7 @@ def test_pa_nodlorsig_few_regions(
 
 @pytest.mark.django_db
 def test_pa_nodlorsig_all_regions(
-    mock_ovrlib_session_dl, mock_all_regions, state_confirmation_email
+    mock_sms, mock_ovrlib_session_dl, mock_all_regions, state_confirmation_email
 ):
     client = APIClient()
     register_response = client.post(
