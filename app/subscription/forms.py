@@ -28,7 +28,7 @@ class InterestForm(forms.ModelForm):
             "organization_name": "Organization Name",
             "first_name": "First Name",
             "last_name": "Last Name",
-            "nonprofit": "Check here if you are a 501(c)3 nonprofit",
+            "nonprofit": "Check here if you are a 501(c)3 Non-Profit organization",
             "ein": "If yes to 501(c)3 please enter the EIN below",
         }
         help_texts = {
@@ -82,7 +82,9 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
 
 
 class ActivateInterestForm(forms.ModelForm):
-    slug = forms.SlugField(help_text="Organization Slug")
+    slug = forms.SlugField(
+        help_text="A short word for the subscriber, with no spaces e.g. 'voteamerica' or 'example-company'"
+    )
     initial_user = forms.EmailField(help_text="First admin to be invited")
 
     class Meta:

@@ -34,7 +34,9 @@ class SubscriberUpdateView(ManageViewMixin, SubscriptionAdminView, UpdateView):
 
 
 class InterestListView(ManageViewMixin, SubscriptionAdminView, ListView):
-    queryset = Interest.objects.select_related("product")
+    queryset = Interest.objects.filter(
+        status=enums.SubscriptionInterestStatus.PENDING
+    ).select_related("product")
     context_object_name = "interests"
     template_name = "subscription/manage/interest_list.html"
     ordering = ["status", "organization_name"]
