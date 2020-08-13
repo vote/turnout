@@ -5,6 +5,7 @@ import unicodedata
 from typing import Any, Dict, List
 
 from pdf_template import PDFTemplate, PDFTemplateSection
+from pydash.strings import deburr
 
 from common.apm import tracer
 
@@ -28,7 +29,9 @@ def clean_data_str(field: str) -> str:
         field = field[:MAX_FIELD_LEN]
 
     # Filter out control characters like null bytes
-    return "".join(c for c in field if chr_is_valid(c))
+    filtered_str = "".join(c for c in field if chr_is_valid(c))
+
+    return deburr(filtered_str)
 
 
 def clean_data_field(field: Any) -> Any:

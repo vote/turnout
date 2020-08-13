@@ -21,6 +21,7 @@ def test_clean_data():
             "H": [],
             "I": {},
             "J": PhoneNumber.from_string("+16175551234"),
+            "K": "Hagåtña",
         }
     ) == {
         "A": 1,
@@ -33,4 +34,5 @@ def test_clean_data():
         "H": "[]",
         "I": "{}",
         "J": "(617) 555-1234",
+        "K": "Hagatna",
     }
