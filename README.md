@@ -59,6 +59,7 @@ USVOTEFOUNDATION_KEY is in your .env, and then run `make usvf`.  By
 default we won't geocode every address (this takes a few hours), but
 you can add USVF_GEOCODE=True to enable that.
 
+Note: If you have Auto Save enabled on your IDE, turn that off. Auto Save does not work well with Django. (See: instructions for [VSCode](https://code.visualstudio.com/docs/editor/codebasics#_save-auto-save).)
 
 ### Shell Access
 
