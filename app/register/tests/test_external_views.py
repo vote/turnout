@@ -53,6 +53,14 @@ def mock_markdown(mocker):
     return patch
 
 
+@pytest.fixture(autouse=True)
+def mock_cache(mocker):
+    patch_get = mocker.patch("register.external_views.cache.get")
+    patch_get.return_value = None
+
+    mocker.patch("register.external_views.cache.set")
+
+
 def set_state_info(state, name, value):
     ft = StateInformationFieldType(slug=name, field_format=StateFieldFormats.MARKDOWN)
     ft.save()

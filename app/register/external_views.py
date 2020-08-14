@@ -3,6 +3,7 @@ from datetime import timedelta
 from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.core.cache import cache
 from django.template.loader import render_to_string
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
@@ -22,6 +23,7 @@ from .serializers import ExternalRegistrationSerializer
 
 MARKDOWN_TEMPLATE = "register/external/external_registration.md"
 JWT_EXPIRATION = timedelta(minutes=settings.REGISTER_JWT_EXPIRATION_MINUTES)
+STATE_CACHE_TIMEOUT = 5 * 60
 
 
 @dataclass
@@ -77,8 +79,20 @@ def get_state_data(state_code: str) -> StateRegistrationData:
     )
 
 
+def get_state_data_cached(state_code: str) -> StateRegistrationData:
+    cache_key = f"register__external_views__get_state_data__{state_code}"
+    cached_value = cache.get(cache_key)
+    if cached_value:
+        return cached_value
+
+    data = get_state_data(state_code)
+    cache.set(cache_key, data, STATE_CACHE_TIMEOUT)
+
+    return data
+
+
 def generate_response(registration: Registration) -> Dict[str, Any]:
-    state_data = get_state_data(registration.state_id)
+    state_data = get_state_data_cached(registration.state_id)
 
     custom_ovr_link = get_custom_ovr_link(registration)
     ovr_link = custom_ovr_link or state_data.external_tool_ovr
@@ -159,7 +173,9 @@ class RegistrationResumeView(APIView):
             if not action_id:
                 return Response({"error": "Invalid token"}, status=400)
 
-            registration = Registration.objects.get(action_id=action_id)
+            registration = Registration.objects.select_related("state").get(
+                action_id=action_id
+            )
 
         return Response(
             {

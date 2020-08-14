@@ -24,7 +24,7 @@ class ApiKeyAuthentication(authentication.BaseAuthentication):
         ]
 
         try:
-            key = ApiKey.objects.select_related().get(
+            key = ApiKey.objects.select_related("subscriber").get(
                 pk=key_id, deactivated_by__isnull=True
             )
         except ApiKey.DoesNotExist:
