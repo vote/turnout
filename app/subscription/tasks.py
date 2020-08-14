@@ -6,7 +6,7 @@ from django.conf import settings
 
 from mailer.retry import EMAIL_RETRY_PROPS
 
-from .notifications import trigger_rejection_notification, trigger_welcome_notification
+from .notifications import trigger_welcome_notification
 
 logger = logging.getLogger("subscription")
 
@@ -19,11 +19,6 @@ def send_organization_welcome_notification(
 
     subscriber = Client.objects.get(pk=subscriber_pk)
     trigger_welcome_notification(subscriber, initial_user_email)
-
-
-@shared_task(**EMAIL_RETRY_PROPS)
-def send_organization_rejection_notification(email: str, reason: str) -> None:
-    trigger_rejection_notification(email, reason)
 
 
 @shared_task

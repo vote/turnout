@@ -11,7 +11,6 @@ from multi_tenant.models import Client
 from .forms import ActivateInterestForm, RejectInterestForm, SubscriberAdminSettingsForm
 from .mixins_manage_views import SubscriptionAdminView
 from .models import Interest
-from .tasks import send_organization_rejection_notification
 
 
 class SubscribersListView(ManageViewMixin, SubscriptionAdminView, ListView):
@@ -111,9 +110,5 @@ class InterestRejectView(
     def form_valid(self, form):
         form.instance.status = enums.SubscriptionInterestStatus.REJECTED
         response = super().form_valid(form)
-
-        send_organization_rejection_notification.delay(
-            form.instance.email, form.cleaned_data["reject_reason"],
-        )
 
         return response

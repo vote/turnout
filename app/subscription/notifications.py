@@ -10,9 +10,6 @@ if TYPE_CHECKING:
 
 WELCOME_EMAIL_TEMPLATE = "subscription/emails/welcome.html"
 
-REJECTION_EMAIL_SUBJECT = "Your VoteAmerica account has been rejected"
-REJECTION_EMAIL_TEMPLATE = "subscription/emails/rejected.html"
-
 
 def generate_manage_link(view: str, subscriber: "Client") -> str:
     path = reverse(view, args=[subscriber.slug],)
@@ -54,20 +51,3 @@ def trigger_welcome_notification(subscriber: "Client", initial_user_email: str) 
     subject = f"The {subscriber.name} account at VoteAmerica is now active"
     content = compile_email(subscriber, initial_user_email)
     send_welcome_email(subject, initial_user_email, content)
-
-
-def trigger_rejection_notification(email: str, reason: str) -> None:
-    context = {
-        "reason": reason,
-        "recipient": {"email": email,},
-    }
-    content = render_to_string(REJECTION_EMAIL_TEMPLATE, context)
-
-    msg = EmailMessage(
-        REJECTION_EMAIL_SUBJECT,
-        content,
-        settings.MANAGEMENT_NOTIFICATION_FROM,
-        [email],
-    )
-    msg.content_subtype = "html"
-    msg.send()
