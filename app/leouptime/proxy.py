@@ -207,6 +207,7 @@ def check_proxies():
                     # make sure the proxy is actually working
                     site = get_sentinel_site()
                     driver = get_driver(proxy)
+                    logger.info(driver)
                     check = check_site_with(driver, proxy, site)
                     if not check.state_up:
                         logger.info(f"Proxy {proxy} can't reach sentinel site {site}")

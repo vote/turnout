@@ -233,7 +233,6 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
-    Queue("uptime"),
 }
 CELERY_BEAT_SCHEDULE = {
     "trigger-netlify-updated-information": {
