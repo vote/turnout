@@ -30,6 +30,8 @@ from election.models import State
 from manage.mixins import ManageViewMixin
 from official.models import Region
 from storage.models import StorageItem
+from event_tracking.models import Event
+from django.db.models import Exists, OuterRef, Q
 
 from .forms import (
     LeoContactOverrideManageCreateForm,
@@ -212,7 +214,22 @@ class BallotRequestListView(
     template_name = "absentee/dashboard/ballot_request_list.html"
 
     def get_queryset(self):
-        queryset = super().get_queryset().filter(action__details__leo_message_sent=True)
+        queryset = (
+            super()
+            .get_queryset()
+            .annotate(
+                is_esign=Exists(
+                    Event.objects.filter(
+                        action_id=OuterRef("action_id"),
+                        event_type__in=(
+                            enums.EventType.FINISH_LEO,
+                            enums.EventType.FINISH_LEO_FAX_PENDING,
+                        ),
+                    )
+                )
+            )
+            .filter(is_esign=True)
+        )
 
         search_query = self.request.GET.get("q")
         if search_query:
@@ -222,7 +239,7 @@ class BallotRequestListView(
         if region_filter:
             queryset = queryset.filter(region_id=int(region_filter))
 
-        return queryset
+        return queryset.select_related("state")
 
 
 class BallotRequestDetailView(
