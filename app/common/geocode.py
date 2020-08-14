@@ -29,7 +29,7 @@ class GISDataError(Exception):
     pass
 
 
-def strip_address_number_alpha_suffix(address):
+def strip_address_number_alpha_suffix(address: str) -> str:
     """
     Remove any alpha suffix from the street number ("40A St Paul St" ->
     "40 St Paul St").  This works around some buggy address parsing at
@@ -53,7 +53,7 @@ def geocode(**kwargs):
     args = {}
     for k in ["street", "city", "state", "q", "fields"]:
         if k in kwargs:
-            if k == "street":
+            if k == "street" and kwargs[k]:
                 args[k] = strip_address_number_alpha_suffix(kwargs[k])
             else:
                 args[k] = kwargs[k]
