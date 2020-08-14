@@ -121,6 +121,7 @@ FIRST_PARTY_APPS = [
     "reminder",
     "apikey",
     "leouptime",
+    "celery_admin",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -283,6 +284,8 @@ if UPTIME_ENABLED:
             "task": "leouptime.tasks.tweet_uptime",
             "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
         }
+
+DJANGO_CELERY_RESULTS = {"ALLOW_EDITS": False}
 
 #### END CELERY CONFIGURATION
 
@@ -578,6 +581,11 @@ LOGGING = {
             "propagate": False,
         },
         "apikey": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
+        "turnout": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
