@@ -134,6 +134,8 @@ def test_purge_registration_form(client):
 
 @pytest.mark.django_db
 def test_purge_secureupload(client):
+    settings.FILE_PURGE_DAYS = 24
+
     upload = baker.make_recipe("storage.secureupload")
     upload.created_at = datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc)
     upload.save()

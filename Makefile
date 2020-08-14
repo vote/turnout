@@ -1,3 +1,8 @@
+
+# Running too many tests is parallel exhausts shared memory on some
+# machines (recent Ubuntu and Fedora in my case).
+MAXPROC ?= 16
+
 up:
 	docker-compose up --build
 
@@ -29,16 +34,16 @@ clientshell:
 	docker-compose exec client /bin/bash
 
 testpy:
-	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest -n auto /app/"
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest -n `scripts/nproc-max ${MAXPROC}` /app/"
 
 mypy:
 	docker-compose exec server mypy /app/
 
 test:
-	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest -n auto /app/ && mypy /app/"
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest -n `scripts/nproc-max ${MAXPROC}` /app/ && mypy /app/"
 
 testpdf:
-	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False ABSENTEE_TEST_ONLY=${STATE} pytest -n auto /app/absentee/tests/test_pdf.py /app/absentee/tests/test_metadata.py"
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False ABSENTEE_TEST_ONLY=${STATE} pytest -n `scripts/nproc-max 16` /app/absentee/tests/test_pdf.py /app/absentee/tests/test_metadata.py"
 
 testpdfsigbox:
 	docker-compose exec server bash -c "mkdir -p absentee/management/commands/out && python manage.py sig_sample ${STATE} --box"
@@ -50,7 +55,7 @@ cacheofficials:
 	docker-compose exec server python manage.py cacheofficials
 
 lint:
-	docker-compose exec server bash -c "autoflake \
+	docker-compose exec srrerver bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \
 		isort --recursive --skip migrations /app/ && black --exclude /*/migrations/* /app/"
 
