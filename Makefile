@@ -55,7 +55,7 @@ cacheofficials:
 	docker-compose exec server python manage.py cacheofficials
 
 lint:
-	docker-compose exec srrerver bash -c "autoflake \
+	docker-compose exec server bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \
 		isort --recursive --skip migrations /app/ && black --exclude /*/migrations/* /app/"
 

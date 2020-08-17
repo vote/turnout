@@ -18,6 +18,7 @@ from .models import Link
 
 FORM_ENDPOINT = "https://actionnetwork.org/api/v2/forms/"
 ADD_ENDPOINT = "https://actionnetwork.org/api/v2/forms/{form_id}/submissions/"
+PEOPLE_ENDPOINT = "https://actionnetwork.org/api/v2/people/{person_id}/"
 
 logger = logging.getLogger("integration")
 
@@ -136,43 +137,54 @@ def setup_action_forms(subscriber_id, api_key, slug):
     return forms
 
 
-def post_person(info, form_id, api_key):
+def post_person(info, form_id, api_key, slug):
     from common.apm import tracer
 
     url = ADD_ENDPOINT.format(form_id=form_id)
-    with tracer.trace("an.form.submission", service="actionnetwork"):
-        try:
+    try:
+        with tracer.trace("an.form.submission", service="actionnetwork"):
             response = requests.post(
                 url, json=info, headers={"OSDI-API-Token": api_key},
             )
-        except Exception as e:
-            extra = {"url": url, "info": info, "exception": str(e)}
-            logger.error(
-                "actionnetwork: Error posting to %(url)s, info %(info)s, exception %(exception)s",
-                extra,
-                extra=extra,
-            )
-            sentry_sdk.capture_exception(
-                ActionNetworkError(f"Error posting to {url}, exception {str(e)}")
-            )
-            return None
-    if response.status_code != 200:
-        extra = {"url": url, "info": info, "status_code": response.status_code}
-        logger.info(response.text)
+            if response.status_code != 200:
+                extra = {"url": url, "info": info, "status_code": response.status_code}
+                logger.info(response.text)
+                logger.error(
+                    "actionnetwork: Error posting to %(url)s, info %(info)s, status_code %(status_code)s",
+                    extra,
+                    extra=extra,
+                )
+                sentry_sdk.capture_exception(
+                    ActionNetworkError(
+                        f"Error posting to {url}, status code {response.status_code}"
+                    )
+                )
+                return None
+
+            person_id = response.json()["_links"]["osdi:person"]["href"].split("/")[-1]
+
+            # if (first) subscriber field not set, set it
+            if not response.json().get("custom_fields", {}).get("first_subscriber"):
+                response = requests.put(
+                    PEOPLE_ENDPOINT.format(person_id=person_id),
+                    headers={"OSDI-API-Token": api_key},
+                    json={"custom_fields": {"subscriber": slug,},},
+                )
+
+    except Exception as e:
+        extra = {"url": url, "info": info, "exception": str(e)}
         logger.error(
-            "actionnetwork: Error posting to %(url)s, info %(info)s, status_code %(status_code)s",
+            "actionnetwork: Error posting to %(url)s, info %(info)s, exception %(exception)s",
             extra,
             extra=extra,
         )
         sentry_sdk.capture_exception(
-            ActionNetworkError(
-                f"Error posting to {url}, status code {response.status_code}"
-            )
+            ActionNetworkError(f"Error posting to {url}, exception {str(e)}")
         )
         return None
 
     # return link to the *person*, not the submission
-    return response.json()["_links"]["osdi:person"]["href"].split("/")[-1]
+    return person_id
 
 
 @tracer.wrap()
@@ -219,7 +231,7 @@ def _sync_item(item, subscriber_id):
                         "country": "US",
                     },
                 ],
-                "custom_fields": {"subscriber": slug,},
+                "custom_fields": {"last_subscriber": slug,},
             },
             "action_network:referrer_data": {
                 "source": item.source or f"voteamerica_{tool}",
@@ -230,6 +242,7 @@ def _sync_item(item, subscriber_id):
         },
         form_id,
         api_key,
+        slug,
     )
     if external_id:
         Link.objects.create(
