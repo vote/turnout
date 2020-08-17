@@ -25,7 +25,7 @@ logger = logging.getLogger("integration")
 # turnout db.  The form description shows up in the ActionNetwork UI
 # and matches the tool name, with title case (value).  See get_form_title().
 ACTIONS = {
-    "lookup": "Lookup",
+    "lookup": "Verify",
     "registration": "Register",
     "ballotrequest": "Absentee",
     "reminderrequest": "Reminder",
@@ -109,10 +109,10 @@ def setup_action_forms(subscriber_id, api_key, slug):
 
             nexturl = response.json().get("_links", {}).get("next", {}).get("href")
 
-    for action, action_desc in ACTIONS.items():
+    for action, tool in ACTIONS.items():
         if action not in forms:
             # This code runs once per action, ever.
-            logger.info(f"Creating action form for {action_desc} ({prefix})")
+            logger.info(f"Creating action form for {tool} ({prefix})")
             with tracer.trace("an.form.create", service="actionnetwork"):
                 form_id = f"voteamerica:{prefix}_{action}"
                 if subscriber_id and slug:
@@ -122,7 +122,7 @@ def setup_action_forms(subscriber_id, api_key, slug):
                     headers={"OSDI-API-Token": api_key},
                     json={
                         "identifiers": [form_id],
-                        "title": get_form_title(action_desc, prefix),
+                        "title": get_form_title(tool, prefix),
                         "origin_system": "voteamerica",
                     },
                 )
@@ -194,6 +194,7 @@ def _sync_item(item, subscriber_id):
 
     forms = setup_action_forms(subscriber_id, api_key, slug)
     action = str(item.__class__.__name__).lower()
+    tool = ACTIONS[action]
     form_id = forms.get(action)
 
     extra = {"subscriber_id": subscriber_id, "item": item}
@@ -221,7 +222,7 @@ def _sync_item(item, subscriber_id):
                 "custom_fields": {"subscriber": slug,},
             },
             "action_network:referrer_data": {
-                "source": item.source or f"voteamerica_{action}",
+                "source": item.source or f"voteamerica_{tool}",
                 "website": item.embed_url,
                 "email_referrer": item.email_referrer,
                 "mobile_referrer": item.mobile_referrer,
