@@ -13,6 +13,8 @@ nav:
     - 'Tool Admin':
         - 'Introduction': '/admin/'
         - 'Export Format': '/admin/exportformat/'
+    - 'Integrations':
+        - 'ActionNetwork': '/integrations/actionnetwork/'
     - 'Advanced APIs':
         - 'Action API': '/api/action/'
     - 'Open Source Development': '/opensource/'
