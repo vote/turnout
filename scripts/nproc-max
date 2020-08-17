@@ -1,0 +1,4 @@
+#!/bin/bash
+
+N=$(nproc)
+if [ "$N" -gt "$1" ]; then echo "$1"; else echo "$N"; fi
