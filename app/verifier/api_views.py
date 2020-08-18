@@ -14,7 +14,7 @@ from election.models import State
 from integration.tasks import sync_lookup_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
 
-from .alloy import ALLOY_STATES_ENABLED, query_alloy
+from .alloy import ALLOY_STATES_ENABLED, get_alloy_state_freshness, query_alloy
 from .models import Lookup
 from .serializers import LookupSerializer
 from .targetsmart import query_targetsmart
@@ -56,6 +56,11 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
             serializer.validated_data["last_updated"] = alloy_response.get(
                 "data", {}
             ).get("last_updated_date")
+
+            if serializer.validated_data["last_updated"] is None:
+                serializer.validated_data["last_updated"] = get_alloy_state_freshness(
+                    serializer.validated_data["state"].code
+                )
 
             registered = False
 

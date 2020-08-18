@@ -14,7 +14,7 @@ from common.enums import EventType, SubscriberStatus, VoterStatus
 from election.models import State
 from event_tracking.models import Event
 from multi_tenant.models import Client
-from verifier.alloy import ALLOY_ENDPOINT
+from verifier.alloy import ALLOY_ENDPOINT, ALLOY_FRESHNESS_ENDPOINT
 from verifier.models import Lookup
 from verifier.targetsmart import TARGETSMART_ENDPOINT
 
@@ -76,6 +76,12 @@ TARGETSMART_RESPONSES_PATH = os.path.abspath(
 ALLOY_RESPONSES_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "sample_alloy_responses/")
 )
+
+
+@pytest.fixture(autouse=True)
+def mock_cache(mocker):
+    mocker.patch("verifier.alloy.cache.get", return_value=None)
+    mocker.patch("verifier.alloy.cache.set", return_value=None)
 
 
 @pytest.fixture(autouse=True)
@@ -172,23 +178,38 @@ def test_targetsmart_request_address2(requests_mock, mocker, settings, smsbot_pa
 
 
 @pytest.mark.django_db
-def test_proper_alloy_request(requests_mock, smsbot_patch):
+def test_proper_alloy_request(requests_mock, mock_cache, smsbot_patch):
     client = APIClient()
     alloy_call = requests_mock.register_uri(
         "GET", ALLOY_ENDPOINT, json={"data": {}, "api_version": "v1"},
+    )
+    alloy_freshness_call = requests_mock.register_uri(
+        "GET",
+        ALLOY_FRESHNESS_ENDPOINT,
+        json={
+            "data": {"data_freshness": {"FL": "2020-01-01T00:00:00Z",}},
+            "api_version": "v1",
+        },
     )
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+    assert response.json() == {
+        "registered": False,
+        "action_id": str(action.pk),
+        "last_updated": "2020-01-01T00:00:00Z",
+    }
 
-    assert requests_mock.call_count == 1
+    assert requests_mock.call_count == 2
     basic_auth_string = (
         "Basic " + b64encode("myalloykey:myalloysecret".encode()).decode()
     )
     assert alloy_call.last_request.headers["authorization"] == basic_auth_string
     assert alloy_call.last_request.qs == ALLOY_EXPECTED_QUERYSTRING
+    assert (
+        alloy_freshness_call.last_request.headers["authorization"] == basic_auth_string
+    )
 
 
 @pytest.mark.django_db

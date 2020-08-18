@@ -2,12 +2,14 @@ import logging
 
 import requests
 from django.conf import settings
+from django.core.cache import cache
 
 from common.apm import tracer
 
 logger = logging.getLogger("verifier")
 
 ALLOY_ENDPOINT = "https://api.alloy.us/v1/verify"
+ALLOY_FRESHNESS_ENDPOINT = "https://api.alloy.us/v1/voter-metadata"
 
 ALLOY_STATES_QUARTERLY = ["AL", "CA", "DC", "IN", "KY", "MN", "SC"]
 ALLOY_STATES_MONTHLY = [
@@ -73,3 +75,17 @@ def query_alloy(serializer_data):
         return {"error": f"HTTP error {response.status_code}: {response.text}"}
 
     return response.json()
+
+
+def get_alloy_state_freshness(state):
+    freshness = cache.get("alloy_freshness", None)
+    if not freshness:
+        with tracer.trace("alloy.freshness", service="alloyapi"):
+            response = requests.get(
+                ALLOY_FRESHNESS_ENDPOINT,
+                auth=requests.auth.HTTPBasicAuth(settings.ALLOY_KEY, settings.ALLOY_SECRET),
+            )
+        freshness = response.json().get("data", {}).get("data_freshness", {})
+        if freshness:
+            cache.set("alloy_freshness", freshness)
+    return freshness.get(state)
