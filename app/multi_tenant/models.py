@@ -89,6 +89,34 @@ class Client(UUIDModel, TimestampModel):
             "\n", ""
         )
 
+    def get_sms_mode(self):
+        if not self.sms_enabled:
+            return enums.SubscriberSMSOption.NONE
+        if not self.sms_checkbox:
+            return enums.SubscriberSMSOption.AUTO_OPT_IN
+        if self.sms_checkbox_default:
+            return enums.SubscriberSMSOption.BOX_CHECKED
+        else:
+            return enums.SubscriberSMSOption.BOX_UNCHECKED
+
+    def set_sms_mode(self, opt):
+        if opt == str(enums.SubscriberSMSOption.NONE):
+            self.sms_enabled = False
+            self.sms_checkbox = False
+            self.sms_checkbox_default = False
+        elif opt == str(enums.SubscriberSMSOption.AUTO_OPT_IN):
+            self.sms_enabled = True
+            self.sms_checkbox = False
+            self.sms_checkbox_default = False
+        elif opt == str(enums.SubscriberSMSOption.BOX_UNCHECKED):
+            self.sms_enabled = True
+            self.sms_checkbox = True
+            self.sms_checkbox_default = False
+        elif opt == str(enums.SubscriberSMSOption.BOX_CHECKED):
+            self.sms_enabled = True
+            self.sms_checkbox = True
+            self.sms_checkbox_default = True
+
 
 class SubscriberSlug(UUIDModel, TimestampModel):
     subscriber = models.ForeignKey(

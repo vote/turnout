@@ -58,6 +58,7 @@ class SubscriberUpdateSettingsView(
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
+        data["form"].initial["sms_mode"] = data["form"].instance.get_sms_mode()
 
         old_key = self.get_actionnetwork_key(data["form"].instance)
         if old_key:
@@ -67,6 +68,8 @@ class SubscriberUpdateSettingsView(
         return data
 
     def form_valid(self, form):
+        form.instance.set_sms_mode(form.cleaned_data.pop("sms_mode"))
+
         an = form.cleaned_data.pop("sync_actionnetwork", False)
         an_key = form.cleaned_data.pop("actionnetwork_api_key", None)
         old_key = self.get_actionnetwork_key(form.instance)
@@ -86,6 +89,7 @@ class SubscriberUpdateSettingsView(
         else:
             if old_key:
                 old_key.delete()
+
         return super().form_valid(form)
 
 

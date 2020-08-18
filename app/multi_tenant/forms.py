@@ -4,7 +4,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 
 from accounts.models import Invite
-from common.enums import ExternalToolType
+from common.enums import ExternalToolType, SubscriberSMSOption
 
 from .models import (
     Association,
@@ -14,6 +14,27 @@ from .models import (
 )
 
 API_KEY_PLACEHOLDER = "________________________________"
+
+sms_mode_choice = forms.ChoiceField(
+    required=True,
+    label="SMS program opt-in behavior",
+    widget=forms.RadioSelect,
+    choices=[
+        (SubscriberSMSOption.NONE, "We do not have an SMS program."),
+        (
+            SubscriberSMSOption.AUTO_OPT_IN,
+            "We automatically opt everyone into our SMS program. There is no checkbox. (You should consult a TCPA attorney to confirm this is legal for your organization before selecting this option)",
+        ),
+        (
+            SubscriberSMSOption.BOX_UNCHECKED,
+            "We surface an SMS opt-in box that is unchecked by default.",
+        ),
+        (
+            SubscriberSMSOption.BOX_CHECKED,
+            "We surface an SMS opt-in box that is checked by default. (If you are not sure, choose this option. This will help you build your SMS list in a way that is compliant for all organizations)",
+        ),
+    ],
+)
 
 
 class ChangeSubscriberManageForm(forms.Form):
@@ -36,6 +57,7 @@ class SubscriberSettingsForm(forms.ModelForm):
         help_text="New ActionNetwork API key (leave blank if unchanged)",
         widget=forms.PasswordInput(render_value=True),
     )
+    sms_mode = sms_mode_choice
 
     def clean(self):
         cleaned_data = super().clean()
@@ -63,9 +85,6 @@ class SubscriberSettingsForm(forms.ModelForm):
             "name",
             "url",
             "privacy_policy",
-            "sms_enabled",
-            "sms_checkbox",
-            "sms_checkbox_default",
             "sync_tmc",
             "sync_bluelink",
         ]
@@ -77,9 +96,6 @@ class SubscriberSettingsForm(forms.ModelForm):
             "name": "The name your organization will be referred to as throughout the tools.",
             "url": "The URL of your homepage.",
             "privacy_policy": "The URL of your privacy policy. This is highly recommended.",
-            "sms_enabled": "If your organization has a SMS program.",
-            "sms_checkbox": "If your organization requires a checkbox to be checked by users. Leave unchecked if you have no SMS program.",
-            "sms_checkbox_default": "If, by default, your organization's SMS checkbox is checked. Leave this unchecked if you have no SMS program or no SMS checkbox.",
             "sms_disclaimer": "If you wish to have a custom disclaimer, or next to your checkbox if you have one.",
             "sync_tmc": mark_safe(
                 "If your data should be included in a nightly sync to <a href='https://movementcooperative.org/' target='_blank' rel='noopener noreferrer'>The Movement Cooperative</a>."
@@ -90,9 +106,6 @@ class SubscriberSettingsForm(forms.ModelForm):
             ),
         }
         field_classes = {
-            "sms_enabled": forms.BooleanField,
-            "sms_checkbox": forms.BooleanField,
-            "sms_checkbox_default": forms.BooleanField,
             "sync_tmc": forms.BooleanField,
             "sync_bluelink": forms.BooleanField,
         }

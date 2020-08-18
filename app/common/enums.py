@@ -253,3 +253,10 @@ class SMSDeliveryStatus(Enum, metaclass=EnumMeta):
     RECEIVING = "receiving"
     RECEIVED = "received"
     READ = "read"  # WhatsApp only
+
+
+class SubscriberSMSOption(Enum, metaclass=EnumMeta):
+    NONE = "none"
+    AUTO_OPT_IN = "auto_opt_in"
+    BOX_UNCHECKED = "box_unchecked"
+    BOX_CHECKED = "box_checked"

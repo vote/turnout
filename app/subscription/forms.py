@@ -1,5 +1,6 @@
 from django import forms
 
+from multi_tenant.forms import sms_mode_choice
 from multi_tenant.models import Client, SubscriberSlug
 
 from .models import Interest, Product
@@ -11,6 +12,7 @@ class InterestForm(forms.ModelForm):
         queryset=Product.objects.filter(public=True),
         widget=forms.RadioSelect,
     )
+    sms_mode = sms_mode_choice
 
     class Meta:
         model = Interest
@@ -54,6 +56,8 @@ class InterestForm(forms.ModelForm):
 
 
 class SubscriberAdminSettingsForm(forms.ModelForm):
+    sms_mode = sms_mode_choice
+
     class Meta:
         model = Client
         fields = [
@@ -62,9 +66,6 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
             "status",
             "email",
             "privacy_policy",
-            "sms_enabled",
-            "sms_checkbox",
-            "sms_checkbox_default",
             "sms_disclaimer",
             "sync_tmc",
             "sync_bluelink",
@@ -73,9 +74,6 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
             "email": "Only change this after the subscriber has added our DKIM records"
         }
         field_classes = {
-            "sms_enabled": forms.BooleanField,
-            "sms_checkbox": forms.BooleanField,
-            "sms_checkbox_default": forms.BooleanField,
             "sync_tmc": forms.BooleanField,
             "sync_bluelink": forms.BooleanField,
         }

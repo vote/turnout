@@ -17,9 +17,7 @@
                     {{ form.url|as_crispy_field }}
                     {{ form.privacy_policy|as_crispy_field }}
                     <h3>SMS Program</h3>
-                    {{ form.sms_enabled|as_crispy_field }}
-                    {{ form.sms_checkbox|as_crispy_field }}
-                    {{ form.sms_checkbox_default|as_crispy_field }}
+                    {{ form.sms_mode|as_crispy_field }}
                     <h3>Third Party Integrations</h3>
                     <p><small>Bluelink and TMC syncs happen nightly. Your VoteAmerica subscriber ID is <code><small>{{ user.active_client_slug }}</small></code>.</small></p>
                     {{ form.sync_bluelink|as_crispy_field }}

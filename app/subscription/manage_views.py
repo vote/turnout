@@ -31,6 +31,15 @@ class SubscriberUpdateView(ManageViewMixin, SubscriptionAdminView, UpdateView):
             Client, default_slug__slug=self.kwargs["subscriber_slug"]
         )
 
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data["form"].initial["sms_mode"] = data["form"].instance.get_sms_mode()
+        return data
+
+    def form_valid(self, form):
+        form.instance.set_sms_mode(form.cleaned_data.pop("sms_mode"))
+        return super().form_valid(form)
+
 
 class InterestListView(ManageViewMixin, SubscriptionAdminView, ListView):
     queryset = Interest.objects.filter(

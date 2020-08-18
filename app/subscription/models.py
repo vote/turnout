@@ -48,6 +48,11 @@ class Interest(
         null=True,
     )
     reject_reason = models.TextField(null=True)
+    sms_mode = TurnoutEnumField(
+        enums.SubscriberSMSOption,
+        default=enums.SubscriberSMSOption.BOX_UNCHECKED,
+        null=True,
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -68,6 +73,7 @@ class Interest(
             slug=slug, subscriber=subscriber
         )
         subscriber.default_slug = subscriber_slug
+        subscriber.set_sms_mode(str(self.sms_mode))
         subscriber.save()
         sub = Subscription.objects.create(
             subscriber=subscriber, product=self.product, interest=self,
