@@ -590,6 +590,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "smsbot": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
     },
 }
 
@@ -654,7 +659,6 @@ MANAGEMENT_NOTIFICATION_FROM = env.str(
 TWILIO_ACCOUNT_SID = env.str("TWILIO_ACCOUNT_SID", default=None)
 TWILIO_AUTH_TOKEN = env.str("TWILIO_AUTH_TOKEN", default=None)
 TWILIO_MESSAGING_SERVICE_SID = env.str("TWILIO_MESSAGING_SERVICE_SID", default=None)
-TWILIO_ENDPOINT_IS_HTTPS = env.bool("TWILIO_ENDPOINT_IS_HTTPS", default=True)
 
 SMS_OPTIN_REMINDER_DELAY = env.int("SMS_OPTIN_REMINDER_DELAY", default=60 * 60)
 # If set, we will resend the welcome message if the last one is older than this

@@ -3,11 +3,8 @@ import datetime
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
-from twilio.rest import Client
 
 from common.analytics import statsd
-from common.enums import MessageDirectionType
-from smsbot.models import SMSMessage
 
 
 @shared_task
@@ -46,15 +43,7 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
     n.welcome_time = now
     n.save()
 
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-    message = client.messages.create(
-        to=number,
-        messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
-        body=msg,
-    )
-    SMSMessage.objects.create(
-        phone=number, direction=MessageDirectionType.OUT, message=msg,
-    )
+    n.send_sms(msg)
 
 
 @shared_task
@@ -80,12 +69,5 @@ def send_reminder_sms(number: str) -> None:
         "Msg & Data rates may apply. 4 msgs/month. "
         "Reply HELP for help, STOP to cancel."
     )
-    client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
-    message = client.messages.create(
-        to=number,
-        messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
-        body=msg,
-    )
-    SMSMessage.objects.create(
-        phone=number, direction=MessageDirectionType.OUT, message=msg,
-    )
+
+    n.send_sms(msg)

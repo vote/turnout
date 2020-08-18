@@ -240,3 +240,16 @@ class RegistrationFlowType(Enum, metaclass=EnumMeta):
     OVR_OR_PRINT = "ovr_or_print"
     PRINT_ONLY = "print_only"
     INELIGIBLE = "ineligible"
+
+
+class SMSDeliveryStatus(Enum, metaclass=EnumMeta):
+    ACCEPTED = "accepted"
+    QUEUED = "queued"
+    SENDING = "sending"
+    SENT = "sent"
+    FAILED = "failed"
+    DELIVERED = "delivered"
+    UNDELIVERED = "undelivered"
+    RECEIVING = "receiving"
+    RECEIVED = "received"
+    READ = "read"  # WhatsApp only

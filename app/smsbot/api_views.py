@@ -1,3 +1,6 @@
+import datetime
+import logging
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
@@ -10,7 +13,6 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from common.enums import MessageDirectionType
 from smsbot.models import Number, SMSMessage
-
 
 """
 Twilio's advanced opt-in should be configured with these messages:
@@ -40,24 +42,32 @@ Default keywords: help
 """
 
 
+logger = logging.getLogger("smsbot")
+
+
+def validate_twilio_request(func):
+    def wrapper(request, *args, **kwargs):
+        validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
+        url = settings.PRIMARY_ORIGIN + request.get_full_path()
+        if not validator.validate(
+            url, request.data, request.headers.get("X-Twilio-Signature", ""),
+        ):
+            return HttpResponse(
+                "Bad twilio signature", status=status.HTTP_403_FORBIDDEN
+            )
+        return func(request, *args, **kwargs)
+
+    return wrapper
+
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@validate_twilio_request
 def twilio(request):
     number = request.data.get("From", None)
     body = request.data.get("Body", "")
     if not number:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
-
-    validator = RequestValidator(settings.TWILIO_AUTH_TOKEN)
-    if settings.TWILIO_ENDPOINT_IS_HTTPS:
-        url = "https://"
-    else:
-        url = "http://"
-    url += request.META["HTTP_HOST"] + request.get_full_path()
-    if not validator.validate(
-        url, request.data, request.headers.get("X-Twilio-Signature", ""),
-    ):
-        return HttpResponse("Bad twilio signature", status=status.HTTP_403_FORBIDDEN)
 
     try:
         n = Number.objects.get(phone=number)
@@ -134,12 +144,24 @@ def twilio(request):
                 "Reply HELP for help, STOP to cancel."
             )
 
-    if reply:
-        SMSMessage.objects.create(
-            phone=number, direction=MessageDirectionType.OUT, message=reply,
-        )
-
     resp = MessagingResponse()
     if reply:
-        resp.message(reply)
+        reply_message = SMSMessage.objects.create(
+            phone=number, direction=MessageDirectionType.OUT, message=reply,
+        )
+        resp.message(reply, action=reply_message.delivery_status_webhook())
     return HttpResponse(str(resp))
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@validate_twilio_request
+def twilio_message_status(request, pk):
+    try:
+        message = SMSMessage.objects.get(pk=pk)
+        message.status = request.data.get("MessageStatus")
+        message.status_time = datetime.datetime.now(tz=datetime.timezone.utc)
+        message.save()
+    except ObjectDoesNotExist:
+        return HttpResponse("Message id not found", status=status.HTTP_404_NOT_FOUND)
+    return HttpResponse()
