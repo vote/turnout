@@ -122,6 +122,7 @@ FIRST_PARTY_APPS = [
     "apikey",
     "leouptime",
     "celery_admin",
+    "voter",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
@@ -604,6 +605,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "voter": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
     },
 }
 
@@ -816,3 +822,22 @@ PROXY_TAG = env.str("PROXY_TAG", "env:dev")
 SELENIUM_URL = env.str("SELENIUM_URL", None)
 
 #### END UPTIME CONFIGURATION
+
+#### VOTER CONFIGURATION
+
+# spread out lookups over time; max of N lookups every M minutes
+VOTER_CHECK_INTERVAL_MINUTES = 7
+VOTER_CHECK_MAX = 100
+
+# if a voter match fails, recheck it every few days
+VOTER_RECHECK_INTERVAL_DAYS = 5
+
+# give up eventually
+VOTER_RECHECK_MAX_DAYS = 90
+
+CELERY_BEAT_SCHEDULE["trigger-voter-check-new_actions"] = {
+    "task": "voter.tasks.check_new_actions",
+    "schedule": crontab(minute=f"*/{VOTER_CHECK_INTERVAL_MINUTES}"),
+}
+
+#### END VOTER CONFIGURATION

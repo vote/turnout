@@ -51,6 +51,8 @@ ALLOY_STATES_ENABLED = ALLOY_STATES_MONTHLY + ALLOY_STATES_WEEKLY
 
 def query_alloy(serializer_data):
     address2 = serializer_data.get("address2", "")
+    if address2 is None:
+        address2 = ""
     address_line = f"{serializer_data['address1']} {address2}".strip()
 
     query = {

@@ -9,6 +9,7 @@ from common.enums import EventType, FaxStatus
 from integration.tasks import sync_ballotrequest_to_actionnetwork
 from mailer.retry import EMAIL_RETRY_PROPS
 from smsbot.tasks import send_welcome_sms
+from voter.tasks import voter_lookup_action
 
 log = logging.getLogger("absentee")
 
@@ -28,6 +29,7 @@ def ballotrequest_followup(ballotrequest_pk: str) -> None:
 
     if settings.ACTIONNETWORK_SYNC:
         sync_ballotrequest_to_actionnetwork.delay(ballot_request.uuid)
+    voter_lookup_action(ballot_request.action.uuid)
 
 
 @shared_task(**EMAIL_RETRY_PROPS)

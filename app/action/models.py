@@ -1,17 +1,33 @@
 from typing import Any
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
+from absentee.models import BallotRequest
 from common.utils.models import TimestampModel, UUIDModel
 from event_tracking.models import Event
+from register.models import Registration
+from reminder.models import ReminderRequest
+from verifier.models import Lookup
 
 
 class Action(UUIDModel, TimestampModel):
+    voter = models.ForeignKey("voter.Voter", null=True, on_delete=models.SET_NULL)
+    last_voter_lookup = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["-created_at"]
 
     def track_event(self, event_type: Any) -> Event:
         return Event.objects.create(action=self, event_type=event_type)
+
+    def get_source_item(self):
+        for cls in BallotRequest, Registration, ReminderRequest, Lookup:
+            try:
+                return cls.objects.get(action=self)
+            except ObjectDoesNotExist:
+                pass
+        return None
 
 
 class ActionDetails(models.Model):

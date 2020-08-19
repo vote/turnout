@@ -96,6 +96,7 @@ def apikey_override(settings):
 def smsbot_patch(settings, mocker):
     settings.SMS_OPTIN_REMINDER_DELAY = 150
     settings.SMS_POST_SIGNUP_ALERT = True
+    mocker.patch("verifier.api_views.voter_lookup_action")
     return mocker.patch("verifier.api_views.send_welcome_sms")
 
 

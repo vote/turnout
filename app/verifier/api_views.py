@@ -13,6 +13,7 @@ from common.enums import EventType
 from election.models import State
 from integration.tasks import sync_lookup_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
+from voter.tasks import voter_lookup_action
 
 from .alloy import ALLOY_STATES_ENABLED, get_alloy_state_freshness, query_alloy
 from .models import Lookup
@@ -136,6 +137,7 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
 
         if settings.ACTIONNETWORK_SYNC:
             sync_lookup_to_actionnetwork.delay(instance.uuid)
+        voter_lookup_action.delay(instance.action.uuid)
 
         response = {"registered": registered, "action_id": instance.action.pk}
         if serializer.validated_data.get("last_updated"):

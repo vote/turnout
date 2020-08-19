@@ -21,6 +21,10 @@ def flag_enabled_for_state(
     )
 
 
+def get_feature(flag: str, user_id: str = "__anonymous__") -> bool:
+    return optimizely_client.is_feature_enabled(flag, user_id=user_id)
+
+
 def get_feature_int(flag: str, var: str, user_id: str = "__anonymous__") -> bool:
     if optimizely_client.is_feature_enabled(flag, user_id=user_id):
         return optimizely_client.get_feature_variable_integer(

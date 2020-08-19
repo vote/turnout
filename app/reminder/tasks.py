@@ -4,6 +4,7 @@ from django.conf import settings
 from common.analytics import statsd
 from integration.tasks import sync_reminderrequest_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
+from voter.tasks import voter_lookup_action
 
 
 @shared_task
@@ -12,6 +13,8 @@ def reminderrequest_followup(reminderrequest_pk: str) -> None:
     from .models import ReminderRequest
 
     reminder = ReminderRequest.objects.get(pk=reminderrequest_pk)
+
+    voter_lookup_action.delay(reminder.action.pk)
 
     if settings.SMS_POST_SIGNUP_ALERT:
         send_welcome_sms.apply_async(

@@ -19,6 +19,7 @@ from official.api_views import geocode_to_regions
 from official.models import Region
 from smsbot.tasks import send_welcome_sms
 from storage.models import SecureUploadItem
+from voter.tasks import voter_lookup_action
 
 from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration
@@ -248,6 +249,8 @@ class RegistrationViewSet(IncompleteActionViewSet):
 
         if settings.ACTIONNETWORK_SYNC:
             sync_registration_to_actionnetwork.delay(registration.uuid)
+        voter_lookup_action(registration.action.uuid)
+
 
     def after_create(self, action_object):
         custom_link = get_custom_ovr_link(action_object)
