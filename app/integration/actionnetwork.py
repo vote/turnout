@@ -164,7 +164,7 @@ def post_person(info, form_id, api_key, slug):
             person_id = response.json()["_links"]["osdi:person"]["href"].split("/")[-1]
 
             # if (first) subscriber field not set, set it
-            if not response.json().get("custom_fields", {}).get("first_subscriber"):
+            if slug and not response.json().get("custom_fields", {}).get("first_subscriber"):
                 response = requests.put(
                     PEOPLE_ENDPOINT.format(person_id=person_id),
                     headers={"OSDI-API-Token": api_key},
@@ -215,34 +215,37 @@ def _sync_item(item, subscriber_id):
         extra,
         extra=extra,
     )
-    external_id = post_person(
-        {
-            "person": {
-                "identifiers": [f"voteamerica_action:{item.action_id}"],
-                "given_name": item.first_name,
-                "family_name": item.last_name,
-                "email_addresses": [{"address": item.email}],
-                "postal_addresses": [
-                    {
-                        "address_lines": [item.address1, item.address2],
-                        "locality": item.city,
-                        "region": item.state_id,
-                        "postal_code": item.zipcode,
-                        "country": "US",
-                    },
-                ],
-                "custom_fields": {"last_subscriber": slug,},
-            },
-            "action_network:referrer_data": {
-                "source": item.source or f"voteamerica_{tool}",
-                "website": item.embed_url,
-                "email_referrer": item.email_referrer,
-                "mobile_referrer": item.mobile_referrer,
-            },
+    info = {
+        "person": {
+            "identifiers": [f"voteamerica_action:{item.action_id}"],
+            "given_name": item.first_name,
+            "family_name": item.last_name,
+            "email_addresses": [{"address": item.email}],
+            "postal_addresses": [
+                {
+                    "address_lines": [item.address1, item.address2],
+                    "locality": item.city,
+                    "region": item.state_id,
+                    "postal_code": item.zipcode,
+                    "country": "US",
+                },
+            ],
         },
+        "action_network:referrer_data": {
+            "source": item.source or f"voteamerica_{tool}",
+            "website": item.embed_url,
+            "email_referrer": item.email_referrer,
+            "mobile_referrer": item.mobile_referrer,
+        },
+    }
+    if not subscriber_id:
+        info["person"]["custom_fields"] = {"last_subscriber": slug}
+
+    external_id = post_person(
+        info,
         form_id,
         api_key,
-        slug,
+        slug if not subscriber_id else None,
     )
     if external_id:
         Link.objects.create(
