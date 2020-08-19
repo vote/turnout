@@ -105,7 +105,9 @@ class EsignRegionDashboardView(ManageViewMixin, EsignAdminView, DetailView):
         return context
 
 
-class LeoContactOverrideDetailView(UUIDSlugMixin, ManageViewMixin, DetailView):
+class LeoContactOverrideDetailView(
+    UUIDSlugMixin, ManageViewMixin, EsignAdminView, DetailView
+):
     model = LeoContactOverride
     context_object_name = "leo_contact_override"
     template_name = "absentee/dashboard/leo_contact_override_detail.html"
