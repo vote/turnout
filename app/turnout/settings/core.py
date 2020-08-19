@@ -226,6 +226,9 @@ OVBM_SYNC = env.bool("OVBM_SYNC", False)
 OVBM_SYNC_HOUR = env.int("OVBM_SYNC_HOUR", 4)
 OVBM_SYNC_MINUTE = env.int("OVBM_SYNC_MINUTE", 30)
 
+SMS_OPTOUT_POLL = env.bool("SMS_OPTOUT_POLL", False)
+SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*/5")
+
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -284,6 +287,12 @@ if UPTIME_ENABLED:
             "task": "leouptime.tasks.tweet_uptime",
             "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
         }
+
+if SMS_OPTOUT_POLL:
+    CELERY_BEAT_SCHEDULE["trigger-sms-optout-poll"] = {
+        "task": "smsbot.tasks.poll_optout",
+        "schedule": crontab(minute=SMS_OPTOUT_POLL_MINUTE),
+    }
 
 DJANGO_CELERY_RESULTS = {"ALLOW_EDITS": False}
 
@@ -666,6 +675,10 @@ SMS_OPTIN_REMINDER_RESEND_SECONDS = env.int(
     "SMS_OPTIN_REMINDER_RESEND_SECONDS", default=None,
 )
 SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
+
+# max seconds of messages to fetch from twilio (if we haven't polled in a while)
+SMS_OPTOUT_POLL_MAX_SECONDS = env.int("SMS_OPTOUT_POLL_MAX", 60 * 60 * 24)
+SMS_OPTOUT_NUMBER = env.str("SMS_OPTOUT_NUMBER", None)
 
 #### END TWILIO CONFIGURATION
 

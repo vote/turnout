@@ -71,3 +71,10 @@ def send_reminder_sms(number: str) -> None:
     )
 
     n.send_sms(msg)
+
+
+@shared_task
+def poll_optout() -> None:
+    from .optout import poll
+
+    poll()

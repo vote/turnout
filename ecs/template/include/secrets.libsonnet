@@ -96,6 +96,14 @@ local base_secrets = import './base_secrets.libsonnet';
         name: 'SMS_POST_SIGNUP_ALERT',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.sms_optout_number',
+        name: 'SMS_OPTOUT_NUMBER',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.sms_optout_poll',
+        name: 'SMS_OPTOUT_POLL',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.multifactor_enabled',
         name: 'MULTIFACTOR_ENABLED',
       },
