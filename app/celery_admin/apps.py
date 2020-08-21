@@ -5,4 +5,4 @@ class CeleryAdminConfig(AppConfig):
     name = "celery_admin"
 
     def ready(self):
-        import celery_admin.celery_admin
+        import celery_admin.celery_admin  # noqa

@@ -85,7 +85,9 @@ def get_alloy_state_freshness(state):
         with tracer.trace("alloy.freshness", service="alloyapi"):
             response = requests.get(
                 ALLOY_FRESHNESS_ENDPOINT,
-                auth=requests.auth.HTTPBasicAuth(settings.ALLOY_KEY, settings.ALLOY_SECRET),
+                auth=requests.auth.HTTPBasicAuth(
+                    settings.ALLOY_KEY, settings.ALLOY_SECRET
+                ),
             )
         freshness = response.json().get("data", {}).get("data_freshness", {})
         if freshness:

@@ -1,6 +1,5 @@
 import logging
 
-import ovrlib
 from django.conf import settings
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import AllowAny
@@ -15,17 +14,15 @@ from common.enums import (
     TurnoutActionStatus,
 )
 from integration.tasks import sync_registration_to_actionnetwork
-from official.api_views import geocode_to_regions
-from official.models import Region
+from official.api_views import get_regions_for_address
 from smsbot.tasks import send_welcome_sms
-from storage.models import SecureUploadItem
 from voter.tasks import voter_lookup_action
 
 from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration
 from .models import Registration
+from .pa import pa_fill_region, process_pa_registration
 from .serializers import RegistrationSerializer, StatusSerializer
-from .tasks import send_registration_state_confirmation
 
 logger = logging.getLogger("register")
 
@@ -35,189 +32,38 @@ class RegistrationViewSet(IncompleteActionViewSet):
     serializer_class = RegistrationSerializer
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
 
+    def after_validate(self, serializer):
+        if self.request.GET.get("match_region") == "true":
+            address1 = serializer.validated_data.get("address1")
+            city = serializer.validated_data.get("city")
+            state = serializer.validated_data.get("state")
+            zipcode = serializer.validated_data.get("zipcode")
+
+            if address1 and city and state and zipcode:
+                # everything was provided in this POST/PATCH
+                regions, _ = get_regions_for_address(
+                    street=address1, city=city, state=state.code, zipcode=zipcode,
+                )
+            else:
+                # we need to load at least some of this from the db
+                registration = self.get_object()
+                regions, _ = get_regions_for_address(
+                    street=address1 or registration.address1,
+                    city=city or registration.city,
+                    state=state.code if state else registration.state_id,
+                    zipcode=zipcode or registration.zipcode,
+                )
+
+            if regions and len(regions) == 1:
+                serializer.validated_data["matched_region"] = regions[0]
+
     def after_create_or_update(self, registration):
         if (
             registration.state_id == "PA"
             and registration.state_fields is not None
             and not registration.state_fields.get("region_id")
         ):
-            regions = geocode_to_regions(
-                street=registration.address1,
-                city=registration.city,
-                state="PA",
-                zipcode=registration.zipcode,
-            )
-            if not regions:
-                regions = []
-                for region in Region.visible.filter(state__code="PA").order_by("name"):
-                    regions.append(region)
-            if not registration.state_api_result:
-                registration.state_api_result = {}
-            registration.state_api_result["regions"] = [
-                {"external_id": region.external_id, "name": region.name,}
-                for region in regions
-            ]
-
-    def process_pa_registration(
-        self, registration, state_id_number, state_id_number_2, is_18_or_over
-    ):
-        state_fields = registration.state_fields
-
-        # prepare
-        r = {
-            k: getattr(registration, k)
-            for k in [
-                "first_name",
-                "last_name",
-                "address1",
-                "address2",
-                "city",
-                "zipcode",
-                "date_of_birth",
-                "email",
-                "suffix",
-                "phone",
-                "previous_first_name",
-                "previous_middle_name",
-                "previous_last_name",
-                "previous_city",
-                "previous_state",
-                "previous_zipcode",
-                "mailing_city",
-                "mailing_state",
-                "mailing_zipcode",
-            ]
-        }
-        if state_id_number:
-            r["dl_number"] = state_id_number
-        if state_id_number_2:
-            r["ssn4"] = state_id_number
-
-        if state_fields.get("signature"):
-            upload = SecureUploadItem.objects.get(pk=state_fields.get("signature"))
-            r["signature"] = upload.file.read()
-            sig_type = upload.content_type.split("/")[1]
-            if sig_type == "jpeg":
-                sig_type = "jpg"
-            r["signature_type"] = sig_type
-        elif "dl_number" not in r:
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "no_dl_or_signature",
-            }
-            return False
-
-        # derive county/city from region
-        region = Region.objects.get(external_id=state_fields.get("region_id"))
-        if not region:
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "invalid_region_id",
-            }
-            return False
-        if region.name.startswith("City of "):
-            r["county"] = region.name[8:]
-        elif region.name.endswith(" County"):
-            r["county"] = region.name[:-7]
-        else:
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "invalid_region_name",
-            }
-            return False
-
-        # pass through some state_fields
-        for k in [
-            "mailin_ballot_request",
-            "mailin_ballot_to_registration_address",
-            "mailin_ballot_to_mailing_address",
-            "mailin_ballot_address",
-            "mailin_ballot_city",
-            "mailin_ballot_state",
-            "mailin_ballot_zipcode",
-        ]:
-            if k in state_fields:
-                r[k] = state_fields[k]
-
-        is_new = (
-            not registration.previous_address1
-            and not registration.previous_first_name
-            and not state_fields.get("party_change", False)
-        )
-
-        # attempt registration
-        def combine_addr(a, b):
-            if b is None:
-                return a
-            return a + " " + b
-
-        if registration.gender in [RegistrationGender.MALE, RegistrationGender.FEMALE]:
-            gender = str(registration.gender).lower()
-        else:
-            gender = "unknown"
-
-        party = str(registration.party)
-        if party == PoliticalParties.OTHER:
-            party = state_fields.get("party_other")
-
-        session = ovrlib.pa.PAOVRSession(
-            api_key=settings.PA_OVR_KEY, staging=settings.PA_OVR_STAGING
-        )
-        req = ovrlib.pa.PAOVRRequest(
-            **r,
-            gender=gender,
-            party=party,
-            mailing_address=combine_addr(
-                registration.mailing_address1, registration.mailing_address2
-            ),
-            previous_address=combine_addr(
-                registration.previous_address1, registration.previous_address2
-            ),
-            federal_voter=state_fields.get("federal_voter", False),
-            eighteen_on_election_day=is_18_or_over,
-            united_states_citizen=registration.us_citizen,
-            declaration=state_fields.get("declaration"),
-            is_new=is_new,
-        )
-        logger.debug(req)
-        try:
-            res = session.register(req)
-            logger.debug(res)
-            registration.state_api_result = {
-                "status": "success",
-                "application_id": res.application_id,
-                "signature_source": res.signature_source,
-            }
-            registration.status = TurnoutActionStatus.PENDING
-            registration.action.track_event(EventType.FINISH_EXTERNAL_API)
-            send_registration_state_confirmation.delay(registration.pk)
-            return True
-        except ovrlib.exceptions.InvalidDLError as e:
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "dl_invalid",
-                "exception": str(e),
-            }
-        except ovrlib.exceptions.InvalidSignatureError as e:
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "signature_invalid",
-                "exception": str(e),
-            }
-        except Exception as e:
-            logger.warning(f"PA API failure: {str(e)}")
-            registration.state_api_result = {
-                "status": "failure",
-                "error": "unknown_error",
-                "exception": str(e),
-            }
-        if "error" in registration.state_api_result:
-            logger.warning(
-                "PA OVR status %(status)s, error %(error)s, exception %(exception)s",
-                registration.state_api_result,
-                extra=registration.state_api_result,
-            )
-        return False
+            pa_fill_region(registration)
 
     def complete(
         self,
@@ -228,7 +74,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
         is_18_or_over,
     ):
         if registration.state_id == "PA" and registration.state_fields:
-            success = self.process_pa_registration(
+            success = process_pa_registration(
                 registration, state_id_number, state_id_number_2, is_18_or_over
             )
             registration.save()
@@ -251,7 +97,6 @@ class RegistrationViewSet(IncompleteActionViewSet):
             sync_registration_to_actionnetwork.delay(registration.uuid)
         voter_lookup_action(registration.action.uuid)
 
-
     def after_create(self, action_object):
         custom_link = get_custom_ovr_link(action_object)
 
@@ -265,7 +110,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 countdown=settings.SMS_OPTIN_REMINDER_DELAY,
             )
 
-    def create_or_update_response(self, request, action_object):
+    def create_or_update_response(self, action_object):
         response = {
             "uuid": action_object.uuid,
             "action_id": action_object.action.pk,
@@ -283,6 +128,18 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 response["state_api_regions"] = action_object.state_api_result.get(
                     "regions"
                 )
+
+        if self.request.GET.get("match_region") == "true":
+            regions = action_object.state.region_set.exclude(hidden=True)
+
+            response["regions"] = regions.order_by("name").values("name", "external_id")
+
+            response["matched_region"] = (
+                action_object.matched_region.pk
+                if action_object.matched_region
+                else None
+            )
+
         return Response(response)
 
 

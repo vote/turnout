@@ -23,7 +23,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
             is_create=False,
         )
 
-        return self.create_or_update_response(request, action_object)
+        return self.create_or_update_response(action_object)
 
     def create(self, request, *args, **kwargs):
         incomplete = request.GET.get("incomplete") == "true"
@@ -32,7 +32,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
             is_create=True,
         )
 
-        return self.create_or_update_response(request, action_object)
+        return self.create_or_update_response(action_object)
 
     def after_create(self, action_object):
         pass
@@ -43,7 +43,10 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
     def after_create_or_update(self, action_object):
         pass
 
-    def create_or_update_response(self, request, action_object):
+    def after_validate(self, serializer):
+        pass
+
+    def create_or_update_response(self, action_object):
         response = {"uuid": action_object.uuid, "action_id": action_object.action.pk}
         return Response(response)
 
@@ -95,6 +98,8 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         state_id_number_2 = serializer.validated_data.pop("state_id_number_2", None)
 
         serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
+
+        self.after_validate(serializer)
 
         action_object = serializer.save()
 

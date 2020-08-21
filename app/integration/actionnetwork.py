@@ -164,7 +164,9 @@ def post_person(info, form_id, api_key, slug):
             person_id = response.json()["_links"]["osdi:person"]["href"].split("/")[-1]
 
             # if (first) subscriber field not set, set it
-            if slug and not response.json().get("custom_fields", {}).get("first_subscriber"):
+            if slug and not response.json().get("custom_fields", {}).get(
+                "first_subscriber"
+            ):
                 response = requests.put(
                     PEOPLE_ENDPOINT.format(person_id=person_id),
                     headers={"OSDI-API-Token": api_key},
@@ -242,10 +244,7 @@ def _sync_item(item, subscriber_id):
         info["person"]["custom_fields"] = {"last_subscriber": slug}
 
     external_id = post_person(
-        info,
-        form_id,
-        api_key,
-        slug if not subscriber_id else None,
+        info, form_id, api_key, slug if not subscriber_id else None,
     )
     if external_id:
         Link.objects.create(

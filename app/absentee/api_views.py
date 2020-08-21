@@ -2,7 +2,6 @@ from typing import Any, Dict
 
 from django.conf import settings
 from django.http import Http404
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -155,18 +154,13 @@ class BallotRequestViewSet(IncompleteActionViewSet):
                 countdown=settings.SMS_OPTIN_REMINDER_DELAY,
             )
 
-        return self.create_or_update_response(
-            request, ballot_request, extra_response_data
-        )
+        return self.create_or_update_response(ballot_request, extra_response_data)
 
     def after_create_or_update(self, ballot_request: BallotRequest):
         populate_esign_method(ballot_request)
 
     def create_or_update_response(
-        self,
-        request: Request,
-        ballot_request: BallotRequest,
-        extra_response_data: Dict[str, Any] = {},
+        self, ballot_request: BallotRequest, extra_response_data: Dict[str, Any] = {},
     ) -> Response:
 
         response = {

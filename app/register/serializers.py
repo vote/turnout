@@ -63,7 +63,11 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "date_of_birth",
             "email",
         ]
-        nationally_required_fields = ["state_id_number", "us_citizen", "is_18_or_over"]
+        nationally_required_fields = [
+            "state_id_number",
+            "us_citizen",
+            "is_18_or_over",
+        ]
         optional_fields = [
             "subscriber",
             "suffix",
@@ -102,6 +106,8 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "referring_tool",
             "state_fields",
             "declaration",
+            "region",
+            "matched_region",
         ]
 
 

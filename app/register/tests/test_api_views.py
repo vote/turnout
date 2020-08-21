@@ -148,7 +148,7 @@ def submission_task_patch(mocker):
 
 @pytest.fixture()
 def state_confirmation_email(mocker):
-    return mocker.patch("register.api_views.send_registration_state_confirmation.delay")
+    return mocker.patch("register.pa.send_registration_state_confirmation.delay")
 
 
 def test_get_request_disallowed():
@@ -432,11 +432,11 @@ def mock_region(mocker):
             self.external_id = external_id
 
     mocker.patch(
-        "register.api_views.geocode_to_regions",
+        "register.pa.geocode_to_regions",
         return_value=[FakeRegion(name="Clarion County", external_id=432147)],
     )
     mocker.patch(
-        "register.api_views.Region.objects.get",
+        "register.pa.Region.objects.get",
         return_value=FakeRegion(name="Clarion County", external_id=432147),
     )
 
@@ -449,7 +449,7 @@ def mock_few_regions(mocker):
             self.external_id = external_id
 
     mocker.patch(
-        "register.api_views.geocode_to_regions",
+        "register.pa.geocode_to_regions",
         return_value=[
             FakeRegion(name="Clarion County", external_id=432147),
             FakeRegion(name="Foo County", external_id=123456),
@@ -457,7 +457,7 @@ def mock_few_regions(mocker):
         ],
     )
     mocker.patch(
-        "register.api_views.Region.objects.get",
+        "register.pa.Region.objects.get",
         return_value=FakeRegion(name="Clarion County", external_id=432147),
     )
 
@@ -470,13 +470,13 @@ def mock_all_regions(mocker):
             self.external_id = external_id
 
     mocker.patch(
-        "register.api_views.geocode_to_regions", return_value=[],
+        "register.pa.geocode_to_regions", return_value=[],
     )
     mocker.patch(
-        "register.api_views.Region.objects.get",
+        "register.pa.Region.objects.get",
         return_value=FakeRegion(name="Clarion County", external_id=432147),
     )
-    m = mocker.patch("register.api_views.Region.visible.filter",)
+    m = mocker.patch("register.pa.Region.visible.filter",)
     m.return_value.order_by.return_value = [
         FakeRegion(name="Clarion County", external_id=432147),
         FakeRegion(name="A County", external_id=432141),

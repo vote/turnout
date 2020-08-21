@@ -1,6 +1,7 @@
 import os
 
 from django.conf import settings
+from django.db.models import Exists, OuterRef
 from django.urls import reverse
 from django.views.generic import (
     CreateView,
@@ -27,11 +28,10 @@ from common.rollouts import flag_enabled_for_state
 from common.utils.uuid_slug_mixin import UUIDSlugMixin
 from election.choices import REGISTRATION_STATES
 from election.models import State
+from event_tracking.models import Event
 from manage.mixins import ManageViewMixin
 from official.models import Region
 from storage.models import StorageItem
-from event_tracking.models import Event
-from django.db.models import Exists, OuterRef, Q
 
 from .forms import (
     LeoContactOverrideManageCreateForm,

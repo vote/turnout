@@ -96,6 +96,13 @@ class Registration(
 
     custom_ovr_link = models.TextField(null=True, blank=True)
 
+    matched_region = models.ForeignKey(
+        "official.Region", null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    region = models.ForeignKey(
+        "official.Region", null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
     class Meta:
         ordering = ["-created_at"]
 

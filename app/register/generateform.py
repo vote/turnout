@@ -10,6 +10,7 @@ from common.pdf.pdftemplate import fill_pdf_template
 from election.models import StateInformation
 from storage.models import StorageItem
 
+from .contactinfo import get_registration_contact_info
 from .tasks import send_registration_notification
 
 logger = logging.getLogger("register")
@@ -67,22 +68,12 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
         suffix_field = registration.previous_suffix.replace(".", "").lower()
         form_data[f"previous_suffix_{suffix_field}"] = True
 
-    # get mailto address from StateInformation
-    # later this will be more complicated...
-    try:
-        state_mailto_address = (
-            StateInformation.objects.only("field_type", "text")
-            .get(
-                state=registration.state,
-                field_type__slug="registration_nvrf_submission_address",
-            )
-            .text
-        )
-    except StateInformation.DoesNotExist:
-        state_mailto_address = ""
+    # get mailto address from the region, falling back to the statewide address
+    contact_info = get_registration_contact_info(registration)
+    mailto_address = contact_info.address
 
     # split by linebreaks, because each line is a separate field in the PDF
-    for num, line in enumerate(state_mailto_address.splitlines()):
+    for num, line in enumerate(mailto_address.splitlines()):
         form_data[f"mailto_line_{num+1}"] = line
 
     # get mailing deadline from StateInformation
