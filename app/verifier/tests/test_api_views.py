@@ -14,9 +14,10 @@ from common.enums import EventType, SubscriberStatus, VoterStatus
 from election.models import State
 from event_tracking.models import Event
 from multi_tenant.models import Client
-from verifier.alloy import ALLOY_ENDPOINT, ALLOY_FRESHNESS_ENDPOINT
+from verifier.alloy import ALLOY_ENDPOINT, query_alloy
 from verifier.models import Lookup
-from verifier.targetsmart import TARGETSMART_ENDPOINT
+from verifier.serializers import LookupSerializer
+from verifier.targetsmart import TARGETSMART_ENDPOINT, query_targetsmart
 
 LOOKUP_API_ENDPOINT = "/v1/verification/verify/"
 VALID_LOOKUP = {
@@ -41,18 +42,6 @@ VALID_LOOKUP = {
     "mobile_referrer": "efgh456",
     "embed_url": "https://www.greatvoter.com/location/of/embed?secret_data=here",
 }
-VALID_LOOKUP_ALLOY = {
-    "first_name": "Donald",
-    "last_name": "Trump",
-    "address1": "1100 S Ocean Blvd",
-    "city": "Palm Beach",
-    "state": "FL",
-    "email": "donald@trump.local",
-    "date_of_birth": "1946-06-14",
-    "zipcode": "33480",
-    "phone": "+15618675309",
-    "sms_opt_in_subscriber": True,
-}
 TARGETSMART_EXPECTED_QUERYSTRING = {
     "first_name": ["Barack"],
     "last_name": ["Obama"],
@@ -62,13 +51,13 @@ TARGETSMART_EXPECTED_QUERYSTRING = {
     "unparsed_full_address": ["1600 Penn Avenue, Chicago, IL 60657"],
 }
 ALLOY_EXPECTED_QUERYSTRING = {
-    "first_name": ["Donald"],
-    "last_name": ["Trump"],
-    "birth_date": ["1946-06-14"],
-    "address": ["1100 S Ocean Blvd"],
-    "city": ["Palm Beach"],
-    "state": ["FL"],
-    "zip": ["33480"],
+    "first_name": ["Barack"],
+    "last_name": ["Obama"],
+    "birth_date": ["1961-08-04"],
+    "address": ["1600 Penn Avenue"],
+    "city": ["Chicago"],
+    "state": ["IL"],
+    "zip": ["60657"],
 }
 TARGETSMART_RESPONSES_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "sample_targetsmart_responses/")
@@ -76,6 +65,35 @@ TARGETSMART_RESPONSES_PATH = os.path.abspath(
 ALLOY_RESPONSES_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "sample_alloy_responses/")
 )
+
+
+def load_alloy(filename):
+    with open(os.path.join(ALLOY_RESPONSES_PATH, filename)) as json_file:
+        data = json.load(json_file)
+    return data
+
+
+def load_targetsmart(filename):
+    with open(os.path.join(TARGETSMART_RESPONSES_PATH, filename)) as json_file:
+        data = json.load(json_file)
+    return data
+
+
+@pytest.fixture()
+def mock_apicalls(mocker):
+    mocker.patch("verifier.api_views.gevent.joinall", return_value=None)
+
+    def process_calls(alloy_data, targetsmart_data):
+        alloy_response = mocker.Mock()
+        alloy_response.value = alloy_data
+        targetsmart_response = mocker.Mock()
+        targetsmart_response.value = targetsmart_data
+        mocker.patch(
+            "verifier.api_views.gevent.spawn",
+            side_effect=[alloy_response, targetsmart_response],
+        )
+
+    return process_calls
 
 
 @pytest.fixture(autouse=True)
@@ -107,9 +125,8 @@ def test_get_request_disallowed():
     assert response.json() == {"detail": 'Method "GET" not allowed.'}
 
 
-def test_blank_api_request(requests_mock):
+def test_blank_api_request():
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri("GET", TARGETSMART_ENDPOINT)
     response = client.post(LOOKUP_API_ENDPOINT, {})
     assert response.status_code == 400
     expected_response = {
@@ -123,110 +140,46 @@ def test_blank_api_request(requests_mock):
         "date_of_birth": ["This field is required."],
     }
     assert response.json() == expected_response
-    assert not targetsmart_call.called
 
 
-@pytest.mark.django_db
-def test_proper_targetsmart_request(requests_mock, smsbot_patch):
-    client = APIClient()
+def test_proper_api_calls(requests_mock):
+    targetsmart_data = load_targetsmart("active.json")
     targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+        "GET", TARGETSMART_ENDPOINT, json=targetsmart_data
     )
+    alloy_data = load_alloy("active.json")
+    alloy_call = requests_mock.register_uri("GET", ALLOY_ENDPOINT, json=alloy_data)
 
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.status_code == 200
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+    serializer = LookupSerializer(data=VALID_LOOKUP)
+    serializer.is_valid()
 
-    assert requests_mock.call_count == 1
+    alloy_result = query_alloy(serializer.validated_data)
+    targetsmart_result = query_targetsmart(serializer.validated_data)
+
+    assert alloy_result == alloy_data
+    assert targetsmart_result == targetsmart_data
+
+    alloy_auth_string = (
+        "Basic " + b64encode("myalloykey:myalloysecret".encode()).decode()
+    )
+    assert alloy_call.last_request.headers["authorization"] == alloy_auth_string
+    assert alloy_call.last_request.qs == ALLOY_EXPECTED_QUERYSTRING
+
     assert targetsmart_call.last_request.headers["x-api-key"] == "mytargetsmartkey"
     assert targetsmart_call.last_request.qs == TARGETSMART_EXPECTED_QUERYSTRING
 
 
 @pytest.mark.django_db
-def test_smsbot_trigger(requests_mock, smsbot_patch):
+def test_lookup_created(requests_mock, smsbot_patch, mock_apicalls):
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
-
-    client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-
-    smsbot_patch.apply_async.assert_called_once_with(
-        args=("(312) 928-9292", "verifier"), countdown=150
-    )
-
-
-@pytest.mark.django_db
-def test_targetsmart_request_address2(requests_mock, mocker, settings, smsbot_patch):
-    client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
-
-    address2_lookup = copy(VALID_LOOKUP)
-    address2_lookup["address2"] = "Unit 2008"
-    response = client.post(LOOKUP_API_ENDPOINT, address2_lookup)
-    assert response.status_code == 200
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-
-    address2_qs = copy(TARGETSMART_EXPECTED_QUERYSTRING)
-    address2_qs["unparsed_full_address"] = [
-        "1600 Penn Avenue Unit 2008, Chicago, IL 60657"
-    ]
-    assert targetsmart_call.last_request.qs == address2_qs
-
-
-@pytest.mark.django_db
-def test_proper_alloy_request(requests_mock, mock_cache, smsbot_patch):
-    client = APIClient()
-    alloy_call = requests_mock.register_uri(
-        "GET", ALLOY_ENDPOINT, json={"data": {}, "api_version": "v1"},
-    )
-    alloy_freshness_call = requests_mock.register_uri(
-        "GET",
-        ALLOY_FRESHNESS_ENDPOINT,
-        json={
-            "data": {"data_freshness": {"FL": "2020-01-01T00:00:00Z",}},
-            "api_version": "v1",
-        },
-    )
-
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
-    assert response.status_code == 200
-    action = Action.objects.first()
-    assert response.json() == {
-        "registered": False,
-        "action_id": str(action.pk),
-        "last_updated": "2020-01-01T00:00:00Z",
-    }
-
-    assert requests_mock.call_count == 2
-    basic_auth_string = (
-        "Basic " + b64encode("myalloykey:myalloysecret".encode()).decode()
-    )
-    assert alloy_call.last_request.headers["authorization"] == basic_auth_string
-    assert alloy_call.last_request.qs == ALLOY_EXPECTED_QUERYSTRING
-    assert (
-        alloy_freshness_call.last_request.headers["authorization"] == basic_auth_string
-    )
-
-
-@pytest.mark.django_db
-def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
-    client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
+    targetsmart_response_data = load_targetsmart("active.json")
+    alloy_response_data = load_alloy("active.json")
+    mock_apicalls(alloy_response_data, targetsmart_response_data)
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-
-    assert Lookup.objects.count() == 1
     lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
 
     assert lookup.first_name == "Barack"
     assert lookup.last_name == "Obama"
@@ -237,7 +190,11 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.sms_opt_in_subscriber == False
-    assert lookup.response == {"result": [], "too_many": False}
+    assert lookup.alloy_response == alloy_response_data
+    assert lookup.alloy_status == VoterStatus.ACTIVE
+    assert lookup.targetsmart_response == targetsmart_response_data
+    assert lookup.targetsmart_status == VoterStatus.ACTIVE
+    action = Action.objects.first()
     assert lookup.action == action
     assert lookup.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
     first_subscriber = Client.objects.first()
@@ -249,11 +206,124 @@ def test_lookup_object_created(requests_mock, mocker, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_sourcing(requests_mock, mocker, smsbot_patch):
+def test_mismatch_a_active_ts_not_found(mock_apicalls, smsbot_patch):
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("not_found.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
+    assert lookup.alloy_status == VoterStatus.ACTIVE
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.registered == True
+
+
+@pytest.mark.django_db
+def test_mismatch_ts_active_a_not_found(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("not_found.json"), load_targetsmart("active.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.ACTIVE
+    assert lookup.alloy_status == VoterStatus.UNKNOWN
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.registered == True
+
+
+@pytest.mark.django_db
+def test_mismatch_ts_active_a_inactive(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("inactive.json"), load_targetsmart("active.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.ACTIVE
+    assert lookup.alloy_status == VoterStatus.INACTIVE
+    assert lookup.voter_status == VoterStatus.INACTIVE
+    assert lookup.registered == False
+
+
+@pytest.mark.django_db
+def test_dual_match(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.ACTIVE
+    assert lookup.alloy_status == VoterStatus.ACTIVE
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.registered == True
+
+
+@pytest.mark.django_db
+def test_ts_too_many(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("too_many.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
+    assert lookup.alloy_status == VoterStatus.ACTIVE
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.registered == True
+
+
+@pytest.mark.django_db
+def test_not_found(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("not_found.json"), load_targetsmart("not_found.json"))
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": False, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
+    assert lookup.alloy_status == VoterStatus.UNKNOWN
+    assert lookup.voter_status == VoterStatus.UNKNOWN
+    assert lookup.registered == False
+
+
+@pytest.mark.django_db
+def test_ts_error(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(
+        load_alloy("active.json"), load_targetsmart("bad_character_error.json")
     )
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    lookup = Lookup.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
+    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
+    assert lookup.alloy_status == VoterStatus.ACTIVE
+    assert lookup.voter_status == VoterStatus.ACTIVE
+    assert lookup.registered == True
+
+
+@pytest.mark.django_db
+def test_dual_error(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls({"error": "Boo"}, {"error": "No!!!"})
+    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    assert response.status_code == 503
+    assert response.json() == {"error": "Error from data providers"}
+    assert Lookup.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_smsbot_trigger(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+
+    client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+
+    smsbot_patch.apply_async.assert_called_once_with(
+        args=("(312) 928-9292", "verifier"), countdown=150
+    )
+
+
+@pytest.mark.django_db
+def test_sourcing(mock_apicalls, mocker, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
@@ -273,11 +343,9 @@ def test_sourcing(requests_mock, mocker, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_default_subscriber(requests_mock, smsbot_patch):
+def test_default_subscriber(mock_apicalls, smsbot_patch):
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
     first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
@@ -286,18 +354,59 @@ def test_default_subscriber(requests_mock, smsbot_patch):
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+    assert response.json() == {"registered": True, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.subscriber == first_subscriber
 
 
 @pytest.mark.django_db
-def test_custom_subscriber(requests_mock, smsbot_patch):
+def test_inactive_subscriber(mock_apicalls, smsbot_patch):
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+
+    first_subscriber = Client.objects.first()
+    second_subscriber = baker.make_recipe("multi_tenant.client")
+    baker.make_recipe(
+        "multi_tenant.subscriberslug",
+        subscriber=second_subscriber,
+        slug="verifierslugtwo",
     )
+    assert Client.objects.count() == 2
+
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+
+    url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
+    response = client.post(url, VALID_LOOKUP)
+    assert response.status_code == 200
+    action = Action.objects.first()
+    assert response.json() == {"registered": True, "action_id": str(action.pk)}
+
+    lookup = Lookup.objects.first()
+    assert lookup.subscriber == second_subscriber
+
+    # Set the second subscriber to disabled and try another verification
+    second_subscriber.status = SubscriberStatus.DISABLED
+    second_subscriber.save()
+
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+
+    inactive_subscriber_response = client.post(url, VALID_LOOKUP)
+    assert inactive_subscriber_response.status_code == 200
+
+    assert Lookup.objects.count() == 2
+    inactive_lookup = Lookup.objects.first()
+    assert inactive_subscriber_response.json() == {
+        "registered": True,
+        "action_id": str(inactive_lookup.action.pk),
+    }
+    assert inactive_lookup.subscriber == first_subscriber
+
+
+@pytest.mark.django_db
+def test_custom_subscriber(mock_apicalls, smsbot_patch):
+    client = APIClient()
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
     second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe(
@@ -311,18 +420,16 @@ def test_custom_subscriber(requests_mock, smsbot_patch):
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+    assert response.json() == {"registered": True, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.subscriber == second_subscriber
 
 
 @pytest.mark.django_db
-def test_invalid_subscriber_key(requests_mock, smsbot_patch):
+def test_invalid_subscriber_key(mock_apicalls, smsbot_patch):
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
+    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
     first_subscriber = Client.objects.first()
     second_subscriber = baker.make_recipe("multi_tenant.client")
@@ -333,222 +440,34 @@ def test_invalid_subscriber_key(requests_mock, smsbot_patch):
     response = client.post(url, VALID_LOOKUP)
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
+    assert response.json() == {"registered": True, "action_id": str(action.pk)}
 
     lookup = Lookup.objects.first()
     assert lookup.subscriber == first_subscriber
 
 
-@pytest.mark.django_db
-def test_inactive_subscriber(requests_mock, smsbot_patch):
+def test_invalid_zipcode():
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, json={"result": [], "too_many": False},
-    )
-
-    first_subscriber = Client.objects.first()
-    second_subscriber = baker.make_recipe("multi_tenant.client")
-    baker.make_recipe(
-        "multi_tenant.subscriberslug",
-        subscriber=second_subscriber,
-        slug="verifierslugtwo",
-    )
-    assert Client.objects.count() == 2
-
-    url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
-    response = client.post(url, VALID_LOOKUP)
-    assert response.status_code == 200
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-
-    lookup = Lookup.objects.first()
-    assert lookup.subscriber == second_subscriber
-
-    # Set the second subscriber to disabled and try another verification
-    second_subscriber.status = SubscriberStatus.DISABLED
-    second_subscriber.save()
-
-    inactive_subscriber_response = client.post(url, VALID_LOOKUP)
-    assert inactive_subscriber_response.status_code == 200
-
-    assert Lookup.objects.count() == 2
-    inactive_lookup = Lookup.objects.first()
-    assert inactive_subscriber_response.json() == {
-        "registered": False,
-        "action_id": str(inactive_lookup.action.pk),
-    }
-    assert inactive_lookup.subscriber == first_subscriber
-
-
-def test_invalid_zipcode(requests_mock):
-    client = APIClient()
-    targetsmart_call = requests_mock.register_uri("GET", TARGETSMART_ENDPOINT)
     bad_zip_lookup = copy(VALID_LOOKUP)
     bad_zip_lookup["zipcode"] = "123"
     response = client.post(LOOKUP_API_ENDPOINT, bad_zip_lookup)
     assert response.status_code == 400
     assert response.json() == {"zipcode": ["Zip codes are 5 digits"]}
-    assert not targetsmart_call.called
 
 
-def test_invalid_phone(requests_mock):
+def test_invalid_phone():
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri("GET", TARGETSMART_ENDPOINT)
     bad_phone_lookup = copy(VALID_LOOKUP)
     bad_phone_lookup["phone"] = "123"
     response = client.post(LOOKUP_API_ENDPOINT, bad_phone_lookup)
     assert response.status_code == 400
     assert response.json() == {"phone": ["Enter a valid phone number."]}
-    assert not targetsmart_call.called
 
 
-def test_invalid_state(requests_mock):
+def test_invalid_state():
     client = APIClient()
-    targetsmart_call = requests_mock.register_uri("GET", TARGETSMART_ENDPOINT)
     bad_state_lookup = copy(VALID_LOOKUP)
     bad_state_lookup["state"] = "ZZ"
     response = client.post(LOOKUP_API_ENDPOINT, bad_state_lookup)
     assert response.status_code == 400
     assert response.json() == {"state": ['"ZZ" is not a valid choice.']}
-    assert not targetsmart_call.called
-
-
-def test_provider_response_500_error(requests_mock):
-    client = APIClient()
-    requests_mock.register_uri(
-        "GET", TARGETSMART_ENDPOINT, status_code=500, text="ERROR"
-    )
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.status_code == 503
-    assert response.json() == {"error": "Error from data provider"}
-
-
-def test_provider_response_missing_parameters(requests_mock):
-    client = APIClient()
-    with open(
-        os.path.join(TARGETSMART_RESPONSES_PATH, "missing_required_parameters.json")
-    ) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, status_code=400, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.status_code == 503
-    assert response.json() == {"error": "Error from data provider"}
-
-
-def test_provider_response_bad_character(requests_mock):
-    client = APIClient()
-    with open(
-        os.path.join(TARGETSMART_RESPONSES_PATH, "bad_character_error.json")
-    ) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, status_code=400, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    assert response.status_code == 503
-    assert response.json() == {"error": "Error from data provider"}
-
-
-@pytest.mark.django_db
-def test_provider_response_voter_not_found(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "not_found.json")) as json_file:
-        data = json.load(json_file)
-
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == False
-    assert lookup.registered == False
-    assert lookup.action == action
-    assert not lookup.voter_status
-
-
-@pytest.mark.django_db
-def test_targetsmart_response_active_voter(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "active.json")) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    action = Action.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(action.pk)}
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == False
-    assert lookup.registered == True
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.action == action
-
-
-@pytest.mark.django_db
-def test_alloy_response_active_voter(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(ALLOY_RESPONSES_PATH, "active.json")) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", ALLOY_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP_ALLOY)
-    action = Action.objects.first()
-    assert response.json() == {
-        "registered": True,
-        "action_id": str(action.pk),
-        "last_updated": "2020-03-03T00:00:00Z",
-    }
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == None
-    assert lookup.registered == True
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.action == action
-    assert lookup.sms_opt_in_subscriber == True
-
-
-@pytest.mark.django_db
-def test_provider_response_inactive_voter(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "inactive.json")) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == False
-    assert lookup.registered == False
-    assert lookup.voter_status == VoterStatus.INACTIVE
-    assert lookup.action == action
-
-
-@pytest.mark.django_db
-def test_provider_response_unknown_voter(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "unknown.json")) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == False
-    assert lookup.registered == False
-    assert lookup.voter_status == VoterStatus.UNKNOWN
-    assert lookup.action == action
-
-
-@pytest.mark.django_db
-def test_provider_response_too_many(requests_mock, smsbot_patch):
-    client = APIClient()
-    with open(os.path.join(TARGETSMART_RESPONSES_PATH, "too_many.json")) as json_file:
-        data = json.load(json_file)
-    requests_mock.register_uri("GET", TARGETSMART_ENDPOINT, json=data)
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    action = Action.objects.first()
-    assert response.json() == {"registered": False, "action_id": str(action.pk)}
-    lookup = Lookup.objects.first()
-    assert lookup.response == data
-    assert lookup.too_many == True
-    assert lookup.registered == False
-    assert lookup.action == action

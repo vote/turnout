@@ -32,7 +32,11 @@ class Lookup(
     voter_status = TurnoutEnumField(enums.VoterStatus, null=True)
     too_many = models.BooleanField(null=True)
     last_updated = models.DateTimeField(null=True, blank=True)
-    response = JSONField()
+    response = JSONField(null=True)
+    alloy_response = JSONField(null=True)
+    alloy_status = TurnoutEnumField(enums.VoterStatus, null=True)
+    targetsmart_response = JSONField(null=True)
+    targetsmart_status = TurnoutEnumField(enums.VoterStatus, null=True)
 
     date_of_birth = models.DateField(null=True, blank=True)
     unparsed_full_address = models.TextField(null=True, blank=True)

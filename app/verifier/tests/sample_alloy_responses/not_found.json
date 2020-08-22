@@ -1,0 +1,25 @@
+{
+  "data": {
+    "id": "0cccaa0f-039d-4440-97c1-4202a9e4cb5b",
+    "zip": "19101",
+    "city": "PHILADELPHIA",
+    "state": "PA",
+    "suffix": "",
+    "address": "123 Front St",
+    "last_name": "BENJAMIN",
+    "phone_num": "",
+    "birth_date": "1990-01-03",
+    "first_name": "FRANKLIN",
+    "middle_name": "",
+    "created_date": "0001-01-01T00:00:00Z",
+    "updated_date": "0001-01-01T00:00:00Z",
+    "alloy_person_id": null,
+    "last_updated_date": null,
+    "registration_date": null,
+    "registration_status": null,
+    "registration_changed_date": null,
+    "submitted_registration_date": ""
+  },
+  "error": null,
+  "api_version": "v1"
+}

@@ -1,0 +1,25 @@
+{
+  "data": {
+    "id": "1111111-2222-3333-4444-55555555555",
+    "zip": "53217",
+    "city": "WHITEFISH BAY",
+    "state": "WI",
+    "suffix": "",
+    "address": "123 Front St",
+    "last_name": "Smith",
+    "phone_num": "",
+    "birth_date": "1948-02-03",
+    "first_name": "Jane",
+    "middle_name": "",
+    "created_date": "0001-01-01T00:00:00Z",
+    "updated_date": "0001-01-01T00:00:00Z",
+    "alloy_person_id": 123,
+    "last_updated_date": "2020-07-01T00:00:00Z",
+    "registration_date": "1996-03-02T00:00:00Z",
+    "registration_status": "Inactive",
+    "registration_changed_date": null,
+    "submitted_registration_date": ""
+  },
+  "error": null,
+  "api_version": "v1"
+}

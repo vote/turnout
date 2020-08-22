@@ -1,5 +1,6 @@
 import logging
 
+import gevent
 from django.conf import settings
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
@@ -15,7 +16,7 @@ from integration.tasks import sync_lookup_to_actionnetwork
 from smsbot.tasks import send_welcome_sms
 from voter.tasks import voter_lookup_action
 
-from .alloy import ALLOY_STATES_ENABLED, get_alloy_state_freshness, query_alloy
+from .alloy import query_alloy
 from .models import Lookup
 from .serializers import LookupSerializer
 from .targetsmart import query_targetsmart
@@ -29,102 +30,76 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = LookupSerializer
     queryset = Lookup.objects.none()
 
-    @statsd.timed("turnout.verifier.request")
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # check alloy states first
-        if serializer.validated_data["state"] in ALLOY_STATES_ENABLED:
-            alloy_response = query_alloy(serializer.validated_data)
+        state_code = serializer.validated_data["state"]
 
-            if alloy_response.get("error"):
-                statsd.increment("turnout.verifier.alloy_error")
-                alloy_error_message = alloy_response.get("error")
+        alloy = gevent.spawn(query_alloy, serializer.validated_data)
+        targetsmart = gevent.spawn(query_targetsmart, serializer.validated_data)
+        gevent.joinall([alloy, targetsmart])
 
-                logger.error(f"Alloy Error {alloy_error_message}")
-                return Response(
-                    {"error": "Error from data provider"},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
+        serializer.validated_data["targetsmart_response"] = targetsmart.value
+        serializer.validated_data["alloy_response"] = alloy.value
 
-            # set the state to a real model from the code
-            serializer.validated_data["state"] = State.objects.get(
-                code=serializer.validated_data["state"]
+        if alloy.value.get("error"):
+            statsd.increment("turnout.verifier.alloy_error")
+            logger.error(f"Alloy Error {alloy.value['error']}")
+
+        if targetsmart.value.get("error"):
+            statsd.increment("turnout.verifier.ts_error")
+            logger.error(f"Targetsmart Error {targetsmart.value['error']}")
+
+        if targetsmart.value.get("error") and alloy.value.get("error"):
+            return Response(
+                {"error": "Error from data providers"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-            serializer.validated_data["response"] = alloy_response
-            serializer.validated_data["last_updated"] = alloy_response.get(
-                "data", {}
-            ).get("last_updated_date")
-
-            if serializer.validated_data["last_updated"] is None:
-                serializer.validated_data["last_updated"] = get_alloy_state_freshness(
-                    serializer.validated_data["state"].code
-                )
-
-            registered = False
-
-            if alloy_response["data"]:
-                alloy_record = alloy_response["data"]
-                if alloy_record["registration_status"] == "Active":
-                    serializer.validated_data["voter_status"] = enums.VoterStatus.ACTIVE
-                    registered = True
-                elif alloy_record["registration_status"] == "Inactive":
-                    serializer.validated_data[
-                        "voter_status"
-                    ] = enums.VoterStatus.INACTIVE
-                else:
-                    serializer.validated_data[
-                        "voter_status"
-                    ] = enums.VoterStatus.UNKNOWN
-
-                statsd.increment("turnout.verifier.singleresult")
-                # alloy only returns single results
-
+        alloy_record = alloy.value.get("data", {})
+        if len(targetsmart.value.get("result_set", [])) == 1:
+            targetsmart_record = targetsmart.value.get("result_set")[0]
         else:
-            # then hit targetsmart
-            targetsmart_response = query_targetsmart(serializer.validated_data)
+            targetsmart_record = {}
 
-            if targetsmart_response.get("error"):
-                statsd.increment("turnout.verifier.ts_error")
-                logger.error(f"Targetsmart Error {targetsmart_response['error']}")
-                return Response(
-                    {"error": "Error from data provider"},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
+        targetsmart_status = enums.VoterStatus.UNKNOWN
+        if targetsmart_record.get("vb.vf_voter_status") == "Inactive":
+            targetsmart_status = enums.VoterStatus.INACTIVE
+        elif targetsmart_record.get("vb.vf_voter_status") == "Active":
+            targetsmart_status = enums.VoterStatus.ACTIVE
 
-            # set the state to a real model from the code
-            serializer.validated_data["state"] = State.objects.get(
-                code=serializer.validated_data["state"]
+        alloy_status = enums.VoterStatus.UNKNOWN
+        if alloy_record.get("registration_status") == "Inactive":
+            alloy_status = enums.VoterStatus.INACTIVE
+        elif alloy_record.get("registration_status") == "Active":
+            alloy_status = enums.VoterStatus.ACTIVE
+
+        registered = False
+        final_status = enums.VoterStatus.UNKNOWN
+        if (
+            alloy_status == enums.VoterStatus.INACTIVE
+            or targetsmart_status == enums.VoterStatus.INACTIVE
+        ):
+            final_status = enums.VoterStatus.INACTIVE
+        elif (
+            alloy_status == enums.VoterStatus.ACTIVE
+            or targetsmart_status == enums.VoterStatus.ACTIVE
+        ):
+            final_status = enums.VoterStatus.ACTIVE
+            registered = True
+
+        serializer.validated_data["targetsmart_status"] = targetsmart_status
+        serializer.validated_data["alloy_status"] = alloy_status
+        serializer.validated_data["voter_status"] = final_status
+        serializer.validated_data["registered"] = registered
+
+        if alloy_status != targetsmart_status:
+            statsd.increment(
+                "turnout.verifier.vendor_mismatch", tags=[f"state:{state_code}"]
             )
 
-            serializer.validated_data["response"] = targetsmart_response
-
-            registered = False
-
-            if targetsmart_response["result"]:
-                # if result is true, there is a single matching record
-                targetsmart_record = targetsmart_response["result_set"][0]
-                if targetsmart_record["vb.vf_voter_status"] == "Active":
-                    serializer.validated_data["voter_status"] = enums.VoterStatus.ACTIVE
-                    registered = True
-                elif targetsmart_record["vb.vf_voter_status"] == "Inactive":
-                    serializer.validated_data[
-                        "voter_status"
-                    ] = enums.VoterStatus.INACTIVE
-                else:
-                    serializer.validated_data[
-                        "voter_status"
-                    ] = enums.VoterStatus.UNKNOWN
-
-                statsd.increment("turnout.verifier.singleresult")
-
-            if targetsmart_response["too_many"]:
-                statsd.increment("turnout.verifier.toomany")
-            serializer.validated_data["too_many"] = targetsmart_response["too_many"]
-
-        serializer.validated_data["registered"] = registered
+        serializer.validated_data["state"] = State.objects.get(code=state_code)
 
         instance = serializer.save()
         instance.action.track_event(EventType.FINISH)
@@ -140,10 +115,14 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         voter_lookup_action.delay(instance.action.uuid)
 
         response = {"registered": registered, "action_id": instance.action.pk}
-        if serializer.validated_data.get("last_updated"):
-            response["last_updated"] = serializer.validated_data["last_updated"]
 
         if registered:
-            statsd.increment("turnout.verifier.registered")
+            statsd.increment(
+                "turnout.verifier.registered", tags=[f"state:{state_code}"]
+            )
+        else:
+            statsd.increment(
+                "turnout.verifier.unregistered", tags=[f"state:{state_code}"]
+            )
 
         return Response(response)
