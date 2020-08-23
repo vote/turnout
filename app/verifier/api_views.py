@@ -10,6 +10,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from common import enums
 from common.analytics import statsd
+from common.apm import tracer
 from common.enums import EventType
 from election.models import State
 from integration.tasks import sync_lookup_to_actionnetwork
@@ -36,9 +37,10 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
 
         state_code = serializer.validated_data["state"]
 
-        alloy = gevent.spawn(query_alloy, serializer.validated_data)
-        targetsmart = gevent.spawn(query_targetsmart, serializer.validated_data)
-        gevent.joinall([alloy, targetsmart])
+        with tracer.trace("verifier.apicalls"):
+            alloy = gevent.spawn(query_alloy, serializer.validated_data)
+            targetsmart = gevent.spawn(query_targetsmart, serializer.validated_data)
+            gevent.joinall([alloy, targetsmart])
 
         serializer.validated_data["targetsmart_response"] = targetsmart.value
         serializer.validated_data["alloy_response"] = alloy.value

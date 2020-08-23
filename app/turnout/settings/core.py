@@ -600,6 +600,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "apm": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
         "smsbot": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
