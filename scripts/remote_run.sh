@@ -96,6 +96,7 @@ export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decry
 export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_FUNCTION=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_function | jq '.Parameter["Value"]' -r)
+export VERIFIER_UPSELL_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.verifier_upsell_url | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -198,6 +199,7 @@ docker run -i -t \
     -e FILE_TOKEN_PURGED_URL \
     -e PDF_GENERATION_LAMBDA_ENABLED \
     -e PDF_GENERATION_LAMBDA_FUNCTION \
+    -e VERIFIER_UPSELL_URL \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
