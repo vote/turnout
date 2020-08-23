@@ -34,6 +34,8 @@ def compile_upsell_email(lookup: Lookup) -> str:
         "utm_term": lookup.utm_term,
         "utm_content": lookup.utm_content,
         "source": lookup.source,
+        "email_referrer": lookup.email_referrer,
+        "mobile_referrer": lookup.mobile_referrer,
     }
 
     query_params = urllib.parse.urlencode(
