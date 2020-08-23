@@ -1,0 +1,28 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+{{ recipient.first_name }},<br><br>
+
+Thanks for checking your voter registration. Here's the next steps:<br><br>
+
+<strong>Not registered to vote?</strong><br><br>
+We can <a href="{{ reg_link }}">help you register</a>.<br><br><br>
+
+<strong>Vote by mail</strong><br><br>
+{{ state_info.vbm_absentee_ballot_rules|markdownify }}<br><br>
+We can <a href="{{ vbm_link }}">help you request a ballot</a>.<br><br><br>
+
+{% if subscriber.is_first_party %}
+<strong>One last thing</strong><br><br>
+We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{lookup.email}}&firstname={{lookup.first_name}}&lastname={{lookup.last_name}}&zip={{lookup.zipcode}}&city={{lookup.city}}&state={{lookup.state.code}}&phone={{lookup.phone.as_e164}}&addr1={{lookup.address1}}&refcode=register_file_notification" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}
+
+{% endblock %}

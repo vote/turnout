@@ -76,4 +76,5 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
             "mobile_referrer",
             "signature",
             "submit_date",
+            "referring_tool",
         ]

@@ -163,7 +163,6 @@ def test_blank_api_request():
     response = client.post(REGISTER_API_ENDPOINT, {})
     assert response.status_code == 400
     expected_response = {
-        "title": ["This field is required."],
         "first_name": ["This field is required."],
         "last_name": ["This field is required."],
         "address1": ["This field is required."],
@@ -347,6 +346,34 @@ def test_invalid_state():
 
 
 @pytest.mark.django_db
+def test_event_tracking(mock_sms):
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE,
+        {**VALID_REGISTRATION, "initial_events": [EventType.FINISH_EXTERNAL.value]},
+    )
+    assert register_response.status_code == 200
+
+    registration = Registration.objects.first()
+
+    assert Event.objects.count() == 2
+
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.FINISH_EXTERNAL
+        ).count()
+        == 1
+    )
+
+
+@pytest.mark.django_db
 def test_update_status(mock_sms):
     client = APIClient()
     register_response = client.post(
@@ -358,12 +385,6 @@ def test_update_status(mock_sms):
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
     assert registration.status == TurnoutActionStatus.INCOMPLETE
-    assert (
-        Event.objects.filter(
-            action=registration.action, event_type=EventType.START
-        ).count()
-        == 1
-    )
 
     status_api_url = STATUS_API_ENDPOINT.format(uuid=registration.uuid)
     status_response = client.patch(status_api_url, STATUS_REFER_OVR)

@@ -99,6 +99,8 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
 
         serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
 
+        initial_events = serializer.validated_data.pop("initial_events", [])
+
         self.after_validate(serializer)
 
         action_object = serializer.save()
@@ -120,5 +122,8 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
                 state_id_number_2,
                 is_18_or_over,
             )
+
+        for event_type in initial_events:
+            action_object.action.track_event(event_type)
 
         return action_object

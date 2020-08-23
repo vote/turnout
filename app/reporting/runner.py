@@ -48,6 +48,7 @@ ABSENTEE_FIELDS: List[Tuple[str, str]] = [
     ("utm_term", "utm_term"),
     ("embed_url", "Embed URL"),
     ("session_id", "Session ID"),
+    ("referring_tool", "Referring Tool"),
     ("updated_at", "Updated At (UTC)"),
 ]
 

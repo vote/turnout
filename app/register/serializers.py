@@ -37,7 +37,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
     mailing_state = serializers.ChoiceField(
         choices=STATES, validators=[state_code_validator], required=False
     )
-    title = serializers.CharField(required=True)
+    title = serializers.CharField(required=False)
     previous_title = serializers.CharField(required=True)
     state_id_number = serializers.CharField(required=False)
     is_18_or_over = RequiredBooleanField(
@@ -53,7 +53,6 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
     class Meta:
         model = Registration
         minimum_necessary_fields = [
-            "title",
             "first_name",
             "last_name",
             "address1",
@@ -69,6 +68,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "is_18_or_over",
         ]
         optional_fields = [
+            "title",
             "subscriber",
             "suffix",
             "phone",

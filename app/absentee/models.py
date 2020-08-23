@@ -80,6 +80,8 @@ class BallotRequest(
 
     esign_method = TurnoutEnumField(enums.SubmissionType, null=True)
 
+    referring_tool = TurnoutEnumField(enums.ToolName, null=True, blank=True)
+
     class Meta:
         ordering = ["-created_at"]
 

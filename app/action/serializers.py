@@ -1,10 +1,12 @@
 import collections
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping
 
+from enumfields.drf.fields import EnumField
 from enumfields.drf.serializers import EnumSupportSerializerMixin
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+from common import enums
 from common.apm import tracer
 from multi_tenant.mixins_serializers import SubscriberSerializerMixin
 
@@ -20,6 +22,7 @@ class ActionSerializer(
 ):
     action = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
     sms_opt_in_subscriber = serializers.BooleanField(required=False)
+    initial_events = serializers.ListField(child=EnumField(enum=enums.EventType))
 
     def __init__(self, instance=None, data=empty, **kwargs) -> None:
         self.incomplete = kwargs.pop("incomplete", False)
@@ -53,6 +56,7 @@ class ActionSerializer(
                 + nationally_required_fields
                 + optional_fields
                 + standard_fields
+                + ["initial_events"]
             )
         )
 
