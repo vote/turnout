@@ -45,7 +45,10 @@ class ResetView(APIView):
             logger.info(f"Purged file at {item.purged}. Redirecting.")
             return HttpResponseRedirect(item.purged_url)
 
-        item.refresh_token()
+        if not item.validate_token(str(item.token)):
+            # Only refresh the token if it's expired
+            item.refresh_token()
+
         trigger_notification(item)
 
         return Response(status=status.HTTP_201_CREATED)

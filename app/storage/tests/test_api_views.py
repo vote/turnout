@@ -13,11 +13,14 @@ STORAGE_DOWNLOAD_URL = "/download/"
 
 
 @pytest.mark.django_db
-def test_reset_uuid(client):
+def test_reset_uuid(client, freezer, settings):
+    settings.FILE_EXPIRATION_HOURS = 10
+    freezer.move_to("2009-01-20T11:30:00Z")
     storage_item = baker.make_recipe("storage.registration_form")
     old_token = storage_item.token
     old_expires = storage_item.expires
 
+    freezer.move_to("2009-01-20T22:30:00Z")
     resp = client.post(STORAGE_RESET_URL, {"id": str(storage_item.uuid)})
 
     assert resp.status_code == 201
@@ -28,13 +31,16 @@ def test_reset_uuid(client):
 
 
 @pytest.mark.django_db
-def test_reset_smalluuid(client):
+def test_reset_smalluuid(client, freezer):
+    settings.FILE_EXPIRATION_HOURS = 10
+    freezer.move_to("2009-01-20T11:30:00Z")
     storage_item = baker.make_recipe("storage.registration_form")
     old_token = storage_item.token
     old_expires = storage_item.expires
 
     smalluuid = SmallUUID(hex=str(storage_item.uuid))
 
+    freezer.move_to("2009-01-20T22:30:00Z")
     resp = client.post(STORAGE_RESET_URL, {"id": str(smalluuid)})
 
     assert resp.status_code == 201
@@ -42,6 +48,26 @@ def test_reset_smalluuid(client):
 
     assert storage_item.token != old_token
     assert storage_item.expires > old_expires
+
+
+@pytest.mark.django_db
+def test_reset_not_expired(client, freezer):
+    settings.FILE_EXPIRATION_HOURS = 10
+    freezer.move_to("2009-01-20T11:30:00Z")
+    storage_item = baker.make_recipe("storage.registration_form")
+    old_token = storage_item.token
+    old_expires = storage_item.expires
+
+    smalluuid = SmallUUID(hex=str(storage_item.uuid))
+
+    freezer.move_to("2009-01-20T20:30:00Z")
+    resp = client.post(STORAGE_RESET_URL, {"id": str(smalluuid)})
+
+    assert resp.status_code == 201
+    storage_item.refresh_from_db()
+
+    assert storage_item.token == old_token
+    assert storage_item.expires == old_expires
 
 
 def test_reset_no_id(client):

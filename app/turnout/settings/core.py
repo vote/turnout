@@ -358,7 +358,7 @@ AWS_DEFAULT_REGION = env.str("AWS_DEFAULT_REGION", default="us-west-2")
 #### STORAGE CONFIGURATION
 
 DEFAULT_FILE_STORAGE = "storage.backends.AttachmentStorage"
-FILE_EXPIRATION_HOURS = env.int("FILE_EXPIRATION_HOURS", default=168)
+FILE_EXPIRATION_HOURS = env.int("FILE_EXPIRATION_HOURS", default=60 * 24)
 FILE_TIMEZONE = env.str("FILE_TIMEZONE", default="America/Los_Angeles")
 FILE_TOKEN_RESET_URL = env.str(
     "FILE_TOKEN_RESET_URL", default="http://localhost:8000/download/?id={item_id}"
