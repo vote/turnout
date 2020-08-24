@@ -52,6 +52,7 @@ def validate_twilio_request(func):
         if not validator.validate(
             url, request.data, request.headers.get("X-Twilio-Signature", ""),
         ):
+            logger.warning(f"Bad twilio callback signature, url {url}, request {request.data}")
             return HttpResponse(
                 "Bad twilio signature", status=status.HTTP_403_FORBIDDEN
             )
