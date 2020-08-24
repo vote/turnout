@@ -15,6 +15,7 @@ nav:
         - 'Export Format': '/admin/exportformat/'
     - 'Integrations':
         - 'ActionNetwork': '/integrations/actionnetwork/'
+    - 'State Voter Tool Uptime API': '/api/leouptime/'
     - 'Advanced APIs':
         - 'Action API': '/api/action/'
     - 'Open Source Development': '/opensource/'
