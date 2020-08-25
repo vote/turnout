@@ -216,6 +216,10 @@ local base_secrets = import './base_secrets.libsonnet';
         name: 'UPTIME_TWITTER_ACCESS_TOKEN_SECRET',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_uptime_webhook',
+        name: 'SLACK_UPTIME_WEBHOOK',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_key',
         name: 'PROXY_SSH_KEY',
       },

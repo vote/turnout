@@ -2,6 +2,7 @@ import datetime
 import logging
 import random
 
+import requests
 import sentry_sdk
 import tweepy
 from django.conf import settings
@@ -391,11 +392,15 @@ def tweet_site_status(site):
             message += ". Overall, down " + ", ".join(uptimes)
         message += " " + site.url
 
+        site.last_tweet_at = now
+        site.save()
+
+        if settings.SLACK_UPTIME_WEBHOOK:
+            r = requests.post(settings.SLACK_UPTIME_WEBHOOK, json={"text": message},)
+
         if not get_feature_bool("leouptime", "tweet"):
             logger.info(f"tweet=false via optimizely; would have sent: {message}")
         else:
-            site.last_tweet_at = now
-            site.save()
             tweet(message)
 
 

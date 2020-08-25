@@ -87,6 +87,7 @@ export UPTIME_TWITTER_CONSUMER_KEY=$(aws ssm get-parameter --region $REGION --wi
 export UPTIME_TWITTER_CONSUMER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_secret | jq '.Parameter["Value"]' -r)
 export UPTIME_TWITTER_ACCESS_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token | jq '.Parameter["Value"]' -r)
 export UPTIME_TWITTER_ACCESS_TOKEN_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token_secret | jq '.Parameter["Value"]' -r)
+export SLACK_UPTIME_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_uptime_webhook | jq '.Parameter["Value"]' -r)
 export PROXY_SSH_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_key | jq '.Parameter["Value"]' -r)
 export PROXY_SSH_PUB=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_pub | jq '.Parameter["Value"]' -r)
 export PROXY_SSH_KEY_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_key_id | jq '.Parameter["Value"]' -r)
@@ -190,6 +191,7 @@ docker run -i -t \
     -e UPTIME_TWITTER_CONSUMER_SECRET \
     -e UPTIME_TWITTER_ACCESS_TOKEN \
     -e UPTIME_TWITTER_ACCESS_TOKEN_SECRET \
+    -e SLACK_UPTIME_WEBHOOK \
     -e PROXY_SSH_KEY \
     -e PROXY_SSH_PUB \
     -e PROXY_SSH_KEY_ID \
