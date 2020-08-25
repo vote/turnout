@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.db import transaction
 
+from common.rollouts import get_feature
 from election.models import StateInformation
 from official.models import Region
 
@@ -108,7 +109,7 @@ def build_movote_url(request: BallotRequest) -> str:
 
 
 def ovbm_link_for_ballot_request(request: BallotRequest) -> Optional[str]:
-    if request.state and request.state.code == "MO":
+    if get_feature("movote") and request.state and request.state.code == "MO":
         return build_movote_url(request)
 
     if request.region:
