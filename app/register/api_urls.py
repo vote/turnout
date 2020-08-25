@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework import routers
 
-from .api_views import RegistrationViewSet, StatusViewSet
+from .api_views import RegistrationViewSet, StatusViewSet, lob_confirm
 from .external_views import ExternalRegistrationViewSet, RegistrationResumeView
 
 router = routers.SimpleRouter()
@@ -16,5 +16,6 @@ urlpatterns = router.urls + [
         "resume_token/",
         RegistrationResumeView.as_view(),
         name="registration_resume_token",
-    )
+    ),
+    path("confirm-print-and-forward/<str:uuid>/", lob_confirm),
 ]

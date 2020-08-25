@@ -20,6 +20,7 @@ from common.enums import (
 )
 from election.models import State
 from event_tracking.models import Event
+from integration.lob import generate_lob_token
 from multi_tenant.models import Client
 from register.models import Registration
 from storage.models import SecureUploadItem
@@ -53,6 +54,16 @@ VALID_REGISTRATION = {
     "mobile_referrer": "efgh456",
 }
 REGISTER_API_ENDPOINT_INCOMPLETE = "/v1/registration/register/?incomplete=true"
+
+VALID_PATCH_MAIL = {
+    "us_citizen": True,
+    "is_18_or_over": True,
+    "state_id_number": "FOUNDER123",
+    "request_mailing_address1": "123 A St NW foo",
+    "request_mailing_city": "Washington",
+    "request_mailing_state": "DC",
+    "request_mailing_zipcode": "20001",
+}
 
 STATUS_API_ENDPOINT = "/v1/registration/status/{uuid}/"
 STATUS_REFER_OVR = {"status": "ReferOVR"}
@@ -132,10 +143,19 @@ PA_REGISTRATION_SIG = {
     },
 }
 
+LOB_LETTER_CONFIRM_API_ENDPOINT = (
+    "/v1/registration/confirm-print-and-forward/{uuid}/?token={token}"
+)
+
 
 @pytest.fixture()
 def mock_sms(mocker):
     mocker.patch("register.api_views.send_welcome_sms")
+
+
+@pytest.fixture
+def mock_verify_address(mocker):
+    return mocker.patch("integration.lob.verify_address", return_value=(True, {}))
 
 
 @pytest.fixture()
@@ -145,6 +165,12 @@ def submission_task_patch(mocker):
     mocker.patch("register.api_views.voter_lookup_action")
     mocker.patch("voter.tasks.get_feature")
     return mocker.patch("register.api_views.process_registration")
+
+
+def set_state_allow_print_and_forward(code):
+    state = State.objects.get(code=code)
+    state.allow_print_and_forward = True
+    state.save()
 
 
 @pytest.fixture()
@@ -734,3 +760,127 @@ def test_pa_sig(
     assert registration.party == PoliticalParties.NONE
 
     state_confirmation_email.assert_called_once_with(registration.uuid)
+
+
+@pytest.mark.django_db
+def test_complete_lob(
+    submission_task_patch, mock_sms, mock_verify_address,
+):
+    # enable print-and-forward for this state
+    set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
+
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert register_response.json()["allow_print_and_forward"] == True
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    # complete with request_mailing address
+    status_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid), VALID_PATCH_MAIL
+    )
+    assert status_response.status_code == 200
+
+    # refresh from database, make sure it's the same object
+    registration.refresh_from_db()
+    assert str(registration.uuid) == register_response.json()["uuid"]
+
+
+@pytest.mark.django_db
+def test_complete_lob_ignore_undeliverable(
+    submission_task_patch, mock_sms, mock_verify_address,
+):
+    # enable print-and-forward for this state
+    set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
+
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert register_response.json()["allow_print_and_forward"] == True
+    assert register_response.json()["request_mailing_deliverable"] == None
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    # (fail) complete with request_mailing address (undeliverable)
+    mock_verify_address.return_value = (False, {})
+
+    status_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid), VALID_PATCH_MAIL
+    )
+    assert status_response.status_code == 400
+    assert "request_mailing_address1" in status_response.json()
+
+    registration.refresh_from_db()
+    assert str(registration.uuid) == register_response.json()["uuid"]
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+
+    # try again, and ignore
+    info = VALID_PATCH_MAIL.copy()
+    info["ignore_undeliverable"] = True
+
+    status_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid), info
+    )
+    assert status_response.status_code == 200
+
+    registration.refresh_from_db()
+    assert str(registration.uuid) == register_response.json()["uuid"]
+    assert registration.status != TurnoutActionStatus.INCOMPLETE
+
+
+# Test confirmation link that sends the actual letter
+@pytest.mark.django_db
+def test_lob_confirm(mocker):
+    registration = baker.make_recipe(
+        "register.registration",
+        result_item_mail=baker.make_recipe("storage.registration_form"),
+    )
+
+    send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
+    send = mocker.patch("register.api_views.send_letter", return_value=send_date)
+
+    client = APIClient()
+    response = client.get(
+        LOB_LETTER_CONFIRM_API_ENDPOINT.format(
+            uuid=registration.action.uuid, token=generate_lob_token(registration)
+        ),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"send_date": send_date.isoformat()}
+    send.assert_called_once_with(registration)
+
+
+@pytest.mark.django_db
+def test_lob_confirm_dne(mocker):
+    client = APIClient()
+
+    response = client.get(
+        LOB_LETTER_CONFIRM_API_ENDPOINT.format(
+            uuid="7e6abe5f-7cc7-4d9a-96f1-75c9e6c05ed8", token="bar",
+        )
+    )
+    assert response.status_code == 404

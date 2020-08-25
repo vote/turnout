@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any, Dict, Optional, Tuple
 
 from django.forms.models import model_to_dict
@@ -19,20 +20,27 @@ from .tasks import (
     send_ballotrequest_leo_email,
     send_ballotrequest_leo_fax,
     send_ballotrequest_notification,
+    send_ballotrequest_print_and_forward,
 )
 
 logger = logging.getLogger("absentee")
 
 SELF_PRINT_COVER_SHEET_PATH = "absentee/templates/pdf/cover.pdf"
+PRINT_AND_FORWARD_COVER_SHEET_PATH = (
+    "absentee/templates/pdf/print-and-forward-cover.pdf"
+)
 FAX_COVER_SHEET_PATH = "absentee/templates/pdf/fax-cover.pdf"
 ENVELOPE_PATH = "absentee/templates/pdf/envelope.pdf"
 
 
-def generate_name(state_code: str, last_name: str):
+def generate_name(state_code: str, last_name: str, suffix: str = None):
     """
     Generates a name for the PDF
     """
-    filename = slugify(f"{state_code} {last_name} ballotrequest").lower()
+    base = f"{state_code} {last_name} ballotrequest"
+    if suffix:
+        base += f" {suffix}"
+    filename = slugify(base).lower()
     return f"{filename}.pdf"
 
 
@@ -152,6 +160,19 @@ def prepare_formdata(
         form_data["mailing_or_reg_address1_2"] = form_data["address1_2"]
         form_data["mailing_or_reg_city_state_zip"] = form_data["address_city_state_zip"]
         form_data["mailing_or_reg_full_address"] = form_data["full_address"]
+
+    # consolidated ballot request address
+    form_data["request_mailing_address_full"] = (
+        form_data["request_mailing_address1"] or ""
+    )
+    if form_data["request_mailing_address2"]:
+        form_data["request_mailing_address_full"] += (
+            "\n" + form_data["request_mailing_address2"]
+        )
+    form_data["request_mailing_address_full"] += fmt.format(
+        "\n{request_mailing_city}, {request_mailing_state} {request_mailing_zipcode}",
+        **form_data,
+    )
 
     # find the mailing address and contact info
     contact_info = get_absentee_contact_info(ballot_request.region.external_id)
@@ -286,6 +307,19 @@ def generate_pdf_template(
         ]
 
         num_pages = state_template_pages + 1
+    elif submission_method == enums.SubmissionType.PRINT_AND_FORWARD:
+        form_path = f"absentee/templates/pdf/states/{state_code}-print-and-forward.pdf"
+        if not os.path.exists(form_path):
+            form_path = f"absentee/templates/pdf/states/{state_code}.pdf"
+        sections = [
+            PDFTemplateSection(
+                path=PRINT_AND_FORWARD_COVER_SHEET_PATH,
+                is_form=True,
+                flatten_form=True,
+            ),
+            PDFTemplateSection(path=form_path, is_form=True, flatten_form=True,),
+        ]
+        num_pages = state_template_pages + 2
     else:
         # Self-print
         sections = [
@@ -304,6 +338,9 @@ def generate_pdf_template(
 
 
 def get_submission_method(ballot_request: BallotRequest) -> enums.SubmissionType:
+    if ballot_request.request_mailing_address1:
+        return enums.SubmissionType.PRINT_AND_FORWARD
+
     if ballot_request.signature is None:
         return enums.SubmissionType.SELF_PRINT
 
@@ -330,7 +367,23 @@ def populate_storage_item(
         pdf_template, form_data, item, file_name, ballot_request.signature
     )
 
-    return submission_method
+    if submission_method == enums.SubmissionType.PRINT_AND_FORWARD:
+        mail_item = StorageItem(
+            app=enums.FileType.ABSENTEE_REQUEST_FORM,
+            email=ballot_request.email,
+            subscriber=ballot_request.subscriber,
+        )
+        mail_template, mail_pages = generate_pdf_template(
+            ballot_request.state.code, enums.SubmissionType.PRINT_AND_FORWARD
+        )
+        mail_file_name = generate_name(
+            ballot_request.state.code, ballot_request.last_name, suffix="mail"
+        )
+        fill_pdf_template(mail_template, form_data, mail_item, mail_file_name)
+    else:
+        mail_item = None
+
+    return submission_method, mail_item
 
 
 @tracer.wrap()
@@ -343,17 +396,20 @@ def process_ballot_request(
         subscriber=ballot_request.subscriber,
     )
 
-    submission_method = populate_storage_item(
+    submission_method, item_mail = populate_storage_item(
         item, ballot_request, state_id_number, is_18_or_over
     )
 
     ballot_request.result_item = item
-    ballot_request.save(update_fields=["result_item"])
+    ballot_request.result_item_mail = item_mail
+    ballot_request.save(update_fields=["result_item", "result_item_mail"])
 
     if submission_method == enums.SubmissionType.LEO_EMAIL:
         send_ballotrequest_leo_email.delay(ballot_request.pk)
     elif submission_method == enums.SubmissionType.LEO_FAX:
         send_ballotrequest_leo_fax.delay(ballot_request.pk)
+    elif submission_method == enums.SubmissionType.PRINT_AND_FORWARD:
+        send_ballotrequest_print_and_forward.delay(ballot_request.pk)
     else:
         send_ballotrequest_notification.delay(ballot_request.pk)
 

@@ -43,6 +43,7 @@ class BallotRequest(
         null=True,
     )
     zipcode = models.TextField(null=True, validators=[zip_validator])
+    deliverable = models.BooleanField(null=True)
 
     mailing_address1 = models.TextField(null=True, blank=True)
     mailing_address2 = models.TextField(null=True, blank=True)
@@ -56,6 +57,21 @@ class BallotRequest(
     mailing_zipcode = models.TextField(
         null=True, validators=[zip_validator], blank=True
     )
+    mailing_deliverable = models.BooleanField(null=True)
+
+    request_mailing_address1 = models.TextField(null=True, blank=True)
+    request_mailing_address2 = models.TextField(null=True, blank=True)
+    request_mailing_city = models.TextField(null=True, blank=True)
+    request_mailing_state = models.ForeignKey(
+        "election.State",
+        on_delete=models.PROTECT,
+        related_name="absentee_request_mailing",
+        null=True,
+    )
+    request_mailing_zipcode = models.TextField(
+        null=True, validators=[zip_validator], blank=True
+    )
+    request_mailing_deliverable = models.BooleanField(null=True)
 
     us_citizen = models.BooleanField(null=True, default=False)
     sms_opt_in = models.BooleanField(null=True, default=False)
@@ -70,6 +86,12 @@ class BallotRequest(
 
     result_item = models.ForeignKey(
         "storage.StorageItem", null=True, on_delete=models.SET_NULL
+    )
+    result_item_mail = models.ForeignKey(
+        "storage.StorageItem",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="absentee_mail",
     )
 
     signature = models.ForeignKey(
@@ -87,6 +109,12 @@ class BallotRequest(
 
     def __str__(self):
         return f"Absentee - {self.first_name} {self.last_name}, {self.state.pk}".strip()
+
+    @property
+    def full_name(self):
+        if self.middle_name:
+            return f"{self.first_name} {self.middle_name} {self.last_name}"
+        return f"{self.first_name} {self.last_name}"
 
 
 @reversion.register()

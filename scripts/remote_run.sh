@@ -43,6 +43,7 @@ export AWS_STORAGE_PRIVATE_BUCKET_NAME=$(aws ssm get-parameter --region $REGION 
 export SENDGRID_API_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sendgrid_api_key | jq '.Parameter["Value"]' -r)
 export FILE_TOKEN_RESET_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_reset_url | jq '.Parameter["Value"]' -r)
 export PRIMARY_ORIGIN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.primary_origin | jq '.Parameter["Value"]' -r)
+export WWW_ORIGIN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.www_origin | jq '.Parameter["Value"]' -r)
 export USVOTEFOUNDATION_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_key | jq '.Parameter["Value"]' -r)
 export ALLOY_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_key | jq '.Parameter["Value"]' -r)
 export ALLOY_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.alloy_secret | jq '.Parameter["Value"]' -r)
@@ -98,6 +99,9 @@ export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-dec
 export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_FUNCTION=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_function | jq '.Parameter["Value"]' -r)
 export VERIFIER_UPSELL_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.verifier_upsell_url | jq '.Parameter["Value"]' -r)
+export LOB_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_key | jq '.Parameter["Value"]' -r)
+export LOB_LETTER_WEBHOOK_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_letter_webhook_secret | jq '.Parameter["Value"]' -r)
+export RETURN_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.return_address | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -147,6 +151,7 @@ docker run -i -t \
     -e SENDGRID_API_KEY \
     -e FILE_TOKEN_RESET_URL \
     -e PRIMARY_ORIGIN \
+    -e WWW_ORIGIN \
     -e USVOTEFOUNDATION_KEY \
     -e ALLOY_KEY \
     -e ALLOY_SECRET \
@@ -202,8 +207,11 @@ docker run -i -t \
     -e PDF_GENERATION_LAMBDA_ENABLED \
     -e PDF_GENERATION_LAMBDA_FUNCTION \
     -e VERIFIER_UPSELL_URL \
+    -e LOB_KEY \
+    -e LOB_LETTER_WEBHOOK_SECRET \
+    -e RETURN_ADDRESS \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
-/bin/bash -c "${2:-bash}"
+/bin/bash
 

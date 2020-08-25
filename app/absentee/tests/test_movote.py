@@ -1,21 +1,21 @@
-from datetime import date
 import urllib.parse
+from datetime import date
+
 import pytest
 from model_bakery import baker
 
 from absentee.region_links import (
     MOVOTE_BASE_URL,
-    MOVOTE_PARAM_FULL_NAME,
-    MOVOTE_PARAM_DOB_M,
-    MOVOTE_PARAM_DOB_D,
-    MOVOTE_PARAM_DOB_Y,
-    MOVOTE_PARAM_ADDR12,
     MOVOTE_PARAM_ADDR3,
-    MOVOTE_PARAM_PHONE,
+    MOVOTE_PARAM_ADDR12,
+    MOVOTE_PARAM_DOB_D,
+    MOVOTE_PARAM_DOB_M,
+    MOVOTE_PARAM_DOB_Y,
     MOVOTE_PARAM_EMAIL,
+    MOVOTE_PARAM_FULL_NAME,
+    MOVOTE_PARAM_PHONE,
     build_movote_url,
 )
-from absentee.models import BallotRequest
 
 base_url_parsed = urllib.parse.urlparse(MOVOTE_BASE_URL)
 

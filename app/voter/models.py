@@ -54,7 +54,8 @@ class Voter(UUIDModel, TimestampModel):
                 self.registration_date.year,
                 self.registration_date.month,
                 self.registration_date.day,
-                tzinfo=datetime.timezone.utc)
+                tzinfo=datetime.timezone.utc,
+            )
         else:
             old_reg_datetime = None
         if register_date and last_updated:

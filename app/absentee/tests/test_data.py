@@ -76,6 +76,7 @@ def make_test_data(state=None) -> Tuple[BallotRequest, Dict[str, Any]]:
         us_citizen=True,
         sms_opt_in=True,
         submit_date=datetime.date(2020, 4, 15),
+        request_mailing_address1=None,
     )
 
     expected_data = {

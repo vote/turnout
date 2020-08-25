@@ -34,7 +34,9 @@ def test_gen_pdf(state, mocker, settings):
         "absentee.generateform.send_ballotrequest_notification"
     )
 
-    state_record = baker.make_recipe("election.state", code=state)
+    state_record = baker.make_recipe(
+        "election.state", code=state, allow_print_and_forward=False
+    )
     ballot_request, expected_data = make_test_data(state_record)
 
     if STATE_DATA.get(state):

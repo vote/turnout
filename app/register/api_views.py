@@ -1,6 +1,12 @@
 import logging
 
+import sentry_sdk
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
+from lob.error import LobError
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -13,6 +19,7 @@ from common.enums import (
     RegistrationGender,
     TurnoutActionStatus,
 )
+from integration.lob import check_deliverable, generate_lob_token, send_letter
 from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import get_regions_for_address
 from smsbot.tasks import send_welcome_sms
@@ -65,6 +72,9 @@ class RegistrationViewSet(IncompleteActionViewSet):
         ):
             pa_fill_region(registration)
 
+        # only check print-and-forward address deliverability for now
+        check_deliverable(self.request.data, registration, "request_mailing_")
+
     def complete(
         self,
         serializer,
@@ -72,7 +82,16 @@ class RegistrationViewSet(IncompleteActionViewSet):
         state_id_number,
         state_id_number_2,
         is_18_or_over,
+        ignore_undeliverable,
     ):
+        if (
+            registration.request_mailing_address1
+            and not registration.request_mailing_deliverable
+            and not ignore_undeliverable
+        ):
+            # do not complete since they did not ignore_undeliverable
+            return
+
         if registration.state_id == "PA" and registration.state_fields:
             success = process_pa_registration(
                 registration, state_id_number, state_id_number_2, is_18_or_over
@@ -115,6 +134,8 @@ class RegistrationViewSet(IncompleteActionViewSet):
             "uuid": action_object.uuid,
             "action_id": action_object.action.pk,
             "custom_ovr_link": action_object.custom_ovr_link,
+            "allow_print_and_forward": action_object.state.allow_print_and_forward,
+            "request_mailing_deliverable": action_object.request_mailing_deliverable,
         }
         if action_object.state_api_result:
             if "status" in action_object.state_api_result:
@@ -140,6 +161,17 @@ class RegistrationViewSet(IncompleteActionViewSet):
                 else None
             )
 
+        if (
+            action_object.request_mailing_address1
+            and not action_object.request_mailing_deliverable
+            and not self.request.data.get("ignore_undeliverable")
+        ):
+            return Response(
+                {
+                    "request_mailing_address1": "Address does not appear to be deliverable by USPS",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(response)
 
 
@@ -148,3 +180,23 @@ class StatusViewSet(UpdateModelMixin, GenericViewSet):
     model = Registration
     serializer_class = StatusSerializer
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def lob_confirm(request, uuid):
+    try:
+        registration = Registration.objects.get(action_id=uuid)
+    except ObjectDoesNotExist:
+        raise Http404
+    if generate_lob_token(registration) != request.GET.get("token", ""):
+        raise Http404
+
+    try:
+        send_date = send_letter(registration)
+        return Response({"send_date": send_date.isoformat()})
+    except LobError as e:
+        sentry_sdk.capture_exception(e)
+        return Response(
+            {"lob_error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )

@@ -35,6 +35,7 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
     us_citizen = RequiredBooleanField(
         required=False, validators=[must_be_true_validator]
     )
+    ignore_undeliverable = serializers.BooleanField(required=False)
 
     class Meta:
         model = BallotRequest
@@ -63,6 +64,11 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
             "mailing_city",
             "mailing_state",
             "mailing_zipcode",
+            "request_mailing_address1",
+            "request_mailing_address2",
+            "request_mailing_city",
+            "request_mailing_state",
+            "request_mailing_zipcode",
             "state_fields",
             "source",
             "utm_campaign",
@@ -77,4 +83,5 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
             "signature",
             "submit_date",
             "referring_tool",
+            "ignore_undeliverable",
         ]

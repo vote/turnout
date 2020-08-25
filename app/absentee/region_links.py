@@ -1,6 +1,6 @@
 import re
-from typing import List, Optional
 import urllib.parse
+from typing import List, Optional
 
 import requests
 from bs4 import BeautifulSoup

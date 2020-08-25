@@ -24,6 +24,7 @@ USE_L10N = True
 WSGI_APPLICATION = "turnout.wsgi.application"
 ROOT_URLCONF = "turnout.urls"
 PRIMARY_ORIGIN = env.str("PRIMARY_ORIGIN", default="http://localhost:9001")
+WWW_ORIGIN = env.str("WWW_ORIGIN", default="http://localhost:8000")
 
 
 # Useful analytics and tracking tags
@@ -855,3 +856,14 @@ VERIFIER_UPSELL_URL = env.str("VERIFIER_UPSELL_URL", default="http://localhost:8
 VERIFIER_UPSELL_DELAY_SECONDS = env.int("VERIFIER_UPSELL_DELAY_SECONDS", default=60)
 
 #### END VERIFIER CONFIGURATION
+
+#### LOB CONFIGURATOIN
+
+LOB_KEY = env.str("LOB_KEY", None)
+LOB_LETTER_WEBHOOK_SECRET = env.str("LOB_LETTER_WEBHOOK_SECRET", None)
+RETURN_ADDRESS = env.json(
+    "RETURN_ADDRESS",
+    '{"name": "VoteAmerica","address1": "PO BOX 123","city": "SAN FRANCISCO","state": "CA","zipcode": "12345"}',
+)
+
+#### END LOB CONFIGURATION

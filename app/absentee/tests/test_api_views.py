@@ -1,11 +1,20 @@
+import datetime
+
 import pytest
+from django.conf import settings
 from model_bakery import baker
 from rest_framework.test import APIClient
 
 from absentee.contactinfo import AbsenteeContactInfo
 from absentee.models import BallotRequest, LeoContactOverride, RegionEsignMethod
-from common.enums import StateFieldFormats, SubmissionType
+from common.enums import (
+    EventType,
+    StateFieldFormats,
+    SubmissionType,
+    TurnoutActionStatus,
+)
 from election.models import StateInformation, StateInformationFieldType
+from integration.lob import generate_lob_token
 from official.models import Address, Office
 
 ABSENTEE_API_ENDPOINT_INCOMPLETE = (
@@ -19,6 +28,10 @@ ABSENTEE_API_ENDPOINT_COMPLETE = "/v1/absentee/request/"
 ABSENTEE_API_ENDPOINT_PATCH_INCOMPLETE = "/v1/absentee/request/{uuid}/?incomplete=true"
 
 ABSENTEE_API_ENDPOINT_PATCH_COMPLETE = "/v1/absentee/request/{uuid}/"
+
+LOB_LETTER_CONFIRM_API_ENDPOINT = (
+    "/v1/absentee/confirm-print-and-forward/{uuid}/?token={token}"
+)
 
 VALID_ABSENTEE_INITIAL = {
     "title": "Mr",
@@ -51,6 +64,24 @@ VALID_ABSENTEE_FULL = {
     "is_18_or_over": True,
 }
 
+VALID_ABSENTEE_FULL_MAIL = {
+    "title": "Mr",
+    "first_name": "John",
+    "last_name": "Hancock",
+    "address1": "30 Beacon Street",
+    "city": "Boston",
+    "state": "MA",
+    "email": "john@hancock.local",
+    "date_of_birth": "1737-01-23",
+    "zipcode": "02108",
+    "phone": "+16175557890",
+    "sms_opt_in": True,
+    "sms_opt_in_subscriber": True,
+    "region": 12345,
+    "us_citizen": True,
+    "is_18_or_over": True,
+}
+
 
 @pytest.fixture
 def mock_followup(mocker):
@@ -59,6 +90,7 @@ def mock_followup(mocker):
 
 @pytest.fixture
 def mock_sms(mocker):
+    settings.SMS_POST_SIGNUP_ALERT = False
     return mocker.patch("absentee.api_views.send_welcome_sms")
 
 
@@ -70,6 +102,11 @@ def mock_get_absentee_contact_info(mocker):
 @pytest.fixture
 def mock_get_regions_for_address(mocker):
     return mocker.patch("absentee.api_views.get_regions_for_address")
+
+
+@pytest.fixture
+def mock_verify_address(mocker):
+    return mocker.patch("integration.lob.verify_address", return_value=(True, {}))
 
 
 @pytest.fixture
@@ -130,6 +167,7 @@ def test_incomplete_create_single_matching_region(
     mock_sms,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
+    mock_verify_address,
     feature_flag_off,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
@@ -152,6 +190,10 @@ def test_incomplete_create_single_matching_region(
         "region": 12345,
         "esign_method": "self_print",
         "ovbm_link": "mock-ovbm-link",
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
     mock_get_regions_for_address.assert_called_with(
@@ -168,6 +210,7 @@ def test_incomplete_create_single_matching_region_email(
     mock_sms,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
+    mock_verify_address,
     feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
@@ -194,13 +237,20 @@ def test_incomplete_create_single_matching_region_email(
         "region": 12345,
         "esign_method": "leo_email",
         "ovbm_link": "mock-ovbm-link",
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
 # Incomplete create, region matching error
 @pytest.mark.django_db
 def test_incomplete_create_region_matching_error(
-    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -231,13 +281,20 @@ def test_incomplete_create_region_matching_error(
             {"name": "B", "external_id": 2},
             {"name": "C", "external_id": 3},
         ],
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
 # Incomplete create, no matching regions
 @pytest.mark.django_db
 def test_incomplete_create_no_matching_regions(
-    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -268,13 +325,20 @@ def test_incomplete_create_no_matching_regions(
             {"name": "B", "external_id": 2},
             {"name": "C", "external_id": 3},
         ],
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
 # Incomplete create, multiple matching regions
 @pytest.mark.django_db
 def test_incomplete_create_multiple_matching_regions(
-    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -301,13 +365,20 @@ def test_incomplete_create_multiple_matching_regions(
         "esign_method": None,
         "ovbm_link": "mock-ovbm-link",
         "regions": [{"name": "B", "external_id": 2}, {"name": "C", "external_id": 3},],
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
 # Incomplete create, no region matching requested
 @pytest.mark.django_db
 def test_incomplete_create_no_region_matching(
-    mock_sms, mock_get_absentee_contact_info, mock_get_regions_for_address
+    mock_sms,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
@@ -340,6 +411,10 @@ def test_incomplete_create_no_region_matching(
             {"name": "B", "external_id": 2},
             {"name": "C", "external_id": 3},
         ],
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
@@ -350,6 +425,7 @@ def test_complete_create(
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_followup,
+    mock_verify_address,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -381,6 +457,10 @@ def test_complete_create(
         "esign_method": "leo_fax",
         "ovbm_link": "mock-ovbm-link",
         "region": 12345,
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
     assert ballot_request.region.external_id == 12345
@@ -390,7 +470,7 @@ def test_complete_create(
 
 # Incomplete update, not filling in esign method
 @pytest.mark.django_db
-def test_incomplete_update_no_esign_filling(mock_sms):
+def test_incomplete_update_no_esign_filling(mock_sms, mock_verify_address):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
     client = APIClient()
@@ -413,6 +493,10 @@ def test_incomplete_update_no_esign_filling(mock_sms):
         "esign_method": None,
         "ovbm_link": "mock-ovbm-link",
         "region": None,
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
     assert BallotRequest.objects.count() == 1
@@ -424,7 +508,7 @@ def test_incomplete_update_no_esign_filling(mock_sms):
 # Incomplete update, filling in esign method
 @pytest.mark.django_db
 def test_incomplete_update_with_esign_filling(
-    mock_sms, mock_get_absentee_contact_info, feature_flag_on
+    mock_sms, mock_get_absentee_contact_info, mock_verify_address, feature_flag_on
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_fax_allowed(state)
@@ -454,6 +538,10 @@ def test_incomplete_update_with_esign_filling(
         "esign_method": "leo_fax",
         "ovbm_link": "mock-ovbm-link",
         "region": 12345,
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
 
@@ -463,6 +551,7 @@ def test_complete_update(
     mock_sms,
     mock_get_absentee_contact_info,
     mock_followup,
+    mock_verify_address,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -499,6 +588,10 @@ def test_complete_update(
         "esign_method": "leo_fax",
         "ovbm_link": "mock-ovbm-link",
         "region": 12345,
+        "allow_print_and_forward": False,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
     }
 
     process_ballot_request.assert_called_with(ballot_request, None, True)
@@ -583,6 +676,7 @@ def test_get_esign_method(
     mocker,
     mock_sms,
     mock_get_regions_for_address,
+    mock_verify_address,
 ):
     set_feature_flag(mocker, flag)
 
@@ -648,3 +742,264 @@ def test_get_esign_method(
     if flag:
         esign_method_record = RegionEsignMethod.objects.get(region_id=12345)
         assert esign_method_record.submission_method == expected
+
+
+# Complete lob
+@pytest.mark.django_db
+def test_complete_lob(
+    mock_followup,
+    mock_get_absentee_contact_info,
+    mock_verify_address,
+    process_ballot_request,
+    feature_flag_on,
+):
+    state = baker.make_recipe(
+        "election.state",
+        code=VALID_ABSENTEE_INITIAL["state"],
+        allow_print_and_forward=True,
+    )
+    baker.make_recipe("official.region", external_id=12345)
+
+    mock_get_absentee_contact_info.return_value = AbsenteeContactInfo(
+        fax="+16175551234"
+    )
+
+    client = APIClient()
+    response = client.post(
+        ABSENTEE_API_ENDPOINT_INCOMPLETE_NO_REGION_MATCH, VALID_ABSENTEE_INITIAL
+    )
+
+    assert BallotRequest.objects.count() == 1
+    ballot_request = BallotRequest.objects.first()
+    assert response.json() == {
+        "uuid": str(ballot_request.uuid),
+        "action_id": str(ballot_request.action.pk),
+        "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
+        "region": None,
+        "regions": [],
+        "allow_print_and_forward": True,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
+    }
+
+    # bad address
+    mock_verify_address.return_value = (False, {})
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_INCOMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "request_mailing_address1": "123 A St NW foo",
+            "request_mailing_city": "Washington",
+            "request_mailing_state": "DC",
+            "request_mailing_zipcode": "20001",
+            "region": 12345,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "request_mailing_address1" in response.json()
+
+    # try to complete (and fail!) with undeliverable request_mailing_address
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_COMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "address1": "new_address",
+            "region": 12345,
+            "us_citizen": True,
+            "is_18_or_over": True,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "request_mailing_address1" in response.json()
+    process_ballot_request.assert_not_called()
+    ballot_request = BallotRequest.objects.first()
+    assert ballot_request.status != TurnoutActionStatus.PENDING
+
+    # now fields change, address is now good
+    mock_verify_address.return_value = (True, {})
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_INCOMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "address1": VALID_ABSENTEE_INITIAL["address1"],
+            "request_mailing_address1": "123 A St NW",
+            "request_mailing_city": "Washington",
+            "request_mailing_state": "DC",
+            "request_mailing_zipcode": "20001",
+            "region": 12345,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "uuid": str(ballot_request.uuid),
+        "action_id": str(ballot_request.action.pk),
+        "esign_method": "self_print",
+        "ovbm_link": "mock-ovbm-link",
+        "region": 12345,
+        "allow_print_and_forward": True,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": True,
+    }
+
+    # Complete!
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_COMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "address1": "new_address",
+            "region": 12345,
+            "us_citizen": True,
+            "is_18_or_over": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "uuid": str(ballot_request.uuid),
+        "action_id": str(ballot_request.action.pk),
+        "esign_method": "self_print",
+        "ovbm_link": "mock-ovbm-link",
+        "region": 12345,
+        "allow_print_and_forward": True,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": True,
+    }
+
+    process_ballot_request.assert_called_with(ballot_request, None, True)
+
+
+# Complete lob
+@pytest.mark.django_db
+def test_complete_lob_force_undeliverable(
+    mock_followup,
+    mock_get_absentee_contact_info,
+    mock_verify_address,
+    process_ballot_request,
+    feature_flag_on,
+):
+    state = baker.make_recipe(
+        "election.state",
+        code=VALID_ABSENTEE_INITIAL["state"],
+        allow_print_and_forward=True,
+    )
+    baker.make_recipe("official.region", external_id=12345)
+
+    mock_get_absentee_contact_info.return_value = AbsenteeContactInfo(
+        fax="+16175551234"
+    )
+
+    client = APIClient()
+    response = client.post(
+        ABSENTEE_API_ENDPOINT_INCOMPLETE_NO_REGION_MATCH, VALID_ABSENTEE_INITIAL
+    )
+
+    assert BallotRequest.objects.count() == 1
+    ballot_request = BallotRequest.objects.first()
+    assert response.json() == {
+        "uuid": str(ballot_request.uuid),
+        "action_id": str(ballot_request.action.pk),
+        "esign_method": None,
+        "ovbm_link": "mock-ovbm-link",
+        "region": None,
+        "regions": [],
+        "allow_print_and_forward": True,
+        #        "deliverable": True,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": None,
+    }
+
+    # bad address
+    mock_verify_address.return_value = (False, {})
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_INCOMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "request_mailing_address1": "123 A St NW foo",
+            "request_mailing_city": "Washington",
+            "request_mailing_state": "DC",
+            "request_mailing_zipcode": "20001",
+            "region": 12345,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "request_mailing_address1" in response.json()
+
+    # try to complete (and fail!) with undeliverable request_mailing_address
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_COMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "address1": "new_address",
+            "region": 12345,
+            "us_citizen": True,
+            "is_18_or_over": True,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "request_mailing_address1" in response.json()
+    process_ballot_request.assert_not_called()
+    ballot_request = BallotRequest.objects.first()
+    assert ballot_request.status != TurnoutActionStatus.PENDING
+
+    # ignore_undeliverable and complete
+    response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_COMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "ignore_undeliverable": True,
+            "region": 12345,
+            "us_citizen": True,
+            "is_18_or_over": True,
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "uuid": str(ballot_request.uuid),
+        "action_id": str(ballot_request.action.pk),
+        "esign_method": "self_print",
+        "ovbm_link": "mock-ovbm-link",
+        "region": 12345,
+        "allow_print_and_forward": True,
+        #        "deliverable": False,
+        #        "mailing_deliverable": None,
+        "request_mailing_deliverable": False,
+    }
+
+    process_ballot_request.assert_called_with(ballot_request, None, True)
+
+
+# Test confirmation link that sends the actual letter
+@pytest.mark.django_db
+def test_lob_confirm(mocker):
+    ballot_request = baker.make_recipe(
+        "absentee.ballot_request",
+        result_item_mail=baker.make_recipe("storage.ballot_request_form"),
+    )
+
+    send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
+    send = mocker.patch("absentee.api_views.send_letter", return_value=send_date)
+
+    client = APIClient()
+    response = client.get(
+        LOB_LETTER_CONFIRM_API_ENDPOINT.format(
+            uuid=ballot_request.action.uuid, token=generate_lob_token(ballot_request)
+        ),
+    )
+
+    send.assert_called_once_with(ballot_request)
+    assert response.json() == {"send_date": send_date.isoformat()}
+
+
+@pytest.mark.django_db
+def test_lob_confirm_dne(mocker):
+    client = APIClient()
+
+    response = client.get(
+        LOB_LETTER_CONFIRM_API_ENDPOINT.format(
+            uuid="7e6abe5f-7cc7-4d9a-96f1-75c9e6c05ed8", token="bar",
+        )
+    )
+    assert response.status_code == 404

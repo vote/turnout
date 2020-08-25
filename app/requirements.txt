@@ -74,3 +74,4 @@ paramiko==2.7.*
 pyjwt==1.7.*
 pdf_template==0.0.2
 pydash==4.8.*
+lob==4.0.*

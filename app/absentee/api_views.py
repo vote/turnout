@@ -1,7 +1,14 @@
+import logging
 from typing import Any, Dict
 
+import sentry_sdk
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from lob.error import LobError
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,6 +16,7 @@ from action.mixin_apiview import IncompleteActionViewSet
 from common.enums import SubmissionType, TurnoutActionStatus
 from common.rollouts import flag_enabled_for_state
 from election.models import State, StateInformation
+from integration.lob import check_deliverable, generate_lob_token, send_letter
 from official.api_views import get_regions_for_address
 from official.models import Region
 from smsbot.tasks import send_welcome_sms
@@ -20,6 +28,8 @@ from .region_links import ovbm_link_for_ballot_request
 from .serializers import BallotRequestSerializer
 from .state_pdf_data import STATE_DATA
 from .tasks import ballotrequest_followup
+
+logger = logging.getLogger("absentee")
 
 
 def get_esign_method_for_region(state: State, region: Region) -> SubmissionType:
@@ -159,6 +169,11 @@ class BallotRequestViewSet(IncompleteActionViewSet):
     def after_create_or_update(self, ballot_request: BallotRequest):
         populate_esign_method(ballot_request)
 
+        # only do this for print-and-forward for now!
+        # check_deliverable("")
+        # check_deliverable("mailing_")
+        check_deliverable(self.request.data, ballot_request, "request_mailing_")
+
     def create_or_update_response(
         self, ballot_request: BallotRequest, extra_response_data: Dict[str, Any] = {},
     ) -> Response:
@@ -170,12 +185,51 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             "esign_method": ballot_request.esign_method.value
             if ballot_request.esign_method
             else None,
+            "allow_print_and_forward": ballot_request.state.allow_print_and_forward,
             "ovbm_link": ovbm_link_for_ballot_request(ballot_request),
+            #            "deliverable": ballot_request.deliverable,
+            #            "mailing_deliverable": ballot_request.mailing_deliverable,
+            "request_mailing_deliverable": ballot_request.request_mailing_deliverable,
         }
 
         response.update(extra_response_data)
 
+        if (
+            ballot_request.request_mailing_address1
+            and not ballot_request.request_mailing_deliverable
+            and not self.request.data.get("ignore_undeliverable")
+        ):
+            return Response(
+                {
+                    "request_mailing_address1": "Address does not appear to be deliverable by USPS",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         return Response(response)
+
+    def complete(
+        self,
+        serializer,
+        action_object,
+        state_id_number,
+        state_id_number_2,
+        is_18_or_over,
+        ignore_undeliverable,
+    ):
+        if (
+            action_object.request_mailing_address1
+            and not action_object.request_mailing_deliverable
+            and not ignore_undeliverable
+        ):
+            # do not complete since they did not ignore_undeliverable
+            return
+
+        # NOTE: we drop state_id_number_2 on the floor here since only register needs it, and it overrides
+        # this method.
+        serializer.validated_data["status"] = TurnoutActionStatus.PENDING
+        action_object.save()
+
+        self.after_complete(action_object, state_id_number, is_18_or_over)
 
     def after_complete(self, action_object, state_id_number, is_18_or_over):
         process_ballot_request(action_object, state_id_number, is_18_or_over)
@@ -190,4 +244,24 @@ class StateMetadataView(APIView):
 
         return Response(
             {k: state_data.get(k) for k in ("signature_statement", "form_fields")}
+        )
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def lob_confirm(request, uuid):
+    try:
+        ballot_request = BallotRequest.objects.get(action_id=uuid)
+    except ObjectDoesNotExist:
+        raise Http404
+    if generate_lob_token(ballot_request) != request.GET.get("token", ""):
+        raise Http404
+
+    try:
+        send_date = send_letter(ballot_request)
+        return Response({"send_date": send_date.isoformat()})
+    except LobError as e:
+        sentry_sdk.capture_exception(e)
+        return Response(
+            {"lob_error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE
         )

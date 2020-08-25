@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path, re_path
 from django.views.generic.base import RedirectView
 from two_factor.admin import AdminSiteOTPRequired
@@ -31,8 +29,3 @@ urlpatterns = [
     path("download/", include("storage.urls", namespace="storage")),
     path("subscribe/", include("subscription.urls", namespace="subscribe")),
 ]
-
-if settings.DEBUG:
-    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
-    urlpatterns += staticfiles_urlpatterns()

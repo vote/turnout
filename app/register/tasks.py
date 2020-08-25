@@ -42,3 +42,15 @@ def send_registration_state_confirmation(registration_pk: str) -> None:
 
     registration = Registration.objects.select_related().get(pk=registration_pk)
     trigger_state_confirmation(registration)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.register.send_registration_notification")
+def send_registration_print_and_forward_notification(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_print_and_forward_notification
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    registration.action.track_event(EventType.FINISH_LOB)
+
+    trigger_print_and_forward_notification(registration)

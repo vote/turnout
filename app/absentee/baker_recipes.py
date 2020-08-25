@@ -22,8 +22,9 @@ def open_signature_file():
     return SimpleUploadedFile("sig.jpg", data.getvalue())
 
 
-state = Recipe(State, code="XX")
+state = Recipe(State, code="XX", allow_print_and_forward=True)
 mailing_state = Recipe(State, code="YY")
+request_mailing_state = Recipe(State, code="ZZ")
 signature = Recipe(
     SecureUploadItem,
     upload_type="Signature",
@@ -35,7 +36,9 @@ ballot_request = Recipe(
     BallotRequest,
     state=foreign_key(state),
     mailing_state=foreign_key(mailing_state),
+    request_mailing_state=foreign_key(request_mailing_state),
     result_item=None,
+    result_item_mail=None,
     status=enums.TurnoutActionStatus.PENDING,
     phone="+1617555123",
     us_citizen=True,

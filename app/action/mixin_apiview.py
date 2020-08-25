@@ -57,6 +57,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         state_id_number,
         state_id_number_2,
         is_18_or_over,
+        ignore_undeliverable,
     ):
         # NOTE: we drop state_id_number_2 on the floor here since only register needs it, and it overrides
         # this method.
@@ -96,6 +97,9 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
         is_18_or_over = serializer.validated_data.pop("is_18_or_over", None)
         state_id_number = serializer.validated_data.pop("state_id_number", None)
         state_id_number_2 = serializer.validated_data.pop("state_id_number_2", None)
+        ignore_undeliverable = serializer.validated_data.pop(
+            "ignore_undeliverable", None
+        )
 
         serializer.validated_data["status"] = TurnoutActionStatus.INCOMPLETE
 
@@ -121,6 +125,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
                 state_id_number,
                 state_id_number_2,
                 is_18_or_over,
+                ignore_undeliverable,
             )
 
         for event_type in initial_events:

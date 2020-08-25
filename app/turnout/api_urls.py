@@ -15,4 +15,5 @@ urlpatterns = [
     path("reminder/", include("reminder.api_urls")),
     path("apikey/", include("apikey.api_urls")),
     path("leouptime/", include("leouptime.api_urls")),
+    path("integration/", include("integration.api_urls")),
 ]

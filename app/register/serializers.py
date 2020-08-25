@@ -49,6 +49,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
     declaration = RequiredBooleanField(
         required=False, validators=[must_be_true_validator]
     )
+    ignore_undeliverable = serializers.BooleanField(required=False)
 
     class Meta:
         model = Registration
@@ -90,6 +91,11 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "mailing_city",
             "mailing_state",
             "mailing_zipcode",
+            "request_mailing_address1",
+            "request_mailing_address2",
+            "request_mailing_city",
+            "request_mailing_state",
+            "request_mailing_zipcode",
             "gender",
             "race_ethnicity",
             "party",
@@ -108,6 +114,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "declaration",
             "region",
             "matched_region",
+            "ignore_undeliverable",
         ]
 
 

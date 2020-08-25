@@ -11,13 +11,19 @@ from election.models import StateInformation
 from storage.models import StorageItem
 
 from .contactinfo import get_registration_contact_info
-from .tasks import send_registration_notification
+from .tasks import (
+    send_registration_notification,
+    send_registration_print_and_forward_notification,
+)
 
 logger = logging.getLogger("register")
 
 
 TEMPLATE_PATH = "register/templates/pdf/eac-nvra.pdf"
 COVER_SHEET_PATH = "register/templates/pdf/cover.pdf"
+PRINT_AND_FORWARD_COVER_SHEET_PATH = (
+    "register/templates/pdf/print-and-forward-cover.pdf"
+)
 
 PDF_TEMPLATE = PDFTemplate(
     [
@@ -26,11 +32,21 @@ PDF_TEMPLATE = PDFTemplate(
     ]
 )
 
+PRINT_AND_FORWARD_PDF_TEMPLATE = PDFTemplate(
+    [
+        PDFTemplateSection(
+            path=PRINT_AND_FORWARD_COVER_SHEET_PATH, is_form=True, flatten_form=True
+        ),
+        PDFTemplateSection(path=TEMPLATE_PATH, is_form=True, flatten_form=True),
+    ]
+)
 
-def generate_name(registration):
-    filename = slugify(
-        f"{registration.state.code} {registration.last_name} registrationform"
-    ).lower()
+
+def generate_name(registration, suffix=""):
+    n = f"{registration.state.code} {registration.last_name} registrationform"
+    if suffix:
+        n += " {suffix}"
+    filename = slugify(n).lower()
     return f"{filename}.pdf"
 
 
@@ -100,6 +116,21 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
 def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
 
+    if registration.request_mailing_address1:
+        # print-and-forward, too!
+        mail_item = StorageItem(
+            app=enums.FileType.REGISTRATION_FORM,
+            email=registration.email,
+            subscriber=registration.subscriber,
+        )
+        fill_pdf_template(
+            PRINT_AND_FORWARD_PDF_TEMPLATE,
+            form_data,
+            mail_item,
+            generate_name(registration, "mail"),
+        )
+        registration.result_item_mail = mail_item
+
     item = StorageItem(
         app=enums.FileType.REGISTRATION_FORM,
         email=registration.email,
@@ -109,8 +140,11 @@ def process_registration(registration, state_id_number, is_18_or_over):
     fill_pdf_template(PDF_TEMPLATE, form_data, item, generate_name(registration))
 
     registration.result_item = item
-    registration.save(update_fields=["result_item"])
+    registration.save(update_fields=["result_item", "result_item_mail"])
 
-    send_registration_notification.delay(registration.pk)
+    if registration.request_mailing_address1:
+        send_registration_print_and_forward_notification.delay(registration.pk)
+    else:
+        send_registration_notification.delay(registration.pk)
 
     logger.info(f"New PDF Created: Registration {item.pk}")

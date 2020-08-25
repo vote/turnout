@@ -11,6 +11,7 @@ from rest_framework.permissions import AllowAny
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
+from common.analytics import statsd
 from common.enums import MessageDirectionType
 from smsbot.models import Number, SMSMessage
 
@@ -52,7 +53,10 @@ def validate_twilio_request(func):
         if not validator.validate(
             url, request.data, request.headers.get("X-Twilio-Signature", ""),
         ):
-            logger.warning(f"Bad twilio callback signature, url {url}, request {request.data}")
+            statsd.increment("turnout.smsbot.bad_twilio_signature")
+            logger.warning(
+                f"Bad twilio callback signature, url {url}, headers {request.headers}, request {request.data}"
+            )
             return HttpResponse(
                 "Bad twilio signature", status=status.HTTP_403_FORBIDDEN
             )

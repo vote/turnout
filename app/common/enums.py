@@ -129,6 +129,11 @@ class EventType(Enum, metaclass=EnumMeta):
     DOWNLOAD = "Download"
     DONATE = "Donate"
     RESTART = "Restart"
+    FINISH_LOB = "FinishLob"
+    LOB_MAILED = "LobMailed"
+    LOB_PROCESSED_FOR_DELIVERY = "LobProcessedForDelivery"
+    LOB_REROUTED = "LobRerouted"
+    LOB_RETURNED = "LobReturned"
 
     class Labels:
         START = "Started Form"
@@ -146,6 +151,11 @@ class EventType(Enum, metaclass=EnumMeta):
         DOWNLOAD_PDF = "Downloaded File"
         DONATE_CLICK = "Donate Click"
         RESTART = "Restarted Flow"
+        FINISH_LOB = "Finish via initiating Lob letter"
+        LOB_MAILED = "Lob letter mailed"
+        LOB_PROCESSED_FOR_DELIVERY = "Lob letter processed for delivery"
+        LOB_REROUTED = "Lob letter rerouted (e.g., change of address)"
+        LOB_RETURNED = "Lob letter returned"
 
 
 class SecureUploadType(Enum, metaclass=EnumMeta):
@@ -198,16 +208,19 @@ class FaxStatus(Enum, metaclass=EnumMeta):
 class SubmissionType(Enum, metaclass=EnumMeta):
     LEO_EMAIL = "leo_email"
     LEO_FAX = "leo_fax"
+    PRINT_AND_FORWARD = "print_and_forward"
     SELF_PRINT = "self_print"
 
     class Labels:
         LEO_EMAIL = "Email to LEO"
         LEO_FAX = "Fax to LEO"
+        PRINT_AND_FORWARD = "Print and Forward"
         SELF_PRINT = "Print at Home"
 
 
 class ExternalToolType(Enum, metaclass=EnumMeta):
     ACTIONNETWORK = "actionnetwork"
+    LOB = "lob"
 
 
 class SubscriptionInterestStatus(Enum, metaclass=EnumMeta):

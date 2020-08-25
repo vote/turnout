@@ -40,6 +40,10 @@ local base_secrets = import './base_secrets.libsonnet';
         name: 'PRIMARY_ORIGIN',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.www_origin',
+        name: 'WWW_ORIGIN',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.usvf_key',
         name: 'USVOTEFOUNDATION_KEY',
       },
@@ -258,6 +262,18 @@ local base_secrets = import './base_secrets.libsonnet';
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.verifier_upsell_url',
         name: 'VERIFIER_UPSELL_URL',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.lob_key',
+        name: 'LOB_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.lob_letter_webhook_secret',
+        name: 'LOB_LETTER_WEBHOOK_SECRET',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.return_address',
+        name: 'RETURN_ADDRESS',
       },
     ],
 }

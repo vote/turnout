@@ -8,6 +8,7 @@ from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
 from absentee.generateform import (
     ENVELOPE_PATH,
     FAX_COVER_SHEET_PATH,
+    PRINT_AND_FORWARD_COVER_SHEET_PATH,
     SELF_PRINT_COVER_SHEET_PATH,
     generate_name,
     generate_pdf_template,
@@ -24,6 +25,10 @@ from .test_data import add_state_info
 def test_generate_name():
     assert (
         generate_name("MA", "McAdams~Webster") == "ma-mcadamswebster-ballotrequest.pdf"
+    )
+    assert (
+        generate_name("MA", "McAdams~Webster", suffix="foo")
+        == "ma-mcadamswebster-ballotrequest-foo.pdf"
     )
 
 
@@ -353,6 +358,11 @@ def test_prepare_formdata_auto_conditional(mocker):
 def test_get_submission_method():
     req = baker.make_recipe("absentee.ballot_request")
 
+    # If there is a request mailing address,
+    assert get_submission_method(req) == SubmissionType.PRINT_AND_FORWARD
+
+    req.request_mailing_address1 = ""
+
     # With a signature, use the state's submission method
     assert get_submission_method(req) == SubmissionType.SELF_PRINT
 
@@ -432,4 +442,20 @@ def test_generate_pdf_self_print(mocker):
             signature_locations=None,
         ),
         PDFTemplateSection(path=ENVELOPE_PATH, is_form=True),
+    ]
+
+
+def test_generate_pdf_mail(mocker):
+    template, num_pages = generate_pdf_template("XX", SubmissionType.PRINT_AND_FORWARD)
+    assert num_pages == 3
+    assert template.template_files == [
+        PDFTemplateSection(
+            path=PRINT_AND_FORWARD_COVER_SHEET_PATH, is_form=True, flatten_form=True
+        ),
+        PDFTemplateSection(
+            path="absentee/templates/pdf/states/XX.pdf",
+            is_form=True,
+            flatten_form=True,
+            signature_locations=None,
+        ),
     ]
