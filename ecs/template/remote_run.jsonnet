@@ -79,11 +79,22 @@ local docker_env_lines = [
   fi
 
   echo "Running Image $IMAGE"
-  docker run -i -t \
+
+  if [ $2 ]; then
+    docker run \
+||| + std.join('\n', docker_env_lines) + |||
+
+  -e DEBUG=$DEBUG \
+  -p 8000:8000 \
+  $IMAGE \
+  /bin/bash -c "$2"
+  else
+    docker run -i -t \
 ||| + std.join('\n', docker_env_lines) + |||
 
   -e DEBUG=$DEBUG \
   -p 8000:8000 \
   $IMAGE \
   /bin/bash
+  fi
 |||
