@@ -1,5 +1,6 @@
 import re
 from typing import List, Optional
+import urllib.parse
 
 import requests
 from bs4 import BeautifulSoup
@@ -77,7 +78,39 @@ def refresh_region_links():
         RegionOVBMLink.objects.bulk_create(links)
 
 
+MOVOTE_PARAM_FULL_NAME = "field95899935"
+MOVOTE_PARAM_DOB_M = "field95899936M"
+MOVOTE_PARAM_DOB_D = "field95899936D"
+MOVOTE_PARAM_DOB_Y = "field95899936Y"
+MOVOTE_PARAM_ADDR12 = "field95899939"
+MOVOTE_PARAM_ADDR3 = "field95899940"
+MOVOTE_PARAM_PHONE = "field95899945"
+MOVOTE_PARAM_EMAIL = "field95899946"
+
+MOVOTE_BASE_URL = "https://movote.formstack.com/forms/november3absenteeballotrequest"
+
+
+def build_movote_url(request: BallotRequest) -> str:
+    params = {
+        MOVOTE_PARAM_FULL_NAME: f"{request.first_name} {request.last_name}",
+        MOVOTE_PARAM_DOB_M: request.date_of_birth.month,
+        MOVOTE_PARAM_DOB_D: request.date_of_birth.day,
+        MOVOTE_PARAM_DOB_Y: str(request.date_of_birth.year)[-2:],
+        MOVOTE_PARAM_ADDR12: " ".join(
+            [s for s in (request.address1, request.address2) if s]
+        ),
+        MOVOTE_PARAM_ADDR3: f"{request.city}, {request.state_id} {request.zipcode}",
+        MOVOTE_PARAM_PHONE: str(request.phone) if request.phone else "",
+        MOVOTE_PARAM_EMAIL: request.email,
+    }
+
+    return f"{MOVOTE_BASE_URL}?{urllib.parse.urlencode(params)}"
+
+
 def ovbm_link_for_ballot_request(request: BallotRequest) -> Optional[str]:
+    if request.state and request.state.code == "MO":
+        return build_movote_url(request)
+
     if request.region:
         region_link = RegionOVBMLink.objects.filter(region=request.region).first()
         if region_link:
