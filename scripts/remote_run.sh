@@ -9,7 +9,7 @@ ENVIRONMENT=${ENVIRONMENT:-staging}
 DOCKER_REPO_NAME=${DOCKER_REPO_NAME:-turnout}
 DEBUG=${DEBUG:-true}
 ACCOUNT_ID=$(aws sts get-caller-identity | jq -r ".Account")
-
+whoami
 if [ $1 ]; then
 
   echo "Logging into ECR"
