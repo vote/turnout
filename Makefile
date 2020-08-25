@@ -72,13 +72,13 @@ dblocalrestore:
 	bash scripts/rds_localrestore.sh
 
 shellprod:
-	ENVIRONMENT=prod bash scripts/remote_run.sh ${TAG}
+	ENVIRONMENT=prod bash scripts/remote_run.sh ${TAG} "${CMD}"
 
 shellstaging:
-	ENVIRONMENT=staging bash scripts/remote_run.sh ${TAG}
+	ENVIRONMENT=staging bash scripts/remote_run.sh ${TAG} "${CMD}"
 
 shelldev:
-	ENVIRONMENT=dev DOCKER_REPO_NAME=turnoutdev bash scripts/remote_run.sh ${TAG}
+	ENVIRONMENT=dev DOCKER_REPO_NAME=turnoutdev bash scripts/remote_run.sh ${TAG} "${CMD}"
 
 localtodev:
 	bash scripts/local_to_dev.sh

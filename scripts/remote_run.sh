@@ -203,5 +203,5 @@ docker run -i -t \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
-/bin/bash
+/bin/bash -c "${2:-bash}"
 
