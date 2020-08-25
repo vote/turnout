@@ -23,7 +23,6 @@ auto_fields:
     value: 11/03/2020
 
 manual_fields:
-  - voter_registration_number
   - update_address
   - assist_date
   - relationship
