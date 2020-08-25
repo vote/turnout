@@ -143,6 +143,7 @@ def submission_task_patch(mocker):
     mocker.patch("register.api_views.send_welcome_sms")
     mocker.patch("register.api_views.sync_registration_to_actionnetwork")
     mocker.patch("register.api_views.voter_lookup_action")
+    mocker.patch("voter.tasks.get_feature")
     return mocker.patch("register.api_views.process_registration")
 
 

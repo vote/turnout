@@ -82,11 +82,23 @@ from voter.models import Voter
     ],
 )
 def test_refresh_registration_status(orig, update, final):
+    # we pass in datetimes in UTC to refresh_registration_status, but
+    # the stored registration_date is a date
+    def to_datetime(d):
+        if d:
+            return datetime.datetime(
+                d.year, d.month, d.day, tzinfo=datetime.timezone.utc
+            )
+        else:
+            return None
+
     v = Voter()
     v.registered = orig[0]
     v.registration_date = orig[1]
-    v.last_registration_refresh = orig[2]
-    v.refresh_registration_status(update[0], update[1], update[2])
+    v.last_registration_refresh = to_datetime(orig[2])
+    v.refresh_registration_status(
+        update[0], to_datetime(update[1]), to_datetime(update[2])
+    )
     assert v.registered == final[0]
     assert v.registration_date == final[1]
-    assert v.last_registration_refresh == final[2]
+    assert v.last_registration_refresh == to_datetime(final[2])

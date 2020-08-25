@@ -48,6 +48,15 @@ class Voter(UUIDModel, TimestampModel):
         ordering = ["-created_at"]
 
     def refresh_registration_status(self, registered, register_date, last_updated):
+        # convert old reg date to datetime for each comparisons
+        if self.registration_date:
+            old_reg_datetime = datetime.datetime(
+                self.registration_date.year,
+                self.registration_date.month,
+                self.registration_date.day,
+                tzinfo=datetime.timezone.utc)
+        else:
+            old_reg_datetime = None
         if register_date and last_updated:
             assert register_date <= last_updated
         if registered:
@@ -55,18 +64,18 @@ class Voter(UUIDModel, TimestampModel):
                 not self.last_registration_refresh
                 or last_updated > self.last_registration_refresh
             ):
-                if not self.registration_date or register_date > self.registration_date:
+                if not old_reg_datetime or register_date > old_reg_datetime:
                     # a newer instance of registration
-                    self.registration_date = register_date
+                    self.registration_date = register_date.date()
                 self.registered = True
                 self.last_registration_refresh = last_updated or register_date
         else:
             if (
                 self.registered
                 and last_updated
-                and self.registration_date
+                and old_reg_datetime
                 and self.last_registration_refresh
-                and self.last_registration_refresh > self.registration_date
+                and self.last_registration_refresh > old_reg_datetime
                 and last_updated > self.last_registration_refresh
             ):
                 # definitely unregistered
