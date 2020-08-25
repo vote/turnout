@@ -1,0 +1,16 @@
+pages: 2
+
+manual_fields:
+  - 'GroupSickDisabled'
+  - 'party'
+  - 'election_primary'
+  - 'election_general'
+  - 'election_special'
+  - 'election_all'
+  - 'disabled'
+  - 'disabled_email'
+  - 'disabled_fax'
+
+auto_fields:
+  - type: todays_date
+    slug: date_signed
