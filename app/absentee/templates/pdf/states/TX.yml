@@ -1,0 +1,27 @@
+pages: 1
+
+manual_fields:
+  - "Annual Application"
+  - "Other"
+  - "Republican Primary"
+  - "If applicant is unable to mark Box 10 and you are acting as a Witness to that fact please check this box and sign below"
+  - "If you assisted the applicant in completing this application in the applicants presence or emailedmailed or faxed the application on behalf of the applicant please check this box as an Assistant and sign below"
+  - "Month of date you can begin to receive mail at this address"
+  - "Day of date you can begin to receive mail at this address"
+  - "Year of date you can begin to receive mail at this address"
+  - "Month of date of return to residence address"
+  - "Day of date of return to residence address"
+  - "Year of date of return to residence address"
+  - "Reason for voting by mail:"
+  - "If requesting this ballot be mailed to a different address (other than residense), indicate where the ballot will be mailed"
+  - "Select only if your 65 or older or live with a disability:"
+  - "Select only if absent from the county or confined to jail:"
+  - "You must declare one political party to vote in a primary:"
+  - "2 - You must declare one political party to vote in a primary:"
+  - "Relative; relationship"
+  - "early voting clerks fax"
+  - "Early voting clerk&apos;s address"
+  - "2 - Other"
+auto_fields:
+  - type: todays_date
+    slug: date_signed
