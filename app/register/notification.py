@@ -8,7 +8,7 @@ from .models import Registration
 
 NOTIFICATION_TEMPLATE = "register/email/file_notification.html"
 STATE_CONFIRMATION_TEMPLATE = "register/email/state_confirmation.html"
-SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
+SUBJECT = "ACTION REQUIRED (CORRECTED): print and mail your voter registration form."
 
 
 @tracer.wrap()

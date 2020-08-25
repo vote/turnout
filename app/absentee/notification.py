@@ -7,7 +7,7 @@ from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
 
 NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
-SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
+SUBJECT = "ACTION REQUIRED (CORRECTED): print and mail your absentee ballot request form."
 
 
 @tracer.wrap()
@@ -46,7 +46,7 @@ def send_email(ballot_request: BallotRequest, content: str) -> None:
         [ballot_request.email],
     )
     msg.content_subtype = "html"
-    msg.send()
+    #msg.send()
 
 
 def trigger_notification(ballot_request: BallotRequest) -> None:
