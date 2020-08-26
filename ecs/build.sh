@@ -6,28 +6,29 @@ cd "$(dirname "$0")"
 
 # the container assumes the uid is 1000; mangle permissions to behave
 # if we're not.
-TARGETS="../scripts/remote_run.sh */*/*.json ./template/include/*.libsonnet ./template/*.jsonnet"
-TARGETDIRS="generated/*"
+TARGETS="../scripts/remote_run.sh */*/*.json ./v2/template/include/*.libsonnet ./v2/template/*.jsonnet"
+TARGETDIRS="v2/generated/*"
 chmod 777 $TARGETS $TARGETDIRS
 
 cat <<"EOF" | docker run --rm -i --entrypoint bash -v $PWD/..:/app -w /app/ecs bitnami/jsonnet:latest
-jsonnetfmt -i ./template/*.jsonnet
-jsonnetfmt -i ./template/include/*.libsonnet
+jsonnetfmt -i ./v2/template/*.jsonnet
+jsonnetfmt -i ./v2/template/include/*.libsonnet
 
-jsonnet ./template/ecs_web.jsonnet --ext-str env=dev --ext-code migrations=true > ./generated/dev/turnout_dev_web.task.temp.json
-jsonnet ./template/ecs_web.jsonnet --ext-str env=staging --ext-code migrations=true > ./generated/staging/turnout_staging_web.task.temp.json
-jsonnet ./template/ecs_web.jsonnet --ext-str env=prod --ext-code migrations=false > ./generated/prod/turnout_prod_web.task.temp.json
 
-jsonnet -S ./template/remote_run.jsonnet --ext-str env=prod --ext-code migrations=false > ../scripts/remote_run.sh
+jsonnet ./v2/template/service_web.jsonnet --ext-str env=dev > ./v2/generated/dev/service_web.task.json
+jsonnet ./v2/template/service_beat.jsonnet --ext-str env=dev > ./v2/generated/dev/service_beat.task.json
+jsonnet ./v2/template/service_worker.jsonnet --ext-str env=dev > ./v2/generated/dev/service_worker.task.json
+
+jsonnet ./v2/template/service_web.jsonnet --ext-str env=staging > ./v2/generated/staging/service_web.task.json
+jsonnet ./v2/template/service_beat.jsonnet --ext-str env=staging > ./v2/generated/staging/service_beat.task.json
+jsonnet ./v2/template/service_worker.jsonnet --ext-str env=staging > ./v2/generated/staging/service_worker.task.json
+
+jsonnet ./v2/template/service_web.jsonnet --ext-str env=prod > ./v2/generated/prod/service_web.task.json
+jsonnet ./v2/template/service_beat.jsonnet --ext-str env=prod > ./v2/generated/prod/service_beat.task.json
+jsonnet ./v2/template/service_worker.jsonnet --ext-str env=prod > ./v2/generated/prod/service_worker.task.json
+
+jsonnet -S ./v2/template/remote_run.jsonnet --ext-str env=prod > ../scripts/remote_run.sh
 EOF
-
-jq -c . < ./generated/dev/turnout_dev_web.task.temp.json > ./generated/dev/turnout_dev_web.task.json
-jq -c . < ./generated/staging/turnout_staging_web.task.temp.json > ./generated/staging/turnout_staging_web.task.json
-jq -c . < ./generated/prod/turnout_prod_web.task.temp.json > ./generated/prod/turnout_prod_web.task.json
-
-rm -f ./generated/dev/turnout_dev_web.task.temp.json
-rm -f ./generated/staging/turnout_staging_web.task.temp.json
-rm -f ./generated/prod/turnout_prod_web.task.temp.json
 
 chmod 644 $TARGETS
 chmod 755 $TARGETDIRS
