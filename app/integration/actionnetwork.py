@@ -219,7 +219,6 @@ def _sync_item(item, subscriber_id):
     )
     info = {
         "person": {
-            "identifiers": [f"voteamerica_action:{item.action_id}"],
             "given_name": item.first_name,
             "family_name": item.last_name,
             "email_addresses": [{"address": item.email}],
@@ -234,12 +233,21 @@ def _sync_item(item, subscriber_id):
             ],
         },
         "action_network:referrer_data": {
-            "source": item.source or f"voteamerica_{tool}",
-            "website": item.embed_url,
-            "email_referrer": item.email_referrer,
-            "mobile_referrer": item.mobile_referrer,
+            "source": item.source or f"voteamerica_{tool.lower()}",
         },
     }
+    if item.phone:
+        info["person"]["phone_numbers"] = [{
+            "number": str(item.phone),
+        }]
+        if not subscriber_id or item.sms_opt_in_subscriber:
+            info["person"]["phone_numbers"][0]["status"] = "subscribed"
+    if item.embed_url:
+        info["action_network:referrer_data"]["website"] = item.embed_url
+    if item.email_referrer:
+        info["action_network:referrer_data"]["email_referrer"] = item.email_referrer
+    if item.mobile_referrer:
+        info["action_network:referrer_data"]["mobile_referrer"] = item.mobile_referrer
     if not subscriber_id:
         info["person"]["custom_fields"] = {"last_subscriber": slug}
 

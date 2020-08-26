@@ -15,11 +15,6 @@ Register` or `VoteAmerica Absentee`.  Each user of the tool will be
 added to your list (if they aren't already a member or haven't already
 opted-out), and then associated with the Action.
 
-If you are using the ActionNetwork API, these Actions will have the
-identifier ``voteamerica:prod_{toolname}_{slug}``, where **toolname**
-is one of ``register``, ``absentee``, ``verify``, or ``reminder``, and
-**slug** is your subscriber identifier used in your embed code.
-
 The Action will also have the following referrer_data:
 
 - ``source`` is the value of the ``?source=`` parameter (or ``voteamerica_{tool}``, if not provided)
