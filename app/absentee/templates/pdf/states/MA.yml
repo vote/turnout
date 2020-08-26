@@ -10,59 +10,15 @@ signature_statement: Signed (under penalty of perjury)
 form_fields:
   - type: section
     label: Election date
-    content:
-      - type: radio
-        required: true
-        options:
-          - label: All elections this year (both the Nov. 3 General Election and the Sept. 1 State Primary)
-            slug: election_all
-            default: true
-            conditional:
-              - type: radio
-                required: true
-                label: |
-                  Which party's primary would you like to vote in on Sept. 1? If
-                  you are registered with a party, you can only vote in that
-                  party's primary. If you're unenrolled (also known as independent),
-                  or you're unsure if you're registered with a party, choose
-                  whichever party's primary you want to vote in.
-                options:
-                  - label: Democratic
-                    slug: party_democratic
-                  - label: Republican
-                    slug: party_republican
-                  - label: Green-Rainbow
-                    slug: party_green_rainbow
-                  - label: Libertarian
-                    slug: party_libertarian
-
-          - label: Only the Nov. 3 General Election
-            slug: election_general
-          - label: Only the Sept. 1 State Primary
-            slug: election_primary
-            conditional:
-              - type: radio
-                required: true
-                label: |
-                  Which party's primary would you like to vote in on Sept. 1? If
-                  you are registered with a party, you can only vote in that
-                  party's primary. If you're unenrolled (also known as independent),
-                  or you're unsure if you're registered with a party, choose
-                  whichever party's primary you want to vote in.
-                options:
-                  - label: Democratic
-                    slug: party_democratic
-                  - label: Republican
-                    slug: party_republican
-                  - label: Green-Rainbow
-                    slug: party_green_rainbow
-                  - label: Libertarian
-                    slug: party_libertarian
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
 
 
 auto_fields:
   - slug: date_signed
     type: todays_date
+  - slug: election_general
+    type: static
+    value: true
 
 pages: 1
 
@@ -70,3 +26,9 @@ manual_fields:
   - needed_assistance
   - assisting_person_name
   - assisting_person_address
+  - party_democratic
+  - party_republican
+  - party_green_rainbow
+  - party_libertarian
+  - election_primary
+  - election_all

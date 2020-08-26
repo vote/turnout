@@ -11,33 +11,21 @@ manual_fields:
   - ward
   - reg_not_registered
   - excuse_primary
+  - election_primary
+  - party_democratic
+  - party_republican
 
 auto_fields:
   - slug: date_signed
     type: todays_date
+  - slug: election_general
+    type: static
+    value: true
 
 form_fields:
   - type: section
     label: Election date
-    note: "I am requesting an official absentee ballot for the following election:"
-    content:
-      - type: radio
-        required: true
-        options:
-        - label: General Election (November 3, 2020)
-          slug: election_general
-          default: true
-        - label: State Primary Election (September 8, 2020)
-          slug: election_primary
-          conditional:
-            - type: radio
-              required: true
-              label: "Required for Primary Elections:  I am a member of, or I am now declaring my affiliation with a party and I am requesting a ballot for that party’s primary"
-              options:
-              - label: Democratic Party
-                slug: party_democratic
-              - label: Republican Party
-                slug: party_republican
+    note: This form will request a ballot for the General Election on Nov. 3, 2020.
   - type: section
     label: Request reason
     content:
