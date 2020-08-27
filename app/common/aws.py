@@ -26,3 +26,5 @@ sqs_client = boto3.client(
 s3_client = boto3.client("s3", **aws_creds())
 
 lambda_client = boto3.client("lambda", **aws_creds())
+
+cloudwatch_client = boto3.client("cloudwatch", **aws_creds())

@@ -103,6 +103,7 @@ export VERIFIER_UPSELL_URL=$(aws ssm get-parameter --region $REGION --with-decry
 export LOB_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_key | jq '.Parameter["Value"]' -r)
 export LOB_LETTER_WEBHOOK_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_letter_webhook_secret | jq '.Parameter["Value"]' -r)
 export RETURN_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.return_address | jq '.Parameter["Value"]' -r)
+export BEAT_STATS_METRIC_NAMESPACE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.beat_stats_metric_namespace | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -216,6 +217,7 @@ if [ "$2" ]; then
     -e LOB_KEY \
     -e LOB_LETTER_WEBHOOK_SECRET \
     -e RETURN_ADDRESS \
+    -e BEAT_STATS_METRIC_NAMESPACE \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -304,6 +306,7 @@ else
     -e LOB_KEY \
     -e LOB_LETTER_WEBHOOK_SECRET \
     -e RETURN_ADDRESS \
+    -e BEAT_STATS_METRIC_NAMESPACE \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

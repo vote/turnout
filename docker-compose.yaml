@@ -50,7 +50,7 @@ services:
   beat:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it postgres:5432 redis:6379 --
-    command: watchmedo auto-restart --directory /app/ --pattern=*.py --recursive -- python -m celery -A turnout.celery_app beat --scheduler redbeat.RedBeatScheduler
+    command: watchmedo auto-restart --directory /app/ --pattern=*.py --recursive -- python -m celery -A turnout.celery_beat beat --scheduler redbeat.RedBeatScheduler
     volumes:
       - ./app:/app
     environment:

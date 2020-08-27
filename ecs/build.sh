@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 
 # the container assumes the uid is 1000; mangle permissions to behave
 # if we're not.
-TARGETS="../scripts/remote_run.sh */*/*.json ./v2/template/include/*.libsonnet ./v2/template/*.jsonnet"
+TARGETS="../scripts/remote_run.sh */*/*/*.json ./v2/template/include/*.libsonnet ./v2/template/*.jsonnet"
 TARGETDIRS="v2/generated/*"
 chmod 777 $TARGETS $TARGETDIRS
 

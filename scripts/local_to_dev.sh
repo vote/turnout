@@ -14,6 +14,12 @@ echo "Uploading Tag ${TAG_NAME}"
 ACCOUNT_ID=$(aws sts get-caller-identity | jq -r ".Account")
 IMAGE=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$DOCKER_REPO_NAME:$TAG_NAME
 
-eval $(aws ecr get-login --no-include-email --region $REGION)
+echo "Logging into ECR"
+if aws --version | grep -q aws-cli/1; then
+  eval $(aws ecr get-login --no-include-email --region $REGION)
+else
+  aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+fi
+
 docker build --cache-from voteamerica/turnout-ci-cache:latest --build-arg TAG_ARG=dev --build-arg BUILD_ARG=${TAG_NAME} -t ${IMAGE} .
 docker push ${IMAGE}
