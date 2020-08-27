@@ -154,11 +154,11 @@ def send_letter(item: Union[BallotRequest, Registration]) -> datetime.datetime:
     to_addr = get_or_create_lob_address(
         str(item.uuid),
         item.full_name,
-        item.address1,
-        item.address2,
-        item.city,
-        item.state_id,
-        item.zipcode,
+        item.request_mailing_address1,
+        item.request_mailing_address2,
+        item.request_mailing_city,
+        item.request_mailing_state_id,
+        item.request_mailing_zipcode,
     )
 
     with tracer.trace("lob.letter.create", service="lob"):
