@@ -17,7 +17,7 @@ PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE = (
 )
 PRINT_AND_FORWARD_SUBJECT = "ACTION REQUIRED: confirm to mail your registration form."
 PRINT_AND_FORWARD_CONFIRM_URL = (
-    "{base}/confirm-register-print-and-forward/?id={uuid}&token={token}"
+    "{base}/register-to-vote/confirm/?id={uuid}&token={token}"
 )
 
 

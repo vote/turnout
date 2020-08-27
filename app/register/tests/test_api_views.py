@@ -832,6 +832,7 @@ def test_complete_lob_ignore_undeliverable(
     )
     assert status_response.status_code == 400
     assert "request_mailing_address1" in status_response.json()
+    assert status_response.json()["request_mailing_deliverable_not_ignored"]
 
     registration.refresh_from_db()
     assert str(registration.uuid) == register_response.json()["uuid"]
@@ -863,7 +864,7 @@ def test_lob_confirm(mocker):
     send = mocker.patch("register.api_views.send_letter", return_value=send_date)
 
     client = APIClient()
-    response = client.get(
+    response = client.put(
         LOB_LETTER_CONFIRM_API_ENDPOINT.format(
             uuid=registration.action.uuid, token=generate_lob_token(registration)
         ),
@@ -878,7 +879,7 @@ def test_lob_confirm(mocker):
 def test_lob_confirm_dne(mocker):
     client = APIClient()
 
-    response = client.get(
+    response = client.put(
         LOB_LETTER_CONFIRM_API_ENDPOINT.format(
             uuid="7e6abe5f-7cc7-4d9a-96f1-75c9e6c05ed8", token="bar",
         )

@@ -18,7 +18,7 @@ PRINT_AND_FORWARD_SUBJECT = (
     "ACTION REQUIRED: confirm to mail your absentee ballot request form."
 )
 PRINT_AND_FORWARD_CONFIRM_URL = (
-    "{base}/confirm-absentee-print-and-forward/?id={uuid}&token={token}"
+    "{base}/absentee-ballot/confirm/?id={uuid}&token={token}"
 )
 
 

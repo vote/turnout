@@ -169,6 +169,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
             return Response(
                 {
                     "request_mailing_address1": "Address does not appear to be deliverable by USPS",
+                    "request_mailing_deliverable_not_ignored": True,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -182,7 +183,7 @@ class StatusViewSet(UpdateModelMixin, GenericViewSet):
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
 
 
-@api_view(["GET"])
+@api_view(["PUT"])
 @permission_classes([AllowAny])
 def lob_confirm(request, uuid):
     try:
