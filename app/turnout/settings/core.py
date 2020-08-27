@@ -207,6 +207,7 @@ REST_FRAMEWORK = {
 
 # how often to recalculate subscriber stats
 CALC_STATS_INTERVAL = 5
+NETLIFY_TRIGGER_INTERVAL = 10
 
 USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
@@ -243,7 +244,7 @@ CELERY_TASK_QUEUES = {
 CELERY_BEAT_SCHEDULE = {
     "trigger-netlify-updated-information": {
         "task": "election.tasks.trigger_netlify_if_updates",
-        "schedule": crontab(minute=0, hour="*"),
+        "schedule": crontab(minute=f"*/{NETLIFY_TRIGGER_INTERVAL}"),
     },
     "trigger-calc-subscriber-stats": {
         "task": "reporting.tasks.calc_all_subscriber_stats",
