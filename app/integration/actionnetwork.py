@@ -237,9 +237,7 @@ def _sync_item(item, subscriber_id):
         },
     }
     if item.phone:
-        info["person"]["phone_numbers"] = [{
-            "number": str(item.phone),
-        }]
+        info["person"]["phone_numbers"] = [{"number": str(item.phone),}]
         if not subscriber_id or item.sms_opt_in_subscriber:
             info["person"]["phone_numbers"][0]["status"] = "subscribed"
     if item.embed_url:
@@ -247,7 +245,9 @@ def _sync_item(item, subscriber_id):
     if item.email_referrer:
         info["action_network:referrer_data"]["email_referrer"] = item.email_referrer
     if item.mobile_referrer:
-        info["action_network:referrer_data"]["mobile_message_referrer"] = item.mobile_referrer
+        info["action_network:referrer_data"][
+            "mobile_message_referrer"
+        ] = item.mobile_referrer
     if not subscriber_id:
         info["person"]["custom_fields"] = {"last_subscriber": slug}
 
