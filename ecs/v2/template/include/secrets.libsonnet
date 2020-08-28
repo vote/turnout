@@ -314,10 +314,6 @@
         name: 'PDF_GENERATION_LAMBDA_FUNCTION',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.verifier_upsell_url',
-        name: 'VERIFIER_UPSELL_URL',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.lob_key',
         name: 'LOB_KEY',
       },

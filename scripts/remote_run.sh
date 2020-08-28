@@ -99,7 +99,6 @@ export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decry
 export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_FUNCTION=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_function | jq '.Parameter["Value"]' -r)
-export VERIFIER_UPSELL_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.verifier_upsell_url | jq '.Parameter["Value"]' -r)
 export LOB_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_key | jq '.Parameter["Value"]' -r)
 export LOB_LETTER_WEBHOOK_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.lob_letter_webhook_secret | jq '.Parameter["Value"]' -r)
 export RETURN_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.return_address | jq '.Parameter["Value"]' -r)
@@ -213,7 +212,6 @@ if [ "$2" ]; then
     -e FILE_TOKEN_PURGED_URL \
     -e PDF_GENERATION_LAMBDA_ENABLED \
     -e PDF_GENERATION_LAMBDA_FUNCTION \
-    -e VERIFIER_UPSELL_URL \
     -e LOB_KEY \
     -e LOB_LETTER_WEBHOOK_SECRET \
     -e RETURN_ADDRESS \
@@ -302,7 +300,6 @@ else
     -e FILE_TOKEN_PURGED_URL \
     -e PDF_GENERATION_LAMBDA_ENABLED \
     -e PDF_GENERATION_LAMBDA_FUNCTION \
-    -e VERIFIER_UPSELL_URL \
     -e LOB_KEY \
     -e LOB_LETTER_WEBHOOK_SECRET \
     -e RETURN_ADDRESS \

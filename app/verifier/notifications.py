@@ -53,8 +53,8 @@ def compile_upsell_email(lookup: Lookup) -> str:
         "subscriber": lookup.subscriber,
         "recipient": recipient,
         "preheader_text": preheader_text,
-        "reg_link": f"{settings.VERIFIER_UPSELL_URL}/register-to-vote/?{query_params}",
-        "vbm_link": f"{settings.VERIFIER_UPSELL_URL}/vote-by-mail/?{query_params}",
+        "reg_link": f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}",
+        "vbm_link": f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}",
         "state_info": lookup.state.data,
     }
 
