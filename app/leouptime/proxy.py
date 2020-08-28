@@ -8,6 +8,7 @@ import uuid
 import paramiko
 import requests
 from django.conf import settings
+from selenium.common.exceptions import WebDriverException
 
 from common import enums
 from common.rollouts import get_feature_int
@@ -204,15 +205,30 @@ def check_proxies():
                 if proxy.state == enums.ProxyStatus.UP:
                     up += 1
 
+                    # get a selenium driver
+                    tries = 0
+                    while True:
+                        try:
+                            driver = get_driver(proxy)
+                            break
+                        except WebDriverException as e:
+                            logger.warning(f"Failed to start selenium worker, tries {tries}: {e}")
+                            tries += 1
+                            if tries > 2:
+                                logger.warning(f"Failed to start selenium worker; we'll check proxies later: {e}")
+                                # just bail out here completely; we'll check our proxies again in a bit
+                                return
+
                     # make sure the proxy is actually working
                     site = get_sentinel_site()
-                    driver = get_driver(proxy)
-                    logger.info(driver)
                     check = check_site_with(driver, proxy, site)
                     if not check.state_up:
                         logger.info(f"Proxy {proxy} can't reach sentinel site {site}")
                         bad_proxies.append((proxy, check))
-                    driver.quit()
+                    try:
+                        driver.quit()
+                    except WebDriverException:
+                        pass
 
                 del stray[proxy.description]
         else:
@@ -235,7 +251,7 @@ def check_proxies():
         else:
             for proxy, check in bad_proxies:
                 logger.warning(
-                    "Marking proxy {proxy} BURNED (due to sentinel check failure)"
+                    f"Marking proxy {proxy} BURNED (due to sentinel check failure)"
                 )
                 check.ignore = True
                 check.save()

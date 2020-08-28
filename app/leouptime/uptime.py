@@ -98,17 +98,18 @@ def check_group(slug, down_sites=False):
         except StaleProxyError:
             logger.info("Refreshing proxies...")
             for driver, proxy in drivers:
-                driver.quit()
+                try:
+                    driver.quit()
+                except WebDriverException:
+                    pass
             continue
 
         break
     for driver, proxy in drivers:
-        driver.quit()
-
-
-def reset_driver(drivers, pos):
-    drivers[pos][0].quit()
-    drivers[pos][0] = get_driver(drivers[pos][1])
+        try:
+            driver.quit()
+        except WebDriverException:
+            pass
 
 
 @tracer.wrap()
@@ -182,9 +183,22 @@ def check_site(drivers, site):
 def check_site_with_pos(drivers, pos, site):
     check = check_site_with(drivers[pos][0], drivers[pos][1], site)
     if check.error and "timeout" in check.error:
-        logger.info(f"Reset driver pos {pos}")
-        drivers[pos][0].quit()
-        drivers[pos][0] = get_driver(drivers[pos][1])
+        tries = 0
+        while True:
+            tries += 1
+            logger.info(f"Reset driver pos {pos} attempt {tries}")
+            try:
+                drivers[pos][0].quit()
+            except WebDriverException as e:
+                pass
+            try:
+                drivers[pos][0] = get_driver(drivers[pos][1])
+                break
+            except WebDriverException as e:
+                logger.warning(f"Failed to reset driver for {drivers[pos][1]}, tries {tries}: {e}")
+                if tries > 2:
+                    logger.warning(f"Failed to reset driver for {drivers[pos][1]}, tries {tries}, giving up")
+                    raise e
     return check
 
 
@@ -193,10 +207,14 @@ def check_site_with(driver, proxy, site):
     logger.debug(f"Checking {site.url} with {proxy}")
     error = None
     timeout = None
+    title = ""
+    content = ""
     before = datetime.datetime.utcnow()
     try:
         driver.get(site.url)
         up = True
+        title = driver.title
+        content = driver.page_source
     except SessionNotCreatedException as e:
         raise e
     except RemoteDriverServerException as e:
@@ -215,9 +233,6 @@ def check_site_with(driver, proxy, site):
             error = str(e)
     after = datetime.datetime.utcnow()
     dur = after - before
-
-    title = driver.title
-    content = driver.page_source
 
     # the trick is determining if this loaded the real page or some sort of error/404 page.
     for item in ["404", "not found", "error"]:
