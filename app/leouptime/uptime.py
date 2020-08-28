@@ -189,15 +189,19 @@ def check_site_with_pos(drivers, pos, site):
             logger.info(f"Reset driver pos {pos} attempt {tries}")
             try:
                 drivers[pos][0].quit()
-            except WebDriverException as e:
+            except WebDriverException:
                 pass
             try:
                 drivers[pos][0] = get_driver(drivers[pos][1])
                 break
             except WebDriverException as e:
-                logger.warning(f"Failed to reset driver for {drivers[pos][1]}, tries {tries}: {e}")
+                logger.warning(
+                    f"Failed to reset driver for {drivers[pos][1]}, tries {tries}: {e}"
+                )
                 if tries > 2:
-                    logger.warning(f"Failed to reset driver for {drivers[pos][1]}, tries {tries}, giving up")
+                    logger.warning(
+                        f"Failed to reset driver for {drivers[pos][1]}, tries {tries}, giving up"
+                    )
                     raise e
     return check
 

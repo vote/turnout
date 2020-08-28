@@ -212,10 +212,14 @@ def check_proxies():
                             driver = get_driver(proxy)
                             break
                         except WebDriverException as e:
-                            logger.warning(f"Failed to start selenium worker, tries {tries}: {e}")
+                            logger.warning(
+                                f"Failed to start selenium worker, tries {tries}: {e}"
+                            )
                             tries += 1
                             if tries > 2:
-                                logger.warning(f"Failed to start selenium worker; we'll check proxies later: {e}")
+                                logger.warning(
+                                    f"Failed to start selenium worker; we'll check proxies later: {e}"
+                                )
                                 # just bail out here completely; we'll check our proxies again in a bit
                                 return
 

@@ -12,6 +12,9 @@ from common.analytics import statsd
 def send_welcome_sms(number: str, origin: str = None) -> None:
     from .models import Number
 
+    if not number:
+        return
+
     n, _ = Number.objects.get_or_create(phone=number)
 
     if n.opt_in_time:
