@@ -15,6 +15,7 @@ from ..state_pdf_data import (
 from .test_data import (
     STATE_ID_NUMBER_SLUGS,
     STATES_WITH_METADATA,
+    MANDATORY_FIELDS,
     get_filled_slugs,
     make_test_data,
 )
@@ -191,6 +192,23 @@ def test_slugs_match_pdf(state):
             assert (
                 "On" in field["FieldStateOption"]
             ), f"Expected PDF field {field['FieldName']} to use \"On\" as its checked value"
+
+    # Ensure a minimal set of slugs are present (e.g. there should never be
+    # a form that doesn't have the voter's name)
+    missing_mandatory_fields = []
+    for field, slugs in MANDATORY_FIELDS.items():
+        if field in state_data.get("missing_mandatory_fields", []):
+            continue
+
+        if not any(slug in pdf_slugs for slug in slugs):
+            print("MISSING")
+            print(pdf_slugs)
+            print(slugs)
+            missing_mandatory_fields.append(field)
+
+    assert (
+        len(missing_mandatory_fields) == 0
+    ), f"Missing some mandatory fields: {missing_mandatory_fields}"
 
 
 # Make sure page counts are correct

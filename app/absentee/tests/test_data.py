@@ -35,6 +35,55 @@ STATE_ID_NUMBER_SLUGS = (
     "state_id_number_opt_3",
 )
 
+MANDATORY_FIELDS = {
+    "first_name": ("first_name", "full_name"),
+    "last_name": ("last_name", "full_name"),
+    "address1": ("address1", "address1_2", "address1_2_city", "full_address"),
+    "address2": ("address2", "address1_2", "address1_2_city", "full_address"),
+    "city": ("city", "address1_2_city", "address_city_state_zip", "full_address"),
+    "zipcode": ("zipcode", "address_city_state_zip", "full_address"),
+    "mailing_address1": (
+        "mailing_address1",
+        "mailing_address1_2",
+        "mailing_full_address",
+        "mailing_or_reg_address1",
+        "mailing_or_reg_address1_2",
+        "mailing_or_reg_full_address",
+    ),
+    "mailing_address2": (
+        "mailing_address2",
+        "mailing_address1_2",
+        "mailing_full_address",
+        "mailing_or_reg_address2",
+        "mailing_or_reg_address1_2",
+        "mailing_or_reg_full_address",
+    ),
+    "mailing_city": (
+        "mailing_city",
+        "mailing_city_state_zip",
+        "mailing_full_address",
+        "mailing_or_reg_city",
+        "mailing_or_reg_city_state_zip",
+        "mailing_or_reg_full_address",
+    ),
+    "mailing_state": (
+        "mailing_state",
+        "mailing_city_state_zip",
+        "mailing_full_address",
+        "mailing_or_reg_state",
+        "mailing_or_reg_city_state_zip",
+        "mailing_or_reg_full_address",
+    ),
+    "mailing_zipcode": (
+        "mailing_zipcode",
+        "mailing_city_state_zip",
+        "mailing_full_address",
+        "mailing_or_reg_zipcode",
+        "mailing_or_reg_city_state_zip",
+        "mailing_or_reg_full_address",
+    ),
+}
+
 
 def add_state_info(state: State, slug: str, value: str):
     ft = baker.make_recipe("election.markdown_field_type", slug=slug)

@@ -224,6 +224,12 @@
         "type": "string"
       }
     },
+    "missing_mandatory_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "pages": {
       "type": "integer"
     }

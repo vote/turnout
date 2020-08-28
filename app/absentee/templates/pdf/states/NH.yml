@@ -2,18 +2,19 @@ pages: 2
 
 signatures:
   2:
-    x: 195
-    y: 476
-    width: 190
-    height: 28
+    x: 183
+    y: 496
+    width: 180
+    height: 45
 
 manual_fields:
   - ward
   - reg_not_registered
-  - excuse_primary
+  - election_primary
   - election_primary
   - party_democratic
   - party_republican
+  - assist_name
 
 auto_fields:
   - slug: date_signed
@@ -32,13 +33,15 @@ form_fields:
       - type: radio
         required: true
         options:
-        - label: I am concerned about COVID-19, or I am unable to vote in person due to a disability. Any voter may choose this option for the 2020 elections.
-          slug: excuse_disability
+        - label: I am unable to vote in person due to concern for the novel coronavirus (COVID-19). Any voter may choose this option for the 2020 elections.
+          slug: excuse_covid
           default: true
         - label: I plan to be absent on the day of the election from the city, town, or unincorporated place where I am domiciled.
           slug: excuse_absent
         - label: I cannot appear in public on election day because of observance of a religious commitment.
           slug: excuse_religion
+        - label: I am unable to vote in person due to a disability.
+          slug: excuse_disability
         - label: I cannot appear at any time during polling hours at my polling place because of an employment obligation. For the purposes of this application, the term “employment” shall include the care of children and infirm adults, with or without compensation.
           slug: excuse_employment
   - type: section

@@ -1,19 +1,17 @@
-pages: 2
+pages: 1
 manual_fields:
-  - party_republican
-  - party_democratic
   - excuse_military
   - excuse_absence
   - excuse_illness
   - excuse_religion
   - excuse_election
   - excuse_disability
+  - excuse_covid
   - assist_name
   - assist_phone
   - assist_full_address
+  - mil_yes
+  - mil_no
 auto_fields:
   - slug: date_signed
     type: todays_date
-  - slug: excuse_covid
-    type: static
-    value: true

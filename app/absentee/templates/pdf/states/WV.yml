@@ -3,82 +3,44 @@ pages: 2
 auto_fields:
   - slug: date_signed
     type: todays_date
-  - slug: election_federal_state_county
-    type: static
-    value: true
-  - slug: election_general
-    type: static
-    value: true
-  - type: conditional
-    condition:
-      slug: eligibility_disability_electronic
-      value: true
-    fill:
-      slug: uocava_email
-      value_from: email
 
 manual_fields:
-  - election_city_town
-  - election_primary
-  - election_special
-  - eligibility_incarceration
-  - eligibility_acp
-  - request_democrat
-  - request_republican
-  - request_mountain
+  - assist_reason
+  - witness_date_signed
+  - assist_date_signed
   - previous_last_name
   - previous_first_name
   - previous_middle_name
   - previous_suffix
-  - previous_address1
+  - previous_address1_2
   - previous_county
   - previous_city
-  - previous_state
   - previous_zipcode
-
-form_fields:
-  - type: section
-    label: Election date
-    note: This form will request a ballot for the General Election on Nov. 3, 2020.
-  - type: section
-    label: Eligibility
-    content:
-      - type: radio
-        label: Why are you applying for an absentee ballot?
-        required: true
-        options:
-        - label: I am applying for a paper ballot by mail because I am not able to vote in person during Early Voting or on Election Day
-          slug: election_general
-          default: true
-          conditional:
-            - type: radio
-              label: "I am not able to vote in person because of"
-              required: true
-              options:
-              - label: Illness, injury or other medical reason which keeps me confined.
-                slug: eligibility_illness
-              - label: Immobility due to advanced age or a physical disability.
-                slug: eligibility_immobility
-              - label: Employment which because of hours worked and distance from the county seat makes voting in person impossible.
-                slug: eligibility_employment
-              - label: The county absentee voting office and my polling place are inaccessible to me due to my physical disability.
-                slug: eligibility_disability
-              - label: Personal business or travel. If selected, your ballot must be mailed outside of your county of residence.
-                slug: eligibility_personal
-              - label: Attendance at college, university, or other place of education or training. If selected, your ballot must be mailed outside of your county of residence.
-                slug: eligibility_education
-              - label: Temporarily living outside of the county due to serving as an elected or appointed federal or state officer. If selected, your ballot must be mailed outside of your county of residence.
-                slug: eligibility_officer
-              - label: Temporarily living outside of the county due to a temporary assignment by my employer for a specific period of four years or less. If selected, your ballot must be mailed outside of your county of residence.
-                slug: eligibility_employment_outside_country
-        - label: I am applying for an electronic absentee ballot due to a physical disability that prevents me from voting in person and from voting a paper ballot without assistance (a ballot will be emailed to you)
-          slug: eligibility_disability_electronic
-
-signature_statement: I do hereby certify the information given is true to the best of my knowledge, that I reside at the address given, and that I am qualified and registered to vote in this county. I understand that I must vote in person if I can. I understand that making a false statement on this application is a crime punishable by a fine up to $1000 and up to one-year imprisonment.
-
-signatures:
-  1:
-    x: 316
-    y: 177
-    width: 188
-    height: 25
+  - previous_state
+  - sheriff_name
+  - sheriff_day
+  - sheriff_month
+  - sheriff_year
+  - sheriff_facility
+  - sheriff_city
+  - sheriff_title
+  - excuse_employment
+  - excuse_mobility
+  - excuse_incarceration
+  - excuse_acp
+  - excuse_disability
+  - excuse_travel
+  - excuse_college
+  - excuse_outside
+  - excuse_employer
+  - excuse_disability_electronic
+  - email_ballot
+  - excuse_illness
+  - election_federal
+  - election_local
+  - election_primary
+  - election_general
+  - election_special
+  - party_democrat
+  - party_republican
+  - party_mountain

@@ -43,7 +43,7 @@ test:
 	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False pytest -n `scripts/nproc-max ${MAXPROC}` /app/ && mypy /app/"
 
 testpdf:
-	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False ABSENTEE_TEST_ONLY=${STATE} pytest -n `scripts/nproc-max 16` /app/absentee/tests/test_pdf.py /app/absentee/tests/test_metadata.py"
+	docker-compose exec server bash -c "ATTACHMENT_USE_S3=False ABSENTEE_TEST_ONLY=${STATE} pytest /app/absentee/tests/test_pdf.py /app/absentee/tests/test_metadata.py"
 
 testpdfsigbox:
 	docker-compose exec server bash -c "mkdir -p absentee/management/commands/out && python manage.py sig_sample ${STATE} --box"

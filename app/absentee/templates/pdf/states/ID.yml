@@ -1,5 +1,4 @@
 pages: 1
 manual_fields:
   - mailing_country
-  - election_primary
   - election_general

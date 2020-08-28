@@ -1,41 +1,21 @@
-pages: 3
+pages: 2
 
 auto_fields:
   - slug: date_signed
     type: todays_date
-  - slug: ballot_general
-    type: static
-    value: true
-  - slug: receive_mail
-    type: static
-    value: true
 
-manual_fields:   
-  - ballot_primary
-  - party_democrat
-  - party_republican
-  - party_bread_roses
-  - party_working_class
-  - party_other
-  - party_specify
-  - month_of_move
-  - day_of_move
-  - year_of_move
-  - primary_same_mailing_address
-  - primary_has_mailing_address
-  - primary_address1
-  - primary_address2
-  - primary_city
-  - primary_state
-  - primary_zipcode
-  - receive_internet
-  - internet_delivery_email
-  - license_or_id
-  - issue_month
-  - issue_date
-  - issue_year
-  - ssn_last_four
-  - receive_fax
-  - fax
-  - assistance_signature
-  - assistance_print
+manual_fields:
+  - suffix_jr
+  - fax_number
+  - delivery_mail
+  - delivery_fax
+  - ssn
+  - suffix_sr
+  - suffix_ii
+  - suffix_iii
+  - suffix_iv
+  - move_date
+  - delivery_email
+  - delivery_email_address
+  - delivery_dl
+  - delivery_dl_issue

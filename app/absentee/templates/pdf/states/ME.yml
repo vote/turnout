@@ -1,0 +1,17 @@
+pages: 1
+manual_fields:
+  - person_phone
+  - relationship
+  - aide_name
+  - fam_name
+  - fam_relation
+  - person_name
+  - Method
+  - Aide
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date
+
+missing_mandatory_fields:
+  - zipcode

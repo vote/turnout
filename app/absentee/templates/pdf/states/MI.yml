@@ -1,12 +1,16 @@
 pages: 2
 manual_fields:
-  - j_city
-  - j_township
-  - election_both
-  - election_primary
-  - election_general
-  - vbm_permanent
-  - primary_mail_start
-  - primary_mail_end
-  - general_mail_start
-  - general_mail_end
+  - jurisdiction
+  - permanent
+  - mailing_date_start
+  - mailing_date_end
+  - assist_name
+  - assist_address
+  - assist_name_2
+  - assist_dob
+  - jurisdiction_city
+  - juristiction_township
+
+auto_fields:
+  - slug: date_signed
+    type: todays_date

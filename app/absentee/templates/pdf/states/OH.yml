@@ -1,0 +1,42 @@
+pages: 2
+manual_fields:
+  - ssn1
+  - ssn2
+  - ssn3
+  - ssn4
+  - dl1
+  - dl2
+  - dl3
+  - dl4
+  - dl5
+  - dl6
+  - dl7
+  - dl8
+  - special1
+  - special2
+  - special3
+  - special4
+  - special5
+  - special6
+  - special7
+  - special8
+  - primary1
+  - primary2
+  - primary3
+  - primary4
+  - primary5
+  - primary6
+  - primary7
+  - primary8
+  - election_general
+  - election_special
+  - election_primary
+  - party_democratic
+  - party_libertarian
+  - party_republican
+  - party_none
+  - poll_yes
+  - poll_no
+auto_fields:
+  - slug: date_signed
+    type: todays_date

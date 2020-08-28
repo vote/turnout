@@ -1,104 +1,19 @@
 manual_fields:
-  - not_moved_yes
-  - not_moved_no
-  - permanent_mailing_address
-  - year_vbm_illness
-  - relative_name
-  - relative_relation
-  - relative_address1_2
-  - relative_city
-  - relative_state
-  - relative_zipcode
+  - previous_full_name
+  - dl
+  - ssn4
+  - move_date
+  - rel_name
+  - rel_relation
+  - rel_address1_2
+  - rel_city
+  - rel_state
+  - rel_zipcode
   - assist_name
-  - assist_address1_2
-  - assist_city
-  - assist_state
-  - assist_zipcode
-  - patient_hospital_name
-  - patient_yes
-  - patient_no
-  - uocava_mil
-  - uocava_overseas
-  - uocava_full_address
-  - uocava_mailing_full_address
-  - uocava_email
-  - uocava_fax
+  - assist_address1
+  - assist_address2
+  - facility
 auto_fields:
   - slug: date_signed
     type: todays_date
-pages: 3
-form_fields:
-  - type: section
-    label: Election date
-    note: This form will request a ballot for the General Election on Nov. 3, 2020.
-  - type: section
-    label: Identification
-    note: You must choose one of these options to identify yourself.
-    content:
-      - type: radio
-        required: true
-        options:
-          - label: North Carolina driver's license or ID number
-            slug: state_id_number_opt_1
-            conditional:
-              - type: text
-                slug: state_id_number
-                required: true
-                format: "^\\d{1,12}$"
-                format_error: Please enter a valid North Carolina driver's license or ID number
-                label: Driver's license or ID number
-          - label: Last four digits of your Social Security Number
-            slug: state_id_number_opt_2
-            conditional:
-              - type: text
-                slug: state_id_number
-                required: true
-                format: "^\\d{4}$"
-                format_error: Please enter just the last 4 digits of your Social Security Number
-                label: Last four digits of your Social Security Number
-  - type: section
-    label: Previous name
-    note: |
-      If you were previously registered under a different name, you must enter
-      that information here. You voter registration will be updated with your
-      new name.
-    content:
-      - type: checkbox
-        label: I was previously registered under a different name
-        conditional:
-          - type: text
-            label: Previous First Name
-            slug: previous_first_name
-            required: true
-          - type: text
-            label: Previous Middle Name
-            slug: previous_middle_name
-          - type: text
-            label: Previous Last Name
-            slug: previous_last_name
-            required: true
-  - type: section
-    label: Recent change of address
-    content:
-      - type: radio
-        label: Have you lived at your registered address for 30 or more days?
-        required: true
-        options:
-          - label: "Yes"
-            slug: not_moved_yes
-            default: true
-          - label: "No"
-            slug: not_moved_no
-            conditional:
-            - type: text
-              label: Date you moved to your current address
-              slug: moved_date
-              required: true
-
-signature_statement: FRAUDULENTLY OR FALSELY COMPLETING THIS FORM IS A CLASS I FELONY UNDER CHAPTER 163 OF THE NC GENERAL STATUTES
-signatures:
-  1:
-    x: 69
-    y: 45
-    width: 146
-    height: 25
+pages: 4
