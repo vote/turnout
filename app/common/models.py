@@ -8,7 +8,6 @@ from django.db import models
 from common.utils.models import TimestampModel, UUIDModel
 from turnout.celery_app import app
 
-
 logger = logging.getLogger("common")
 
 
@@ -36,6 +35,7 @@ class DelayedTask(UUIDModel, TimestampModel):
         try:
             new_id = app.send_task(self.task_name, args=self.args, kwargs=self.kwargs)
         except Exception as e:
-            logger.exception(f"failed to run task {self.task_name} args {self.args} kwargs {self.kwargs}")
+            logger.exception(
+                f"failed to run task {self.task_name} args {self.args} kwargs {self.kwargs}"
+            )
             sentry_sdk.capture_exception(e)
-            pass

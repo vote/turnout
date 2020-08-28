@@ -35,7 +35,7 @@ class SMSMessage(UUIDModel, TimestampModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"SMSMessage - {self.phone} {self.direction}"
+        return f"SMSMessage - {self.phone_id} {self.direction}"
 
     def delivery_status_webhook(self):
         return f"{settings.PRIMARY_ORIGIN}/v1/smsbot/twilio-message-status/{self.uuid}/"
@@ -65,7 +65,7 @@ class Number(TimestampModel):
             return
         with tracer.trace("smsbot.number.send_sms", service="twilio"):
             msg = SMSMessage.objects.create(
-                phone=str(self.phone), direction=MessageDirectionType.OUT, message=text,
+                phone=self, direction=MessageDirectionType.OUT, message=text,
             )
             r = twilio_client.messages.create(
                 to=str(self.phone),

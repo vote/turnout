@@ -7,17 +7,19 @@ from rest_framework.test import APIClient
 
 from common.enums import (
     EventType,
+    ExternalToolType,
     StateFieldFormats,
     SubmissionType,
     TurnoutActionStatus,
 )
 from event_tracking.models import Event
+from integration.models import Link
 
-LOB_LETTER_STATUS_API_ENDPOINT = "/v1/integration/lob-letter-status/{uuid}/"
+LOB_LETTER_STATUS_API_ENDPOINT = "/v1/integration/lob-letter-status/"
 
 LOB_LETTER_STATUS_BODY = {
     "id": "evt_d95ff8ffd2b5cfb4",
-    "body": {"id": "psc_d2d10a2e9cba991c", "blah": "blah",},
+    "body": {"id": "ltr_d2d10a2e9cba991c", "blah": "blah",},
     "event_type": {
         "id": "letter.mailed",
         "enabled_for_test": True,
@@ -34,25 +36,27 @@ LOB_LETTER_STATUS_BODY = {
 def test_lob_letter_status():
     import hashlib
     import hmac
-    import base64
 
     settings.LOB_LETTER_WEBHOOK_SECRET = "foo"
 
     ballot_request = baker.make_recipe("absentee.ballot_request")
+    link = Link.objects.create(
+        action=ballot_request.action,
+        external_tool=ExternalToolType.LOB,
+        external_id=LOB_LETTER_STATUS_BODY["body"]["id"],
+    )
 
     timestamp = "last tuesday"
     body = json.dumps(LOB_LETTER_STATUS_BODY)
     message = timestamp + "." + body
     secret = settings.LOB_LETTER_WEBHOOK_SECRET
-    signature = base64.b64encode(
-        hmac.new(
-            secret.encode("utf-8"), message.encode("utf-8"), digestmod=hashlib.sha256
-        ).digest()
-    )
+    signature = hmac.new(
+        secret.encode("utf-8"), message.encode("utf-8"), digestmod=hashlib.sha256
+    ).hexdigest()
 
     client = APIClient()
     response = client.post(
-        LOB_LETTER_STATUS_API_ENDPOINT.format(uuid=ballot_request.action.uuid),
+        LOB_LETTER_STATUS_API_ENDPOINT,
         body,
         content_type="application/json",
         **{"HTTP_LOB_SIGNATURE_TIMESTAMP": timestamp, "HTTP_LOB_SIGNATURE": signature,},
@@ -66,18 +70,18 @@ def test_lob_letter_status():
 # Test lob letter status callbacks
 @pytest.mark.django_db
 def test_lob_letter_status_bad_signature():
-    import base64
+    pass
 
     settings.LOB_LETTER_WEBHOOK_SECRET = "foo"
 
-    ballot_request = baker.make_recipe("absentee.ballot_request")
+    baker.make_recipe("absentee.ballot_request")
 
     timestamp = "today"
-    signature = base64.b64encode("not a valid hash value".encode("utf-8"))
+    signature = "abc123deadbeef"
 
     client = APIClient()
     response = client.post(
-        LOB_LETTER_STATUS_API_ENDPOINT.format(uuid=ballot_request.action.uuid),
+        LOB_LETTER_STATUS_API_ENDPOINT,
         json=LOB_LETTER_STATUS_BODY,
         **{
             "HTTP_X_LOB_SIGNATURE_TIMESTAMP": timestamp,
