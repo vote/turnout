@@ -247,7 +247,7 @@ def _sync_item(item, subscriber_id):
     if item.email_referrer:
         info["action_network:referrer_data"]["email_referrer"] = item.email_referrer
     if item.mobile_referrer:
-        info["action_network:referrer_data"]["mobile_referrer"] = item.mobile_referrer
+        info["action_network:referrer_data"]["mobile_message_referrer"] = item.mobile_referrer
     if not subscriber_id:
         info["person"]["custom_fields"] = {"last_subscriber": slug}
 

@@ -19,4 +19,4 @@ The Action will also have the following referrer_data:
 
 - ``source`` is the value of the ``?source=`` parameter (or ``voteamerica_{tool}``, if not provided)
 - ``website`` is the embed URL
-- ``email_referrer`` and ``mobile_referrer`` are ActionNetwork parameters that are set if the tool was linked via an ActionNetwork email or SMS campaign.
+- ``email_referrer`` and ``mobile_message_referrer`` are ActionNetwork parameters that are set if the tool was linked via an ActionNetwork email or SMS campaign.
