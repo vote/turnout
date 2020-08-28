@@ -209,6 +209,9 @@ REST_FRAMEWORK = {
 CALC_STATS_INTERVAL = 5
 NETLIFY_TRIGGER_INTERVAL = 10
 
+# how often to check for delayed tasks (minutes)
+DELAYED_TASKS_INTERVAL = 2
+
 USVF_SYNC = env.bool("USVF_SYNC", False)
 USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
 USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
@@ -249,6 +252,10 @@ CELERY_BEAT_SCHEDULE = {
     "trigger-calc-subscriber-stats": {
         "task": "reporting.tasks.calc_all_subscriber_stats",
         "schedule": crontab(minute=f"*/{CALC_STATS_INTERVAL}"),
+    },
+    "trigger-deliver-delayed-tasks": {
+        "task": "common.tasks.deliver_delayed_tasks",
+        "schedule": crontab(minute=f"*/{DELAYED_TASKS_INTERVAL}"),
     },
 }
 CELERY_TIMEZONE = "UTC"
@@ -525,6 +532,11 @@ LOGGING = {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
         },
+        "common": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
         "verifier": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
@@ -685,7 +697,7 @@ TWILIO_ACCOUNT_SID = env.str("TWILIO_ACCOUNT_SID", default=None)
 TWILIO_AUTH_TOKEN = env.str("TWILIO_AUTH_TOKEN", default=None)
 TWILIO_MESSAGING_SERVICE_SID = env.str("TWILIO_MESSAGING_SERVICE_SID", default=None)
 
-SMS_OPTIN_REMINDER_DELAY = env.int("SMS_OPTIN_REMINDER_DELAY", default=60 * 60)
+SMS_OPTIN_REMINDER_DELAY = env.int("SMS_OPTIN_REMINDER_DELAY", default=600)
 # If set, we will resend the welcome message if the last one is older than this
 SMS_OPTIN_REMINDER_RESEND_SECONDS = env.int(
     "SMS_OPTIN_REMINDER_RESEND_SECONDS", default=None,
@@ -727,6 +739,10 @@ REGISTER_RESUME_URL = env.str(
 )
 
 REGISTER_JWT_EXPIRATION_MINUTES = env.int("REGISTER_JWT_EXPIRATION_MINUTES", default=60)
+
+REGISTER_LOB_CONFIRM_NAG_SECONDS = env.int(
+    "REGISTER_LOB_CONFIRM_NAG_SECONDS", default=SMS_OPTIN_REMINDER_DELAY + 5,
+)
 
 #### END REGISTER CONFIGURATION
 

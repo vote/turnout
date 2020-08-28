@@ -122,3 +122,15 @@ def refresh_region_links():
     from .region_links import refresh_region_links
 
     refresh_region_links()
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.absentee.send_download_reminder")
+def send_download_reminder(pk: str) -> None:
+    from .models import BallotRequest
+    from .notification import trigger_reminder
+
+    ballot_request = BallotRequest.objects.select_related().get(pk=pk)
+    if ballot_request.action.event_set.filter(event_type=EventType.DOWNLOAD).exists():
+        return
+    trigger_reminder(ballot_request)

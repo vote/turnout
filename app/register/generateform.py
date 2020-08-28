@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from django.forms.models import model_to_dict
@@ -6,15 +7,14 @@ from pdf_template import PDFTemplate, PDFTemplateSection
 
 from common import enums
 from common.apm import tracer
+from common.models import DelayedTask
 from common.pdf.pdftemplate import fill_pdf_template
 from election.models import StateInformation
 from storage.models import StorageItem
 
 from .contactinfo import get_registration_contact_info
-from .tasks import (
-    send_registration_notification,
-    send_registration_print_and_forward_notification,
-)
+from .models import Registration
+from .tasks import send_registration_notification
 
 logger = logging.getLogger("register")
 
@@ -113,6 +113,26 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
 
 
 @tracer.wrap()
+def queue_registration_reminder(registration: Registration) -> None:
+    # send a reminder the next day
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    when = datetime.datetime(
+        tomorrow.year,
+        tomorrow.month,
+        tomorrow.day,
+        17,
+        0,
+        0,  # 1700 UTC == 12pm ET == 9am PT == 6am HT
+        tzinfo=datetime.timezone.utc,
+    )
+    now = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc)
+
+    DelayedTask.schedule(
+        when, "register.tasks.send_registration_reminder", str(registration.uuid),
+    )
+
+
+@tracer.wrap()
 def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
 
@@ -142,9 +162,8 @@ def process_registration(registration, state_id_number, is_18_or_over):
     registration.result_item = item
     registration.save(update_fields=["result_item", "result_item_mail"])
 
-    if registration.request_mailing_address1:
-        send_registration_print_and_forward_notification.delay(registration.pk)
-    else:
-        send_registration_notification.delay(registration.pk)
+    send_registration_notification.delay(registration.pk)
+
+    queue_registration_reminder(registration)
 
     logger.info(f"New PDF Created: Registration {item.pk}")

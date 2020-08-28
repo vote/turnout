@@ -130,6 +130,7 @@ class EventType(Enum, metaclass=EnumMeta):
     DONATE = "Donate"
     RESTART = "Restart"
     FINISH_LOB = "FinishLob"
+    FINISH_LOB_CONFIRM = "FinishLobConfirm"
     LOB_MAILED = "LobMailed"
     LOB_PROCESSED_FOR_DELIVERY = "LobProcessedForDelivery"
     LOB_REROUTED = "LobRerouted"

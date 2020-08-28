@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 from typing import Any, Dict, Optional, Tuple
@@ -8,6 +9,7 @@ from pdf_template import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 
 from common import enums
 from common.apm import tracer
+from common.models import DelayedTask
 from common.pdf.pdftemplate import fill_pdf_template
 from common.utils.format import StringFormatter
 from election.models import StateInformation
@@ -387,6 +389,26 @@ def populate_storage_item(
 
 
 @tracer.wrap()
+def queue_download_reminder(ballot_request: BallotRequest) -> None:
+    # send a reminder the next day
+    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+    when = datetime.datetime(
+        tomorrow.year,
+        tomorrow.month,
+        tomorrow.day,
+        17,
+        0,
+        0,  # 1700 UTC == 12pm ET == 9am PT == 6am HT
+        tzinfo=datetime.timezone.utc,
+    )
+    now = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc)
+
+    DelayedTask.schedule(
+        when, "absentee.tasks.send_download_reminder", str(ballot_request.uuid),
+    )
+
+
+@tracer.wrap()
 def process_ballot_request(
     ballot_request: BallotRequest, state_id_number: str, is_18_or_over: bool
 ):
@@ -412,5 +434,7 @@ def process_ballot_request(
         send_ballotrequest_print_and_forward.delay(ballot_request.pk)
     else:
         send_ballotrequest_notification.delay(ballot_request.pk)
+
+    queue_download_reminder(ballot_request)
 
     logger.info(f"New PDF Created: Ballot Request {item.pk}")

@@ -180,6 +180,7 @@ def send_letter(item: Union[BallotRequest, Registration]) -> datetime.datetime:
         external_tool=enums.ExternalToolType.LOB,
         external_id=letter["id"],
     )
+    item.action.track_event(enums.EventType.FINISH_LOB_CONFIRM)
     logger.info(f"Submitted lob letter for {item}")
     return link.created_at
 

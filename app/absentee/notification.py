@@ -1,15 +1,19 @@
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from common.apm import tracer
 from integration.lob import generate_lob_token
+from smsbot.models import Number
 
 from .contactinfo import get_absentee_contact_info
 from .models import BallotRequest
 
 NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
 SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
+
+REMINDER_SUBJECT = "REMINDER: print and mail your absentee ballot request form."
 
 PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE = (
     "absentee/email/print_and_forward_notification.html"
@@ -64,6 +68,20 @@ def send_email(ballot_request: BallotRequest, subject: str, content: str) -> Non
 def trigger_notification(ballot_request: BallotRequest) -> None:
     content = compile_email(ballot_request)
     send_email(ballot_request, SUBJECT, content)
+
+
+def trigger_reminder(ballot_request: BallotRequest) -> None:
+    content = compile_email(ballot_request)
+    send_email(ballot_request, REMINDER_SUBJECT, content)
+
+    if ballot_request.phone:
+        try:
+            n = Number.objects.get(phone=ballot_request.phone)
+            n.send_sms(
+                f"We emailed your absentee ballot request form, but you haven't downloaded and printed it yet. We've just resent it to {ballot_request.email} from VoteAmerica."
+            )
+        except ObjectDoesNotExist:
+            pass
 
 
 def trigger_print_and_forward_notification(ballot_request: BallotRequest) -> None:
