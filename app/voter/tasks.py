@@ -9,7 +9,6 @@ from django.db.models import Q
 from action.models import Action
 from common.apm import tracer
 from common.rollouts import get_feature, get_feature_int
-from smsbot.models import Number
 from verifier.alloy import ALLOY_STATES_ENABLED, query_alloy
 from verifier.targetsmart import query_targetsmart
 
@@ -69,11 +68,7 @@ def lookup(item):
 
     # link
     if vbid or alloy_id:
-        if item.phone:
-            number, _ = Number.objects.get_or_create(phone=item.phone,)
-        else:
-            number = None
-
+        # get voter
         voter = None
 
         if vbid and not voter:
@@ -95,6 +90,7 @@ def lookup(item):
         else:
             logger.info(f"Matched existing {voter} from action {item}")
 
+        # update external links
         if vbid:
             if voter.ts_voterbase_id:
                 if voter.ts_voterbase_id != vbid:
@@ -115,16 +111,16 @@ def lookup(item):
                 logger.info(f"Expanded {voter} match to include alloy")
             voter.alloy_person_id = alloy_id
 
-        if number:
-            if voter.phone and voter.phone != number:
-                logger.warning(f"Changed {voter} number {voter.phone} -> {number}")
-            voter.phone = number
+        # refresh voter info
+        if item.phone:
+            if voter.phone and voter.phone != item.phone:
+                logger.warning(f"Changed {voter} number {voter.phone} -> {item.phone}")
+            voter.phone = item.phone
         if item.email:
             if voter.email and voter.email != item.email:
                 logger.warning(f"Changed {voter} email {voter.email} -> {item.email}")
             voter.email = item.email
 
-        # refresh voter info
         if vbid:
             voter.refresh_status_from_ts(ts_match)
             if not alloy_id:

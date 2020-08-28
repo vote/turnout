@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.conf import settings
 from django.db import models
@@ -22,7 +23,9 @@ else:
 
 
 class SMSMessage(UUIDModel, TimestampModel):
-    phone = PhoneNumberField(null=True, db_index=True)
+    phone = models.ForeignKey(
+        null=True, on_delete=models.deletion.SET_NULL, to="smsbot.Number"
+    )
     direction = TurnoutEnumField(MessageDirectionType)
     message = models.TextField(blank=True, null=True)
     status = TurnoutEnumField(SMSDeliveryStatus, null=True)
@@ -38,8 +41,11 @@ class SMSMessage(UUIDModel, TimestampModel):
         return f"{settings.PRIMARY_ORIGIN}/v1/smsbot/twilio-message-status/{self.uuid}/"
 
 
-class Number(UUIDModel, TimestampModel):
-    phone = PhoneNumberField(null=True, db_index=True)
+class Number(TimestampModel):
+    # deprecated key from old UUIDModel base class
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    phone = PhoneNumberField(primary_key=True)
 
     welcome_time = models.DateTimeField(null=True, blank=True)
     opt_out_time = models.DateTimeField(null=True, blank=True)

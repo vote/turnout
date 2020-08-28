@@ -47,33 +47,6 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
 
 
 @shared_task
-@statsd.timed("turnout.smsbot.tasks.send_reminder_sms")
-def send_reminder_sms(number: str) -> None:
-    from .models import Number
-
-    n = Number.objects.get(phone=number)
-    if not n:
-        # We have no record of this user--do not send them a reminder.
-        return
-
-    if n.opt_out_time:
-        # If the user has (really) opted out, do not send them anything.  Note
-        # that Twilio's advanced opt-in may also prevent us from sending something
-        # even if we tried.  It is also possible they opted-out, and then sent
-        # UNSTOP or JOIN but not YES so that they can receive our message but we
-        # still show them as opted out.  Either way, we should not contact them.
-        return
-
-    msg = (
-        "Reminder: You are subscribed to VoteAmerica Election Alerts. "
-        "Msg & Data rates may apply. 4 msgs/month. "
-        "Reply HELP for help, STOP to cancel."
-    )
-
-    n.send_sms(msg)
-
-
-@shared_task
 def poll_optout() -> None:
     from .optout import poll
 

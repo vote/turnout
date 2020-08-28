@@ -1,7 +1,9 @@
 import datetime
 import logging
+import uuid
 
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 from common.utils.models import TimestampModel, UUIDModel
 
@@ -29,8 +31,11 @@ class Voter(UUIDModel, TimestampModel):
     registration_date = models.DateField(null=True)
     last_registration_refresh = models.DateTimeField(null=True)
 
+    # deprecated:
+    phone_id = models.UUIDField(null=True, editable=False, default=uuid.uuid4)
+
     # our contact info
-    phone = models.ForeignKey("smsbot.Number", null=True, on_delete=models.SET_NULL)
+    phone = PhoneNumberField(null=True)
     email = models.EmailField(max_length=150, null=True)
 
     # PII (pulled from or validated against a data source)
