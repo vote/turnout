@@ -13,9 +13,9 @@ from ..state_pdf_data import (
     each_slug_with_type,
 )
 from .test_data import (
+    MANDATORY_FIELDS,
     STATE_ID_NUMBER_SLUGS,
     STATES_WITH_METADATA,
-    MANDATORY_FIELDS,
     get_filled_slugs,
     make_test_data,
 )
