@@ -70,8 +70,6 @@ def test_lob_letter_status():
 # Test lob letter status callbacks
 @pytest.mark.django_db
 def test_lob_letter_status_bad_signature():
-    pass
-
     settings.LOB_LETTER_WEBHOOK_SECRET = "foo"
 
     baker.make_recipe("absentee.ballot_request")
