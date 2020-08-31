@@ -100,7 +100,8 @@ def check_group(slug, down_sites=False):
             for driver, proxy in drivers:
                 try:
                     driver.quit()
-                except WebDriverException:
+                except WebDriverException as e:
+                    logger.warning(f"Failed to quit selenium worker for {proxy}: {e}")
                     pass
             continue
 
@@ -108,7 +109,8 @@ def check_group(slug, down_sites=False):
     for driver, proxy in drivers:
         try:
             driver.quit()
-        except WebDriverException:
+        except WebDriverException as e:
+            logger.warning(f"Failed to quit selenium worker for {proxy}: {e}")
             pass
 
 
@@ -181,28 +183,43 @@ def check_site(drivers, site):
 
 
 def check_site_with_pos(drivers, pos, site):
-    check = check_site_with(drivers[pos][0], drivers[pos][1], site)
-    if check.error and "timeout" in check.error:
-        tries = 0
+    def reset_selenium():
+        reset_tries = 0
         while True:
-            tries += 1
-            logger.info(f"Reset driver pos {pos} attempt {tries}")
+            reset_tries += 1
+            logger.info(f"Reset driver pos {pos} attempt {reset_tries}")
             try:
                 drivers[pos][0].quit()
-            except WebDriverException:
+            except WebDriverException as e:
+                logger.warning(f"Failed to quit selenium worker for {drivers[pos][1]}: {e}")
                 pass
             try:
                 drivers[pos][0] = get_driver(drivers[pos][1])
                 break
             except WebDriverException as e:
                 logger.warning(
-                    f"Failed to reset driver for {drivers[pos][1]}, tries {tries}: {e}"
+                    f"Failed to reset driver for {drivers[pos][1]}, reset tries {reset_tries}: {e}"
                 )
-                if tries > 2:
+                if reset_tries > 2:
                     logger.warning(
-                        f"Failed to reset driver for {drivers[pos][1]}, tries {tries}, giving up"
+                        f"Failed to reset driver for {drivers[pos][1]}, reset tries {reset_tries}, giving up"
                     )
                     raise e
+
+    tries = 0
+    while True:
+        try:
+            tries += 1
+            check = check_site_with(drivers[pos][0], drivers[pos][1], site)
+            if check.error and "timeout" in check.error:
+                reset_selenium()
+            break
+        except SeleniumError as e:
+            logger.info(f"Selenium error on try {tries}: {e}")
+            if tries > 2:
+                raise e
+            reset_selenium()
+
     return check
 
 
@@ -224,6 +241,9 @@ def check_site_with(driver, proxy, site):
     except RemoteDriverServerException as e:
         raise e
     except Exception as e:
+        if "Timed out receiving message from renderer: -" in str(e):
+            # if we get a negatime timeout it's because the worker is broken
+            raise SeleniumError(f"Problem talking to selenium worker: {e}")
         if "establishing a connection" in str(e):
             raise e
         if "marionette" in str(e):
@@ -288,12 +308,26 @@ def check_site_with(driver, proxy, site):
 
 
 def get_driver(proxy):
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument(f"--proxy-server=socks5://{proxy.address}")
+    options = webdriver.ChromeOptions()
+    options.add_argument(f"--proxy-server=socks5://{proxy.address}")
+
+    # https://stackoverflow.com/questions/48450594/selenium-timed-out-receiving-message-from-renderer
+    options.add_argument("--disable-gpu")
+    options.add_argument("enable-automation")
+    options.add_argument("--headless")
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--dns-prefetch-disable")
+    options.add_argument("--disable-browser-side-navigation") # https://stackoverflow.com/a/49123152/1689770
+
+    caps = webdriver.DesiredCapabilities.CHROME.copy()
+    caps["pageLoadStrategy"] = "normal"
+
     driver = webdriver.Remote(
         command_executor=settings.SELENIUM_URL,
-        desired_capabilities=webdriver.DesiredCapabilities.CHROME,
-        options=chrome_options,
+        desired_capabilities=caps,
+        options=options,
     )
     driver.set_page_load_timeout(DRIVER_TIMEOUT)
     return driver

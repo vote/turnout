@@ -10,10 +10,15 @@ def check_uptime_group(slug, down_sites=False):
 
 @shared_task()
 def check_uptime():
-    from .uptime import MONITORS
+    from .uptime import check_all
+    from .proxy import check_proxies
 
-    for slug in MONITORS.keys():
-        check_uptime_group.delay(slug)
+    check_proxies()
+    check_all()
+
+    #from .uptime import MONITORS
+    #for slug in MONITORS.keys():
+    #    check_uptime_group.delay(slug)
 
 
 @shared_task()
@@ -36,3 +41,9 @@ def check_proxies():
     from .proxy import check_proxies
 
     check_proxies()
+
+
+@shared_task()
+def check():
+    check_proxies()
+    check_uptime()

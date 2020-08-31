@@ -231,7 +231,8 @@ def check_proxies():
                         bad_proxies.append((proxy, check))
                     try:
                         driver.quit()
-                    except WebDriverException:
+                    except WebDriverException as e:
+                        logger.warning(f"Failed to quit selenium worker for {proxy}: {e}")
                         pass
 
                 del stray[proxy.description]

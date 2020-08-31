@@ -279,19 +279,15 @@ if OVBM_SYNC:
     }
 if UPTIME_ENABLED:
     if UPTIME_CHECK_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-check-uptime"] = {
-            "task": "leouptime.tasks.check_uptime",
+        CELERY_BEAT_SCHEDULE["trigger-check"] = {
+            "task": "leouptime.tasks.check",
             "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
         }
-        CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
-            "task": "leouptime.tasks.check_proxies",
-            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-        }
-    if UPTIME_CHECK_DOWN_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
-            "task": "leouptime.tasks.check_uptime_downsites",
-            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-        }
+#    if UPTIME_CHECK_DOWN_CRON_MINUTE:
+#        CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
+#            "task": "leouptime.tasks.check_uptime_downsites",
+#            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+#        }
     if UPTIME_TWITTER_CRON_MINUTE:
         CELERY_BEAT_SCHEDULE["trigger-tweet-uptime"] = {
             "task": "leouptime.tasks.tweet_uptime",
