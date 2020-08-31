@@ -117,6 +117,27 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "ignore_undeliverable",
         ]
 
+    def validate(self, data):
+        if (
+            not self.instance
+            or not self.instance.state
+            or not self.instance.state.allow_print_and_forward
+        ):
+            if any(
+                k in data
+                for k in [
+                    "request_mailing_address1",
+                    "request_mailing_address2",
+                    "request_mailing_city",
+                    "request_mailing_state",
+                    "request_mailing_zipcode",
+                ]
+            ):
+                raise ValidationError(
+                    "Cannot specify request mailing address if print_and_forward is not enabled for this state"
+                )
+        return data
+
 
 class StatusSerializer(EnumSupportSerializerMixin, serializers.ModelSerializer):
     status = EnumField(enum=enums.TurnoutActionStatus, required=True)

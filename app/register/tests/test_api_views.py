@@ -852,6 +852,53 @@ def test_complete_lob_ignore_undeliverable(
     assert registration.status != TurnoutActionStatus.INCOMPLETE
 
 
+@pytest.mark.django_db
+def test_complete_lob_disallow(
+    submission_task_patch, mock_sms, mock_verify_address,
+):
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert register_response.json()["allow_print_and_forward"] == False
+    assert register_response.json()["request_mailing_deliverable"] == None
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    # try to complete with request_mailing address
+    status_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid), VALID_PATCH_MAIL
+    )
+    assert status_response.status_code == 400
+    registration.refresh_from_db()
+    assert str(registration.uuid) == register_response.json()["uuid"]
+    assert registration.request_mailing_address1 is None
+    assert registration.request_mailing_city is None
+    assert registration.request_mailing_state is None
+    assert registration.request_mailing_zipcode is None
+
+
+@pytest.mark.django_db
+def test_complete_lob_disallow2(
+    submission_task_patch, mock_sms, mock_verify_address,
+):
+    client = APIClient()
+    ref = VALID_REGISTRATION.copy()
+    ref["request_mailing_address1"] = "123 A St."
+    register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, ref)
+    assert register_response.status_code == 400
+
+
 # Test confirmation link that sends the actual letter
 @pytest.mark.django_db
 def test_lob_confirm(mocker):
