@@ -90,6 +90,14 @@ class RegistrationViewSet(IncompleteActionViewSet):
             and not ignore_undeliverable
         ):
             # do not complete since they did not ignore_undeliverable
+            for k in [
+                "request_mailing_address1",
+                "request_mailing_address2",
+                "request_mailing_city",
+                "request_mailing_state",
+                "request_mailing_zipcode",
+            ]:
+                setattr(registration, k, None)
             return
 
         if registration.state_id == "PA" and registration.state_fields:
