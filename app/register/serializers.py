@@ -96,6 +96,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             "request_mailing_city",
             "request_mailing_state",
             "request_mailing_zipcode",
+            "request_mailing_stamped",
             "gender",
             "race_ethnicity",
             "party",
@@ -134,8 +135,15 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
                 ]
             ):
                 raise ValidationError(
-                    "Cannot specify request mailing address if print_and_forward is not enabled for this state"
+                    f"Cannot specify request mailing address if print_and_forward=false for this state {data}"
                 )
+        elif (
+            not self.instance.state.allow_print_and_forward_stamped
+            and data.get("request_mailing_stamped") == True
+        ):
+            raise ValidationError(
+                "Cannot specify stamped return envelope if print_and_forward_stamped=false for this state"
+            )
         return data
 
 

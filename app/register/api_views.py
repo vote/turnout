@@ -134,7 +134,9 @@ class RegistrationViewSet(IncompleteActionViewSet):
             "uuid": action_object.uuid,
             "action_id": action_object.action.pk,
             "custom_ovr_link": action_object.custom_ovr_link,
-            "allow_print_and_forward": action_object.state.allow_print_and_forward,
+            "allow_print_and_forward": (action_object.state.allow_print_and_forward or action_object.state.allow_print_and_forward_stamped),
+            "allow_print_and_forward_stamped": action_object.state.allow_print_and_forward_stamped,
+            "allow_print_and_forward_unstamped": action_object.state.allow_print_and_forward,
             "request_mailing_deliverable": action_object.request_mailing_deliverable,
         }
         if action_object.state_api_result:

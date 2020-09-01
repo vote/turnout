@@ -72,6 +72,7 @@ class BallotRequest(
         null=True, validators=[zip_validator], blank=True
     )
     request_mailing_deliverable = models.BooleanField(null=True)
+    request_mailing_stamped = models.BooleanField(null=True)
 
     us_citizen = models.BooleanField(null=True, default=False)
     sms_opt_in = models.BooleanField(null=True, default=False)

@@ -167,9 +167,10 @@ def submission_task_patch(mocker):
     return mocker.patch("register.api_views.process_registration")
 
 
-def set_state_allow_print_and_forward(code):
+def set_state_allow_print_and_forward(code, stamped=False):
     state = State.objects.get(code=code)
     state.allow_print_and_forward = True
+    state.allow_print_and_forward_stamped = stamped
     state.save()
 
 
@@ -779,6 +780,7 @@ def test_complete_lob(
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
     assert register_response.json()["allow_print_and_forward"] == True
+    assert register_response.json()["allow_print_and_forward_stamped"] == False
     assert registration.status == TurnoutActionStatus.INCOMPLETE
     assert (
         Event.objects.filter(
@@ -803,7 +805,7 @@ def test_complete_lob_ignore_undeliverable(
     submission_task_patch, mock_sms, mock_verify_address,
 ):
     # enable print-and-forward for this state
-    set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
+    set_state_allow_print_and_forward(VALID_REGISTRATION["state"], True)
 
     client = APIClient()
     register_response = client.post(
@@ -815,6 +817,7 @@ def test_complete_lob_ignore_undeliverable(
     registration = Registration.objects.first()
     assert register_response.json()["uuid"] == str(registration.uuid)
     assert register_response.json()["allow_print_and_forward"] == True
+    assert register_response.json()["allow_print_and_forward_stamped"] == True
     assert register_response.json()["request_mailing_deliverable"] == None
     assert registration.status == TurnoutActionStatus.INCOMPLETE
     assert (
@@ -897,6 +900,42 @@ def test_complete_lob_disallow2(
     ref["request_mailing_address1"] = "123 A St."
     register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, ref)
     assert register_response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_complete_lob_try_stamped(
+    submission_task_patch, mock_sms, mock_verify_address,
+):
+    # enable print-and-forward for this state
+    set_state_allow_print_and_forward(VALID_REGISTRATION["state"], False)
+
+    client = APIClient()
+    register_response = client.post(
+        REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
+    )
+    assert register_response.status_code == 200
+    assert "uuid" in register_response.json()
+
+    registration = Registration.objects.first()
+    assert register_response.json()["uuid"] == str(registration.uuid)
+    assert register_response.json()["allow_print_and_forward"] == True
+    assert register_response.json()["allow_print_and_forward_stamped"] == False
+    assert register_response.json()["request_mailing_deliverable"] == None
+    assert registration.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=registration.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    # try to request a stamp
+    info = VALID_PATCH_MAIL.copy()
+    info["request_mailing_stamped"] = True
+    status_response = client.patch(
+        PATCH_API_ENDPOINT.format(uuid=registration.uuid), info
+    )
+    assert status_response.status_code == 400
 
 
 # Test confirmation link that sends the actual letter

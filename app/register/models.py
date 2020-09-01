@@ -89,6 +89,7 @@ class Registration(
         null=True, validators=[zip_validator], blank=True
     )
     request_mailing_deliverable = models.BooleanField(null=True)
+    request_mailing_stamped = models.BooleanField(null=True)
 
     gender = TurnoutEnumField(enums.RegistrationGender, null=True)
     race_ethnicity = TurnoutEnumField(enums.RaceEthnicity, null=True)

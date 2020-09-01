@@ -39,6 +39,7 @@ class State(TimestampModel):
     states = NonTerritoryManager()
 
     allow_print_and_forward = models.BooleanField(null=True, default=False)
+    allow_print_and_forward_stamped = models.BooleanField(null=True, default=False)
 
     class Meta(object):
         ordering = ["code"]
