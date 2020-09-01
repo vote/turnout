@@ -27,7 +27,7 @@ def compile_email(storage_item: StorageItem) -> str:
 def send_email(storage_item: StorageItem, content: str) -> None:
     from_email = settings.MANAGEMENT_NOTIFICATION_FROM
     if storage_item.subscriber:
-        from_email = storage_item.subscriber.full_email_address
+        from_email = storage_item.subscriber.transactional_from_email_address
 
     msg = EmailMessage(
         "Your new download link", content, from_email, [storage_item.email],

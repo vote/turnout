@@ -72,7 +72,7 @@ def send_email(registration: Registration, subject, content: str) -> None:
     msg = EmailMessage(
         subject,
         content,
-        registration.subscriber.full_email_address,
+        registration.subscriber.transactional_from_email_address,
         [registration.email],
     )
     msg.content_subtype = "html"

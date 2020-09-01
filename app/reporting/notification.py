@@ -32,7 +32,7 @@ def send_email(report: Report, content: str) -> None:
     msg = EmailMessage(
         f"Your {report.type.label}",
         content,
-        report.subscriber.full_email_address,
+        report.subscriber.transactional_from_email_address,
         [report.author.email],
     )
     msg.content_subtype = "html"

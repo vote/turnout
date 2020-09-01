@@ -29,7 +29,7 @@ There's nothing else you need to do, but you can save a copy of your application
 for your records if you'd like.
 <br><br>
 Happy voting,<br>
-{{ subscriber.name }}
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
 <br>
 <br>
 

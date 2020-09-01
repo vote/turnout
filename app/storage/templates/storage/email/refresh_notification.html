@@ -33,7 +33,7 @@ Here's the new link to download your file.
 <br><br>
 Happy voting,<br>
 {% if subscriber %}
-{{ subscriber.name }}
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
 {% else %}
 VoteAmerica
 {% endif %}

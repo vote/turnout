@@ -1,4 +1,5 @@
 import reversion
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.template.loader import render_to_string
@@ -77,6 +78,13 @@ class Client(UUIDModel, TimestampModel):
     def full_email_address(self) -> str:
         clean_name = self.name.replace('"', "'")
         return f'"{clean_name}" <{self.email}>'
+
+    @property
+    def transactional_from_email_address(self) -> str:
+        if self.is_first_party:
+            return self.full_email_address
+        clean_name = self.name.replace('"', "'")
+        return f'"{clean_name} via VoteAmerica" <{settings.DEFAULT_EMAIL_FROM}>'
 
     @property
     def stats(self):

@@ -57,7 +57,7 @@ def send_fax_submitted_email(
         body=compile_email(
             ballot_request, leo_contact, NOTIFICATION_TEMPLATE_SUBMITTED
         ),
-        from_email=ballot_request.subscriber.full_email_address,
+        from_email=ballot_request.subscriber.transactional_from_email_address,
         to=[ballot_request.email],
         reply_to=[REPLY_TO],
     )
@@ -88,7 +88,7 @@ def send_fax_sent_email(ballot_request: BallotRequest) -> None:
     msg = EmailMessage(
         subject=subject,
         body=compile_email(ballot_request, leo_contact, NOTIFICATION_TEMPLATE_SENT),
-        from_email=ballot_request.subscriber.full_email_address,
+        from_email=ballot_request.subscriber.transactional_from_email_address,
         to=[ballot_request.email],
         reply_to=[REPLY_TO],
     )

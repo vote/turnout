@@ -65,7 +65,10 @@ def trigger_upsell(lookup: Lookup) -> None:
     content = compile_upsell_email(lookup)
 
     msg = EmailMessage(
-        UPSELL_SUBJECT, content, lookup.subscriber.full_email_address, [lookup.email],
+        UPSELL_SUBJECT,
+        content,
+        lookup.subscriber.transactional_from_email_address,
+        [lookup.email],
     )
     msg.content_subtype = "html"
     msg.send()

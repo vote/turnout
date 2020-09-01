@@ -26,6 +26,7 @@ ROOT_URLCONF = "turnout.urls"
 PRIMARY_ORIGIN = env.str("PRIMARY_ORIGIN", default="http://localhost:9001")
 WWW_ORIGIN = env.str("WWW_ORIGIN", default="http://localhost:8000")
 
+DEFAULT_EMAIL_FROM = env.str("DEFAULT_EMAIL_FROM", "hello@voteamerica.com")
 
 # Useful analytics and tracking tags
 CLOUD_DETAIL = env.str("CLOUD_DETAIL", default="")

@@ -58,7 +58,7 @@ def send_email(ballot_request: BallotRequest, subject: str, content: str) -> Non
     msg = EmailMessage(
         subject,
         content,
-        ballot_request.subscriber.full_email_address,
+        ballot_request.subscriber.transactional_from_email_address,
         [ballot_request.email],
     )
     msg.content_subtype = "html"
