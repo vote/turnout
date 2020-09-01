@@ -33,7 +33,6 @@ class SiteChecksList(generics.ListAPIView):
     def get_queryset(self):
         return SiteCheck.objects.filter(site_id=self.kwargs["pk"])
 
-
 class SiteDowntimeList(generics.ListAPIView):
     serializer_class = SiteDowntimeSerializer
     pagination_class = PaginationStyle
