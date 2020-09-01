@@ -24,6 +24,9 @@ COVER_SHEET_PATH = "register/templates/pdf/cover.pdf"
 PRINT_AND_FORWARD_COVER_SHEET_PATH = (
     "register/templates/pdf/print-and-forward-cover.pdf"
 )
+PRINT_AND_FORWARD_TEMPLATE_PATH = (
+    "register/templates/pdf/print-and-forward-eac-nvra.pdf"
+)
 
 PDF_TEMPLATE = PDFTemplate(
     [
@@ -37,7 +40,9 @@ PRINT_AND_FORWARD_PDF_TEMPLATE = PDFTemplate(
         PDFTemplateSection(
             path=PRINT_AND_FORWARD_COVER_SHEET_PATH, is_form=True, flatten_form=True
         ),
-        PDFTemplateSection(path=TEMPLATE_PATH, is_form=True, flatten_form=True),
+        PDFTemplateSection(
+            path=PRINT_AND_FORWARD_TEMPLATE_PATH, is_form=True, flatten_form=True
+        ),
     ]
 )
 
@@ -45,7 +50,7 @@ PRINT_AND_FORWARD_PDF_TEMPLATE = PDFTemplate(
 def generate_name(registration, suffix=""):
     n = f"{registration.state.code} {registration.last_name} registrationform"
     if suffix:
-        n += " {suffix}"
+        n += f" {suffix}"
     filename = slugify(n).lower()
     return f"{filename}.pdf"
 
@@ -109,6 +114,20 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
         state_deadline = "Mail your form as soon as possible."
     form_data["state_deadlines"] = state_deadline
 
+    # 2020
+    try:
+        state_mail_deadline_2020 = (
+            StateInformation.objects.only("field_type", "text")
+            .get(
+                state=registration.state,
+                field_type__slug="2020_registration_deadline_by_mail",
+            )
+            .text
+        )
+    except StateInformation.DoesNotExist:
+        state_mail_deadline_2020 = "Mailed as soon as possible."
+    form_data["2020_state_deadline"] = state_mail_deadline_2020
+
     return form_data
 
 
@@ -147,7 +166,7 @@ def process_registration(registration, state_id_number, is_18_or_over):
             PRINT_AND_FORWARD_PDF_TEMPLATE,
             form_data,
             mail_item,
-            generate_name(registration, "mail"),
+            generate_name(registration, suffix="mail"),
         )
         registration.result_item_mail = mail_item
 

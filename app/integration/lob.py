@@ -19,7 +19,8 @@ from .models import Link
 logger = logging.getLogger("integration")
 
 
-RETURN_ENVELOPE = "renv_4012d6bf3a8a281"
+#RETURN_ENVELOPE = "renv_4012d6bf3a8a281"
+RETURN_ENVELOPE = "no_9_single_window"
 COVER_SHEET_PERFORATED_PAGE = 1
 
 FORM_CUSTOM = "absentee/templates/pdf/states/{state_id}-lob.pdf"
@@ -169,7 +170,7 @@ def send_letter(item: Union[BallotRequest, Registration]) -> datetime.datetime:
             from_address=from_addr,
             file=item.result_item_mail.file,
             color=False,
-            double_sided=True,
+            double_sided=False,
             address_placement="top_first_page",
             return_envelope=RETURN_ENVELOPE,
             perforated_page=COVER_SHEET_PERFORATED_PAGE,
