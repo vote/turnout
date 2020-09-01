@@ -19,6 +19,7 @@ nav:
     - 'Advanced APIs':
         - 'Action API': '/api/action/'
     - 'Open Source Development': '/opensource/'
+    - 'Mapping "Legacy Field" To "2020 Field"' : '/api/2020/'
 collapse_navigation: false
 theme:
   name: material

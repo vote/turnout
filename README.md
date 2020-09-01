@@ -90,13 +90,11 @@ and Sentry. Port `8000` is also forwarded to the host, so the command
 `./manage.py runserver 0.0.0.0:8000` would allow you to visit a version of the app locally at
 `http://localhost:8000/`.
 
-
 ### On-Demand Dev Deployment
 
 To deploy the version of code currently in your `app/` directory to the dev cluster, run
 `make localtodev`. Migrations will be automatically run prior to the cluster launching with your
 new code.
-
 
 3 Notes:
 
@@ -111,10 +109,8 @@ they appear in your local deployment (or staging or prod deployments.)
 
 3) Dev is not currently behind a CDN, and is not accessible by the public internet.
 
-
 This means one thing: **Dev is a playground to test code, not an adequite reflection of how turnout
 will function on prod**
-
 
 ### Remote Database Access
 
@@ -136,7 +132,6 @@ IAM user with permission to perform IAM auth to your turnout database. If you're
 commands on EC2, ensure that the IAM Role that your instance is running under has proper
 permissions. If your RDS instance is on a private subnet, you'll likely need to connect via a VPN
 or from a shell that is on that same subnet.
-
 
 ### Storage Configuration
 
@@ -178,3 +173,7 @@ functionality of Turnout.
     redirected to if they visit the download endpoint but either do not have a valid token or if
     their token has exired. **Must include `{item_id}` where the primary key of the file will be
     inserted**
+
+### Running docs.voteamerica.com locally
+
+After running `make up`, visit [localhost:9003](http://localhost:9003/) in the browser.
