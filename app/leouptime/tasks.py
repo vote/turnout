@@ -16,8 +16,8 @@ def check_uptime():
     check_proxies()
     check_all()
 
-    #from .uptime import MONITORS
-    #for slug in MONITORS.keys():
+    # from .uptime import MONITORS
+    # for slug in MONITORS.keys():
     #    check_uptime_group.delay(slug)
 
 

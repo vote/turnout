@@ -102,7 +102,6 @@ def check_group(slug, down_sites=False):
                     driver.quit()
                 except WebDriverException as e:
                     logger.warning(f"Failed to quit selenium worker for {proxy}: {e}")
-                    pass
             continue
 
         break
@@ -111,7 +110,6 @@ def check_group(slug, down_sites=False):
             driver.quit()
         except WebDriverException as e:
             logger.warning(f"Failed to quit selenium worker for {proxy}: {e}")
-            pass
 
 
 @tracer.wrap()
@@ -191,8 +189,9 @@ def check_site_with_pos(drivers, pos, site):
             try:
                 drivers[pos][0].quit()
             except WebDriverException as e:
-                logger.warning(f"Failed to quit selenium worker for {drivers[pos][1]}: {e}")
-                pass
+                logger.warning(
+                    f"Failed to quit selenium worker for {drivers[pos][1]}: {e}"
+                )
             try:
                 drivers[pos][0] = get_driver(drivers[pos][1])
                 break
@@ -319,7 +318,9 @@ def get_driver(proxy):
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-extensions")
     options.add_argument("--dns-prefetch-disable")
-    options.add_argument("--disable-browser-side-navigation") # https://stackoverflow.com/a/49123152/1689770
+    options.add_argument(
+        "--disable-browser-side-navigation"
+    )  # https://stackoverflow.com/a/49123152/1689770
 
     caps = webdriver.DesiredCapabilities.CHROME.copy()
     caps["pageLoadStrategy"] = "normal"
