@@ -213,29 +213,6 @@ NETLIFY_TRIGGER_INTERVAL = 10
 # how often to check for delayed tasks (minutes)
 DELAYED_TASKS_INTERVAL = 2
 
-USVF_SYNC = env.bool("USVF_SYNC", False)
-USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
-USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
-
-UPTIME_ENABLED = env.bool("UPTIME_ENABLED", default=False)
-UPTIME_CHECK_CRON_MINUTE = env.str("UPTIME_CHECK_CRON_MINUTE", default="*/15")
-UPTIME_CHECK_DOWN_CRON_MINUTE = env.str("UPTIME_CHECK_DOWN_CRON_MINUTE", default="*/5")
-UPTIME_TWITTER_CRON_MINUTE = env.str("UPTIME_TWITTER_CRON_MINUTE", default="*/5")
-
-# This (daily?) sync is only to catch stragglers that don't sync in realtime.
-ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
-ACTIONNETWORK_SYNC_DAILY = env.bool("ACTIONNETWORK_SYNC_DAILY", False)
-ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
-ACTIONNETWORK_SYNC_MINUTE = env.int("ACTIONNETWORK_SYNC_MINUTE", 45)
-
-# This daily sync refreshes region-level OVBM links
-OVBM_SYNC = env.bool("OVBM_SYNC", False)
-OVBM_SYNC_HOUR = env.int("OVBM_SYNC_HOUR", 4)
-OVBM_SYNC_MINUTE = env.int("OVBM_SYNC_MINUTE", 30)
-
-SMS_OPTOUT_POLL = env.bool("SMS_OPTOUT_POLL", False)
-SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*/5")
-
 CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=3)
@@ -260,46 +237,6 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_TIMEZONE = "UTC"
-
-if USVF_SYNC:
-    CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
-        "task": "official.tasks.sync_usvotefoundation",
-        "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
-    }
-if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
-    CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
-        "task": "integration.tasks.sync_actionnetwork",
-        "schedule": crontab(
-            minute=ACTIONNETWORK_SYNC_MINUTE, hour=ACTIONNETWORK_SYNC_HOUR
-        ),
-    }
-if OVBM_SYNC:
-    CELERY_BEAT_SCHEDULE["trigger-ovbm-sync"] = {
-        "task": "absentee.tasks.refresh_region_links",
-        "schedule": crontab(minute=OVBM_SYNC_MINUTE, hour=OVBM_SYNC_HOUR),
-    }
-if UPTIME_ENABLED:
-    if UPTIME_CHECK_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-check"] = {
-            "task": "leouptime.tasks.check",
-            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-        }
-    #    if UPTIME_CHECK_DOWN_CRON_MINUTE:
-    #        CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
-    #            "task": "leouptime.tasks.check_uptime_downsites",
-    #            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-    #        }
-    if UPTIME_TWITTER_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-tweet-uptime"] = {
-            "task": "leouptime.tasks.tweet_uptime",
-            "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
-        }
-
-if SMS_OPTOUT_POLL:
-    CELERY_BEAT_SCHEDULE["trigger-sms-optout-poll"] = {
-        "task": "smsbot.tasks.poll_optout",
-        "schedule": crontab(minute=SMS_OPTOUT_POLL_MINUTE),
-    }
 
 DJANGO_CELERY_RESULTS = {"ALLOW_EDITS": False}
 
@@ -654,6 +591,15 @@ ALLOY_SECRET = env.str("ALLOY_SECRET", default=None)
 
 USVOTEFOUNDATION_KEY = env.str("USVOTEFOUNDATION_KEY", default=None)
 USVF_GEOCODE = env.bool("USVF_GEOCODE", default=False)
+USVF_SYNC = env.bool("USVF_SYNC", False)
+USVF_SYNC_HOUR = env.int("USVF_SYNC_HOUR", 6)
+USVF_SYNC_MINUTE = env.int("USVF_SYNC_MINUTE", 30)
+
+if USVF_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-usvf-sync"] = {
+        "task": "official.tasks.sync_usvotefoundation",
+        "schedule": crontab(minute=USVF_SYNC_MINUTE, hour=USVF_SYNC_HOUR),
+    }
 
 PHONENUMBER_DEFAULT_REGION = "US"
 PHONENUMBER_DEFAULT_FORMAT = "NATIONAL"
@@ -704,6 +650,14 @@ SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
 # max seconds of messages to fetch from twilio (if we haven't polled in a while)
 SMS_OPTOUT_POLL_MAX_SECONDS = env.int("SMS_OPTOUT_POLL_MAX", 60 * 60 * 24)
 SMS_OPTOUT_NUMBER = env.str("SMS_OPTOUT_NUMBER", None)
+SMS_OPTOUT_POLL = env.bool("SMS_OPTOUT_POLL", False)
+SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*/5")
+
+if SMS_OPTOUT_POLL:
+    CELERY_BEAT_SCHEDULE["trigger-sms-optout-poll"] = {
+        "task": "smsbot.tasks.poll_optout",
+        "schedule": crontab(minute=SMS_OPTOUT_POLL_MINUTE),
+    }
 
 #### END TWILIO CONFIGURATION
 
@@ -759,6 +713,17 @@ ABSENTEE_LEO_FAX_EMAIL_REPLY_TO = env.str(
     "ABSENTEE_LEO_FAX_EMAIL_FROM", default=ABSENTEE_LEO_EMAIL_FROM
 )
 
+# This daily sync refreshes region-level OVBM links
+OVBM_SYNC = env.bool("OVBM_SYNC", False)
+OVBM_SYNC_HOUR = env.int("OVBM_SYNC_HOUR", 4)
+OVBM_SYNC_MINUTE = env.int("OVBM_SYNC_MINUTE", 30)
+
+if OVBM_SYNC:
+    CELERY_BEAT_SCHEDULE["trigger-ovbm-sync"] = {
+        "task": "absentee.tasks.refresh_region_links",
+        "schedule": crontab(minute=OVBM_SYNC_MINUTE, hour=OVBM_SYNC_HOUR),
+    }
+
 #### END ABSENTEE CONFIGURATION
 
 
@@ -798,6 +763,20 @@ ACTIONNETWORK_FORM_CACHE_TIMEOUT = env.int(
 )
 ACTIONNETWORK_FORM_PREFIX = env.str("ACTIONNETWORK_FORM_PREFIX", "staging")
 
+# This (daily?) sync is only to catch stragglers that don't sync in realtime.
+ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)
+ACTIONNETWORK_SYNC_DAILY = env.bool("ACTIONNETWORK_SYNC_DAILY", False)
+ACTIONNETWORK_SYNC_HOUR = env.int("ACTIONNETWORK_SYNC_HOUR", 5)
+ACTIONNETWORK_SYNC_MINUTE = env.int("ACTIONNETWORK_SYNC_MINUTE", 45)
+
+if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
+    CELERY_BEAT_SCHEDULE["trigger-actionnetwork-sync"] = {
+        "task": "integration.tasks.sync_actionnetwork",
+        "schedule": crontab(
+            minute=ACTIONNETWORK_SYNC_MINUTE, hour=ACTIONNETWORK_SYNC_HOUR
+        ),
+    }
+
 #### END ACTIONNETWORK CONFIGURATION
 
 #### OPTIMIZELY CONFIGURATION
@@ -827,6 +806,11 @@ API_KEY_PEPPER = env.str("API_KEY_PEEPER", default="somepepper")
 
 #### UPTIME CONFIGURATION
 
+UPTIME_ENABLED = env.bool("UPTIME_ENABLED", default=False)
+UPTIME_CHECK_CRON_MINUTE = env.str("UPTIME_CHECK_CRON_MINUTE", default="*/15")
+UPTIME_CHECK_DOWN_CRON_MINUTE = env.str("UPTIME_CHECK_DOWN_CRON_MINUTE", default="*/5")
+UPTIME_TWITTER_CRON_MINUTE = env.str("UPTIME_TWITTER_CRON_MINUTE", default="*/5")
+
 UPTIME_TWITTER_CONSUMER_KEY = env.str("UPTIME_TWITTER_CONSUMER_KEY", default=None)
 UPTIME_TWITTER_CONSUMER_SECRET = env.str("UPTIME_TWITTER_CONSUMER_SECRET", default=None)
 UPTIME_TWITTER_ACCESS_TOKEN = env.str("UPTIME_TWITTER_ACCESS_TOKEN", default=None)
@@ -845,6 +829,28 @@ PROXY_TAG = env.str("PROXY_TAG", "env:dev")
 SELENIUM_URL = env.str("SELENIUM_URL", None)
 
 SLACK_UPTIME_WEBHOOK = env.str("SLACK_UPTIME_WEBHOOK", default=None)
+
+if UPTIME_ENABLED:
+    if UPTIME_CHECK_CRON_MINUTE:
+        CELERY_BEAT_SCHEDULE["trigger-check"] = {
+            "task": "leouptime.tasks.check",
+            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+        }
+    # if UPTIME_CHECK_DOWN_CRON_MINUTE:
+    #    CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
+    #        "task": "leouptime.tasks.check_uptime_downsites",
+    #        "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+    #    }
+    if UPTIME_TWITTER_CRON_MINUTE:
+        CELERY_BEAT_SCHEDULE["trigger-tweet-uptime"] = {
+            "task": "leouptime.tasks.tweet_uptime",
+            "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
+        }
+elif DIGITALOCEAN_KEY:
+    CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
+        "task": "leouptime.tasks.check_proxies",
+        "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+    }
 
 #### END UPTIME CONFIGURATION
 

@@ -14,7 +14,7 @@ from common import enums
 from common.rollouts import get_feature_int
 
 from .models import Proxy
-from .uptime import check_site_with, get_driver, get_sentinel_site
+from .uptime import NoProxyError, check_site_with, get_driver, get_sentinel_site
 
 PROXY_PORT_MIN = 2000
 PROXY_PORT_MAX = 60000
@@ -58,6 +58,20 @@ SETUP = [
 
 
 logger = logging.getLogger("leouptime")
+
+
+def get_random_proxy():
+    proxies = list(
+        Proxy.objects.filter(state=enums.ProxyStatus.UP).order_by(
+            "failure_count", "created_at"
+        )
+    )
+    if len(proxies) < 1:
+        logger.warning(f"no available proxies (only {len(proxies)})")
+        raise NoProxyError(f"{len(proxies)} available (need at least 1)")
+
+    random.shuffle(proxies)
+    return proxies[0]
 
 
 def get_proxies_by_name():

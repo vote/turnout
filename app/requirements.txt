@@ -66,7 +66,7 @@ pdfrw==0.4
 shapely==1.7.*
 django-tsvector-field==0.9.*
 optimizely-sdk==3.5.2
-ovrlib==0.0.3
+ovrlib==0.0.4
 beautifulsoup4==4.9.*
 tweepy==3.8.0
 selenium==3.141.*

@@ -1,5 +1,7 @@
 from celery import shared_task
 
+from common.rollouts import get_feature_bool
+
 
 @shared_task()
 def check_uptime_group(slug, down_sites=False):
@@ -11,10 +13,9 @@ def check_uptime_group(slug, down_sites=False):
 @shared_task()
 def check_uptime():
     from .uptime import check_all
-    from .proxy import check_proxies
 
-    check_proxies()
-    check_all()
+    if get_feature_bool("leouptime", "check"):
+        check_all()
 
     # from .uptime import MONITORS
     # for slug in MONITORS.keys():
@@ -24,6 +25,9 @@ def check_uptime():
 @shared_task()
 def check_uptime_downsites():
     from .uptime import MONITORS
+
+    if not get_feature_bool("leouptime", "check"):
+        return
 
     for slug in MONITORS.keys():
         check_uptime_group.delay(slug, down_sites=True)

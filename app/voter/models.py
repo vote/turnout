@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -20,11 +21,14 @@ class Voter(UUIDModel, TimestampModel):
     state = models.ForeignKey("election.State", on_delete=models.PROTECT, null=True,)
 
     state_voter_id = models.TextField(null=True)
+    state_result = JSONField(null=True)
     last_state_refresh = models.DateField(null=True)
     alloy_person_id = models.IntegerField(null=True)
+    alloy_result = JSONField(null=True)
     last_alloy_refresh = models.DateTimeField(null=True)
     ts_voterbase_id = models.TextField(null=True)
     last_ts_refresh = models.DateTimeField(null=True)
+    ts_result = JSONField(null=True)
 
     # registration status
     registered = models.BooleanField(null=True)
@@ -52,7 +56,12 @@ class Voter(UUIDModel, TimestampModel):
     class Meta:
         ordering = ["-created_at"]
 
-    def refresh_registration_status(self, registered, register_date, last_updated):
+    def refresh_registration_status(
+        self,
+        registered: bool,
+        register_date: datetime.datetime,
+        last_updated: datetime.datetime,
+    ):
         # convert old reg date to datetime for each comparisons
         if self.registration_date:
             old_reg_datetime = datetime.datetime(
@@ -95,61 +104,6 @@ class Voter(UUIDModel, TimestampModel):
             ):
                 # still not registered
                 self.last_registration_refresh = last_updated
-
-    def refresh_status_from_alloy(self, alloy):
-        reg_date = datetime.datetime.strptime(
-            alloy["registration_date"], "%Y-%m-%dT%H:%M:%SZ",
-        ).replace(tzinfo=datetime.timezone.utc)
-        last_updated = datetime.datetime.strptime(
-            alloy["last_updated_date"], "%Y-%m-%dT%H:%M:%SZ",
-        ).replace(tzinfo=datetime.timezone.utc)
-        if reg_date > last_updated:
-            logger.warning(
-                f"Bad data from Alloy: reg date {reg_date} > last_updated {last_updated}: {alloy}"
-            )
-        else:
-            self.refresh_registration_status(
-                alloy["registration_status"] == "Active", reg_date, last_updated
-            )
-            self.last_alloy_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    def refresh_pii_from_alloy(self, alloy):
-        # WARNING: the PII (name, address, dob) returned by alloy is
-        # an echo of your lookup; it does not necessarily reflect the
-        # contents of their database.
-        self.first_name = alloy.get("first_name")
-        self.middle_name = alloy.get("middle_name")
-        self.last_name = alloy.get("last_name")
-        self.suffix = alloy.get("suffix")
-        self.date_of_birth = datetime.datetime.strptime(
-            alloy.get("birth_date"), "%Y-%m-%d"
-        ).replace(tzinfo=datetime.timezone.utc)
-        self.address_full = alloy.get("address")
-        self.city = alloy.get("city")
-        self.zipcode = alloy.get("zip")
-
-    def refresh_status_from_ts(self, ts):
-        reg_date = datetime.datetime.strptime(
-            ts.get("vb.vf_registration_date"), "%Y%m%d"
-        ).replace(tzinfo=datetime.timezone.utc)
-        self.refresh_registration_status(
-            ts.get("vb.voterbase_registration_status") == "Registered",
-            reg_date,
-            reg_date,  # we cannot assume this info is any newer than the date they first registered
-        )
-        self.last_ts_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    def refresh_pii_from_ts(self, ts):
-        self.first_name = ts.get("vb.tsmart_first_name")
-        self.middle_name = ts.get("vb.tsmart_middle_name")
-        self.last_name = ts.get("vb.tsmart_last_name")
-        self.suffix = ts.get("vb.tsmart_name_suffix")
-        self.date_of_birth = datetime.datetime.strptime(
-            ts.get("vb.voterbase_dob"), "%Y%m%d"
-        ).replace(tzinfo=datetime.timezone.utc)
-        self.address_full = ts.get("vb.vf_reg_cass_address_full")
-        self.city = ts.get("vb.vf_reg_cass_city")
-        self.zipcode = ts.get("vb.vf_reg_cass_zip")
 
 
 class TSEarlyVoteAndBallot(models.Model):
