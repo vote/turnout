@@ -184,7 +184,6 @@ def lookup(item):
             voter.last_alloy_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if state_voter_id:
-            logger.info(f"reg_date {state_result.registration_date}")
             voter.last_state_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
             voter.refresh_registration_status(
                 state_result.active,
