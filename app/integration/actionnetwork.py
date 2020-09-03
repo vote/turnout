@@ -4,7 +4,7 @@ import requests
 import sentry_sdk
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 
 from absentee.models import BallotRequest
 from common.apm import tracer
@@ -301,3 +301,28 @@ def sync():
     sync_all_items(BallotRequest)
     sync_all_items(Registration)
     sync_all_items(ReminderRequest)
+
+
+@tracer.wrap()
+def resubscribe_phone(phone):
+    # re-subscribe the most recent user of this phone number
+    person_id_by_date = {}
+    for link in Link.objects.filter(
+        external_tool=ExternalToolType.ACTIONNETWORK
+    ).filter(
+        Q(action__registration__phone=phone)
+        | Q(action__lookup__phone=phone)
+        | Q(action__ballotrequest__phone=phone)
+        | Q(action__reminderrequest__phone=phone)
+    ):
+        person_id_by_date[link.created_at] = link.external_id
+
+    if person_id_by_date:
+        last = sorted(person_id_by_date.keys())[-1]
+        person_id = person_id_by_date[last]
+        response = requests.put(
+            PEOPLE_ENDPOINT.format(person_id=person_id),
+            headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
+            json={"phone_numbers": [{"number": str(phone), "status": "subscribed"}]},
+        )
+        logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")

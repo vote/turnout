@@ -50,7 +50,7 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
 
 
 @shared_task
-def poll_optout() -> None:
-    from .optout import poll
+def poll_twilio() -> None:
+    from .poll import poll
 
     poll()

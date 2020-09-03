@@ -6,7 +6,9 @@ from django.core.cache import cache
 from django.db.models import Max
 from twilio.rest import Client
 
-from smsbot.models import Number
+from common.enums import MessageDirectionType
+from integration.actionnetwork import resubscribe_phone
+from smsbot.models import Number, SMSMessage
 
 logger = logging.getLogger("smsbot")
 
@@ -46,18 +48,49 @@ def poll():
     messages.reverse()  # oldest to newest
     for msg in messages:
         logger.debug(f"msg {msg.from_} {msg.date_created} {msg.body}")
+        n, _ = Number.objects.get_or_create(phone=msg.from_)
+        if SMSMessage.objects.filter(phone=n, twilio_sid=msg.sid).exists():
+            continue
+        SMSMessage.objects.create(
+            phone=n,
+            direction=MessageDirectionType.IN,
+            message=msg.body,
+            twilio_sid=msg.sid,
+        )
         cmd = msg.body.strip().upper()
-        if cmd in ["STOP"]:
+        if cmd in ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"]:
             logger.info(f"Opt-out from {msg.from_} at {msg.date_created}")
-            n, _ = Number.objects.get_or_create(phone=msg.from_)
             n.opt_out_time = msg.date_created
             n.opt_in_time = None
             n.save()
-        if cmd in ["UNSTOP", "JOIN", "YES"]:
+        elif cmd in ["JOIN"]:
             logger.info(f"Opt-in from {msg.from_} at {msg.date_created}")
-            n, _ = Number.objects.get_or_create(phone=msg.from_)
             n.opt_in_time = msg.date_created
             n.opt_out_time = None
             n.save()
+
+            n.send_sms(
+                "Thank you for subscribing to VoteAmerica election alerts. Reply STOP to cancel."
+            )
+
+            # Try to match this to an ActionNetwork subscriber.  Note that this will may fail if the number
+            # has been used more than once.
+            resubscribe_phone(n.phone)
+        elif cmd in ["HELP", "INFO"]:
+            # ActionNetwork handles this
+            pass
+        else:
+            logger.info(f"Auto-reply to {msg.from_} at {msg.date_created}: {msg.body}")
+            if n.opt_out_time:
+                n.send_sms(
+                    "You have previously opted-out of VoteAmerica election alerts. "
+                    "Reply HELP for help, JOIN to re-join."
+                )
+            else:
+                n.send_sms(
+                    "Thanks for contacting VoteAmerica. "
+                    "For more information or assistance visit https://voteamerica.com/faq/ "
+                    "or text STOP to opt-out."
+                )
 
     save_watermark(start)

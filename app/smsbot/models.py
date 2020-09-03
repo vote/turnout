@@ -30,6 +30,7 @@ class SMSMessage(UUIDModel, TimestampModel):
     message = models.TextField(blank=True, null=True)
     status = TurnoutEnumField(SMSDeliveryStatus, null=True)
     status_time = models.DateTimeField(null=True)
+    twilio_sid = models.TextField(null=True, db_index=True)
 
     class Meta(object):
         ordering = ["-created_at"]
@@ -38,7 +39,11 @@ class SMSMessage(UUIDModel, TimestampModel):
         return f"SMSMessage - {self.phone_id} {self.direction}"
 
     def delivery_status_webhook(self):
-        return f"{settings.PRIMARY_ORIGIN}/v1/smsbot/twilio-message-status/{self.uuid}/"
+        if settings.PRIMARY_ORIGIN.startswith("https"):
+            return f"{settings.PRIMARY_ORIGIN}/v1/smsbot/twilio-message-status/{self.uuid}/"
+        else:
+            # twilio rejects http webhooks
+            return None
 
 
 class Number(TimestampModel):
@@ -73,3 +78,5 @@ class Number(TimestampModel):
                 body=text,
                 status_callback=msg.delivery_status_webhook(),
             )
+            msg.twilio_sid = r.sid
+            msg.save()

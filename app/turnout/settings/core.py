@@ -651,11 +651,11 @@ SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
 SMS_OPTOUT_POLL_MAX_SECONDS = env.int("SMS_OPTOUT_POLL_MAX", 60 * 60 * 24)
 SMS_OPTOUT_NUMBER = env.str("SMS_OPTOUT_NUMBER", None)
 SMS_OPTOUT_POLL = env.bool("SMS_OPTOUT_POLL", False)
-SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*/5")
+SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*")
 
 if SMS_OPTOUT_POLL:
-    CELERY_BEAT_SCHEDULE["trigger-sms-optout-poll"] = {
-        "task": "smsbot.tasks.poll_optout",
+    CELERY_BEAT_SCHEDULE["trigger-sms-poll-twilio"] = {
+        "task": "smsbot.tasks.poll_twilio",
         "schedule": crontab(minute=SMS_OPTOUT_POLL_MINUTE),
     }
 

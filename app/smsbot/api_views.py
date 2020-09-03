@@ -71,16 +71,13 @@ def validate_twilio_request(func):
 def twilio(request):
     number = request.data.get("From", None)
     body = request.data.get("Body", "")
+    sid = request.data.get("MessageSid")
     if not number:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        n = Number.objects.get(phone=number)
-    except ObjectDoesNotExist:
-        n = None
-
+    n, created = Number.objects.get_or_create(phone=number)
     SMSMessage.objects.create(
-        phone=number, direction=MessageDirectionType.IN, message=body,
+        phone=n, direction=MessageDirectionType.IN, message=body, twilio_sid=sid,
     )
 
     cmd = body.lower().strip()
@@ -90,7 +87,7 @@ def twilio(request):
     elif cmd in ["join"]:
         # Twilio advanced opt-in will respond here *if* they previously opted out.
         # We'll send an additional message either way.
-        if n and n.opt_in_time:
+        if n.opt_in_time:
             reply = (
                 "You have already signed up for VoteAmerica Election Alerts. "
                 "Reply HELP for help, STOP to cancel."
@@ -102,7 +99,7 @@ def twilio(request):
                 "Reply HELP for help, STOP to cancel."
             )
     elif cmd in ["yes"]:
-        if n and n.opt_in_time:
+        if n.opt_in_time:
             reply = (
                 "You have already signed up for VoteAmerica Election Alerts. "
                 "Reply HELP for help, STOP to cancel."
@@ -113,26 +110,22 @@ def twilio(request):
                 "Msg & Data rates may apply. 4 msgs/month. "
                 "Reply HELP for help, STOP to cancel."
             )
-            if not n:
-                n = Number(phone=number)
             n.opt_in_time = timezone.now()
             n.opt_out_time = None
             n.save()
     elif cmd in ["stop"]:
         # Twilio advanced opt-in will always respond here.
         reply = None
-        if not n:
-            n = Number(phone=number)
         n.opt_out_time = timezone.now()
         n.opt_in_time = None
         n.save()
     else:
-        if n and n.opt_in_time:
+        if n.opt_in_time:
             reply = (
                 "Hi, I am the VoteAmerica chat bot. Nice to hear from you again!\n"
                 "HELP for help, STOP to cancel."
             )
-        elif n and n.opt_out_time:
+        elif n.opt_out_time:
             # Twilio won't let them see this, but we can try anyway in case we are
             # out of sync with twilio's blacklist.
             reply = (
@@ -152,7 +145,7 @@ def twilio(request):
     resp = MessagingResponse()
     if reply:
         reply_message = SMSMessage.objects.create(
-            phone=number, direction=MessageDirectionType.OUT, message=reply,
+            phone=n, direction=MessageDirectionType.OUT, message=reply,
         )
         resp.message(reply, action=reply_message.delivery_status_webhook())
     return HttpResponse(str(resp))
