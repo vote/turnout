@@ -19,8 +19,7 @@ from .models import Link
 logger = logging.getLogger("integration")
 
 
-#RETURN_ENVELOPE = "renv_4012d6bf3a8a281"
-RETURN_ENVELOPE = "no_9_single_window"
+RETURN_ENVELOPE = "renv_4012d6bf3a8a281"
 COVER_SHEET_PERFORATED_PAGE = 1
 
 FORM_CUSTOM = "absentee/templates/pdf/states/{state_id}-lob.pdf"
