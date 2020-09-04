@@ -932,6 +932,11 @@ def test_complete_lob_disallow2(
     register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, ref)
     assert register_response.status_code == 400
 
+    ref["request_mailing_address1"] = ""
+    ref["request_mailing_city"] = ""
+    register_response = client.post(REGISTER_API_ENDPOINT_INCOMPLETE, ref)
+    assert register_response.status_code == 200
+
 
 # Test confirmation link that sends the actual letter
 @pytest.mark.django_db

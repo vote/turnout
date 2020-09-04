@@ -1041,13 +1041,26 @@ def test_complete_lob_disallow(
 
 @pytest.mark.django_db
 def test_complete_lob_disallow2(
-    mock_get_absentee_contact_info, mock_verify_address, feature_flag_on,
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
+    feature_flag_on,
+    mock_check_unfinished,
 ):
+    mock_get_regions_for_address.return_value = (
+        [baker.make_recipe("official.region", external_id=12345)],
+        False,
+    )
+
     client = APIClient()
     ref = VALID_ABSENTEE_INITIAL.copy()
     ref["request_mailing_address1"] = "123 A St."
     response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, ref)
     assert response.status_code == 400
+
+    ref["request_mailing_address1"] = ""
+    response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, ref)
+    assert response.status_code == 200
 
 
 # Test confirmation link that sends the actual letter

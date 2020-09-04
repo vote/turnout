@@ -124,7 +124,7 @@ class RegistrationSerializer(TrackingSerializer, ActionSerializer):
             or not self.instance.state.allow_print_and_forward
         ):
             if any(
-                k in data
+                data.get(k)
                 for k in [
                     "request_mailing_address1",
                     "request_mailing_address2",
