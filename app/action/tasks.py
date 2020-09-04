@@ -18,8 +18,6 @@ def action_finish(action_pk: str) -> None:
     if settings.ACTIONNETWORK_SYNC:
         sync_action_to_actionnetwork.delay(action_pk)
 
-    voter_lookup_action(action_pk)
-
     if settings.SMS_POST_SIGNUP_ALERT and item.phone:
         if "BallotRequest" in str(type(item)):
             tool = "absentee"
@@ -34,6 +32,8 @@ def action_finish(action_pk: str) -> None:
         send_welcome_sms.apply_async(
             args=(str(item.phone), tool), countdown=settings.SMS_OPTIN_REMINDER_DELAY,
         )
+
+    voter_lookup_action(action_pk)
 
 
 @shared_task
@@ -56,8 +56,6 @@ def action_check_unfinished(action_pk: str) -> None:
     if settings.ACTIONNETWORK_SYNC:
         sync_action_to_actionnetwork.delay(action_pk)
 
-    voter_lookup_action(action_pk)
-
     item = action.get_source_item()
     if item.phone:
         n = _send_welcome_sms(str(item.phone))
@@ -76,3 +74,5 @@ def action_check_unfinished(action_pk: str) -> None:
         n.send_sms(
             f"It looks like you didn't finish {what}. To continue the process, please visit {shorten_url(url)}"
         )
+
+    voter_lookup_action(action_pk)

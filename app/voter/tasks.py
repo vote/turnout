@@ -155,14 +155,17 @@ def lookup(item):
 
         # refresh registration
         if ts_id:
-            reg_date = datetime.datetime.strptime(
-                ts_result.get("vb.vf_registration_date"), "%Y%m%d"
-            ).replace(tzinfo=datetime.timezone.utc)
-            voter.refresh_registration_status(
-                ts_result.get("vb.voterbase_registration_status") == "Registered",
-                reg_date,
-                reg_date,  # we cannot assume this info is any newer than the date they first registered
-            )
+            try:
+                reg_date = datetime.datetime.strptime(
+                    ts_result.get("vb.vf_registration_date"), "%Y%m%d"
+                ).replace(tzinfo=datetime.timezone.utc)
+                voter.refresh_registration_status(
+                    ts_result.get("vb.voterbase_registration_status") == "Registered",
+                    reg_date,
+                    reg_date,  # we cannot assume this info is any newer than the date they first registered
+                )
+            except ValueError:
+                logger.warning(f"No registration date for {ts_id}: {ts_result}")
             voter.ts_result = ts_result
             voter.last_ts_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
 
