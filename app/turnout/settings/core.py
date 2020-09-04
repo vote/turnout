@@ -566,6 +566,11 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "i90": {
+            "handlers": [handler],
+            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
+            "propagate": False,
+        },
     },
 }
 
@@ -634,6 +639,12 @@ MANAGEMENT_NOTIFICATION_FROM = env.str(
 
 #### END MANAGEMENT INTERFACE CONFIGURATION
 
+#### ACTION CONFIGURATION
+
+ACTION_CHECK_UNFINISHED_DELAY = env.int("ACTION_CHECK_UNFINISHED_DELAY", 900)
+
+#### END ACTION CONFIGURATION
+
 #### TWILIO CONFIGURATION
 
 TWILIO_ACCOUNT_SID = env.str("TWILIO_ACCOUNT_SID", default=None)
@@ -692,8 +703,9 @@ REGISTER_RESUME_URL = env.str(
 REGISTER_JWT_EXPIRATION_MINUTES = env.int("REGISTER_JWT_EXPIRATION_MINUTES", default=60)
 
 REGISTER_LOB_CONFIRM_NAG_SECONDS = env.int(
-    "REGISTER_LOB_CONFIRM_NAG_SECONDS", default=SMS_OPTIN_REMINDER_DELAY + 5,
+    "REGISTER_LOB_CONFIRM_NAG_SECONDS", default=300,
 )
+REGISTER_UPSELL_DELAY_SECONDS = env.int("REGISTER_UPSELL_DELAY_SECONDS", default=300)
 
 #### END REGISTER CONFIGURATION
 
@@ -712,6 +724,8 @@ ABSENTEE_LEO_EMAIL_FROM = env.str(
 ABSENTEE_LEO_FAX_EMAIL_REPLY_TO = env.str(
     "ABSENTEE_LEO_FAX_EMAIL_FROM", default=ABSENTEE_LEO_EMAIL_FROM
 )
+
+ABSENTEE_UPSELL_DELAY_SECONDS = env.int("ABSENTEE_UPSELL_DELAY_SECONDS", default=300)
 
 # This daily sync refreshes region-level OVBM links
 OVBM_SYNC = env.bool("OVBM_SYNC", False)
@@ -893,3 +907,10 @@ RETURN_ADDRESS = env.json(
 )
 
 #### END LOB CONFIGURATION
+
+#### I90 CONFIGURATION
+
+I90_KEY = env.str("I90_KEY", None)
+I90_URL = env.str("I90_URL", "https://go.voteamerica.com")
+
+#### END I90 CONFIGURATION

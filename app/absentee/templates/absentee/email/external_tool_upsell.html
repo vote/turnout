@@ -1,0 +1,56 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+{{ recipient.first_name }},<br><br>
+
+Thanks for requesting your absentee ballot. Here are the next steps:<br><br>
+
+{% if state_info.external_tool_absentee_ballot_tracker %}
+<strong>Track your absentee ballot</strong><br><br>
+{{ ballot_request.state }} has an online tool to <a href="{{ state_info.external_tool_absentee_ballot_tracker }}">track the progress of your absentee ballot</a>.  You should use to
+
+<ul>
+  <li>confirm that your ballot request is processed by the state</li>
+  <li>see when your ballot is mailed to you</li>
+  <li>confirm that your completed and returned ballot is received</li>
+</ul>
+<br><br><br>
+{% endif %}
+
+<strong>Complete your ballot carefully</strong><br><br>
+{{ state_info.id_requirements_vbm|markdownify }}
+<br><br><br>
+
+<strong>Return your ballot early</strong><br><br>
+You should return your completed absentee ballot as early as possible to ensure that it is received in time
+to be counted, even if there are unexpected postal delays.
+<br><br><br>
+
+{% if state_info.vbm_state_provides_dropboxes %}
+<strong>Drop off your ballot in person</strong><br><br>
+{{ ballot_request.state }} may provide a ballot dropbox near you.  For information about dropbox locations, please visit your state's
+{% if state_info.external_tool_polling_place %}<a href="{{ state_info.external_tool_polling_place  }}">polling place locator</a> or
+{% endif %}
+<a href="{{ state_info.sos_election_website }}">election website</a>.
+<br><br><br>
+{% endif %}
+
+{% if state_info.external_tool_polling_place %}
+<strong>Find your polling place</strong><br><br>
+{{ ballot_request.state }} provides an online <a href="{{ state_info.external_tool_polling_place }}">polling place lookup tool</a>.<br><br><br>
+{% endif %}
+
+{% if subscriber.is_first_party %}
+<strong>One last thing</strong><br><br>
+We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{lookup.email}}&firstname={{lookup.first_name}}&lastname={{lookup.last_name}}&zip={{lookup.zipcode}}&city={{lookup.city}}&state={{lookup.state.code}}&phone={{lookup.phone.as_e164}}&addr1={{lookup.address1}}&refcode=register_file_notification" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

@@ -111,11 +111,8 @@ def apikey_override(settings):
 
 
 @pytest.fixture()
-def smsbot_patch(settings, mocker):
-    settings.SMS_OPTIN_REMINDER_DELAY = 150
-    settings.SMS_POST_SIGNUP_ALERT = True
-    mocker.patch("verifier.api_views.voter_lookup_action")
-    return mocker.patch("verifier.api_views.send_welcome_sms")
+def mock_finish(settings, mocker):
+    return mocker.patch("verifier.api_views.action_finish.delay")
 
 
 def test_get_request_disallowed():
@@ -170,7 +167,7 @@ def test_proper_api_calls(requests_mock):
 
 
 @pytest.mark.django_db
-def test_lookup_created(requests_mock, smsbot_patch, mock_apicalls):
+def test_lookup_created(requests_mock, mock_finish, mock_apicalls):
     client = APIClient()
     targetsmart_response_data = load_targetsmart("active.json")
     alloy_response_data = load_alloy("active.json")
@@ -206,7 +203,7 @@ def test_lookup_created(requests_mock, smsbot_patch, mock_apicalls):
 
 
 @pytest.mark.django_db
-def test_mismatch_a_active_ts_not_found(mock_apicalls, smsbot_patch):
+def test_mismatch_a_active_ts_not_found(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("not_found.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -219,7 +216,7 @@ def test_mismatch_a_active_ts_not_found(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_mismatch_ts_active_a_not_found(mock_apicalls, smsbot_patch):
+def test_mismatch_ts_active_a_not_found(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("not_found.json"), load_targetsmart("active.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -232,7 +229,7 @@ def test_mismatch_ts_active_a_not_found(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_mismatch_ts_active_a_inactive(mock_apicalls, smsbot_patch):
+def test_mismatch_ts_active_a_inactive(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("inactive.json"), load_targetsmart("active.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -245,7 +242,7 @@ def test_mismatch_ts_active_a_inactive(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_dual_match(mock_apicalls, smsbot_patch):
+def test_dual_match(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -258,7 +255,7 @@ def test_dual_match(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_ts_too_many(mock_apicalls, smsbot_patch):
+def test_ts_too_many(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("too_many.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -271,7 +268,7 @@ def test_ts_too_many(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_not_found(mock_apicalls, smsbot_patch):
+def test_not_found(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("not_found.json"), load_targetsmart("not_found.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -284,7 +281,7 @@ def test_not_found(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_ts_error(mock_apicalls, smsbot_patch):
+def test_ts_error(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(
         load_alloy("active.json"), load_targetsmart("bad_character_error.json")
@@ -299,7 +296,7 @@ def test_ts_error(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_dual_error(mock_apicalls, smsbot_patch):
+def test_dual_error(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls({"error": "Boo"}, {"error": "No!!!"})
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
@@ -309,19 +306,17 @@ def test_dual_error(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_smsbot_trigger(mock_apicalls, smsbot_patch):
+def test_finish(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
     client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
 
-    smsbot_patch.apply_async.assert_called_once_with(
-        args=("(312) 928-9292", "verifier"), countdown=150
-    )
+    mock_finish.assert_called_once()
 
 
 @pytest.mark.django_db
-def test_sourcing(mock_apicalls, mocker, smsbot_patch):
+def test_sourcing(mock_apicalls, mocker, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
@@ -343,7 +338,7 @@ def test_sourcing(mock_apicalls, mocker, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_default_subscriber(mock_apicalls, smsbot_patch):
+def test_default_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
@@ -361,7 +356,7 @@ def test_default_subscriber(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_inactive_subscriber(mock_apicalls, smsbot_patch):
+def test_inactive_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
@@ -404,7 +399,7 @@ def test_inactive_subscriber(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_custom_subscriber(mock_apicalls, smsbot_patch):
+def test_custom_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
@@ -427,7 +422,7 @@ def test_custom_subscriber(mock_apicalls, smsbot_patch):
 
 
 @pytest.mark.django_db
-def test_invalid_subscriber_key(mock_apicalls, smsbot_patch):
+def test_invalid_subscriber_key(mock_apicalls, mock_finish):
     client = APIClient()
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 

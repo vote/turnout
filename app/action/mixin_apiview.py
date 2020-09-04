@@ -129,6 +129,7 @@ class IncompleteActionViewSet(CreateModelMixin, UpdateModelMixin, GenericViewSet
             )
 
         for event_type in initial_events:
-            action_object.action.track_event(event_type)
+            event = action_object.action.track_event(event_type)
+            event.check_hooks(self.tool)
 
         return action_object

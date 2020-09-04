@@ -1,0 +1,35 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+{{ recipient.first_name }},<br><br>
+
+Thanks for registering to vote. Here are the next steps:<br><br>
+
+<strong>Vote by mail</strong><br><br>
+{{ state_info.vbm_absentee_ballot_rules|markdownify }}<br><br>
+We can help you <a href="{{ vbm_link }}">request a ballot</a> so you can vote by mail.<br><br><br>
+
+{% if state_info.2020_early_voting_start %}
+<strong>Vote early</strong><br><br>
+Early voting in {{ registration.state }} starts {{ state_info.2020_early_voting_start }} and ends {{ state_info.2020_early_voting_ends }}.  Avoids the crowds and vote early!<br><br><br>
+{% endif %}
+
+{% if state_info.external_tool_polling_place %}
+<strong>Find your polling place</strong><br><br>
+{{ registration.state }} provides an online <a href="{{ state_info.external_tool_polling_place }}">polling place lookup tool</a>.<br><br><br>
+{% endif %}
+
+{% if subscriber.is_first_party %}
+<strong>One last thing</strong><br><br>
+We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{lookup.email}}&firstname={{lookup.first_name}}&lastname={{lookup.last_name}}&zip={{lookup.zipcode}}&city={{lookup.city}}&state={{lookup.state.code}}&phone={{lookup.phone.as_e164}}&addr1={{lookup.address1}}&refcode=register_file_notification" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

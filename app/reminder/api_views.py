@@ -3,11 +3,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from action.tasks import action_finish
 from election.models import State
 
 from .models import ReminderRequest
 from .serializers import ReminderRequestSerializer
-from .tasks import reminderrequest_followup
 
 
 class ReminderRequestViewSet(CreateModelMixin, GenericViewSet):
@@ -28,6 +28,6 @@ class ReminderRequestViewSet(CreateModelMixin, GenericViewSet):
 
         response = {"action_id": instance.action.pk}
 
-        reminderrequest_followup.delay(instance.pk)
+        action_finish.delay(instance.action.pk)
 
         return Response(response)

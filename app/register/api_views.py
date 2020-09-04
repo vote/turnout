@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from action.mixin_apiview import IncompleteActionViewSet
+from action.tasks import action_check_unfinished, action_finish
 from common.enums import (
     EventType,
     PoliticalParties,
@@ -20,10 +21,7 @@ from common.enums import (
     TurnoutActionStatus,
 )
 from integration.lob import check_deliverable, generate_lob_token, send_letter
-from integration.tasks import sync_registration_to_actionnetwork
 from official.api_views import get_regions_for_address
-from smsbot.tasks import send_welcome_sms
-from voter.tasks import voter_lookup_action
 
 from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration
@@ -35,6 +33,7 @@ logger = logging.getLogger("register")
 
 
 class RegistrationViewSet(IncompleteActionViewSet):
+    tool = "register"
     model = Registration
     serializer_class = RegistrationSerializer
     queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
@@ -106,15 +105,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
             process_registration(registration, state_id_number, is_18_or_over)
 
         # common reg completion path
-        if settings.SMS_POST_SIGNUP_ALERT:
-            send_welcome_sms.apply_async(
-                args=(str(registration.phone), "register"),
-                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-            )
-
-        if settings.ACTIONNETWORK_SYNC:
-            sync_registration_to_actionnetwork.delay(registration.uuid)
-        voter_lookup_action(registration.action.uuid)
+        action_finish.delay(registration.action.uuid)
 
     def after_create(self, action_object):
         custom_link = get_custom_ovr_link(action_object)
@@ -123,11 +114,10 @@ class RegistrationViewSet(IncompleteActionViewSet):
             action_object.custom_ovr_link = custom_link
             action_object.save(update_fields=["custom_ovr_link"])
 
-        if settings.SMS_POST_SIGNUP_ALERT:
-            send_welcome_sms.apply_async(
-                args=(str(action_object.phone), "register"),
-                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-            )
+        action_check_unfinished.apply_async(
+            args=(action_object.action.pk,),
+            countdown=settings.ACTION_CHECK_UNFINISHED_DELAY,
+        )
 
     def create_or_update_response(self, action_object):
         response = {

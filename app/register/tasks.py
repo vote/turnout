@@ -74,12 +74,26 @@ def send_registration_reminder(registration_pk: str) -> None:
 @shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_print_and_forward_nag")
 def send_print_and_forward_confirm_nag(registration_pk: str) -> None:
+    from smsbot.tasks import send_welcome_sms
     from .models import Registration
     from .notification import trigger_print_and_forward_confirm_nag
 
     registration = Registration.objects.select_related().get(pk=registration_pk)
+    send_welcome_sms(str(registration.phone), "register")
     if registration.action.event_set.filter(
         event_type=EventType.FINISH_LOB_CONFIRM
     ).exists():
         return
     trigger_print_and_forward_confirm_nag(registration)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.register.external_tool_upsell")
+def external_tool_upsell(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_external_tool_upsell
+    from smsbot.tasks import send_welcome_sms
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    send_welcome_sms(str(registration.phone), "register")
+    trigger_external_tool_upsell(registration)

@@ -14,6 +14,7 @@ from voter.tasks import voter_lookup_action
 log = logging.getLogger("absentee")
 
 
+## DEPRECATED ## REMOVE ME SOON ##
 @shared_task
 @statsd.timed("turnout.absentee.ballotrequest_followup")
 def ballotrequest_followup(ballotrequest_pk: str) -> None:
@@ -148,3 +149,15 @@ def send_print_and_forward_confirm_nag(pk: str) -> None:
     ).exists():
         return
     trigger_print_and_forward_confirm_nag(ballot_request)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.absentee.external_tool_upsell")
+def external_tool_upsell(ballot_request_pk: str) -> None:
+    from .models import BallotRequest
+    from .notification import trigger_external_tool_upsell
+    from smsbot.tasks import send_welcome_sms
+
+    ballot_request = BallotRequest.objects.select_related().get(pk=ballot_request_pk)
+    send_welcome_sms(str(ballot_request.phone), "absentee")
+    trigger_external_tool_upsell(ballot_request)

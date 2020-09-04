@@ -13,13 +13,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from action.mixin_apiview import IncompleteActionViewSet
+from action.tasks import action_check_unfinished, action_finish
 from common.enums import SubmissionType, TurnoutActionStatus
 from common.rollouts import flag_enabled_for_state
 from election.models import State, StateInformation
 from integration.lob import check_deliverable, generate_lob_token, send_letter
 from official.api_views import get_regions_for_address
 from official.models import Region
-from smsbot.tasks import send_welcome_sms
 
 from .contactinfo import get_absentee_contact_info
 from .generateform import process_ballot_request
@@ -27,7 +27,6 @@ from .models import BallotRequest
 from .region_links import ovbm_link_for_ballot_request
 from .serializers import BallotRequestSerializer
 from .state_pdf_data import STATE_DATA
-from .tasks import ballotrequest_followup
 
 logger = logging.getLogger("absentee")
 
@@ -93,6 +92,7 @@ def populate_esign_method(ballot_request: BallotRequest):
 
 
 class BallotRequestViewSet(IncompleteActionViewSet):
+    tool = "absentee"
     model = BallotRequest
     serializer_class = BallotRequestSerializer
     queryset = BallotRequest.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
@@ -158,11 +158,10 @@ class BallotRequestViewSet(IncompleteActionViewSet):
                     "name"
                 ).values("name", "external_id")
 
-        if settings.SMS_POST_SIGNUP_ALERT:
-            send_welcome_sms.apply_async(
-                args=(str(ballot_request.phone), "register"),
-                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-            )
+        action_check_unfinished.apply_async(
+            args=(str(ballot_request.action.pk),),
+            countdown=settings.ACTION_CHECK_UNFINISHED_DELAY,
+        )
 
         return self.create_or_update_response(ballot_request, extra_response_data)
 
@@ -234,7 +233,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
 
     def after_complete(self, action_object, state_id_number, is_18_or_over):
         process_ballot_request(action_object, state_id_number, is_18_or_over)
-        ballotrequest_followup.delay(action_object.pk)
+        action_finish.delay(action_object.pk)
 
 
 class StateMetadataView(APIView):

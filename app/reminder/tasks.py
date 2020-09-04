@@ -7,6 +7,7 @@ from smsbot.tasks import send_welcome_sms
 from voter.tasks import voter_lookup_action
 
 
+## DEPRECATED ## REMOVE ME SOON ##
 @shared_task
 @statsd.timed("turnout.absentee.reminderrequest_followup")
 def reminderrequest_followup(reminderrequest_pk: str) -> None:

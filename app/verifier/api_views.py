@@ -1,21 +1,18 @@
 import logging
 
 import gevent
-from django.conf import settings
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from action.tasks import action_finish
 from common import enums
 from common.analytics import statsd
 from common.apm import tracer
 from common.enums import EventType
 from election.models import State
-from integration.tasks import sync_lookup_to_actionnetwork
-from smsbot.tasks import send_welcome_sms
-from voter.tasks import voter_lookup_action
 
 from .alloy import query_alloy
 from .models import Lookup
@@ -106,15 +103,7 @@ class LookupViewSet(CreateModelMixin, GenericViewSet):
         instance = serializer.save()
         instance.action.track_event(EventType.FINISH)
 
-        if settings.SMS_POST_SIGNUP_ALERT:
-            send_welcome_sms.apply_async(
-                args=(str(instance.phone), "verifier"),
-                countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-            )
-
-        if settings.ACTIONNETWORK_SYNC:
-            sync_lookup_to_actionnetwork.delay(instance.uuid)
-        voter_lookup_action.delay(instance.action.uuid)
+        action_finish.delay(instance.action.pk)
 
         response = {"registered": registered, "action_id": instance.action.pk}
 

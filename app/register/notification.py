@@ -4,6 +4,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from common.apm import tracer
+from common.i90 import shorten_url
+from common.rollouts import get_feature_bool
 from integration.lob import generate_lob_token
 from smsbot.models import Number
 
@@ -15,11 +17,13 @@ STATE_CONFIRMATION_TEMPLATE = "register/email/state_confirmation.html"
 PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE = (
     "register/email/print_and_forward_notification.html"
 )
+EXTERNAL_TOOL_UPSELL_TEMPLATE = "register/email/external_tool_upsell.html"
 
 SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
 REMINDER_SUBJECT = "REMINDER: print and mail your voter registration form."
 PRINT_AND_FORWARD_SUBJECT = "ACTION REQUIRED: confirm to mail your registration form."
 PRINT_AND_FORWARD_REMINDER_SUBJECT = "REMINDER: confirm to mail your registration form."
+EXTERNAL_TOOL_SUBJECT = "You've registered to vote. Here's what's next."
 
 PRINT_AND_FORWARD_CONFIRM_URL = (
     "{base}/register-to-vote/confirm/?id={uuid}&token={token}"
@@ -89,6 +93,13 @@ def trigger_notification(registration: Registration) -> None:
 
 
 def trigger_reminder(registration: Registration) -> None:
+    if registration.request_mailing_address1:
+        if not get_feature_bool("drip", "register_confirm_reminder"):
+            return
+    else:
+        if not get_feature_bool("drip", "register_download_reminder"):
+            return
+
     content = compile_email(registration)
     send_email(
         registration,
@@ -129,11 +140,47 @@ def trigger_state_confirmation(registration: Registration) -> None:
 
 @tracer.wrap()
 def trigger_print_and_forward_confirm_nag(registration: Registration) -> None:
+    if not get_feature_bool("drip", "register_unfinished"):
+        return
+
     if registration.phone:
         try:
             n = Number.objects.get(phone=registration.phone)
             n.send_sms(
                 f"Before we mail your registration form, you need to click the confirmation link in the email we just sent to {registration.email} from VoteAmerica."
+            )
+        except ObjectDoesNotExist:
+            pass
+
+
+@tracer.wrap()
+def trigger_external_tool_upsell(registration: Registration) -> None:
+    if not get_feature_bool("drip", "register_external"):
+        return
+
+    query_params = registration.get_query_params()
+    vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+    content = render_to_string(
+        EXTERNAL_TOOL_UPSELL_TEMPLATE,
+        {
+            "registration": registration,
+            "subscriber": registration.subscriber,
+            "recipient": {
+                "first_name": registration.first_name,
+                "last_name": registration.last_name,
+                "email": registration.email,
+            },
+            "state_info": registration.state.data,
+            "vbm_link": vbm_link,
+        },
+    )
+    send_email(registration, EXTERNAL_TOOL_SUBJECT, content)
+
+    if registration.phone:
+        try:
+            n = Number.objects.get(phone=registration.phone)
+            n.send_sms(
+                f"Thank you for registering to vote! We can also help you request an absentee ballot to vote by mail at {shorten_url(vbm_link)}"
             )
         except ObjectDoesNotExist:
             pass

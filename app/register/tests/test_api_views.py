@@ -149,8 +149,13 @@ LOB_LETTER_CONFIRM_API_ENDPOINT = (
 
 
 @pytest.fixture()
-def mock_sms(mocker):
-    mocker.patch("register.api_views.send_welcome_sms")
+def mock_check_unfinished(mocker):
+    return mocker.patch("register.api_views.action_check_unfinished")
+
+
+@pytest.fixture()
+def mock_upsell(mocker):
+    return mocker.patch("register.event_hooks.external_tool_upsell.apply_async")
 
 
 @pytest.fixture
@@ -160,10 +165,7 @@ def mock_verify_address(mocker):
 
 @pytest.fixture()
 def submission_task_patch(mocker):
-    mocker.patch("register.api_views.send_welcome_sms")
-    mocker.patch("register.api_views.sync_registration_to_actionnetwork")
-    mocker.patch("register.api_views.voter_lookup_action")
-    mocker.patch("voter.tasks.get_feature")
+    mocker.patch("register.api_views.action_finish")
     return mocker.patch("register.api_views.process_registration")
 
 
@@ -206,7 +208,7 @@ def test_blank_api_request():
 
 
 @pytest.mark.django_db
-def test_register_object_created(submission_task_patch):
+def test_register_object_created(submission_task_patch, mock_check_unfinished):
     client = APIClient()
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)
@@ -249,7 +251,7 @@ def test_register_object_created(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_non_url_embed_url(submission_task_patch):
+def test_non_url_embed_url(submission_task_patch, mock_check_unfinished):
     client = APIClient()
 
     new_valid_restration = copy(VALID_REGISTRATION)
@@ -264,7 +266,7 @@ def test_non_url_embed_url(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_default_subscriber(submission_task_patch):
+def test_default_subscriber(mock_check_unfinished, submission_task_patch):
     client = APIClient()
 
     first_subscriber = Client.objects.first()
@@ -283,7 +285,7 @@ def test_default_subscriber(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_custom_subscriber(submission_task_patch):
+def test_custom_subscriber(mock_check_unfinished, submission_task_patch):
     client = APIClient()
 
     second_subscriber = baker.make_recipe("multi_tenant.client")
@@ -307,7 +309,7 @@ def test_custom_subscriber(submission_task_patch):
 
 
 @pytest.mark.django_db
-def test_invalid_subscriber_key(submission_task_patch):
+def test_invalid_subscriber_key(mock_check_unfinished, submission_task_patch):
     client = APIClient()
 
     first_subscriber = Client.objects.first()
@@ -373,7 +375,7 @@ def test_invalid_state():
 
 
 @pytest.mark.django_db
-def test_event_tracking(mock_sms):
+def test_event_tracking(mock_upsell, mock_check_unfinished):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE,
@@ -399,9 +401,11 @@ def test_event_tracking(mock_sms):
         == 1
     )
 
+    mock_upsell.assert_called_once()
+
 
 @pytest.mark.django_db
-def test_update_status(mock_sms):
+def test_update_status(mock_check_unfinished):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -425,7 +429,7 @@ def test_update_status(mock_sms):
 
 
 @pytest.mark.django_db
-def test_invalid_update_status(mock_sms):
+def test_invalid_update_status(mock_check_unfinished):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -448,7 +452,7 @@ def test_invalid_update_status(mock_sms):
 
 
 @pytest.mark.django_db
-def test_bad_update_status(mock_sms):
+def test_bad_update_status(mock_check_unfinished):
     client = APIClient()
     register_response = client.post(
         REGISTER_API_ENDPOINT_INCOMPLETE, VALID_REGISTRATION
@@ -553,7 +557,7 @@ def mock_ovrlib_session_dl(mocker):
 
 @pytest.mark.django_db
 def test_pa_nodlorsig(
-    mock_sms, mock_ovrlib_session_dl, mock_region, state_confirmation_email
+    mock_check_unfinished, mock_ovrlib_session_dl, mock_region, state_confirmation_email
 ):
     client = APIClient()
     register_response = client.post(
@@ -582,7 +586,10 @@ def test_pa_nodlorsig(
 
 @pytest.mark.django_db
 def test_pa_nodlorsig_few_regions(
-    mock_sms, mock_ovrlib_session_dl, mock_few_regions, state_confirmation_email
+    mock_check_unfinished,
+    mock_ovrlib_session_dl,
+    mock_few_regions,
+    state_confirmation_email,
 ):
     client = APIClient()
     register_response = client.post(
@@ -613,7 +620,10 @@ def test_pa_nodlorsig_few_regions(
 
 @pytest.mark.django_db
 def test_pa_nodlorsig_all_regions(
-    mock_sms, mock_ovrlib_session_dl, mock_all_regions, state_confirmation_email
+    mock_check_unfinished,
+    mock_ovrlib_session_dl,
+    mock_all_regions,
+    state_confirmation_email,
 ):
     client = APIClient()
     register_response = client.post(
@@ -640,7 +650,11 @@ def test_pa_nodlorsig_all_regions(
 
 @pytest.mark.django_db
 def test_pa_dl(
-    submission_task_patch, mock_ovrlib_session_dl, mock_region, state_confirmation_email
+    mock_check_unfinished,
+    submission_task_patch,
+    mock_ovrlib_session_dl,
+    mock_region,
+    state_confirmation_email,
 ):
     client = APIClient()
     register_response = client.post(
@@ -709,6 +723,7 @@ def mock_ovrlib_session_badssn(mocker):
 
 @pytest.mark.django_db
 def test_pa_sig(
+    mock_check_unfinished,
     submission_task_patch,
     mock_ovrlib_session_baddl,
     mock_region,
@@ -764,7 +779,7 @@ def test_pa_sig(
 
 @pytest.mark.django_db
 def test_complete_lob(
-    submission_task_patch, mock_sms, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_verify_address,
 ):
     # enable print-and-forward for this state
     set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
@@ -800,7 +815,7 @@ def test_complete_lob(
 
 @pytest.mark.django_db
 def test_complete_lob_ignore_undeliverable(
-    submission_task_patch, mock_sms, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_verify_address,
 ):
     # enable print-and-forward for this state
     set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
@@ -854,7 +869,7 @@ def test_complete_lob_ignore_undeliverable(
 
 @pytest.mark.django_db
 def test_complete_lob_disallow(
-    submission_task_patch, mock_sms, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_verify_address,
 ):
     client = APIClient()
     register_response = client.post(
@@ -890,7 +905,7 @@ def test_complete_lob_disallow(
 
 @pytest.mark.django_db
 def test_complete_lob_disallow2(
-    submission_task_patch, mock_sms, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_verify_address,
 ):
     client = APIClient()
     ref = VALID_REGISTRATION.copy()

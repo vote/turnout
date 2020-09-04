@@ -329,5 +329,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.beat_stats_metric_namespace',
         name: 'BEAT_STATS_METRIC_NAMESPACE',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.i90_key',
+        name: 'I90_KEY',
+      },
     ],
 }

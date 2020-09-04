@@ -85,14 +85,14 @@ VALID_ABSENTEE_FULL_MAIL = {
 
 
 @pytest.fixture
-def mock_followup(mocker):
-    return mocker.patch("absentee.api_views.ballotrequest_followup")
+def mock_check_unfinished(mocker):
+    settings.SMS_POST_SIGNUP_ALERT = False
+    return mocker.patch("absentee.api_views.action_check_unfinished")
 
 
 @pytest.fixture
-def mock_sms(mocker):
-    settings.SMS_POST_SIGNUP_ALERT = False
-    return mocker.patch("absentee.api_views.send_welcome_sms")
+def mock_finish(mocker):
+    return mocker.patch("absentee.api_views.action_finish")
 
 
 @pytest.fixture
@@ -165,7 +165,7 @@ def set_fax_forbidden(state):
 # Incomplete create, matching region
 @pytest.mark.django_db
 def test_incomplete_create_single_matching_region(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -208,7 +208,7 @@ def test_incomplete_create_single_matching_region(
 # Incomplete create, matching region, email
 @pytest.mark.django_db
 def test_incomplete_create_single_matching_region_email(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -248,7 +248,7 @@ def test_incomplete_create_single_matching_region_email(
 # Incomplete create, region matching error
 @pytest.mark.django_db
 def test_incomplete_create_region_matching_error(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -292,7 +292,7 @@ def test_incomplete_create_region_matching_error(
 # Incomplete create, no matching regions
 @pytest.mark.django_db
 def test_incomplete_create_no_matching_regions(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -336,7 +336,7 @@ def test_incomplete_create_no_matching_regions(
 # Incomplete create, multiple matching regions
 @pytest.mark.django_db
 def test_incomplete_create_multiple_matching_regions(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -376,7 +376,7 @@ def test_incomplete_create_multiple_matching_regions(
 # Incomplete create, no region matching requested
 @pytest.mark.django_db
 def test_incomplete_create_no_region_matching(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -422,11 +422,11 @@ def test_incomplete_create_no_region_matching(
 # Complete create
 @pytest.mark.django_db
 def test_complete_create(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
-    mock_followup,
     mock_verify_address,
+    mock_finish,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -466,12 +466,13 @@ def test_complete_create(
 
     assert ballot_request.region.external_id == 12345
 
+    mock_finish.delay.assert_called_once_with(ballot_request.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
 # Incomplete update, not filling in esign method
 @pytest.mark.django_db
-def test_incomplete_update_no_esign_filling(mock_sms, mock_verify_address):
+def test_incomplete_update_no_esign_filling(mock_check_unfinished, mock_verify_address):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"],)
 
     client = APIClient()
@@ -509,7 +510,10 @@ def test_incomplete_update_no_esign_filling(mock_sms, mock_verify_address):
 # Incomplete update, filling in esign method
 @pytest.mark.django_db
 def test_incomplete_update_with_esign_filling(
-    mock_sms, mock_get_absentee_contact_info, mock_verify_address, feature_flag_on
+    mock_check_unfinished,
+    mock_get_absentee_contact_info,
+    mock_verify_address,
+    feature_flag_on,
 ):
     state = baker.make_recipe("election.state", code=VALID_ABSENTEE_INITIAL["state"])
     set_fax_allowed(state)
@@ -549,10 +553,10 @@ def test_incomplete_update_with_esign_filling(
 # Complete update
 @pytest.mark.django_db
 def test_complete_update(
-    mock_sms,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
-    mock_followup,
     mock_verify_address,
+    mock_finish,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -595,6 +599,7 @@ def test_complete_update(
         "request_mailing_deliverable": None,
     }
 
+    mock_finish.delay.assert_called_once_with(ballot_request.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
@@ -675,7 +680,7 @@ def test_get_esign_method(
     submission_override,
     expected,
     mocker,
-    mock_sms,
+    mock_check_unfinished,
     mock_get_regions_for_address,
     mock_verify_address,
 ):
@@ -748,9 +753,10 @@ def test_get_esign_method(
 # Complete lob
 @pytest.mark.django_db
 def test_complete_lob(
-    mock_followup,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_verify_address,
+    mock_finish,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -871,15 +877,17 @@ def test_complete_lob(
         "request_mailing_deliverable": True,
     }
 
+    mock_finish.delay.assert_called_once_with(ballot_request.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
 # Complete lob
 @pytest.mark.django_db
 def test_complete_lob_force_undeliverable(
-    mock_followup,
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_verify_address,
+    mock_finish,
     process_ballot_request,
     feature_flag_on,
 ):
@@ -973,11 +981,13 @@ def test_complete_lob_force_undeliverable(
         "request_mailing_deliverable": False,
     }
 
+    mock_finish.delay.assert_called_once_with(ballot_request.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
 @pytest.mark.django_db
 def test_complete_lob_disallow(
+    mock_check_unfinished,
     mock_get_absentee_contact_info,
     mock_get_regions_for_address,
     mock_verify_address,
@@ -1026,11 +1036,12 @@ def test_complete_lob_disallow(
     assert ballot_request.request_mailing_city is None
     assert ballot_request.request_mailing_state is None
     assert ballot_request.request_mailing_zipcode is None
+    mock_check_unfinished.apply_async.assert_called_once()
 
 
 @pytest.mark.django_db
 def test_complete_lob_disallow2(
-    mock_followup, mock_get_absentee_contact_info, mock_verify_address, feature_flag_on,
+    mock_get_absentee_contact_info, mock_verify_address, feature_flag_on,
 ):
     client = APIClient()
     ref = VALID_ABSENTEE_INITIAL.copy()

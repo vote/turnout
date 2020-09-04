@@ -37,7 +37,7 @@ VALID_SIGNUP = {
 
 @pytest.fixture
 def mock_followup(mocker):
-    return mocker.patch("reminder.api_views.reminderrequest_followup")
+    return mocker.patch("reminder.api_views.action_finish")
 
 
 def test_get_request_disallowed():

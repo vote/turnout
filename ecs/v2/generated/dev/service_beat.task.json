@@ -396,6 +396,10 @@
             {
                "name": "BEAT_STATS_METRIC_NAMESPACE",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.beat_stats_metric_namespace"
+            },
+            {
+               "name": "I90_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.i90_key"
             }
          ]
       },

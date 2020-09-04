@@ -6,20 +6,19 @@ from django.utils import timezone
 
 from common.analytics import statsd
 
+from .models import Number
 
-@shared_task
-@statsd.timed("turnout.smsbot.tasks.send_welcome_sms")
-def send_welcome_sms(number: str, origin: str = None) -> None:
-    from .models import Number
 
+@statsd.timed("turnout.smsbot.tasks._send_welcome_sms")
+def _send_welcome_sms(number: str, origin: str = None) -> Number:
     if not number:
-        return
+        return None
 
     n, _ = Number.objects.get_or_create(phone=number)
 
     if n.opt_in_time:
         # The user has already opted-in.  Do nothing.
-        return
+        return n
 
     # If Twilio's Advanced opt-in is enabled: If the user has
     #  opted-out (STOP), they won't receive this message.  If they
@@ -34,7 +33,7 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
         + datetime.timedelta(seconds=settings.SMS_OPTIN_REMINDER_RESEND_SECONDS)
         > now
     ):
-        return
+        return n
 
     phrase = {
         "register": "registering to vote via",
@@ -47,6 +46,12 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
     n.save()
 
     n.send_sms(msg)
+    return n
+
+
+@shared_task
+def send_welcome_sms(number: str, origin: str = None) -> None:
+    _send_welcome_sms(number, origin)
 
 
 @shared_task
