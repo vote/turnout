@@ -451,8 +451,10 @@ def tweet_site_status(site):
 
         if settings.SLACK_UPTIME_WEBHOOK:
             down_check_url = f"{settings.WWW_ORIGIN}/v1/leouptime/checks/{site.last_went_down_check.pk}/"
-            slack_message = f"{message} (failing check {check_url})"
-            r = requests.post(settings.SLACK_UPTIME_WEBHOOK, json={"text": slack_message})
+            slack_message = f"{message} (failing check {down_check_url})"
+            r = requests.post(
+                settings.SLACK_UPTIME_WEBHOOK, json={"text": slack_message}
+            )
 
         if not get_feature_bool("leouptime", "tweet"):
             logger.info(f"tweet=false via optimizely; would have sent: {message}")

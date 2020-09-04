@@ -18,6 +18,7 @@ before_script:
   - docker-compose up -d
 
 script:
+  - docker-compose exec server bash -c "autoflake --remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --recursive --exclude /*/migrations/* /app/ && isort --check --recursive -m 3 -tc -w 88 --skip migrations /app/ && black --check --exclude /*/migrations/* /app/"
   - docker-compose exec server pytest -n auto /app/
   - docker-compose exec server mypy /app/
 

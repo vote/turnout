@@ -57,7 +57,8 @@ cacheofficials:
 lint:
 	docker-compose exec server bash -c "autoflake \
 		--remove-unused-variables --remove-all-unused-imports --ignore-init-module-imports --in-place --recursive --exclude /*/migrations/* /app/ && \
-		isort --recursive --skip migrations /app/ && black --exclude /*/migrations/* /app/"
+		isort --recursive -m 3 -tc -w 88 --skip migrations /app/ && \
+		black --exclude /*/migrations/* /app/"
 
 openapi:
 	docker-compose exec server python manage.py generateschema --format openapi openapi.yaml
