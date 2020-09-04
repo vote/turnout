@@ -44,7 +44,10 @@ def lookup(item):
             and alloy["data"]["registration_status"]
         ):
             alloy_result = alloy.get("data")
-            if alloy_result["registration_status"] == "Active":
+            if (
+                alloy_result["registration_status"] == "Active"
+                and alloy_result["registration_date"]
+            ):
                 alloy_id = alloy_result["alloy_person_id"]
 
     # targetsmart
@@ -207,10 +210,10 @@ def lookup(item):
             voter.last_name = alloy_result.get("last_name")
             voter.suffix = alloy_result.get("suffix")
         elif ts_id:
-            voter.first_name = ts_resultget("vb.tsmart_first_name")
-            voter.middle_name = ts_resultget("vb.tsmart_middle_name")
-            voter.last_name = ts_resultget("vb.tsmart_last_name")
-            voter.suffix = ts_resultget("vb.tsmart_name_suffix")
+            voter.first_name = ts_result.get("vb.tsmart_first_name")
+            voter.middle_name = ts_result.get("vb.tsmart_middle_name")
+            voter.last_name = ts_result.get("vb.tsmart_last_name")
+            voter.suffix = ts_result.get("vb.tsmart_name_suffix")
         elif state_voter_id:
             voter.first_name = state_result.first_and_middle_name
             voter.last_name = state_result.last_name
@@ -230,11 +233,11 @@ def lookup(item):
             voter.zipcode = alloy_result.get("zip")
         elif ts_id:
             voter.date_of_birth = datetime.datetime.strptime(
-                ts_resultget("vb.voterbase_dob"), "%Y%m%d"
+                ts_result.get("vb.voterbase_dob"), "%Y%m%d"
             ).replace(tzinfo=datetime.timezone.utc)
-            voter.address_full = ts_resultget("vb.vf_reg_cass_address_full")
-            voter.city = ts_resultget("vb.vf_reg_cass_city")
-            voter.zipcode = ts_resultget("vb.vf_reg_cass_zip")
+            voter.address_full = ts_result.get("vb.vf_reg_cass_address_full")
+            voter.city = ts_result.get("vb.vf_reg_cass_city")
+            voter.zipcode = ts_result.get("vb.vf_reg_cass_zip")
 
         voter.save()
 
