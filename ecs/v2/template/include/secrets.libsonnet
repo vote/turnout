@@ -333,5 +333,13 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.i90_key',
         name: 'I90_KEY',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mymove_id',
+        name: 'MYMOVE_ID',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mymove_secret',
+        name: 'MYMOVE_SECRET',
+      },
     ],
 }

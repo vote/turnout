@@ -797,6 +797,22 @@ if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
 
 #### END ACTIONNETWORK CONFIGURATION
 
+
+#### MYMOVE CONFIGURATION
+
+MYMOVE_ID = env.str("MYMOVE_ID", None)
+MYMOVE_SECRET = env.str("MYMOVE_SECRET", None)
+MYMOVE_PULL_INTERVAL_HOURS = env.int("MYMOVE_PULL_HOURS", 3)
+
+if MYMOVE_ID and MYMOVE_PULL_INTERVAL_HOURS:
+    CELERY_BEAT_SCHEDULE["trigger-sync-mymove"] = {
+        "task": "integration.tasks.sync_mymove",
+        "schedule": crontab(hour=f"*/{MYMOVE_PULL_INTERVAL_HOURS}",),
+    }
+
+#### END MYMOVE CONFIGURATION
+
+
 #### OPTIMIZELY CONFIGURATION
 
 # Defaults to the "local development" environment

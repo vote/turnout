@@ -104,6 +104,8 @@ export LOB_LETTER_WEBHOOK_SECRET=$(aws ssm get-parameter --region $REGION --with
 export RETURN_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.return_address | jq '.Parameter["Value"]' -r)
 export BEAT_STATS_METRIC_NAMESPACE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.beat_stats_metric_namespace | jq '.Parameter["Value"]' -r)
 export I90_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.i90_key | jq '.Parameter["Value"]' -r)
+export MYMOVE_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_id | jq '.Parameter["Value"]' -r)
+export MYMOVE_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_secret | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -218,6 +220,8 @@ if [ "$2" ]; then
     -e RETURN_ADDRESS \
     -e BEAT_STATS_METRIC_NAMESPACE \
     -e I90_KEY \
+    -e MYMOVE_ID \
+    -e MYMOVE_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -307,6 +311,8 @@ else
     -e RETURN_ADDRESS \
     -e BEAT_STATS_METRIC_NAMESPACE \
     -e I90_KEY \
+    -e MYMOVE_ID \
+    -e MYMOVE_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

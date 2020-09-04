@@ -1,12 +1,17 @@
+import logging
+
 from celery import shared_task
 
 from absentee.models import BallotRequest
 from action.models import Action
+from common.rollouts import get_feature_bool
 from register.models import Registration
 from reminder.models import ReminderRequest
 from verifier.models import Lookup
 
 from .actionnetwork import sync, sync_all_items, sync_item
+
+logger = logging.getLogger("integration")
 
 
 @shared_task
@@ -58,3 +63,30 @@ def sync_actionnetwork_ballotrequests():
 @shared_task
 def sync_actionnetwork_reminderrequests():
     sync_all_items(ReminderRequest)
+
+
+@shared_task
+def pull_from_mymove(days=None, hours=None):
+    from .mymove import pull
+
+    pull(days=days, hours=hours)
+
+
+@shared_task
+def push_mymove_to_actionnetwork(limit=None) -> None:
+    from .mymove import push_to_actionnetwork
+
+    push_to_actionnetwork(limit)
+
+
+@shared_task
+def sync_mymove():
+    if get_feature_bool("mymove", "pull_from_mymove"):
+        pull_from_mymove()
+    else:
+        logger.info("mymove.pull_from_mymove=false")
+
+    if get_feature_bool("mymove", "push_to_actionnetwork"):
+        push_mymove_to_actionnetwork()
+    else:
+        logger.info("mymove.push_to_actionnetwork=false")

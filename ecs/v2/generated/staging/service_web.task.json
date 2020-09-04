@@ -404,6 +404,14 @@
             {
                "name": "I90_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.i90_key"
+            },
+            {
+               "name": "MYMOVE_ID",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.mymove_id"
+            },
+            {
+               "name": "MYMOVE_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.staging.mymove_secret"
             }
          ]
       },
