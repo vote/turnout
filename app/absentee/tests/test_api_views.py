@@ -466,7 +466,7 @@ def test_complete_create(
 
     assert ballot_request.region.external_id == 12345
 
-    mock_finish.delay.assert_called_once_with(ballot_request.pk)
+    mock_finish.delay.assert_called_once_with(ballot_request.action.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
@@ -599,7 +599,7 @@ def test_complete_update(
         "request_mailing_deliverable": None,
     }
 
-    mock_finish.delay.assert_called_once_with(ballot_request.pk)
+    mock_finish.delay.assert_called_once_with(ballot_request.action.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
@@ -877,7 +877,7 @@ def test_complete_lob(
         "request_mailing_deliverable": True,
     }
 
-    mock_finish.delay.assert_called_once_with(ballot_request.pk)
+    mock_finish.delay.assert_called_once_with(ballot_request.action.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 
@@ -981,7 +981,7 @@ def test_complete_lob_force_undeliverable(
         "request_mailing_deliverable": False,
     }
 
-    mock_finish.delay.assert_called_once_with(ballot_request.pk)
+    mock_finish.delay.assert_called_once_with(ballot_request.action.pk)
     process_ballot_request.assert_called_with(ballot_request, None, True)
 
 

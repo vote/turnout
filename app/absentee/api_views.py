@@ -233,7 +233,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
 
     def after_complete(self, action_object, state_id_number, is_18_or_over):
         process_ballot_request(action_object, state_id_number, is_18_or_over)
-        action_finish.delay(action_object.pk)
+        action_finish.delay(action_object.action.pk)
 
 
 class StateMetadataView(APIView):

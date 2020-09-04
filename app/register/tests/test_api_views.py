@@ -163,9 +163,13 @@ def mock_verify_address(mocker):
     return mocker.patch("integration.lob.verify_address", return_value=(True, {}))
 
 
+@pytest.fixture
+def mock_finish(mocker):
+    return mocker.patch("register.api_views.action_finish")
+
+
 @pytest.fixture()
 def submission_task_patch(mocker):
-    mocker.patch("register.api_views.action_finish")
     return mocker.patch("register.api_views.process_registration")
 
 
@@ -208,7 +212,9 @@ def test_blank_api_request():
 
 
 @pytest.mark.django_db
-def test_register_object_created(submission_task_patch, mock_check_unfinished):
+def test_register_object_created(
+    submission_task_patch, mock_finish, mock_check_unfinished
+):
     client = APIClient()
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)
@@ -248,10 +254,11 @@ def test_register_object_created(submission_task_patch, mock_check_unfinished):
     assert registration.subscriber == first_subscriber
 
     submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
-def test_non_url_embed_url(submission_task_patch, mock_check_unfinished):
+def test_non_url_embed_url(submission_task_patch, mock_check_unfinished, mock_finish):
     client = APIClient()
 
     new_valid_restration = copy(VALID_REGISTRATION)
@@ -263,10 +270,11 @@ def test_non_url_embed_url(submission_task_patch, mock_check_unfinished):
 
     registration = Registration.objects.first()
     assert registration.embed_url == "completely random non url string"
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
-def test_default_subscriber(mock_check_unfinished, submission_task_patch):
+def test_default_subscriber(mock_check_unfinished, mock_finish, submission_task_patch):
     client = APIClient()
 
     first_subscriber = Client.objects.first()
@@ -282,10 +290,11 @@ def test_default_subscriber(mock_check_unfinished, submission_task_patch):
     assert registration.subscriber == first_subscriber
 
     submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
-def test_custom_subscriber(mock_check_unfinished, submission_task_patch):
+def test_custom_subscriber(mock_check_unfinished, mock_finish, submission_task_patch):
     client = APIClient()
 
     second_subscriber = baker.make_recipe("multi_tenant.client")
@@ -306,10 +315,13 @@ def test_custom_subscriber(mock_check_unfinished, submission_task_patch):
     assert registration.subscriber == second_subscriber
 
     submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
-def test_invalid_subscriber_key(mock_check_unfinished, submission_task_patch):
+def test_invalid_subscriber_key(
+    mock_check_unfinished, mock_finish, submission_task_patch
+):
     client = APIClient()
 
     first_subscriber = Client.objects.first()
@@ -327,6 +339,7 @@ def test_invalid_subscriber_key(mock_check_unfinished, submission_task_patch):
     assert registration.subscriber == first_subscriber
 
     submission_task_patch.assert_called_once_with(registration, "FOUNDER123", True)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 def test_not_us_citizen():
@@ -651,6 +664,7 @@ def test_pa_nodlorsig_all_regions(
 @pytest.mark.django_db
 def test_pa_dl(
     mock_check_unfinished,
+    mock_finish,
     submission_task_patch,
     mock_ovrlib_session_dl,
     mock_region,
@@ -683,6 +697,7 @@ def test_pa_dl(
     assert registration.state_fields["party_other"] == "Foo"
 
     state_confirmation_email.assert_called_once_with(registration.pk)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.fixture
@@ -724,6 +739,7 @@ def mock_ovrlib_session_badssn(mocker):
 @pytest.mark.django_db
 def test_pa_sig(
     mock_check_unfinished,
+    mock_finish,
     submission_task_patch,
     mock_ovrlib_session_baddl,
     mock_region,
@@ -775,11 +791,12 @@ def test_pa_sig(
     assert registration.party == PoliticalParties.NONE
 
     state_confirmation_email.assert_called_once_with(registration.uuid)
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
 def test_complete_lob(
-    submission_task_patch, mock_check_unfinished, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_finish, mock_verify_address,
 ):
     # enable print-and-forward for this state
     set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
@@ -811,11 +828,12 @@ def test_complete_lob(
     # refresh from database, make sure it's the same object
     registration.refresh_from_db()
     assert str(registration.uuid) == register_response.json()["uuid"]
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
 def test_complete_lob_ignore_undeliverable(
-    submission_task_patch, mock_check_unfinished, mock_verify_address,
+    submission_task_patch, mock_check_unfinished, mock_finish, mock_verify_address,
 ):
     # enable print-and-forward for this state
     set_state_allow_print_and_forward(VALID_REGISTRATION["state"])
@@ -865,6 +883,7 @@ def test_complete_lob_ignore_undeliverable(
     registration.refresh_from_db()
     assert str(registration.uuid) == register_response.json()["uuid"]
     assert registration.status != TurnoutActionStatus.INCOMPLETE
+    mock_finish.delay.assert_called_once_with(registration.action.pk)
 
 
 @pytest.mark.django_db
