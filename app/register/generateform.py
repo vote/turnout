@@ -125,7 +125,7 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
             .text
         )
     except StateInformation.DoesNotExist:
-        state_mail_deadline_2020 = "Mailed as soon as possible."
+        state_mail_deadline_2020 = "mailed as soon as possible."
     form_data["2020_state_deadline"] = state_mail_deadline_2020
 
     return form_data

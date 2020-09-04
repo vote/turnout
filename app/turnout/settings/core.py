@@ -724,6 +724,10 @@ if OVBM_SYNC:
         "schedule": crontab(minute=OVBM_SYNC_MINUTE, hour=OVBM_SYNC_HOUR),
     }
 
+ABSENTEE_LOB_CONFIRM_NAG_SECONDS = env.int(
+    "ABSENTEE_LOB_CONFIRM_NAG_SECONDS", default=300,
+)
+
 #### END ABSENTEE CONFIGURATION
 
 

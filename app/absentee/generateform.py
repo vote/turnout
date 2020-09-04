@@ -22,7 +22,6 @@ from .tasks import (
     send_ballotrequest_leo_email,
     send_ballotrequest_leo_fax,
     send_ballotrequest_notification,
-    send_ballotrequest_print_and_forward,
 )
 
 logger = logging.getLogger("absentee")
@@ -256,6 +255,20 @@ def prepare_formdata(
             else:
                 raise RuntimeError(f"Invalid auto_field type: {auto_type}")
 
+    # 2020 vbm deadline
+    try:
+        state_mail_deadline_2020 = (
+            StateInformation.objects.only("field_type", "text")
+            .get(
+                state=ballot_request.state,
+                field_type__slug="2020_vbm_deadline_by_mail",
+            )
+            .text
+        )
+    except StateInformation.DoesNotExist:
+        state_mail_deadline_2020 = "mailed as soon as possible."
+    form_data["2020_state_deadline"] = state_mail_deadline_2020
+
     return form_data
 
 
@@ -430,9 +443,8 @@ def process_ballot_request(
         send_ballotrequest_leo_email.delay(ballot_request.pk)
     elif submission_method == enums.SubmissionType.LEO_FAX:
         send_ballotrequest_leo_fax.delay(ballot_request.pk)
-    elif submission_method == enums.SubmissionType.PRINT_AND_FORWARD:
-        send_ballotrequest_print_and_forward.delay(ballot_request.pk)
     else:
+        # lob and print-and-forward take same path
         send_ballotrequest_notification.delay(ballot_request.pk)
 
     queue_download_reminder(ballot_request)

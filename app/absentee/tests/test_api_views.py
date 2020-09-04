@@ -14,6 +14,7 @@ from common.enums import (
     TurnoutActionStatus,
 )
 from election.models import StateInformation, StateInformationFieldType
+from event_tracking.models import Event
 from integration.lob import generate_lob_token
 from official.models import Address, Office
 
@@ -973,6 +974,69 @@ def test_complete_lob_force_undeliverable(
     }
 
     process_ballot_request.assert_called_with(ballot_request, None, True)
+
+
+@pytest.mark.django_db
+def test_complete_lob_disallow(
+    mock_get_absentee_contact_info,
+    mock_get_regions_for_address,
+    mock_verify_address,
+    feature_flag_on,
+):
+    mock_get_regions_for_address.return_value = (
+        [baker.make_recipe("official.region", external_id=12345)],
+        False,
+    )
+
+    client = APIClient()
+    response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, VALID_ABSENTEE_INITIAL)
+    assert response.status_code == 200
+    assert "uuid" in response.json()
+
+    ballot_request = BallotRequest.objects.first()
+    assert response.json()["uuid"] == str(ballot_request.uuid)
+    assert response.json()["allow_print_and_forward"] == False
+    assert response.json()["request_mailing_deliverable"] == None
+    assert ballot_request.status == TurnoutActionStatus.INCOMPLETE
+    assert (
+        Event.objects.filter(
+            action=ballot_request.action, event_type=EventType.START
+        ).count()
+        == 1
+    )
+
+    # try to complete with request_mailing address
+    status_response = client.patch(
+        ABSENTEE_API_ENDPOINT_PATCH_COMPLETE.format(uuid=ballot_request.uuid),
+        {
+            "request_mailing_address1": "12 A St",
+            "request_mailing_city": "Aurora",
+            "request_mailing_state": "IL",
+            "request_mailing_zipcode": "12345",
+            "ignore_undeliverable": True,
+            "region": 12345,
+            "us_citizen": True,
+            "is_18_or_over": True,
+        },
+    )
+    assert status_response.status_code == 400
+    ballot_request.refresh_from_db()
+    assert str(ballot_request.uuid) == response.json()["uuid"]
+    assert ballot_request.request_mailing_address1 is None
+    assert ballot_request.request_mailing_city is None
+    assert ballot_request.request_mailing_state is None
+    assert ballot_request.request_mailing_zipcode is None
+
+
+@pytest.mark.django_db
+def test_complete_lob_disallow2(
+    mock_followup, mock_get_absentee_contact_info, mock_verify_address, feature_flag_on,
+):
+    client = APIClient()
+    ref = VALID_ABSENTEE_INITIAL.copy()
+    ref["request_mailing_address1"] = "123 A St."
+    response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, ref)
+    assert response.status_code == 400
 
 
 # Test confirmation link that sends the actual letter
