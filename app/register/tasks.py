@@ -6,21 +6,6 @@ from common.enums import EventType, TurnoutActionStatus
 from mailer.retry import EMAIL_RETRY_PROPS
 
 
-# DEPRECATED.
-# TODO: Delete this -- leaving it in for now so in-flight tasks don't fail
-# during the deploy.
-@shared_task
-@statsd.timed("turnout.register.process_registration_submission")
-def process_registration_submission(
-    registration_pk: str, state_id_number: str, is_18_or_over: bool
-) -> None:
-    from .models import Registration
-    from .generateform import process_registration
-
-    registration = Registration.objects.select_related().get(pk=registration_pk)
-    process_registration(registration, state_id_number, is_18_or_over)
-
-
 @shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.send_registration_notification")
 def send_registration_notification(registration_pk: str) -> None:

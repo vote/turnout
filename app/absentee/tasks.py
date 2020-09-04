@@ -14,25 +14,6 @@ from voter.tasks import voter_lookup_action
 log = logging.getLogger("absentee")
 
 
-## DEPRECATED ## REMOVE ME SOON ##
-@shared_task
-@statsd.timed("turnout.absentee.ballotrequest_followup")
-def ballotrequest_followup(ballotrequest_pk: str) -> None:
-    from .models import BallotRequest
-
-    ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
-
-    if settings.SMS_POST_SIGNUP_ALERT:
-        send_welcome_sms.apply_async(
-            args=(str(ballot_request.phone), "absentee"),
-            countdown=settings.SMS_OPTIN_REMINDER_DELAY,
-        )
-
-    if settings.ACTIONNETWORK_SYNC:
-        sync_ballotrequest_to_actionnetwork.delay(ballot_request.uuid)
-    voter_lookup_action(ballot_request.action.uuid)
-
-
 @shared_task(**EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.absentee.send_ballotrequest_notification")
 def send_ballotrequest_notification(ballotrequest_pk: str) -> None:
