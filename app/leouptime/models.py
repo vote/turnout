@@ -114,6 +114,7 @@ class Proxy(UUIDModel, TimestampModel):
     description = models.TextField(null=True)
     state = TurnoutEnumField(enums.ProxyStatus, null=True)
     failure_count = models.IntegerField(null=True)
+    last_used = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ["-created_at"]

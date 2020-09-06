@@ -13,6 +13,7 @@ class ProxyAdmin(admin.ModelAdmin):
         "failure_count",
         "modified_at",
         "created_at",
+        "last_used",
     )
 
 

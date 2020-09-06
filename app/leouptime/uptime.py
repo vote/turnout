@@ -339,7 +339,7 @@ def get_drivers():
 
     proxies = list(
         Proxy.objects.filter(state=enums.ProxyStatus.UP).order_by(
-            "failure_count", "created_at"
+            "failure_count", "last_used", "created_at"
         )
     )
 
@@ -354,11 +354,14 @@ def get_drivers():
 
     # use one as a backup, and a random one as primary
     backup = proxies.pop()
-    primary = random.choice(proxies)
-    logger.debug(f"backup {backup}")
-    logger.debug(f"primary {primary}")
+    primary = proxies[0]
+    logger.info(f"backup {backup} last_used {backup.last_used}")
+    logger.info(f"primary {primary} last_used {primary.last_used}")
     drivers.append([get_driver(primary), primary])
     drivers.append([get_driver(backup), backup])
+
+    primary.last_used = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+    primary.save()
 
     return drivers
 
