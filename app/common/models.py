@@ -21,6 +21,9 @@ class DelayedTask(UUIDModel, TimestampModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["due_at", "started_at"]),
+        ]
 
     @staticmethod
     def schedule(due_at: datetime.datetime, task_name: str, *args, **kwargs) -> None:
