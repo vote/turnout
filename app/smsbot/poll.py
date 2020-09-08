@@ -19,7 +19,9 @@ WATERMARK_CACHE_KEY = "smsbot_twilio_poll_last"
 def get_watermark():
     last = cache.get(WATERMARK_CACHE_KEY, None)
     if last:
-        return datetime.datetime.fromisoformat(last)
+        return datetime.datetime.fromisoformat(last).replace(
+            tzinfo=datetime.timezone.utc
+        )
 
     last = Number.objects.aggregate(Max("opt_out_time")).get("opt_out_time__max")
     if last:
@@ -36,7 +38,7 @@ def save_watermark(last):
 
 def poll():
     since = get_watermark()
-    start = datetime.datetime.now()
+    start = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
 
     logger.debug(
         f"Checking incoming messages to {settings.SMS_OPTOUT_NUMBER} since {since}"
@@ -80,17 +82,38 @@ def poll():
             # ActionNetwork handles this
             pass
         else:
-            logger.info(f"Auto-reply to {msg.from_} at {msg.date_created}: {msg.body}")
-            if n.opt_out_time:
-                n.send_sms(
-                    "You have previously opted-out of VoteAmerica election alerts. "
-                    "Reply HELP for help, JOIN to re-join."
+            # check last
+            try:
+                last = (
+                    SMSMessage.objects.filter(
+                        phone=n, direction=MessageDirectionType.OUT
+                    )
+                    .exclude(twilio_sid=msg.sid)
+                    .latest("created_at")
+                )
+            except SMSMessage.DoesNotExist:
+                last = None
+
+            if last and last.created_at >= start - datetime.timedelta(
+                minutes=settings.SMS_AUTOREPLY_THROTTLE_SECONDS
+            ):
+                logger.info(
+                    f"Ignoring {msg.from_} at {msg.date_created} (last autoreply at {last.created_at}): {msg.body}"
                 )
             else:
-                n.send_sms(
-                    "Thanks for contacting VoteAmerica. "
-                    "For more information or assistance visit https://voteamerica.com/faq/ "
-                    "or text STOP to opt-out."
+                logger.info(
+                    f"Auto-reply to {msg.from_} at {msg.date_created}: {msg.body}"
                 )
+                if n.opt_out_time:
+                    n.send_sms(
+                        "You have previously opted-out of VoteAmerica election alerts. "
+                        "Reply HELP for help, JOIN to re-join."
+                    )
+                else:
+                    n.send_sms(
+                        "Thanks for contacting VoteAmerica. "
+                        "For more information or assistance visit https://voteamerica.com/faq/ "
+                        "or text STOP to opt-out."
+                    )
 
     save_watermark(start)
