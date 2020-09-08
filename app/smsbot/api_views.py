@@ -75,6 +75,10 @@ def twilio(request):
     if not number:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
+    if settings.SMS_OPTOUT_POLL:
+        # ignore -- we are polling instead.
+        return
+
     n, created = Number.objects.get_or_create(phone=number)
     SMSMessage.objects.create(
         phone=n, direction=MessageDirectionType.IN, message=body, twilio_sid=sid,
