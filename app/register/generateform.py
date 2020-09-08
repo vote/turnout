@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
@@ -24,6 +25,9 @@ COVER_SHEET_PATH = "register/templates/pdf/cover.pdf"
 PRINT_AND_FORWARD_COVER_SHEET_PATH = (
     "register/templates/pdf/print-and-forward-cover.pdf"
 )
+STATE_PRINT_AND_FORWARD_COVER_SHEET_PATH = (
+    "register/templates/pdf/print-and-forward-cover-{state_code}.pdf"
+)
 PRINT_AND_FORWARD_TEMPLATE_PATH = (
     "register/templates/pdf/print-and-forward-eac-nvra.pdf"
 )
@@ -32,17 +36,6 @@ PDF_TEMPLATE = PDFTemplate(
     [
         PDFTemplateSection(path=COVER_SHEET_PATH, is_form=True),
         PDFTemplateSection(path=TEMPLATE_PATH, is_form=True, flatten_form=False),
-    ]
-)
-
-PRINT_AND_FORWARD_PDF_TEMPLATE = PDFTemplate(
-    [
-        PDFTemplateSection(
-            path=PRINT_AND_FORWARD_COVER_SHEET_PATH, is_form=True, flatten_form=True
-        ),
-        PDFTemplateSection(
-            path=PRINT_AND_FORWARD_TEMPLATE_PATH, is_form=True, flatten_form=True
-        ),
     ]
 )
 
@@ -151,6 +144,23 @@ def queue_registration_reminder(registration: Registration) -> None:
     )
 
 
+def get_print_and_forward_template(state_code: str):
+    cover_path = STATE_PRINT_AND_FORWARD_COVER_SHEET_PATH.format(state_code=state_code)
+    if not os.path.exists(cover_path):
+        cover_path = PRINT_AND_FORWARD_COVER_SHEET_PATH
+    return PDFTemplate(
+        [
+            PDFTemplateSection(path=cover_path, is_form=True, flatten_form=True),
+            PDFTemplateSection(
+                path=PRINT_AND_FORWARD_TEMPLATE_PATH, is_form=True, flatten_form=True
+            ),
+            PDFTemplateSection(
+                path=PRINT_AND_FORWARD_TEMPLATE_PATH, is_form=False, flatten_form=True
+            ),
+        ]
+    )
+
+
 @tracer.wrap()
 def process_registration(registration, state_id_number, is_18_or_over):
     form_data = extract_formdata(registration, state_id_number, is_18_or_over)
@@ -163,7 +173,7 @@ def process_registration(registration, state_id_number, is_18_or_over):
             subscriber=registration.subscriber,
         )
         fill_pdf_template(
-            PRINT_AND_FORWARD_PDF_TEMPLATE,
+            get_print_and_forward_template(registration.state.code),
             form_data,
             mail_item,
             generate_name(registration, suffix="mail"),
