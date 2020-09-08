@@ -13,6 +13,10 @@ local memory = std.extVar('memory');
       name: 'worker',
       command: ['/app/ops/worker_launch.sh', 'default'],
     },
+    turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
+      name: 'worker',
+      command: ['/app/ops/worker_launch.sh', 'high-pri'],
+    },
   ] + datadogContainers.for_env(env),
   memory: '8192',
   requiresCompatibilities: ['FARGATE'],

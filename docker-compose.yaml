@@ -90,6 +90,28 @@ services:
       - redis
       - beat
 
+  worker_high_pri:
+    image: voteamerica/turnout-ci-cache:latest
+    entrypoint: wait-for-it postgres:5432 redis:6379 --
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
+    volumes:
+      - ./app:/app
+    environment:
+      - SECRET_KEY=abcd
+      - DJANGO_SETTINGS_MODULE=turnout.settings
+      - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
+      - REDIS_URL=redis://redis:6379
+      - ALLOWED_HOSTS=*
+      - DEBUG=True
+      - DD_AGENT_HOST=echo
+      - DD_DOGSTATSD_PORT=3333
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - beat
+
   selenium:
     image: selenium/standalone-chrome:3.141.59-20200525
     ports:
