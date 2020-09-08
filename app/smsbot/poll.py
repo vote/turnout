@@ -38,7 +38,7 @@ def poll():
     since = get_watermark()
     start = datetime.datetime.now()
 
-    logger.info(
+    logger.debug(
         f"Checking incoming messages to {settings.SMS_OPTOUT_NUMBER} since {since}"
     )
     client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)

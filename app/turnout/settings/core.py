@@ -662,12 +662,12 @@ SMS_POST_SIGNUP_ALERT = env.bool("SMS_POST_SIGNUP_ALERT", default=False)
 SMS_OPTOUT_POLL_MAX_SECONDS = env.int("SMS_OPTOUT_POLL_MAX", 60 * 60 * 24)
 SMS_OPTOUT_NUMBER = env.str("SMS_OPTOUT_NUMBER", None)
 SMS_OPTOUT_POLL = env.bool("SMS_OPTOUT_POLL", False)
-SMS_OPTOUT_POLL_MINUTE = env.str("SMS_OPTOUT_POLL_MINUTE", "*")
+SMS_OPTOUT_POLL_SECONDS = env.int("SMS_OPTOUT_POLL_SECONDS", 5)
 
 if SMS_OPTOUT_POLL:
     CELERY_BEAT_SCHEDULE["trigger-sms-poll-twilio"] = {
         "task": "smsbot.tasks.poll_twilio",
-        "schedule": crontab(minute=SMS_OPTOUT_POLL_MINUTE),
+        "schedule": SMS_OPTOUT_POLL_SECONDS,
     }
 
 #### END TWILIO CONFIGURATION
