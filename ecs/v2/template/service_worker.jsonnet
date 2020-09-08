@@ -14,7 +14,7 @@ local memory = std.extVar('memory');
       command: ['/app/ops/worker_launch.sh', 'default'],
     },
     turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
-      name: 'worker',
+      name: 'workerhigh',
       command: ['/app/ops/worker_launch.sh', 'high-pri'],
     },
   ] + datadogContainers.for_env(env),

@@ -480,7 +480,7 @@
                }
             ]
          },
-         "name": "worker",
+         "name": "workerhigh",
          "secrets": [
             {
                "name": "DATABASE_URL",
