@@ -1,7 +1,6 @@
 import logging
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -9,7 +8,7 @@ from rest_framework.permissions import AllowAny
 
 from common.analytics import statsd
 from common.enums import EventType, ExternalToolType
-from smsbot.models import Number
+from common.models import DelayedTask
 
 from .models import Link
 
@@ -64,11 +63,6 @@ def lob_letter_status(request):
         "letter.re-routed": EventType.LOB_REROUTED,
         "letter.returned_to_sender": EventType.LOB_RETURNED,
     }
-    event_sms = {
-        #        "letter.mailed": "Your absentee ballot application has been mailed. Expect delivery in 2-4 days.",
-        #        "letter.processed_for_delivery": "Your absentee ballot application should be delivered in the next 24 hours",
-        #        "letter.returned_to_sender": "Unfortunately, your absentee ballot application has been returned to sender.",
-    }
 
     etype = request.data.get("event_type", {}).get("id")
 
@@ -78,12 +72,25 @@ def lob_letter_status(request):
     if etype in event_mapping:
         action.track_event(event_mapping[etype])
 
-    if etype in event_sms:
-        if item.phone:
-            try:
-                number = Number.objects.get(phone=item.phone)
-                number.send_sms(event_sms[etype])
-            except ObjectDoesNotExist:
-                pass
+    event_trigger = {
+        "letter.processed_for_delivery": [
+            ("send_print_and_forward_mailed", 0),
+            ("send_mail_chase", 14),
+        ],
+        "letter.returned_to_sender": [("send_print_and_forward_returned", 0)],
+    }
+
+    if etype in event_trigger:
+        item = action.get_source_item()
+        if item:
+            for fname, days in event_trigger[etype]:
+                tool = type(item).__module__.split(".")[0]
+                task = f"{tool}.{fname}"
+                if days:
+                    DelayedTask.schedule_days_later_polite(
+                        item.state.code, days, task, str(item.pk)
+                    )
+                else:
+                    DelayedTask.schedule_polite(item.state.code, task, str(item.pk))
 
     return HttpResponse()

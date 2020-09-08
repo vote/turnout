@@ -1,0 +1,35 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+
+Since you mailed your voter registration form a week or two ago, now is
+a good time to verify that you are successfully registered:
+<br><br>
+
+<strong><a href="{{ state_info.external_tool_verify_status }}">Verify your voter registration</a></strong>
+
+<br><br>
+
+If your state does not have you registered yet, you might need to wait a bit longer, or you might need to contact your local election office:<br><br>
+
+<div>
+  {{ mailing_address|linebreaksbr }}<br><br>
+</div>
+
+<hr><br>
+
+{% if subscriber.is_first_party %}
+One last thing: We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{registration.email}}&firstname={{registration.first_name}}&lastname={{registration.last_name}}&zip={{registration.zipcode}}&city={{registration.city}}&state={{registration.state.code}}&phone={{registration.phone.as_e164}}&addr1={{registration.address1}}&refcode=register_mail_chase" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

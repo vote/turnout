@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 
@@ -126,21 +125,10 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
 
 @tracer.wrap()
 def queue_registration_reminder(registration: Registration) -> None:
-    # send a reminder the next day
-    tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-    when = datetime.datetime(
-        tomorrow.year,
-        tomorrow.month,
-        tomorrow.day,
-        17,
-        0,
-        0,  # 1700 UTC == 12pm ET == 9am PT == 6am HT
-        tzinfo=datetime.timezone.utc,
-    )
-    now = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc)
-
-    DelayedTask.schedule(
-        when, "register.tasks.send_registration_reminder", str(registration.uuid),
+    DelayedTask.schedule_tomorrow_polite(
+        registration.state.code,
+        "register.tasks.send_registration_reminder",
+        str(registration.uuid),
     )
 
 

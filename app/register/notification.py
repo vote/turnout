@@ -17,12 +17,20 @@ STATE_CONFIRMATION_TEMPLATE = "register/email/state_confirmation.html"
 PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE = (
     "register/email/print_and_forward_notification.html"
 )
+PRINT_AND_FORWARD_MAILED_TEMPLATE = "register/email/print_and_forward_mailed.html"
+PRINT_AND_FORWARD_RETURNED_TEMPLATE = "register/email/print_and_forward_returned.html"
+MAIL_CHASE_TEMPLATE = "register/email/mail_chase.html"
 EXTERNAL_TOOL_UPSELL_TEMPLATE = "register/email/external_tool_upsell.html"
 
 SUBJECT = "ACTION REQUIRED: print and mail your voter registration form."
 REMINDER_SUBJECT = "REMINDER: print and mail your voter registration form."
 PRINT_AND_FORWARD_SUBJECT = "ACTION REQUIRED: confirm to mail your registration form."
 PRINT_AND_FORWARD_REMINDER_SUBJECT = "REMINDER: confirm to mail your registration form."
+PRINT_AND_FORWARD_MAILED_SUBJECT = "Your voter registration form should arrive soon!"
+PRINT_AND_FORWARD_RETURNED_SUBJECT = (
+    "WARNING: Your voter registration form was not delivered!"
+)
+MAIL_CHASE_SUBJECT = "Check your voter registration"
 EXTERNAL_TOOL_SUBJECT = "You've registered to vote. Here's what's next."
 
 PRINT_AND_FORWARD_CONFIRM_URL = (
@@ -31,7 +39,9 @@ PRINT_AND_FORWARD_CONFIRM_URL = (
 
 
 @tracer.wrap()
-def compile_email(registration: Registration) -> str:
+def compile_email(
+    registration: Registration, template: str, preheader: bool = True
+) -> str:
     contact_info = get_registration_contact_info(registration)
 
     mailing_address = (
@@ -45,6 +55,7 @@ def compile_email(registration: Registration) -> str:
         "last_name": registration.last_name,
         "email": registration.email,
     }
+    query_params = registration.get_query_params()
     context = {
         "registration": registration,
         "subscriber": registration.subscriber,
@@ -52,6 +63,8 @@ def compile_email(registration: Registration) -> str:
         "download_url": registration.result_item.download_url,
         "mailing_address": mailing_address,
         "state_info": registration.state.data,
+        "query_params": query_params,
+        "vbm_link": f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}",
     }
 
     if registration.request_mailing_address1:
@@ -61,15 +74,17 @@ def compile_email(registration: Registration) -> str:
             uuid=registration.action.uuid,
             token=generate_lob_token(registration),
         )
-        context[
-            "preheader_text"
-        ] = f"{registration.first_name}, click the link below and we'll mail you for registration form."
-        return render_to_string(PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE, context)
+        if preheader:
+            context[
+                "preheader_text"
+            ] = f"{registration.first_name}, click the link below and we'll mail you for registration form."
     else:
-        context[
-            "preheader_text"
-        ] = f"{registration.first_name}, just a few more steps to complete your voter registration: print, sign and mail your form."
-        return render_to_string(NOTIFICATION_TEMPLATE, context)
+        if preheader:
+            context[
+                "preheader_text"
+            ] = f"{registration.first_name}, just a few more steps to complete your voter registration: print, sign and mail your form."
+
+    return render_to_string(template, context)
 
 
 def send_email(registration: Registration, subject, content: str) -> None:
@@ -84,7 +99,12 @@ def send_email(registration: Registration, subject, content: str) -> None:
 
 
 def trigger_notification(registration: Registration) -> None:
-    content = compile_email(registration)
+    content = compile_email(
+        registration,
+        PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE
+        if registration.request_mailing_address1
+        else NOTIFICATION_TEMPLATE,
+    )
     send_email(
         registration,
         PRINT_AND_FORWARD_SUBJECT if registration.request_mailing_address1 else SUBJECT,
@@ -100,7 +120,12 @@ def trigger_reminder(registration: Registration) -> None:
         if not get_feature_bool("drip", "register_download_reminder"):
             return
 
-    content = compile_email(registration)
+    content = compile_email(
+        registration,
+        PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE
+        if registration.request_mailing_address1
+        else NOTIFICATION_TEMPLATE,
+    )
     send_email(
         registration,
         PRINT_AND_FORWARD_REMINDER_SUBJECT
@@ -122,19 +147,7 @@ def trigger_reminder(registration: Registration) -> None:
 
 
 def trigger_state_confirmation(registration: Registration) -> None:
-    content = render_to_string(
-        NOTIFICATION_TEMPLATE,
-        {
-            "registration": registration,
-            "subscriber": registration.subscriber,
-            "recipient": {
-                "first_name": registration.first_name,
-                "last_name": registration.last_name,
-                "email": registration.email,
-            },
-            "state_info": registration.state.data,
-        },
-    )
+    content = compile_email(registration, NOTIFICATION_TEMPLATE)
     send_email(registration, SUBJECT, content)
 
 
@@ -158,25 +171,14 @@ def trigger_external_tool_upsell(registration: Registration) -> None:
     if not get_feature_bool("drip", "register_external"):
         return
 
-    query_params = registration.get_query_params()
-    vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
-    content = render_to_string(
-        EXTERNAL_TOOL_UPSELL_TEMPLATE,
-        {
-            "registration": registration,
-            "subscriber": registration.subscriber,
-            "recipient": {
-                "first_name": registration.first_name,
-                "last_name": registration.last_name,
-                "email": registration.email,
-            },
-            "state_info": registration.state.data,
-            "vbm_link": vbm_link,
-        },
+    content = compile_email(
+        registration, EXTERNAL_TOOL_UPSELL_TEMPLATE, preheader=False
     )
     send_email(registration, EXTERNAL_TOOL_SUBJECT, content)
 
     if registration.phone:
+        query_params = registration.get_query_params()
+        vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
         try:
             n = Number.objects.get(phone=registration.phone)
             n.send_sms(
@@ -184,3 +186,52 @@ def trigger_external_tool_upsell(registration: Registration) -> None:
             )
         except ObjectDoesNotExist:
             pass
+
+
+@tracer.wrap()
+def trigger_print_and_forward_mailed(registration: Registration) -> None:
+    if not get_feature_bool("drip", "register_lob_mailed"):
+        return
+
+    content = compile_email(
+        registration, PRINT_AND_FORWARD_MAILED_TEMPLATE, preheader=False
+    )
+    send_email(registration, PRINT_AND_FORWARD_MAILED_SUBJECT, content)
+
+    if registration.phone:
+        try:
+            n = Number.objects.get(phone=registration.phone)
+            n.send_sms(
+                f"Your registration form should be delivered in the next 24 hours. Be sure to sign and mail it soon! -VoteAmerica"
+            )
+        except ObjectDoesNotExist:
+            pass
+
+
+@tracer.wrap()
+def trigger_print_and_forward_returned(registration: Registration) -> None:
+    if not get_feature_bool("drip", "register_lob_returned"):
+        return
+
+    content = compile_email(
+        registration, PRINT_AND_FORWARD_RETURNED_TEMPLATE, preheader=False
+    )
+    send_email(registration, PRINT_AND_FORWARD_RETURNED_SUBJECT, content)
+
+    if registration.phone:
+        try:
+            n = Number.objects.get(phone=registration.phone)
+            n.send_sms(
+                f"Unfortunately, the registration form that we mailed to you has been returned to us by the postal service. Please try to register again and double-check the mailing address! -VoteAmerica"
+            )
+        except ObjectDoesNotExist:
+            pass
+
+
+@tracer.wrap()
+def trigger_mail_chase(registration: Registration) -> None:
+    if not get_feature_bool("drip", "register_mail_chase"):
+        return
+
+    content = compile_email(registration, MAIL_CHASE_TEMPLATE, preheader=False)
+    send_email(registration, MAIL_CHASE_SUBJECT, content)

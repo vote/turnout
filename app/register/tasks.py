@@ -97,3 +97,39 @@ def external_tool_upsell(registration_pk: str) -> None:
     registration = Registration.objects.select_related().get(pk=registration_pk)
     send_welcome_sms(str(registration.phone), "register")
     trigger_external_tool_upsell(registration)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.register.print_and_forward_mailed")
+def send_print_and_forward_mailed(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_print_and_forward_mailed
+    from smsbot.tasks import send_welcome_sms
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    send_welcome_sms(str(registration.phone), "register")
+    trigger_print_and_forward_mailed(registration)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.register.print_and_forward_returned")
+def send_print_and_forward_returned(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_print_and_forward_returned
+    from smsbot.tasks import send_welcome_sms
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    send_welcome_sms(str(registration.phone), "register")
+    trigger_print_and_forward_returned(registration)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.register.mail_chase")
+def send_mail_chase(registration_pk: str) -> None:
+    from .models import Registration
+    from .notification import trigger_mail_chase
+    from smsbot.tasks import send_welcome_sms
+
+    registration = Registration.objects.select_related().get(pk=registration_pk)
+    send_welcome_sms(str(registration.phone), "register")
+    trigger_mail_chase(registration)

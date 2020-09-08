@@ -1,0 +1,25 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+
+The voter registration form that we mailed to you was returned to us by the USPS.  The address we tried to mail it to was:<br><br>
+
+<div>
+  {{ registration.first_name }} {{ registration.last_name }}<br>
+  {{ registration.request_mailing_address1 }} {{ registration.request_mailing_address2|default:"" }}<br>
+  {{ registration.city }}, {{ registration.state.code }} {{ registration.zipcode }}<br>
+</div>
+
+<br>
+
+We're very sorry the letter was not delivered.  If the address above is incorrect, please <a href="https://www.voteamerica.com/register-to-vote/?{{query_params}}&refcode=register_print_and_forward_returned" target="_blank">use our registration tool again</a> with the correct mailing address for the registration form.
+
+<br><br>
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

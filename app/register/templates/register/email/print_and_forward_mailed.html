@@ -1,0 +1,48 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+Your voter registration form should arrive in the mail in the next 24 hours!  We sent it to:
+<br><br>
+
+<div>
+  {{ registration.first_name }} {{ registration.last_name }}<br>
+  {{ registration.request_mailing_address1 }} {{ registration.request_mailing_address2|default:"" }}<br>
+  {{ registration.city }}, {{ registration.state.code }} {{ registration.zipcode }}<br>
+</div>
+
+<br>
+
+<ol style="margin-left:0;padding-left:0">
+  <li><strong>Sign and date</strong> the pre-filled registration form. Your signature may be checked against
+    your state ID, so be sure to sign carefully.
+  <li>If there are any errors on the pre-filled form, you can use the included blank form</li>
+  <li>If there is someone else in your household who also needs to register, encourage them to use the included blank form and return it at the same time.</li>
+  <li>Mail your completed form using the provided envelope and stamp to your local election clerk using the included tear-off address slip.</li>
+</ol>
+
+<hr><br>
+
+Your voter registration form must be <strong>{{ state_info.2020_registration_deadline_by_mail|markdownify }}</strong>.<br><br>
+
+<hr><br>
+
+You are not registered to vote until your state processes this form.  You should receive written confirmation within 1-2 weeks.
+If not, you might want to <a href="https://www.voteamerica.com/local-election-offices/{{registration.state.code}}/">call your local election office</a>{% if state_info.external_tool_verify_status %} or use the <a href="{{ state_info.external_tool_verify_status }}">State of {{ registration.state }} website</a>{% endif %} to confirm that you are now registered to vote.<br><br>
+
+<hr><br>
+
+{% if subscriber.is_first_party %}
+One last thing: We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{registration.email}}&firstname={{registration.first_name}}&lastname={{registration.last_name}}&zip={{registration.zipcode}}&city={{registration.city}}&state={{registration.state.code}}&phone={{registration.phone.as_e164}}&addr1={{registration.address1}}&refcode=register_print_and_forward_mailed" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}
