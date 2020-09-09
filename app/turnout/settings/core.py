@@ -231,11 +231,18 @@ CELERY_TASK_ROUTES = {
     "absentee.tasks.send_ballotrequest_leo_fax_sent_notification": {
         "queue": "high-pri"
     },
+    "absentee.tasks.send_download_reminder": {"queue": "high-pri"},
+    "absentee.tasks.send_print_and_forward_confirm_nag": {"queue": "high-pri"},
     "absentee.tasks.external_tool_upsell": {"queue": "high-pri"},
     "multi_tenant.tasks.send_invite_notification": {"queue": "high-pri"},
     "register.tasks.send_registration_notification": {"queue": "high-pri"},
     "register.tasks.send_registration_state_confirmation": {"queue": "high-pri"},
+    "register.tasks.send_registration_reminder": {"queue": "high-pri"},
+    "register.tasks.send_print_and_forward_nag": {"queue": "high-pri"},
     "register.tasks.external_tool_upsell": {"queue": "high-pri"},
+    "register.tasks.send_print_and_forward_mailed": {"queue": "high-pri"},
+    "register.tasks.send_print_and_forward_returned": {"queue": "high-pri"},
+    "register.tasks.send_mail_chase": {"queue": "high-pri"},
     "subscription.tasks.send_organization_welcome_notification": {"queue": "high-pri"},
     "verifier.tasks.external_tool_upsell": {"queue": "high-pri"},
 }
