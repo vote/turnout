@@ -237,7 +237,7 @@ def test_generate_response_ovr_or_print(mocker):
                 },
             },
             {
-                "message_text": "Print and mail a form",
+                "message_text": "Register by mail",
                 "primary": False,
                 "url": "https://voteamerica.example/resume/?skip_ovr=true&token=jwt-token",
                 "url_expiry": "2020-07-03T12:13:14+00:00",
@@ -292,7 +292,7 @@ def test_generate_response_custom_ovr_or_print(mocker):
                 },
             },
             {
-                "message_text": "Print and mail a form",
+                "message_text": "Register by mail",
                 "primary": False,
                 "url": "https://voteamerica.example/resume/?skip_ovr=true&token=jwt-token",
                 "url_expiry": "2020-07-03T12:13:14+00:00",
@@ -336,7 +336,7 @@ def test_generate_response_print_only(mocker):
         "message_markdown": "some markdown",
         "buttons": [
             {
-                "message_text": "Print and mail a form",
+                "message_text": "Register by mail",
                 "primary": True,
                 "url": "https://voteamerica.example/resume/?skip_ovr=true&token=jwt-token",
                 "url_expiry": "2020-07-03T12:13:14+00:00",
@@ -412,6 +412,7 @@ def test_create_and_resume_minimal(basic_state_info, mocker):
         "state": MINIMAL_REGISTRATION["state"],
         "action_id": str(registration.action_id),
         "custom_ovr_link": "some link",
+        "allow_print_and_forward": False,
     }
 
     uuid_response = unauth_client.get(f"{RESUME_ENDPOINT}?uuid={registration.uuid}")
@@ -422,6 +423,7 @@ def test_create_and_resume_minimal(basic_state_info, mocker):
         "state": MINIMAL_REGISTRATION["state"],
         "action_id": str(registration.action_id),
         "custom_ovr_link": "some link",
+        "allow_print_and_forward": False,
     }
 
 

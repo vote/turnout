@@ -114,7 +114,7 @@ def generate_response(registration: Registration) -> Dict[str, Any]:
                 },
             },
             {
-                "message_text": "Print and mail a form",
+                "message_text": "Register by mail",
                 "primary": False,
                 "url": f"{settings.REGISTER_RESUME_URL}?skip_ovr=true&token={jwt}",
                 "url_expiry": jwt_expiry.isoformat(),
@@ -128,7 +128,7 @@ def generate_response(registration: Registration) -> Dict[str, Any]:
         )
         buttons = [
             {
-                "message_text": "Print and mail a form",
+                "message_text": "Register by mail",
                 "primary": True,
                 "url": f"{settings.REGISTER_RESUME_URL}?skip_ovr=true&token={jwt}",
                 "url_expiry": jwt_expiry.isoformat(),
@@ -183,6 +183,9 @@ class RegistrationResumeView(APIView):
                 "state": registration.state_id,
                 "action_id": registration.action_id,
                 "custom_ovr_link": get_custom_ovr_link(registration),
+                "allow_print_and_forward": registration.state.allow_print_and_forward
+                if registration.state
+                else None,
             },
             status=200,
         )
