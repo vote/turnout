@@ -21,9 +21,20 @@ class Site(UUIDModel, TimestampModel):
     uptime_week = models.FloatField(null=True)
     uptime_month = models.FloatField(null=True)
     uptime_quarter = models.FloatField(null=True)
+    blocked = models.BooleanField(null=True)
+    blocked_changed_at = models.DateTimeField(null=True)
+    last_went_blocked_check = models.ForeignKey(
+        "SiteCheck", null=True, on_delete=models.CASCADE, related_name="site_blocked"
+    )
+    last_went_unblocked_check = models.ForeignKey(
+        "SiteCheck", null=True, on_delete=models.CASCADE, related_name="site_unblocked"
+    )
 
     class Meta:
         ordering = ["-modified_at"]
+
+    def __str__(self):
+        return f"Site {self.uuid} - {self.url}"
 
     def calc_uptimes(self):
         r = self.do_calc_uptime(
@@ -82,6 +93,7 @@ class Site(UUIDModel, TimestampModel):
 class SiteCheck(UUIDModel, TimestampModel):
     site = models.ForeignKey("Site", null=True, on_delete=models.CASCADE)
     state_up = models.BooleanField(null=True)
+    blocked = models.BooleanField(null=True)
     ignore = models.BooleanField(null=True)
     load_time = models.FloatField(null=True)
     error = models.TextField(null=True)
@@ -114,6 +126,7 @@ class Proxy(UUIDModel, TimestampModel):
     description = models.TextField(null=True)
     state = TurnoutEnumField(enums.ProxyStatus, null=True)
     failure_count = models.IntegerField(null=True)
+    last_used = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ["-created_at"]

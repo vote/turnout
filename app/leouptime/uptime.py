@@ -1,6 +1,7 @@
 import datetime
 import logging
 import random
+import uuid
 
 import requests
 import sentry_sdk
@@ -15,7 +16,7 @@ from selenium.common.exceptions import (
 
 from common import enums
 from common.apm import tracer
-from common.rollouts import get_feature_bool
+from common.rollouts import get_feature_bool, get_feature_int
 from election.models import StateInformation
 
 from .models import Proxy, Site, SiteCheck, SiteDowntime
@@ -47,6 +48,10 @@ class NoProxyError(Exception):
 
 
 class StaleProxyError(Exception):
+    pass
+
+
+class BurnedProxyError(Exception):
     pass
 
 
@@ -83,16 +88,36 @@ def check_group(slug, down_sites=False):
             return
 
         try:
+            now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
             while items:
                 item = items.pop()
 
                 # some values are blank
                 if not item.text:
                     continue
+
+                if get_feature_bool("leouptime", item.state_id) == False:
+                    continue
+
                 desc = f"{item.state_id} {MONITORS[slug]}"
                 site, _ = Site.objects.get_or_create(description=desc, url=item.text,)
                 if down_sites and site.state_up:
                     continue
+
+                interval = get_feature_int("leouptime", f"{item.state_id}_interval")
+                if interval:
+                    try:
+                        last_check = site.sitecheck_set.order_by("-created_at").first()
+                        if (
+                            last_check.created_at + datetime.timedelta(minutes=interval)
+                            > now
+                        ):
+                            logger.info(
+                                f"SKIPPING: {site.description} {site.url} ({item.state_id}_interval={interval})"
+                            )
+                            continue
+                    except SiteCheck.DoesNotExist:
+                        pass
 
                 check_site(drivers, site)
         except StaleProxyError:
@@ -117,22 +142,22 @@ def check_site(drivers, site):
     # first try primary proxy
     check = check_site_with_pos(drivers, 0, site)
     bad_proxy = False
-    if not check.state_up:
+    if not check.state_up or check.blocked:
         # try another proxy
         check2 = check_site_with_pos(drivers, 1, site)
 
-        if check2.state_up:
+        if check2.state_up and not check2.blocked:
             # new proxy is fine; ignore the failure
             check.ignore = True
             check.save()
 
             check3 = check_site_with_pos(drivers, 0, site)
-            if check3.state_up:
+            if check3.state_up and not check3.blocked:
                 # call it intermittent; stick with original proxy
                 check = check3
             else:
                 # we've burned the proxy
-                logger.warning(f"We've burned proxy {drivers[0][1]} on site {site}")
+                logger.warning(f"We've burned {drivers[0][1]} on site {site}")
                 drivers[0][1].failure_count += 1
                 drivers[0][1].state = enums.ProxyStatus.BURNED
                 drivers[0][1].save()
@@ -172,6 +197,13 @@ def check_site(drivers, site):
                 site=site, down_check=check,
             )
             site.last_went_down_check = check
+    if site.blocked != check.blocked:
+        site.blocked = check.blocked
+        site.blocked_changed_at = check.created_at
+        if site.blocked:
+            site.last_went_blocked_check = check
+        else:
+            site.last_went_unblocked_check = check
 
     site.calc_uptimes()
     site.save()
@@ -257,52 +289,85 @@ def check_site_with(driver, proxy, site):
     after = datetime.datetime.utcnow()
     dur = after - before
 
-    # the trick is determining if this loaded the real page or some sort of error/404 page.
-    for item in ["404", "not found", "error"]:
-        if item in title.lower():
-            up = False
-            error = f"'{item}' in page title"
+    ignore = False
+    blocked = False
+    burn = False
 
-    REQUIRED_STRINGS = [
-        "vote",
-        "Vote",
-        "Poll",
-        "poll",
-        "Absentee",
-        "Please enable JavaScript to view the page content.",  # for CT
-        "application/pdf",  # for WY
+    # blocked?
+    BURN_LIST = [
+        "Request unsuccessful. Incapsula incident ID",
+        "<html><head></head><body></body></html>",
     ]
-    have_any = False
-    for item in REQUIRED_STRINGS:
-        if item in content:
-            have_any = True
-    if not have_any:
-        up = False
-        if timeout:
-            error = timeout
-        else:
-            error = f"Cannot find any of {REQUIRED_STRINGS} not in page content"
-            logger.info(content)
+    if get_feature_bool("leouptime", "enable_burn_list"):
+        for b in BURN_LIST:
+            if b in content:
+                blocked = True
+                ignore = True
+                # make sure we've used this proxy on this site before...
+                if SiteCheck.objects.filter(
+                    site=site, proxy=proxy, state_up=True, blocked=False
+                ).exists():
+                    error = f"Proxy is burned (page contains '{b}')"
+                    burn = True
+                    break
+                else:
+                    logger.warning(
+                        f"Not burning {proxy} on {site} that has never successfully checked it before"
+                    )
+
+    if up and not blocked:
+        # the trick is determining if this loaded the real page or some sort of error/404 page.
+        for item in ["404", "not found", "error"]:
+            if item in title.lower():
+                up = False
+                error = f"'{item}' in page title"
+
+        REQUIRED_STRINGS = [
+            "vote",
+            "Vote",
+            "Poll",
+            "poll",
+            "Absentee",
+            "Please enable JavaScript to view the page content.",  # for CT
+            "application/pdf",  # for WY
+        ]
+        have_any = False
+        for item in REQUIRED_STRINGS:
+            if item in content:
+                have_any = True
+        if not have_any:
+            up = False
+            if timeout:
+                error = timeout
+            else:
+                error = f"Cannot find any of {REQUIRED_STRINGS} not in page content"
 
     check = SiteCheck.objects.create(
         site=site,
         state_up=up,
+        blocked=blocked,
         load_time=dur.total_seconds(),
         error=error,
         proxy=proxy,
-        ignore=False,
+        ignore=ignore,
         title=title,
         content=content if not up else None,
     )
 
-    if not up:
-        logger.info(
-            f"DOWN: {site.description} {site.url} ({error}) duration {dur} proxy {proxy}"
-        )
+    if burn:
+        logger.info(f"BURNED PROXY: {site} ({error}) duration {dur}, {proxy}")
+        proxy.failure_count += 1
+        proxy.state = enums.ProxyStatus.BURNED
+        proxy.save()
+        raise StaleProxyError
+
+    if blocked:
+        logger.info(f"BLOCKED: {site} ({error}) duration {dur}, {proxy}")
+    elif up:
+        logger.info(f"UP: {site} ({error}) duration {dur}, {proxy}")
     else:
-        logger.info(
-            f"UP: {site.description} {site.url} ({error}) duration {dur} proxy {proxy}"
-        )
+        logger.info(f"DOWN: {site} ({error}) duration {dur}, {proxy}")
+
     return check
 
 
@@ -322,6 +387,9 @@ def get_driver(proxy):
         "--disable-browser-side-navigation"
     )  # https://stackoverflow.com/a/49123152/1689770
 
+    # random independent user dir
+    options.add_argument(f"--user-data-dir=/tmp/chrome-user-data-{uuid.uuid4()}")
+
     caps = webdriver.DesiredCapabilities.CHROME.copy()
     caps["pageLoadStrategy"] = "normal"
 
@@ -337,28 +405,38 @@ def get_driver(proxy):
 def get_drivers():
     drivers = []
 
-    proxies = list(
+    unused_proxies = list(
+        Proxy.objects.filter(
+            state=enums.ProxyStatus.UP, last_used__isnull=True
+        ).order_by("failure_count", "created_at")
+    )
+    used_proxies = list(
         Proxy.objects.filter(state=enums.ProxyStatus.UP).order_by(
-            "failure_count", "created_at"
+            "failure_count", "last_used",
         )
     )
+
+    # always try to keep a fresh proxy in reserve, if we can
+    if unused_proxies and len(unused_proxies) + len(used_proxies) > 2:
+        reserve = unused_proxies.pop()
+        logger.debug(f"reserve {reserve}")
+
+    proxies = unused_proxies + used_proxies
 
     if len(proxies) < 2:
         logger.warning(f"not enough available proxies (only {len(proxies)})")
         raise NoProxyError(f"{len(proxies)} available (need at least 2)")
 
-    # always try to keep a fresh proxy in reserve, if we can
-    if len(proxies) > 2:
-        reserve = proxies.pop()
-        logger.debug(f"reserve {reserve}")
-
     # use one as a backup, and a random one as primary
     backup = proxies.pop()
-    primary = random.choice(proxies)
-    logger.debug(f"backup {backup}")
-    logger.debug(f"primary {primary}")
+    primary = proxies[0]
+    logger.info(f"backup {backup} last_used {backup.last_used}")
+    logger.info(f"primary {primary} last_used {primary.last_used}")
     drivers.append([get_driver(primary), primary])
     drivers.append([get_driver(backup), backup])
+
+    primary.last_used = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+    primary.save()
 
     return drivers
 
@@ -450,7 +528,7 @@ def tweet_site_status(site):
         site.save()
 
         if settings.SLACK_UPTIME_WEBHOOK:
-            down_check_url = f"{settings.WWW_ORIGIN}/v1/leouptime/checks/{site.last_went_down_check.pk}/"
+            down_check_url = f"{settings.PRIMARY_ORIGIN}/v1/leouptime/checks/{site.last_went_down_check.pk}/"
             slack_message = f"{message} (failing check {down_check_url})"
             r = requests.post(
                 settings.SLACK_UPTIME_WEBHOOK, json={"text": slack_message}

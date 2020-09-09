@@ -21,6 +21,12 @@ class SiteDownList(generics.ListAPIView):
     pagination_class = PaginationStyle
 
 
+class SiteBlockedList(generics.ListAPIView):
+    queryset = Site.objects.filter(blocked=True)
+    serializer_class = SiteSerializer
+    pagination_class = PaginationStyle
+
+
 class SiteDetail(generics.RetrieveAPIView):
     queryset = Site.objects.all()
     serializer_class = SiteSerializer

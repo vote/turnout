@@ -4,6 +4,7 @@ from . import api_views
 
 urlpatterns = [
     path("sites-down/", api_views.SiteDownList.as_view()),
+    path("sites-blocked/", api_views.SiteBlockedList.as_view()),
     path("sites/", api_views.SiteList.as_view(), name="site-list"),
     path("sites/<str:pk>/", api_views.SiteDetail.as_view(), name="site-detail"),
     path("sites/<str:pk>/checks/", api_views.SiteChecksList.as_view()),

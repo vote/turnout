@@ -886,8 +886,12 @@ SLACK_UPTIME_WEBHOOK = env.str("SLACK_UPTIME_WEBHOOK", default=None)
 
 if UPTIME_ENABLED:
     if UPTIME_CHECK_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-check"] = {
-            "task": "leouptime.tasks.check",
+        CELERY_BEAT_SCHEDULE["trigger-check-uptime"] = {
+            "task": "leouptime.tasks.check_uptime",
+            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
+        }
+        CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
+            "task": "leouptime.tasks.check_proxies",
             "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
         }
     # if UPTIME_CHECK_DOWN_CRON_MINUTE:
