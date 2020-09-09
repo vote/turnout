@@ -1,9 +1,13 @@
+import logging
+from typing import List, Optional
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 from common.apm import tracer
+from common.enums import EventType
 from common.i90 import shorten_url
 from common.rollouts import get_feature_bool
 from integration.lob import generate_lob_token
@@ -36,6 +40,8 @@ EXTERNAL_TOOL_SUBJECT = "You've registered to vote. Here's what's next."
 PRINT_AND_FORWARD_CONFIRM_URL = (
     "{base}/register-to-vote/confirm/?id={uuid}&token={token}"
 )
+
+logger = logging.getLogger("register")
 
 
 @tracer.wrap()
@@ -88,12 +94,14 @@ def compile_email(
     return render_to_string(template, context)
 
 
-def send_email(registration: Registration, subject, content: str) -> None:
+def send_email(
+    registration: Registration, subject, content: str, force_to: Optional[str] = None
+) -> None:
     msg = EmailMessage(
         subject,
         content,
         registration.subscriber.transactional_from_email_address,
-        [registration.email],
+        [force_to or registration.email],
     )
     msg.content_subtype = "html"
     msg.send()
@@ -236,3 +244,70 @@ def trigger_mail_chase(registration: Registration) -> None:
 
     content = compile_email(registration, MAIL_CHASE_TEMPLATE, preheader=False)
     send_email(registration, MAIL_CHASE_SUBJECT, content)
+
+
+def trigger_test_notifications(recipients: List[str]) -> None:
+    from event_tracking.models import Event
+
+    # self print
+    event = Event.objects.filter(
+        event_type=EventType.FINISH_SELF_PRINT, action__registration__isnull=False
+    ).last()
+    if not event:
+        logger.warning("No registrations that finished with self-print")
+    else:
+        registration = event.action.registration
+        content = compile_email(registration, NOTIFICATION_TEMPLATE)
+
+        for to in recipients:
+            send_email(registration, SUBJECT, content, force_to=to)
+            send_email(registration, REMINDER_SUBJECT, content, force_to=to)
+
+    # external tool
+    event = Event.objects.filter(
+        event_type=EventType.FINISH_EXTERNAL, action__registration__isnull=False
+    ).last()
+    if not event:
+        logger.warning("No registrations that finished with external")
+    else:
+        registration = event.action.registration
+        content = compile_email(
+            registration, EXTERNAL_TOOL_UPSELL_TEMPLATE, preheader=False
+        )
+
+        for to in recipients:
+            send_email(registration, EXTERNAL_TOOL_SUBJECT, content, force_to=to)
+
+    # print-and-forward
+    event = Event.objects.filter(
+        event_type=EventType.FINISH_LOB, action__registration__isnull=False
+    ).last()
+    if not event:
+        logger.warning("No registrations that finished with self-print")
+    else:
+        registration = event.action.registration
+        content = compile_email(registration, PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE)
+
+        for to in recipients:
+            send_email(registration, PRINT_AND_FORWARD_SUBJECT, content, force_to=to)
+            send_email(
+                registration, PRINT_AND_FORWARD_REMINDER_SUBJECT, content, force_to=to
+            )
+
+        content_mailed = compile_email(
+            registration, PRINT_AND_FORWARD_MAILED_TEMPLATE, preheader=False
+        )
+        content_returned = compile_email(
+            registration, PRINT_AND_FORWARD_RETURNED_TEMPLATE, preheader=False
+        )
+        content_chase = compile_email(
+            registration, MAIL_CHASE_TEMPLATE, preheader=False
+        )
+        for to in recipients:
+            send_email(registration, PRINT_AND_FORWARD_MAILED_SUBJECT, content_mailed)
+            send_email(
+                registration, PRINT_AND_FORWARD_RETURNED_SUBJECT, content_returned
+            )
+            send_email(registration, MAIL_CHASE_SUBJECT, content_chase)
+
+    # TODO: state confirmation

@@ -19,6 +19,7 @@ from .models import Link
 FORM_ENDPOINT = "https://actionnetwork.org/api/v2/forms/"
 ADD_ENDPOINT = "https://actionnetwork.org/api/v2/forms/{form_id}/submissions/"
 PEOPLE_ENDPOINT = "https://actionnetwork.org/api/v2/people/{person_id}/"
+PERSON_HELPER_ENDPOINT = "https://actionnetwork.org/api/v2/people/"
 
 logger = logging.getLogger("integration")
 
@@ -326,3 +327,23 @@ def resubscribe_phone(phone):
             json={"phone_numbers": [{"number": str(phone), "status": "subscribed"}]},
         )
         logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")
+
+
+@tracer.wrap()
+def add_test_addrs():
+    from common.tasks import TEST_ADDRS
+
+    for addr in TEST_ADDRS:
+        info = {
+            "person": {
+                "given_name": "250",
+                "family_name": "ok",
+                "email_addresses": [{"address": addr}],
+            },
+            "action_network:referrer_data": {"source": "250ok",},
+        }
+        response = requests.post(
+            PERSON_HELPER_ENDPOINT,
+            headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
+            json=info,
+        )

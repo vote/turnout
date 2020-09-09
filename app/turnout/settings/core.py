@@ -28,6 +28,8 @@ WWW_ORIGIN = env.str("WWW_ORIGIN", default="http://localhost:8000")
 
 DEFAULT_EMAIL_FROM = env.str("DEFAULT_EMAIL_FROM", "hello@voteamerica.com")
 
+TEST_ADDRS = env.json("TEST_ADDRS", "[]")
+
 # Useful analytics and tracking tags
 CLOUD_DETAIL = env.str("CLOUD_DETAIL", default="")
 SERVER_GROUP = env.str("SERVER_GROUP", default="")

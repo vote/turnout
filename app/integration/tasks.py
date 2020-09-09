@@ -66,6 +66,13 @@ def sync_actionnetwork_reminderrequests():
 
 
 @shared_task
+def sync_250ok_to_actionnetwork():
+    from .actionnetwork import add_test_addrs
+
+    add_test_addrs()
+
+
+@shared_task
 def pull_from_mymove(days=None, hours=None):
     from .mymove import pull
 
