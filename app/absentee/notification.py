@@ -50,10 +50,11 @@ def compile_email(ballot_request: BallotRequest) -> str:
         "ballot_request": ballot_request,
         "subscriber": ballot_request.subscriber,
         "recipient": recipient,
-        "download_url": ballot_request.result_item.download_url,
         "state_info": ballot_request.state.data,
         "mailing_address": mailing_address,
     }
+    if ballot_request.result_item:
+        context["download_url"] = ballot_request.result_item.download_url
 
     if ballot_request.request_mailing_address1:
         context["mail_download_url"] = ballot_request.result_item_mail.download_url

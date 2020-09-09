@@ -60,12 +60,13 @@ def compile_email(
         "registration": registration,
         "subscriber": registration.subscriber,
         "recipient": recipient,
-        "download_url": registration.result_item.download_url,
         "mailing_address": mailing_address,
         "state_info": registration.state.data,
         "query_params": query_params,
         "vbm_link": f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}",
     }
+    if registration.result_item:
+        context["download_url"] = registration.result_item.download_url
 
     if registration.request_mailing_address1:
         context["mail_download_url"] = registration.result_item_mail.download_url
