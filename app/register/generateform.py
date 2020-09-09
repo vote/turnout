@@ -88,6 +88,7 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
     # split by linebreaks, because each line is a separate field in the PDF
     for num, line in enumerate(mailto_address.splitlines()):
         form_data[f"mailto_line_{num+1}"] = line
+        form_data[f"mailto_line_upper_{num+1}"] = line.upper()
 
     # get mailing deadline from StateInformation
     try:

@@ -187,6 +187,7 @@ def prepare_formdata(
         # split by linebreaks, because each line is a separate field in the envelope PDF
         for num, line in enumerate(form_data["mailto"].splitlines()):
             form_data[f"mailto_line_{num+1}"] = line
+            form_data[f"mailto_line_upper_{num+1}"] = line
 
         if contact_info.email or contact_info.phone:
             contact_info_lines = []
