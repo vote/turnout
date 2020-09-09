@@ -10,7 +10,7 @@ Your voter registration form should arrive in the mail in the next 24 hours!  We
 <div>
   {{ registration.first_name }} {{ registration.last_name }}<br>
   {{ registration.request_mailing_address1 }} {{ registration.request_mailing_address2|default:"" }}<br>
-  {{ registration.city }}, {{ registration.state.code }} {{ registration.zipcode }}<br>
+  {{ registration.request_mailing_city }}, {{ registration.request_mailing_state.code }} {{ registration.request_mailing_zipcode }}<br>
 </div>
 
 <br>
