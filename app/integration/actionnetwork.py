@@ -1,4 +1,5 @@
 import logging
+import time
 
 import requests
 import sentry_sdk
@@ -280,6 +281,9 @@ def sync_all_items(cls):
     ):
         _sync_item(item, None)
 
+        # be nice
+        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
+
     for item in (
         cls.objects.annotate(
             no_sync=~Exists(
@@ -294,6 +298,9 @@ def sync_all_items(cls):
         .order_by("created_at")
     ):
         _sync_item(item, item.subscriber_id)
+
+        # be nice
+        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
 
 
 @tracer.wrap()

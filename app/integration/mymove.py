@@ -1,5 +1,6 @@
 import datetime
 import logging
+import time
 
 import requests
 import sentry_sdk
@@ -60,7 +61,20 @@ def pull(days: int = None, hours: int = None) -> None:
 
     leads = response.json()["leads"]
     logger.info(f"Fetched {len(leads)} leads")
+    store_leads(leads)
 
+
+def load_leads_from_file(fn):
+    import json
+
+    with open(fn, "r") as f:
+        j = f.read()
+        leads = json.loads(j)["leads"]
+        logger.info(f"Loaded {len(leads)} leads from {fn}")
+        store_leads(leads)
+
+
+def store_leads(leads):
     new = 0
     for lead in leads:
         # avoid duplicates
@@ -226,8 +240,11 @@ def push_to_actionnetwork(limit=None) -> None:
     form_id = get_or_create_form()
 
     num = 0
-    for lead in MymoveLead.objects.filter(actionnetwork_person_id__isnull=True):
+    for lead in MymoveLead.objects.filter(
+        actionnetwork_person_id__isnull=True
+    ).order_by("mymove_created_at"):
         push_lead(form_id, lead)
         num += 1
         if limit and num >= limit:
             break
+        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)

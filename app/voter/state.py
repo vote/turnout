@@ -37,10 +37,11 @@ def lookup_wi(
         date_of_birth=item.date_of_birth,
         proxies={"https": proxy_str},
     )
-    for v in voters:
-        logger.info(v)
-        if v.zipcode[0:5] == item.zipcode[0:5]:
-            return v.voter_reg_number, v
+    if voters:
+        for v in voters:
+            logger.info(v)
+            if v.zipcode[0:5] == item.zipcode[0:5]:
+                return v.voter_reg_number, v
     return None, None
 
 
