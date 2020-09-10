@@ -62,13 +62,16 @@ def action_check_unfinished(action_pk: str) -> None:
         if not n:
             return
 
-        query_params = item.get_query_params()
         if "BallotRequest" in str(type(item)):
             what = "requesting your absentee ballot"
-            url = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+            if item.subscriber.is_first_party:
+                query_params = item.get_query_params()
+                url = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+            else:
+                url = f"{settings.WWW_ORIGIN}/vote-by-mail/"
         elif "Registration" in str(type(item)):
             what = "registering to vote"
-            url = f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}"
+            url = f"{settings.WWW_ORIGIN}/register-to-vote/resume/?uuid={item.uuid}"
         else:
             return
         n.send_sms(

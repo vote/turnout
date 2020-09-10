@@ -200,7 +200,10 @@ def trigger_external_tool_upsell(registration: Registration) -> None:
 
     if registration.phone:
         query_params = registration.get_query_params()
-        vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+        if registration.subscriber.is_first_party:
+            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+        else:
+            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/"
         try:
             n = Number.objects.get(phone=registration.phone)
             n.send_sms(

@@ -64,11 +64,15 @@ def trigger_upsell(lookup: Lookup) -> None:
     if lookup.phone:
         try:
             n = Number.objects.get(phone=lookup.phone)
-            query_params = lookup.get_query_params()
-            reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}"
-            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+            if lookup.subscriber.is_first_party:
+                query_params = lookup.get_query_params()
+                reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}"
+                vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+            else:
+                reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/"
+                vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/"
             n.send_sms(
-                f"Thanks for checking your registration with VoteAmerica! If you're not registered, we can help you register at {shorten_url(reg_link)}"
+                f"Thanks for checking your registration with VoteAmerica! If you are not registered to vote, we can help you register at {shorten_url(reg_link)}"
             )
             n.send_sms(
                 f"If you are already registered, you can request an absentee ballot to vote by mail at {shorten_url(vbm_link)}"
