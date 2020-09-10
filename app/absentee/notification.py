@@ -19,6 +19,9 @@ NOTIFICATION_TEMPLATE = "absentee/email/file_notification.html"
 PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE = (
     "absentee/email/print_and_forward_notification.html"
 )
+PRINT_AND_FORWARD_MAILED_TEMPLATE = "absentee/email/print_and_forward_mailed.html"
+PRINT_AND_FORWARD_RETURNED_TEMPLATE = "absentee/email/print_and_forward_returned.html"
+MAIL_CHASE_TEMPLATE = "absentee/email/mail_chase.html"
 EXTERNAL_TOOL_UPSELL_TEMPLATE = "absentee/email/external_tool_upsell.html"
 
 SUBJECT = "ACTION REQUIRED: print and mail your absentee ballot request form."
@@ -29,6 +32,11 @@ PRINT_AND_FORWARD_SUBJECT = (
 PRINT_AND_FORWARD_REMINDER_SUBJECT = (
     "REMINDER: confirm to mail your absentee ballot request form."
 )
+PRINT_AND_FORWARD_MAILED_SUBJECT = "Your voter registration form should arrive soon!"
+PRINT_AND_FORWARD_RETURNED_SUBJECT = (
+    "WARNING: Your voter registration form was not delivered!"
+)
+MAIL_CHASE_SUBJECT = "Check your voter registration"
 EXTERNAL_TOOL_UPSELL_SUBJECT = (
     "You've requested your absentee ballot. Here's what's next."
 )
@@ -66,6 +74,19 @@ def compile_email(
     }
     if ballot_request.result_item:
         context["download_url"] = ballot_request.result_item.download_url
+
+    if contact_info.email or contact_info.phone:
+        contact_info_lines = []
+        if contact_info.email:
+            contact_info_lines.append(f"Email: {contact_info.email}")
+        if contact_info.phone:
+            contact_info_lines.append(f"Phone: {contact_info.phone}")
+
+        context["leo_contact_info"] = "\n".join(contact_info_lines)
+    else:
+        context[
+            "leo_contact_info"
+        ] = "https://www.voteamerica.com/local-election-offices/"
 
     if ballot_request.request_mailing_address1:
         context["mail_download_url"] = ballot_request.result_item_mail.download_url
@@ -188,11 +209,61 @@ def trigger_external_tool_upsell(ballot_request: BallotRequest) -> None:
             pass
 
 
+@tracer.wrap()
 def trigger_print_and_forward_notification(ballot_request: BallotRequest) -> None:
     content = compile_email(
         ballot_request, PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE, preheader=False
     )
     send_email(ballot_request, PRINT_AND_FORWARD_SUBJECT, content)
+
+
+@tracer.wrap()
+def trigger_print_and_forward_mailed(ballot_request: BallotRequest) -> None:
+    if not get_feature_bool("drip", "absentee_lob_mailed"):
+        return
+
+    content = compile_email(
+        ballot_request, PRINT_AND_FORWARD_MAILED_TEMPLATE, preheader=False
+    )
+    send_email(ballot_request, PRINT_AND_FORWARD_MAILED_SUBJECT, content)
+
+    if ballot_request.phone:
+        try:
+            n = Number.objects.get(phone=ballot_request.phone)
+            n.send_sms(
+                f"Your absentee ballot request form should be delivered in the next 24 hours. Be sure to sign and mail it soon! -VoteAmerica"
+            )
+        except ObjectDoesNotExist:
+            pass
+
+
+@tracer.wrap()
+def trigger_print_and_forward_returned(ballot_request: BallotRequest) -> None:
+    if not get_feature_bool("drip", "absentee_lob_returned"):
+        return
+
+    content = compile_email(
+        ballot_request, PRINT_AND_FORWARD_RETURNED_TEMPLATE, preheader=False
+    )
+    send_email(ballot_request, PRINT_AND_FORWARD_RETURNED_SUBJECT, content)
+
+    if ballot_request.phone:
+        try:
+            n = Number.objects.get(phone=ballot_request.phone)
+            n.send_sms(
+                f"Unfortunately, the absentee ballot request form that we mailed to you has been returned to us by the postal service. Please try to request it again and double-check the mailing address! -VoteAmerica"
+            )
+        except ObjectDoesNotExist:
+            pass
+
+
+@tracer.wrap()
+def trigger_mail_chase(ballot_request: BallotRequest) -> None:
+    if not get_feature_bool("drip", "absentee_mail_chase"):
+        return
+
+    content = compile_email(ballot_request, MAIL_CHASE_TEMPLATE, preheader=False)
+    send_email(ballot_request, MAIL_CHASE_SUBJECT, content)
 
 
 def trigger_test_notifications(recipients: List[str]):
@@ -241,8 +312,30 @@ def trigger_test_notifications(recipients: List[str]):
         content = compile_email(
             ballot_request, PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE, preheader=False
         )
+        content_mailed = compile_email(
+            ballot_request, PRINT_AND_FORWARD_MAILED_TEMPLATE, preheader=False
+        )
+        content_returned = compile_email(
+            ballot_request, PRINT_AND_FORWARD_RETURNED_TEMPLATE, preheader=False
+        )
+        content_chase = compile_email(
+            ballot_request, MAIL_CHASE_TEMPLATE, preheader=False
+        )
         for to in recipients:
             send_email(ballot_request, PRINT_AND_FORWARD_SUBJECT, content, force_to=to)
             send_email(
                 ballot_request, PRINT_AND_FORWARD_REMINDER_SUBJECT, content, force_to=to
             )
+            send_email(
+                ballot_request,
+                PRINT_AND_FORWARD_MAILED_SUBJECT,
+                content_mailed,
+                force_to=to,
+            )
+            send_email(
+                ballot_request,
+                PRINT_AND_FORWARD_RETURNED_SUBJECT,
+                content_returned,
+                force_to=to,
+            )
+            send_email(ballot_request, MAIL_CHASE_SUBJECT, content_chase, force_to=to)

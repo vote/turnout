@@ -74,6 +74,19 @@ def compile_email(
     if registration.result_item:
         context["download_url"] = registration.result_item.download_url
 
+    if contact_info.email or contact_info.phone:
+        contact_info_lines = []
+        if contact_info.email:
+            contact_info_lines.append(f"Email: {contact_info.email}")
+        if contact_info.phone:
+            contact_info_lines.append(f"Phone: {contact_info.phone}")
+
+        context["leo_contact_info"] = "\n".join(contact_info_lines)
+    else:
+        context[
+            "leo_contact_info"
+        ] = "https://www.voteamerica.com/local-election-offices/"
+
     if registration.request_mailing_address1:
         context["mail_download_url"] = registration.result_item_mail.download_url
         context["confirm_url"] = PRINT_AND_FORWARD_CONFIRM_URL.format(
@@ -304,10 +317,18 @@ def trigger_test_notifications(recipients: List[str]) -> None:
             registration, MAIL_CHASE_TEMPLATE, preheader=False
         )
         for to in recipients:
-            send_email(registration, PRINT_AND_FORWARD_MAILED_SUBJECT, content_mailed)
             send_email(
-                registration, PRINT_AND_FORWARD_RETURNED_SUBJECT, content_returned
+                registration,
+                PRINT_AND_FORWARD_MAILED_SUBJECT,
+                content_mailed,
+                force_to=to,
             )
-            send_email(registration, MAIL_CHASE_SUBJECT, content_chase)
+            send_email(
+                registration,
+                PRINT_AND_FORWARD_RETURNED_SUBJECT,
+                content_returned,
+                force_to=to,
+            )
+            send_email(registration, MAIL_CHASE_SUBJECT, content_chase, force_to=to)
 
     # TODO: state confirmation

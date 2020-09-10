@@ -1,0 +1,52 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+
+{% if state_info.external_tool_absentee_ballot_tracker %}
+Since you mailed your absentee ballot request form a week or two ago, now is
+a good time to verify that it was received and your absentee ballot is en route:
+<br><br>
+
+<strong><a href="{{ state_info.external_tool_absentee_ballot_tracker }}">Track your absentee ballot</a></strong>
+
+<br><br>
+
+If your state does not show that your ballot request was received, you might need to wait a bit longer, or you might need to contact your local election office:<br><br>
+
+{% else %}
+
+Since you mailed your absentee ballot request form a week or two ago,
+now is a good time to verify that it was received, and find out when
+your absentee ballot will be mailed to you.
+<br><br>
+
+Unlike most states, {{ ballot_request.state }} does not have an online
+tool to track your absentee ballot.  However, you can e-mail or call
+your Local Election Office to check whether your ballot request has
+been received (and perhaps mention how helpful an online tool would
+be):<br><br>
+
+{% endif %}
+
+<div>
+  {{ mailing_address|linebreaksbr }}<br><br>
+  {{ leo_contact_info|linebreaksbr }}
+</div>
+
+<hr><br>
+
+{% if subscriber.is_first_party %}
+One last thing: We are a small nonprofit and we don’t take any government funding.
+<a href="https://secure.actblue.com/donate/tipjar?email={{registration.email}}&firstname={{registration.first_name}}&lastname={{registration.last_name}}&zip={{registration.zipcode}}&city={{registration.city}}&state={{registration.state.code}}&phone={{registration.phone.as_e164}}&addr1={{registration.address1}}&refcode=register_mail_chase" target="_blank">
+    Can you chip in $3 to support our work?
+</a>
+<br><br>
+{% endif %}
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

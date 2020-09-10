@@ -161,3 +161,39 @@ def external_tool_upsell(ballot_request_pk: str) -> None:
     ballot_request = BallotRequest.objects.select_related().get(pk=ballot_request_pk)
     send_welcome_sms(str(ballot_request.phone), "absentee")
     trigger_external_tool_upsell(ballot_request)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.absentee.print_and_forward_mailed")
+def send_print_and_forward_mailed(ballot_request_pk: str) -> None:
+    from .models import BallotRequest
+    from .notification import trigger_print_and_forward_mailed
+    from smsbot.tasks import send_welcome_sms
+
+    ballot_request = BallotRequest.objects.select_related().get(pk=ballot_request_pk)
+    send_welcome_sms(str(ballot_request.phone), "absentee")
+    trigger_print_and_forward_mailed(ballot_request)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.absentee.print_and_forward_returned")
+def send_print_and_forward_returned(ballot_request_pk: str) -> None:
+    from .models import BallotRequest
+    from .notification import trigger_print_and_forward_returned
+    from smsbot.tasks import send_welcome_sms
+
+    ballot_request = BallotRequest.objects.select_related().get(pk=ballot_request_pk)
+    send_welcome_sms(str(ballot_request.phone), "absentee")
+    trigger_print_and_forward_returned(ballot_request)
+
+
+@shared_task(**EMAIL_RETRY_PROPS)
+@statsd.timed("turnout.absentee.mail_chase")
+def send_mail_chase(ballot_request_pk: str) -> None:
+    from .models import BallotRequest
+    from .notification import trigger_mail_chase
+    from smsbot.tasks import send_welcome_sms
+
+    ballot_request = BallotRequest.objects.select_related().get(pk=ballot_request_pk)
+    send_welcome_sms(str(ballot_request.phone), "absentee")
+    trigger_mail_chase(ballot_request)
