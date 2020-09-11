@@ -36,7 +36,7 @@ class RegistrationViewSet(IncompleteActionViewSet):
     tool = "register"
     model = Registration
     serializer_class = RegistrationSerializer
-    queryset = Registration.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
+    queryset = Registration.objects.all()
 
     def after_validate(self, serializer):
         if self.request.GET.get("match_region") == "true":

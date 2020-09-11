@@ -95,7 +95,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
     tool = "absentee"
     model = BallotRequest
     serializer_class = BallotRequestSerializer
-    queryset = BallotRequest.objects.filter(status=TurnoutActionStatus.INCOMPLETE)
+    queryset = BallotRequest.objects.all()
 
     def create(self, request, *args, **kwargs):
         incomplete = request.GET.get("incomplete") == "true"
