@@ -67,7 +67,12 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
 
     def track_download(self):
         if self.app == enums.FileType.REGISTRATION_FORM:
-            registration = Registration.objects.get(result_item=self)
+            try:
+                registration = Registration.objects.get(result_item=self)
+            except Registration.ObjectDoesNotExist:
+                # we briefly linked to lob PDFs to download, but
+                # stopped.  some links are still in the wild.
+                registration = Registration.objects.get(result_item_mail=self)
             registration.action.track_event(enums.EventType.DOWNLOAD)
         if self.app == enums.FileType.ABSENTEE_REQUEST_FORM:
             ballot_request = BallotRequest.objects.get(result_item=self)

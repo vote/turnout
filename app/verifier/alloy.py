@@ -49,6 +49,27 @@ ALLOY_STATES_ENABLED = ALLOY_STATES_MONTHLY + ALLOY_STATES_WEEKLY
 # update frequencies per https://alloy.us/verify/details/
 
 
+def get_session():
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
+
+    session = requests.Session()
+    session.auth = requests.auth.HTTPBasicAuth(
+        settings.ALLOY_KEY, settings.ALLOY_SECRET
+    )
+    session.mount(
+        "https://",
+        HTTPAdapter(
+            max_retries=Retry(
+                total=1,
+                status_forcelist=[500, 502, 503, 504],
+                method_whitelist=["HEAD", "GET"],
+            )
+        ),
+    )
+    return session
+
+
 def query_alloy(serializer_data):
     address2 = serializer_data.get("address2", "")
     if address2 is None:
@@ -66,12 +87,9 @@ def query_alloy(serializer_data):
         "birth_date": serializer_data["date_of_birth"].strftime("%Y-%m-%d"),
     }
 
+    session = get_session()
     with tracer.trace("alloy.verify", service="alloyapi"):
-        response = requests.get(
-            ALLOY_ENDPOINT,
-            params=query,
-            auth=requests.auth.HTTPBasicAuth(settings.ALLOY_KEY, settings.ALLOY_SECRET),
-        )
+        response = session.get(ALLOY_ENDPOINT, params=query,)
 
     if response.status_code != 200:
         return {"error": f"HTTP error {response.status_code}: {response.text}"}
@@ -82,13 +100,9 @@ def query_alloy(serializer_data):
 def get_alloy_state_freshness(state):
     freshness = cache.get("alloy_freshness", None)
     if not freshness:
+        session = get_session()
         with tracer.trace("alloy.freshness", service="alloyapi"):
-            response = requests.get(
-                ALLOY_FRESHNESS_ENDPOINT,
-                auth=requests.auth.HTTPBasicAuth(
-                    settings.ALLOY_KEY, settings.ALLOY_SECRET
-                ),
-            )
+            response = session.get(ALLOY_FRESHNESS_ENDPOINT,)
         freshness = response.json().get("data", {}).get("data_freshness", {})
         if freshness:
             cache.set("alloy_freshness", freshness)

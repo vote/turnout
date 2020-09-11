@@ -15,6 +15,25 @@ logger = logging.getLogger("verifier")
 TARGETSMART_ENDPOINT = "https://api.targetsmart.com/voter/voter-registration-check"
 
 
+def get_session():
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
+
+    session = requests.Session()
+    session.headers["x-api-key"] = settings.TARGETSMART_KEY
+    session.mount(
+        "https://",
+        HTTPAdapter(
+            max_retries=Retry(
+                total=1,
+                status_forcelist=[500, 502, 503, 504],
+                method_whitelist=["HEAD", "GET"],
+            )
+        ),
+    )
+    return session
+
+
 def query_targetsmart(serializer_data):
     # TS is pretty conservative, so we'll only pass in the bare minimum needed for a
     # match.
@@ -35,12 +54,9 @@ def query_targetsmart(serializer_data):
         "dob": serializer_data["date_of_birth"].strftime("%Y*"),
     }
 
+    session = get_session()
     with tracer.trace("ts.registration_check", service="targetsmartapi"):
-        response = requests.get(
-            TARGETSMART_ENDPOINT,
-            params=query,
-            headers={"x-api-key": settings.TARGETSMART_KEY},
-        )
+        response = session.get(TARGETSMART_ENDPOINT, params=query,)
 
     if response.status_code != 200:
         return {"error": f"HTTP error {response.status_code}: {response.text}"}

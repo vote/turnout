@@ -50,13 +50,6 @@ logger = logging.getLogger("absentee")
 def compile_email(
     ballot_request: BallotRequest, template: str, preheader: bool = True
 ) -> str:
-    contact_info = get_absentee_contact_info(ballot_request.region.external_id)
-    mailing_address = (
-        contact_info.full_address
-        if contact_info
-        else "We were unable to find your local election official mailing address"
-    )
-
     query_params = ballot_request.get_query_params()
 
     recipient = {
@@ -69,11 +62,17 @@ def compile_email(
         "subscriber": ballot_request.subscriber,
         "recipient": recipient,
         "state_info": ballot_request.state.data,
-        "mailing_address": mailing_address,
         "query_params": query_params,
     }
     if ballot_request.result_item:
         context["download_url"] = ballot_request.result_item.download_url
+    if ballot_request.region:
+        contact_info = get_absentee_contact_info(ballot_request.region.external_id)
+        context["mailing_address"] = (
+            contact_info.full_address
+            if contact_info
+            else "We were unable to find your local election official mailing address"
+        )
 
     if contact_info.email or contact_info.phone:
         contact_info_lines = []
