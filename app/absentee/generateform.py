@@ -445,9 +445,9 @@ def process_ballot_request(
     elif submission_method == enums.SubmissionType.LEO_FAX:
         send_ballotrequest_leo_fax.delay(ballot_request.pk)
     else:
-        # lob and print-and-forward take same path
+        # self-print and print-and-forward take same path
         send_ballotrequest_notification.delay(ballot_request.pk)
 
-    queue_download_reminder(ballot_request)
+        queue_download_reminder(ballot_request)
 
     logger.info(f"New PDF Created: Ballot Request {item.pk}")
