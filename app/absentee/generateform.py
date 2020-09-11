@@ -262,13 +262,27 @@ def prepare_formdata(
             StateInformation.objects.only("field_type", "text")
             .get(
                 state=ballot_request.state,
-                field_type__slug="2020_vbm_deadline_by_mail",
+                field_type__slug="2020_vbm_request_deadline_by_mail",
             )
             .text
         )
     except StateInformation.DoesNotExist:
         state_mail_deadline_2020 = "mailed as soon as possible."
     form_data["2020_state_deadline"] = state_mail_deadline_2020
+
+    # ballot tracker tool
+    try:
+        tracker = (
+            StateInformation.objects.only("field_type", "text")
+            .get(
+                state=ballot_request.state,
+                field_type__slug="external_tool_absentee_ballot_tracker",
+            )
+            .text
+        )
+    except StateInformation.DoesNotExist:
+        tracker = ""
+    form_data["external_tool_absentee_ballot_tracker"] = tracker
 
     return form_data
 

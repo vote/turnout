@@ -5,7 +5,12 @@ from election import models
 
 @admin.register(models.State)
 class StateAdmin(admin.ModelAdmin):
-    list_display = ("code", "name", "allow_print_and_forward")
+    list_display = (
+        "code",
+        "name",
+        "allow_print_and_forward",
+        "allow_absentee_print_and_forward",
+    )
 
     def has_add_permission(self, request):
         return False

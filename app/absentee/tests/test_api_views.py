@@ -763,7 +763,7 @@ def test_complete_lob(
     state = baker.make_recipe(
         "election.state",
         code=VALID_ABSENTEE_INITIAL["state"],
-        allow_print_and_forward=True,
+        allow_absentee_print_and_forward=True,
     )
     baker.make_recipe("official.region", external_id=12345)
 
@@ -894,7 +894,7 @@ def test_complete_lob_force_undeliverable(
     state = baker.make_recipe(
         "election.state",
         code=VALID_ABSENTEE_INITIAL["state"],
-        allow_print_and_forward=True,
+        allow_absentee_print_and_forward=True,
     )
     baker.make_recipe("official.region", external_id=12345)
 
@@ -1081,7 +1081,7 @@ def test_lob_confirm(mocker):
         ),
     )
 
-    send.assert_called_once_with(ballot_request)
+    send.assert_called_once_with(ballot_request, double_sided=True)
     assert response.json() == {"send_date": send_date.isoformat()}
 
 

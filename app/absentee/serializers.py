@@ -90,7 +90,7 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
         if (
             not self.instance
             or not self.instance.state
-            or not self.instance.state.allow_print_and_forward
+            or not self.instance.state.allow_absentee_print_and_forward
         ):
             if any(
                 data.get(k)

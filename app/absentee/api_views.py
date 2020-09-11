@@ -184,7 +184,7 @@ class BallotRequestViewSet(IncompleteActionViewSet):
             "esign_method": ballot_request.esign_method.value
             if ballot_request.esign_method
             else None,
-            "allow_print_and_forward": ballot_request.state.allow_print_and_forward,
+            "allow_print_and_forward": ballot_request.state.allow_absentee_print_and_forward,
             "ovbm_link": ovbm_link_for_ballot_request(ballot_request),
             #            "deliverable": ballot_request.deliverable,
             #            "mailing_deliverable": ballot_request.mailing_deliverable,
@@ -258,7 +258,7 @@ def lob_confirm(request, uuid):
         raise Http404
 
     try:
-        send_date = send_letter(ballot_request)
+        send_date = send_letter(ballot_request, double_sided=True)
         return Response({"send_date": send_date.isoformat()})
     except LobError as e:
         sentry_sdk.capture_exception(e)

@@ -131,7 +131,9 @@ def get_or_create_lob_address(
 
 
 @tracer.wrap()
-def send_letter(item: Union[BallotRequest, Registration]) -> datetime.datetime:
+def send_letter(
+    item: Union[BallotRequest, Registration], double_sided: bool = False
+) -> datetime.datetime:
     # only do it once!
     try:
         link = Link.objects.get(
@@ -169,7 +171,7 @@ def send_letter(item: Union[BallotRequest, Registration]) -> datetime.datetime:
             from_address=from_addr,
             file=item.result_item_mail.file,
             color=False,
-            double_sided=False,
+            double_sided=double_sided,
             address_placement="top_first_page",
             return_envelope=RETURN_ENVELOPE,
             perforated_page=COVER_SHEET_PERFORATED_PAGE,

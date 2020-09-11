@@ -22,7 +22,7 @@ def open_signature_file():
     return SimpleUploadedFile("sig.jpg", data.getvalue())
 
 
-state = Recipe(State, code="XX", allow_print_and_forward=True)
+state = Recipe(State, code="XX", allow_absentee_print_and_forward=True,)
 mailing_state = Recipe(State, code="YY")
 request_mailing_state = Recipe(State, code="ZZ")
 signature = Recipe(
