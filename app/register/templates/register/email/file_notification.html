@@ -47,6 +47,10 @@ Just a few more steps to complete your voter registration.
 
 Your voter registration form must be <strong>{{ state_info.2020_registration_deadline_by_mail|markdownify }}</strong>.<br><br>
 
+{% if state_info.warnings_registration %}
+{{ state_info.warnings_registration | markdownify }}<br><br>
+{% endif %}
+
 Helpful hints:
 <ul style="margin-left:0;padding-left:0">
     <li>

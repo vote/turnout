@@ -120,6 +120,20 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
     except StateInformation.DoesNotExist:
         state_mail_deadline_2020 = "mailed as soon as possible."
     form_data["2020_state_deadline"] = state_mail_deadline_2020
+    form_data[
+        "2020_state_deadline_full"
+    ] = f"Your form must be {state_mail_deadline_2020}"
+
+    # Warnings
+    try:
+        warnings_registration = (
+            StateInformation.objects.only("field_type", "text")
+            .get(state=registration.state, field_type__slug="warnings_registration",)
+            .text
+        )
+    except StateInformation.DoesNotExist:
+        warnings_registration = ""
+    form_data["warnings_registration"] = warnings_registration
 
     return form_data
 

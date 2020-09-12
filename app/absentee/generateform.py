@@ -218,9 +218,13 @@ def prepare_formdata(
     # If we don't have data, make the most conservative assumption: 55 days before the election
     form_data["vbm_first_day_to_apply"] = (
         state_text_property(
-            ballot_request.state.code, "vbm_first_day_to_apply", lower=True
+            ballot_request.state.code, "vbm_first_day_to_apply", lower=False
         )
         or "At least 55 days before the election."
+    )
+
+    form_data["vbm_warnings"] = (
+        state_text_property(ballot_request.state.code, "vbm_warnings") or ""
     )
 
     # Signatures are handled separately
@@ -269,6 +273,9 @@ def prepare_formdata(
     except StateInformation.DoesNotExist:
         state_mail_deadline_2020 = "mailed as soon as possible."
     form_data["2020_state_deadline"] = state_mail_deadline_2020
+    form_data[
+        "2020_state_deadline_full"
+    ] = f"Your form must be {state_mail_deadline_2020}"
 
     # ballot tracker tool
     try:

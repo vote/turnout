@@ -46,7 +46,7 @@ def test_prepare_formdata():
     form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
     assert form_data["mailto"] == ABSENTEE_BALLOT_MAILING_ADDRESS
     assert form_data["vbm_deadline"] == "some deadline"
-    assert form_data["vbm_first_day_to_apply"] == "some date"
+    assert form_data["vbm_first_day_to_apply"] == "Some DATE"
     assert form_data["leo_contact_info"] == f"Email: {addr.email}\nPhone: {addr.phone}"
 
 
@@ -97,7 +97,7 @@ def test_prepare_formdata_no_deadline():
     form_data = prepare_formdata(ballot_request, STATE_ID_NUMBER, IS_18_OR_OVER,)
 
     assert form_data["vbm_deadline"] == "As soon as possible."
-    assert form_data["vbm_first_day_to_apply"] == "some date"
+    assert form_data["vbm_first_day_to_apply"] == "Some DATE"
 
 
 @pytest.mark.django_db
