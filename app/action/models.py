@@ -13,7 +13,7 @@ from verifier.models import Lookup
 
 class Action(UUIDModel, TimestampModel):
     voter = models.ForeignKey("voter.Voter", null=True, on_delete=models.SET_NULL)
-    last_voter_lookup = models.DateTimeField(null=True, blank=True)
+    last_voter_lookup = models.DateTimeField(null=True, blank=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]

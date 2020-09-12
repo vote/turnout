@@ -20,13 +20,13 @@ class Voter(UUIDModel, TimestampModel):
 
     state = models.ForeignKey("election.State", on_delete=models.PROTECT, null=True,)
 
-    state_voter_id = models.TextField(null=True)
+    state_voter_id = models.TextField(null=True, db_index=True)
     state_result = JSONField(null=True)
     last_state_refresh = models.DateField(null=True)
-    alloy_person_id = models.IntegerField(null=True)
+    alloy_person_id = models.IntegerField(null=True, db_index=True)
     alloy_result = JSONField(null=True)
     last_alloy_refresh = models.DateTimeField(null=True)
-    ts_voterbase_id = models.TextField(null=True)
+    ts_voterbase_id = models.TextField(null=True, db_index=True)
     last_ts_refresh = models.DateTimeField(null=True)
     ts_result = JSONField(null=True)
 
