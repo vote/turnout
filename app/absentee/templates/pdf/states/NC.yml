@@ -1,5 +1,4 @@
 manual_fields:
-  - previous_full_name
   - dl
   - ssn4
   - move_date
@@ -13,7 +12,35 @@ manual_fields:
   - assist_address1
   - assist_address2
   - facility
-auto_fields:
-  - slug: date_signed
-    type: todays_date
+  - date_signed
+  - last_name_xxx
+  - first_name_xxx
+  - middle_name_xxx
+  - suffix_xxx
+  - previous_full_name_xxx
+  - date_of_birth_xxx
+  - address1_2_xxx
+  - city_xxx
+  - state_xxx
+  - zipcode_xxx
+  - county_xxx
+  - mailing_city_state_zip_xxx
+  - mailing_address1_2_xxx
+  - mailing_city_xxx
+  - mailing_state_xxx
+  - mailing_zipcode_xxx
+  - phone_xxx
+  - email_xxx
 pages: 4
+missing_mandatory_fields:
+  - first_name
+  - last_name
+  - address1
+  - address2
+  - city
+  - zipcode
+  - mailing_address1
+  - mailing_address2
+  - mailing_city
+  - mailing_state
+  - mailing_zipcode
