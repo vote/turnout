@@ -40,19 +40,22 @@ def action_finish(action_pk: str) -> None:
 def action_check_unfinished(action_pk: str) -> None:
     action = Action.objects.get(pk=action_pk)
 
+    # note: we do not check for FINISH_EXTERNAL because that event is
+    # created via event_tracking and does not imply that action_finish
+    # has been called.
     if Event.objects.filter(
         action=action,
         event_type__in=[
             EventType.FINISH_SELF_PRINT,
-            EventType.FINISH_EXTERNAL,
             EventType.FINISH_LOB,
             EventType.FINISH_LEO,
             EventType.FINISH,
+            EventType.FINISH_FAX_PENDING,
         ],
     ).exists():
         return
 
-    # they didn't finish the tool
+    # they didn't finish the tool, or clicked off to an external site
     if settings.ACTIONNETWORK_SYNC:
         sync_action_to_actionnetwork.delay(action_pk)
 

@@ -285,16 +285,24 @@ def sync_all_items(cls):
         time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
 
     for item in (
-        cls.objects.annotate(
+        cls.objects.filter(subscriber__is_first_party=False)
+        .annotate(
             no_sync=~Exists(
                 Link.objects.filter(
                     subscriber_id=OuterRef("subscriber"),
                     external_tool=ExternalToolType.ACTIONNETWORK,
                     action=OuterRef("action"),
                 )
-            )
+            ),
+            has_api_key=Exists(
+                SubscriberIntegrationProperty.objects.filter(
+                    subscriber_id=OuterRef("subscriber"),
+                    external_tool=ExternalToolType.ACTIONNETWORK,
+                    name="api_key",
+                )
+            ),
         )
-        .filter(no_sync=True, action__isnull=False)
+        .filter(no_sync=True, has_api_key=True, action__isnull=False)
         .order_by("created_at")
     ):
         _sync_item(item, item.subscriber_id)
