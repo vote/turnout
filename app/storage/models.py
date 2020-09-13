@@ -69,7 +69,7 @@ class StorageItem(SubscriberModel, UUIDModel, TimestampModel):
         if self.app == enums.FileType.REGISTRATION_FORM:
             try:
                 registration = Registration.objects.get(result_item=self)
-            except Registration.ObjectDoesNotExist:
+            except Registration.DoesNotExist:
                 # we briefly linked to lob PDFs to download, but
                 # stopped.  some links are still in the wild.
                 registration = Registration.objects.get(result_item_mail=self)
