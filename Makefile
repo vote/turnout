@@ -86,3 +86,6 @@ localtodev:
 
 ecrpush:
 	scripts/local_ecr_push.sh
+
+resetlocaldb:
+	scripts/reset_local_db.sh
