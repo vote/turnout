@@ -222,7 +222,7 @@ def push_lead(form_id: str, lead: MymoveLead) -> None:
     if response.status_code != 200:
         sentry_sdk.capture_exception(
             ActionNetworkError(
-                "Error posting mymove lead to form {url}, status code {response.status_code}"
+                f"Error posting mymove lead to form {url}, status code {response.status_code}"
             )
         )
         logger.error(
