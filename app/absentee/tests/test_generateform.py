@@ -8,6 +8,7 @@ from absentee.baker_recipes import IS_18_OR_OVER, STATE_ID_NUMBER
 from absentee.generateform import (
     ENVELOPE_PATH,
     FAX_COVER_SHEET_PATH,
+    NOTRACKER_PRINT_AND_FORWARD_COVER_SHEET_PATH,
     PRINT_AND_FORWARD_COVER_SHEET_PATH,
     SELF_PRINT_COVER_SHEET_PATH,
     generate_name,
@@ -445,12 +446,15 @@ def test_generate_pdf_self_print(mocker):
     ]
 
 
+@pytest.mark.django_db
 def test_generate_pdf_mail(mocker):
     template, num_pages = generate_pdf_template("XX", SubmissionType.PRINT_AND_FORWARD)
     assert num_pages == 3
     assert template.template_files == [
         PDFTemplateSection(
-            path=PRINT_AND_FORWARD_COVER_SHEET_PATH, is_form=True, flatten_form=True
+            path=NOTRACKER_PRINT_AND_FORWARD_COVER_SHEET_PATH,
+            is_form=True,
+            flatten_form=True,
         ),
         PDFTemplateSection(
             path="absentee/templates/pdf/states/XX.pdf",

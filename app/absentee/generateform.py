@@ -30,6 +30,9 @@ SELF_PRINT_COVER_SHEET_PATH = "absentee/templates/pdf/cover.pdf"
 PRINT_AND_FORWARD_COVER_SHEET_PATH = (
     "absentee/templates/pdf/print-and-forward-cover.pdf"
 )
+NOTRACKER_PRINT_AND_FORWARD_COVER_SHEET_PATH = (
+    "absentee/templates/pdf/print-and-forward-cover-notracker.pdf"
+)
 FAX_COVER_SHEET_PATH = "absentee/templates/pdf/fax-cover.pdf"
 ENVELOPE_PATH = "absentee/templates/pdf/envelope.pdf"
 
@@ -348,12 +351,25 @@ def generate_pdf_template(
         form_path = f"absentee/templates/pdf/states/{state_code}-print-and-forward.pdf"
         if not os.path.exists(form_path):
             form_path = f"absentee/templates/pdf/states/{state_code}.pdf"
+
+        try:
+            tracker_url = (
+                StateInformation.objects.only("field_type", "text")
+                .get(
+                    state_id=state_code,
+                    field_type__slug="external_tool_absentee_ballot_tracker",
+                )
+                .text
+            )
+        except StateInformation.DoesNotExist:
+            tracker_url = None
+        if tracker_url:
+            cover_path = PRINT_AND_FORWARD_COVER_SHEET_PATH
+        else:
+            cover_path = NOTRACKER_PRINT_AND_FORWARD_COVER_SHEET_PATH
+
         sections = [
-            PDFTemplateSection(
-                path=PRINT_AND_FORWARD_COVER_SHEET_PATH,
-                is_form=True,
-                flatten_form=True,
-            ),
+            PDFTemplateSection(path=cover_path, is_form=True, flatten_form=True,),
             PDFTemplateSection(path=form_path, is_form=True, flatten_form=True,),
         ]
         num_pages = state_template_pages + 2
