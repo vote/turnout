@@ -76,7 +76,7 @@ def compile_email(
     else:
         contact_info = None
 
-    if contact_info and contact_info.email or contact_info.phone:
+    if contact_info and (contact_info.email or contact_info.phone):
         contact_info_lines = []
         if contact_info.email:
             contact_info_lines.append(f"Email: {contact_info.email}")
