@@ -27,21 +27,35 @@ def lookup_wi(
     item: Union[BallotRequest, Registration, Lookup, ReminderRequest]
 ) -> Tuple[str, Dict[str, str]]:
     from ovrlib import wi
+    from requests.exceptions import ConnectionError
 
-    proxy_str = get_random_proxy_str()
-    logger.debug(f"lookup up WI {item} with proxy_str {proxy_str}")
+    tries = 1
+    while True:
+        proxy_str = get_random_proxy_str()
+        logger.debug(f"lookup up WI {item} with proxy_str {proxy_str}")
 
-    voters = wi.lookup_voter(
-        first_name=item.first_name,
-        last_name=item.last_name,
-        date_of_birth=item.date_of_birth,
-        proxies={"https": proxy_str},
-    )
-    if voters:
-        for v in voters:
-            logger.info(v)
-            if v.zipcode[0:5] == item.zipcode[0:5]:
-                return v.voter_reg_number, v
+        try:
+            voters = wi.lookup_voter(
+                first_name=item.first_name,
+                last_name=item.last_name,
+                date_of_birth=item.date_of_birth,
+                proxies={"https": proxy_str},
+            )
+        except ConnectionError as e:
+            tries += 1
+            if tries > 2:
+                logger.warning(
+                    f"Got {e} on WI looukp of {item} (attempt {tries}), giving up"
+                )
+                return None, None
+            logger.warning(f"Got {e} on WI lookup of {item} (attempt {tries})")
+            continue
+        if voters:
+            for v in voters:
+                logger.info(v)
+                if v.zipcode[0:5] == item.zipcode[0:5]:
+                    return v.voter_reg_number, v
+        break
     return None, None
 
 
