@@ -25,19 +25,30 @@ def get_feature(flag: str, user_id: str = "__anonymous__") -> bool:
     return optimizely_client.is_feature_enabled(flag, user_id=user_id)
 
 
+def has_feature_var(flag: str, var: str) -> bool:
+    # Sadly, optimizely class does not expose this as a nice method, and it
+    # logs to *error* if you look up a variable that is not defined.
+    feature = conf_manager.get_config().feature_key_map.get(flag)
+    if not feature:
+        return False
+    return var in feature.variables
+
+
 def get_feature_int(flag: str, var: str, user_id: str = "__anonymous__") -> bool:
-    if optimizely_client.is_feature_enabled(flag, user_id=user_id):
+    if optimizely_client.is_feature_enabled(flag, user_id=user_id) and has_feature_var(
+        flag, var
+    ):
         return optimizely_client.get_feature_variable_integer(
             flag, var, user_id=user_id
         )
-    else:
-        return None
+    return None
 
 
 def get_feature_bool(flag: str, var: str, user_id: str = "__anonymous__") -> bool:
-    if optimizely_client.is_feature_enabled(flag, user_id=user_id):
+    if optimizely_client.is_feature_enabled(flag, user_id=user_id) and has_feature_var(
+        flag, var
+    ):
         return optimizely_client.get_feature_variable_boolean(
             flag, var, user_id=user_id
         )
-    else:
-        return None
+    return None
