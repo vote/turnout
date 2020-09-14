@@ -50,7 +50,7 @@ def action_check_unfinished(action_pk: str) -> None:
             EventType.FINISH_LOB,
             EventType.FINISH_LEO,
             EventType.FINISH,
-            EventType.FINISH_FAX_PENDING,
+            EventType.FINISH_LEO_FAX_PENDING,
         ],
     ).exists():
         return
