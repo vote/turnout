@@ -134,15 +134,17 @@ def get_or_create_lob_address(
 def send_letter(
     item: Union[BallotRequest, Registration], double_sided: bool = False
 ) -> datetime.datetime:
-    # only do it once!
-    try:
-        link = Link.objects.get(
+    # Try to only do it once.  (This is a racy check, though!)
+    link = (
+        Link.objects.filter(
             action=item.action, external_tool=enums.ExternalToolType.LOB
         )
+        .order_by("created_at")
+        .first()
+    )
+    if link:
         logger.info(f"Already submitted lob letter {link.external_id} for {item}")
         return link.created_at
-    except ObjectDoesNotExist:
-        pass
 
     from_addr = get_or_create_lob_address(
         "va_return_addr",
@@ -183,6 +185,23 @@ def send_letter(
         external_tool=enums.ExternalToolType.LOB,
         external_id=letter["id"],
     )
+
+    # make sure I'm the first and only one who completed
+    first = (
+        Link.objects.filter(
+            action=item.action, external_tool=enums.ExternalToolType.LOB
+        )
+        .order_by("created_at", "uuid")
+        .first()
+    )
+    if first != link:
+        logger.info(
+            f"Submitted a duplicate letter to lob ({link.external_id} != first {first.external_id}); canceling"
+        )
+        lob.Letter.delete(letter["id"])
+        link.delete()
+        return first.created_at
+
     item.action.track_event(enums.EventType.FINISH_LOB_CONFIRM)
     logger.info(f"Submitted lob letter for {item}")
     return link.created_at
