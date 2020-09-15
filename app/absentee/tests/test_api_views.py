@@ -83,6 +83,21 @@ VALID_ABSENTEE_FULL_MAIL = {
     "is_18_or_over": True,
 }
 
+INVALID_STATE_FIELDS = {
+    "title": "Mr",
+    "first_name": "John",
+    "last_name": "Hancock",
+    "address1": "30 Beacon Street",
+    "city": "Boston",
+    "state": "MA",
+    "email": "john@hancock.local",
+    "date_of_birth": "1737-01-23",
+    "zipcode": "02108",
+    "phone": "+16175557890",
+    "sms_opt_in_subscriber": True,
+    "state_fields": "this should be a dict, not a string",
+}
+
 
 @pytest.fixture
 def mock_check_unfinished(mocker):
@@ -160,6 +175,15 @@ def set_fax_allowed(state):
 
 def set_fax_forbidden(state):
     set_state_bool_info(state, "vbm_app_submission_fax", False)
+
+
+@pytest.mark.django_db
+def test_bad_state_fields():
+    state = baker.make_recipe("election.state", code=INVALID_STATE_FIELDS["state"],)
+    client = APIClient()
+    response = client.post(ABSENTEE_API_ENDPOINT_INCOMPLETE, INVALID_STATE_FIELDS)
+    assert response.status_code == 400
+    assert "state_fields" in response.json()
 
 
 # Incomplete create, matching region

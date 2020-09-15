@@ -105,4 +105,7 @@ class BallotRequestSerializer(TrackingSerializer, ActionSerializer):
                 raise serializers.ValidationError(
                     "Cannot specify request mailing address if print_and_forward is not enabled for this state"
                 )
+        state_fields = data.get("state_fields")
+        if state_fields and not isinstance(state_fields, dict):
+            raise serializers.ValidationError("state_fields must be a dict")
         return data
