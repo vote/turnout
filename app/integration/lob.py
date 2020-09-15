@@ -7,7 +7,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 import lob
 from django.conf import settings
 from django.core.cache import cache
-from django.core.exceptions import ObjectDoesNotExist
 
 from absentee.models import BallotRequest
 from common import enums

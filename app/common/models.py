@@ -26,13 +26,15 @@ class DelayedTask(UUIDModel, TimestampModel):
         ]
 
     @staticmethod
-    def schedule(due_at: datetime.datetime, task_name: str, *args, **kwargs) -> None:
-        DelayedTask.objects.create(
+    def schedule(
+        due_at: datetime.datetime, task_name: str, *args, **kwargs
+    ) -> "DelayedTask":
+        return DelayedTask.objects.create(
             task_name=task_name, due_at=due_at, args=[*args], kwargs=kwargs,
         )
 
     @staticmethod
-    def schedule_polite(state_id: str, task_name, *args, **kwargs) -> None:
+    def schedule_polite(state_id: str, task_name, *args, **kwargs) -> "DelayedTask":
         ## TODO: adjust by state ##
         # next polite time interval
         now = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
@@ -62,12 +64,12 @@ class DelayedTask(UUIDModel, TimestampModel):
                 0,  # 1700 UTC == 12pm ET == 9am PT == 6am HT
                 tzinfo=datetime.timezone.utc,
             )
-        DelayedTask.schedule(when, task_name, *args, **kwargs)
+        return DelayedTask.schedule(when, task_name, *args, **kwargs)
 
     @staticmethod
     def schedule_days_later_polite(
         state_id: str, days: int, task_name, *args, **kwargs
-    ) -> None:
+    ) -> "DelayedTask":
         ## TODO: adjust by state ##
         # tomorrow, politely
         tomorrow = datetime.date.today() + datetime.timedelta(days=days)
@@ -80,11 +82,15 @@ class DelayedTask(UUIDModel, TimestampModel):
             0,  # 1700 UTC == 12pm ET == 9am PT == 6am HT
             tzinfo=datetime.timezone.utc,
         )
-        DelayedTask.schedule(when, task_name, *args, **kwargs)
+        return DelayedTask.schedule(when, task_name, *args, **kwargs)
 
     @staticmethod
-    def schedule_tomorrow_polite(state_id: str, task_name, *args, **kwargs) -> None:
-        DelayedTask.schedule_days_later_polite(state_id, 1, *args, **kwargs)
+    def schedule_tomorrow_polite(
+        state_id: str, task_name, *args, **kwargs
+    ) -> "DelayedTask":
+        return DelayedTask.schedule_days_later_polite(
+            state_id, 1, task_name, *args, **kwargs
+        )
 
     def deliver(self):
         self.started_at = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc)
