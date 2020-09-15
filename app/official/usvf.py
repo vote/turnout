@@ -35,6 +35,7 @@ def authenticated_session() -> requests.Session:
         HTTPAdapter(
             max_retries=Retry(
                 total=5,
+                backoff_factor=1,
                 status_forcelist=[500, 502, 503, 504],
                 method_whitelist=["HEAD", "GET"],
             )

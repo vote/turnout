@@ -9,6 +9,7 @@ from django.conf import settings
 from common.apm import tracer
 
 from .actionnetwork import ActionNetworkError
+from .actionnetwork import get_session as get_actionnetwork_session
 from .models import MymoveLead
 
 STAGING_LEADS_ENDPOINT = "https://staging-leads.mymove.com/v2/clients/{client_id}/leads"
@@ -115,7 +116,7 @@ def store_leads(leads):
 
 
 @tracer.wrap()
-def get_or_create_form() -> str:
+def get_or_create_form(session: requests.Session) -> str:
     logger.info(f"Fetching forms from ActionNetwork")
 
     if settings.ENV != "prod":
@@ -137,9 +138,7 @@ def get_or_create_form() -> str:
     nexturl = ACTIONNETWORK_FORM_ENDPOINT
     while nexturl:
         with tracer.trace("an.form", service="actionnetwork"):
-            response = requests.get(
-                nexturl, headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
-            )
+            response = session.get(nexturl,)
         for form in response.json()["_embedded"]["osdi:forms"]:
             an_id = get_form_id(form["identifiers"])
             if an_id:
@@ -153,9 +152,8 @@ def get_or_create_form() -> str:
     if settings.ENV != "prod":
         title += f" ({settings.ENV})"
     with tracer.trace("an.form_create", service="actionnetwork"):
-        response = requests.post(
+        response = session.post(
             ACTIONNETWORK_FORM_ENDPOINT,
-            headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
             json={
                 "identifiers": [f"voteamerica:{form_name}"],
                 "title": title,
@@ -175,7 +173,7 @@ def get_or_create_form() -> str:
 
 
 @tracer.wrap()
-def push_lead(form_id: str, lead: MymoveLead) -> None:
+def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None:
     info = {
         "person": {
             "given_name": lead.first_name,
@@ -215,9 +213,7 @@ def push_lead(form_id: str, lead: MymoveLead) -> None:
     }
     url = ACTIONNETWORK_ADD_ENDPOINT.format(form_id=form_id)
     with tracer.trace("an.mymove_form", service="actionnetwork"):
-        response = requests.post(
-            url, json=info, headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY,},
-        )
+        response = session.post(url, json=info,)
 
     if response.status_code != 200:
         sentry_sdk.capture_exception(
@@ -237,13 +233,15 @@ def push_lead(form_id: str, lead: MymoveLead) -> None:
 
 @tracer.wrap()
 def push_to_actionnetwork(limit=None) -> None:
-    form_id = get_or_create_form()
+    session = get_actionnetwork_session(settings.ACTIONNETWORK_KEY)
+
+    form_id = get_or_create_form(session)
 
     num = 0
     for lead in MymoveLead.objects.filter(
         actionnetwork_person_id__isnull=True
     ).order_by("mymove_created_at"):
-        push_lead(form_id, lead)
+        push_lead(session, form_id, lead)
         num += 1
         if limit and num >= limit:
             break

@@ -26,6 +26,7 @@ def get_session():
         HTTPAdapter(
             max_retries=Retry(
                 total=1,
+                backoff_factor=1,
                 status_forcelist=[500, 502, 503, 504],
                 method_whitelist=["HEAD", "GET"],
             )

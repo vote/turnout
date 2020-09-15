@@ -41,6 +41,26 @@ class ActionNetworkError(Exception):
     pass
 
 
+def get_session(api_key):
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
+
+    session = requests.Session()
+    session.headers["OSDI-API-Token"] = api_key
+    session.mount(
+        "https://",
+        HTTPAdapter(
+            max_retries=Retry(
+                total=1,
+                backoff_factor=1,
+                status_forcelist=[500, 502, 503, 504],
+                method_whitelist=["HEAD", "GET", "POST", "PUT"],
+            )
+        ),
+    )
+    return session
+
+
 def get_form_title(action_desc, prefix):
     title = f"VoteAmerica {action_desc}"
     if prefix != "prod":
@@ -88,6 +108,8 @@ def setup_action_forms(subscriber_id, api_key, slug):
     if not missing:
         return forms
 
+    session = get_session(api_key)
+
     logger.info(f"Fetching forms from ActionNetwork for subscriber {subscriber_id}")
     prefix = settings.ACTIONNETWORK_FORM_PREFIX
     forms = {}
@@ -95,7 +117,7 @@ def setup_action_forms(subscriber_id, api_key, slug):
         nexturl = FORM_ENDPOINT
         while nexturl:
             logger.info(nexturl)
-            response = requests.get(nexturl, headers={"OSDI-API-Token": api_key},)
+            response = session.get(nexturl)
             for form in response.json()["_embedded"]["osdi:forms"]:
                 an_id, va_action = get_form_ids(form["identifiers"], prefix)
                 if an_id and va_action:
@@ -104,10 +126,8 @@ def setup_action_forms(subscriber_id, api_key, slug):
                         title = get_form_title(ACTIONS[va_action], prefix)
                         if title != form["title"]:
                             logger.info(f"Fixing title for {va_action} form {an_id}")
-                            response = requests.put(
-                                FORM_ENDPOINT + f"/{an_id}",
-                                headers={"OSDI-API-Token": api_key},
-                                json={"title": title,},
+                            response = session.put(
+                                FORM_ENDPOINT + f"/{an_id}", json={"title": title,},
                             )
 
             nexturl = response.json().get("_links", {}).get("next", {}).get("href")
@@ -120,9 +140,8 @@ def setup_action_forms(subscriber_id, api_key, slug):
                 form_id = f"voteamerica:{prefix}_{action}"
                 if subscriber_id and slug:
                     form_id += "_" + slug
-                response = requests.post(
+                response = session.post(
                     FORM_ENDPOINT,
-                    headers={"OSDI-API-Token": api_key},
                     json={
                         "identifiers": [form_id],
                         "title": get_form_title(tool, prefix),
@@ -142,12 +161,11 @@ def setup_action_forms(subscriber_id, api_key, slug):
 def post_person(info, form_id, api_key, slug):
     from common.apm import tracer
 
+    session = get_session(api_key)
     url = ADD_ENDPOINT.format(form_id=form_id)
     try:
         with tracer.trace("an.form.submission", service="actionnetwork"):
-            response = requests.post(
-                url, json=info, headers={"OSDI-API-Token": api_key},
-            )
+            response = session.post(url, json=info,)
             if response.status_code != 200:
                 extra = {"url": url, "info": info, "status_code": response.status_code}
                 logger.info(response.text)
@@ -169,9 +187,8 @@ def post_person(info, form_id, api_key, slug):
             if slug and not response.json().get("custom_fields", {}).get(
                 "first_subscriber"
             ):
-                response = requests.put(
+                response = session.put(
                     PEOPLE_ENDPOINT.format(person_id=person_id),
-                    headers={"OSDI-API-Token": api_key},
                     json={"custom_fields": {"subscriber": slug,},},
                 )
 
@@ -336,9 +353,9 @@ def resubscribe_phone(phone):
     if person_id_by_date:
         last = sorted(person_id_by_date.keys())[-1]
         person_id = person_id_by_date[last]
-        response = requests.put(
+        session = get_session(settings.ACTIONNETWORK_KEY)
+        response = session.put(
             PEOPLE_ENDPOINT.format(person_id=person_id),
-            headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
             json={"phone_numbers": [{"number": str(phone), "status": "subscribed"}]},
         )
         logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")
@@ -348,6 +365,7 @@ def resubscribe_phone(phone):
 def add_test_addrs():
     from common.tasks import TEST_ADDRS
 
+    session = get_session(settings.ACTIONNETWORK_KEY)
     for addr in TEST_ADDRS:
         info = {
             "person": {
@@ -357,8 +375,4 @@ def add_test_addrs():
             },
             "action_network:referrer_data": {"source": "250ok",},
         }
-        response = requests.post(
-            PERSON_HELPER_ENDPOINT,
-            headers={"OSDI-API-Token": settings.ACTIONNETWORK_KEY},
-            json=info,
-        )
+        response = session.post(PERSON_HELPER_ENDPOINT, json=info,)
