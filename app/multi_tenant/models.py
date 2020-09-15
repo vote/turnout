@@ -20,7 +20,7 @@ class Client(UUIDModel, TimestampModel):
         verbose_name="Default 'From' Email Address",
         max_length=254,
         null=True,
-        default="info@voteamerica.com",
+        default="hello@voteamerica.com",
     )
     privacy_policy = models.URLField(
         verbose_name="Privacy Policy URL", null=True, blank=True
