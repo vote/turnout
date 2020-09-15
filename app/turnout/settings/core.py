@@ -127,6 +127,7 @@ FIRST_PARTY_APPS = [
     "leouptime",
     "celery_admin",
     "voter",
+    "polling_place",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + FIRST_PARTY_APPS
