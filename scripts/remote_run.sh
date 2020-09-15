@@ -135,7 +135,7 @@ fi
 
 echo "Running Image $IMAGE"
 
-if [ -z ${2+x} ]; then
+if [ "$2" ]; then
   docker run \
     -e DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
