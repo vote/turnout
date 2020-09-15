@@ -80,7 +80,7 @@ local docker_env_lines = [
 
   echo "Running Image $IMAGE"
 
-  if [ "$2" ]; then
+  if [ -z ${2+x} ]; then
     docker run \
 ||| + std.join('\n', docker_env_lines) + |||
 
