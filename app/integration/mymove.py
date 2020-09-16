@@ -75,13 +75,36 @@ def load_leads_from_file(fn):
         store_leads(leads)
 
 
+def load_leads_from_csv(fn, n=0, d=1):
+    import csv
+
+    with open(fn, "r") as f:
+        r = csv.DictReader(f, delimiter=",")
+        leads = [i for i in r]
+        chunk = len(leads) // d
+        logger.info(f"Loaded {len(leads)} leads from {fn}, chunk {chunk} ({n} of {d})")
+        store_leads(leads[(n * chunk) : ((n + 1) * chunk)])
+
+
 def store_leads(leads):
     new = 0
     for lead in leads:
         # avoid duplicates
-        created_at = datetime.datetime.strptime(
-            lead["created_at"], "%Y-%m-%dT%H:%M:%SZ"
-        ).replace(tzinfo=datetime.timezone.utc)
+        try:
+            created_at = datetime.datetime.strptime(
+                lead["created_at"], "%Y-%m-%dT%H:%M:%SZ"
+            ).replace(tzinfo=datetime.timezone.utc)
+            move_date = datetime.datetime.strptime(
+                lead["move_date"], "%Y-%m-%dT%H:%M:%SZ"
+            ).replace(tzinfo=datetime.timezone.utc)
+        except:
+            # csv has different date format :/
+            created_at = datetime.datetime.strptime(
+                lead["created_at"], "%Y-%m-%d %H:%M:%S"
+            ).replace(tzinfo=datetime.timezone.utc)
+            move_date = datetime.datetime.strptime(
+                lead["move_date"], "%Y-%m-%d"
+            ).replace(tzinfo=datetime.timezone.utc)
         lead, created = MymoveLead.objects.get_or_create(
             email=lead.get("email"),
             mymove_created_at=created_at,
@@ -90,9 +113,7 @@ def store_leads(leads):
                 "email": lead.get("email"),
                 "first_name": lead.get("first_name"),
                 "last_name": lead.get("last_name"),
-                "move_date": datetime.datetime.strptime(
-                    lead["move_date"], "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=datetime.timezone.utc),
+                "move_date": move_date,
                 "new_address1": lead.get("new_address_1"),
                 "new_address2": lead.get("new_address_2"),
                 "new_city": lead.get("new_city"),
@@ -232,17 +253,25 @@ def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None
 
 
 @tracer.wrap()
-def push_to_actionnetwork(limit=None) -> None:
+def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
     session = get_actionnetwork_session(settings.ACTIONNETWORK_KEY)
 
     form_id = get_or_create_form(session)
 
-    num = 0
-    for lead in MymoveLead.objects.filter(
-        actionnetwork_person_id__isnull=True
-    ).order_by("mymove_created_at"):
+    q = MymoveLead.objects.filter(
+        actionnetwork_person_id__isnull=True,
+        mymove_created_at__gte=datetime.datetime(
+            2020, 9, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
+    ).order_by("mymove_created_at")
+    if new_state:
+        q = q.filter(new_state=new_state)
+
+    if limit:
+        end = offset + limit
+    else:
+        end = None
+
+    for lead in q[offset:end]:
         push_lead(session, form_id, lead)
-        num += 1
-        if limit and num >= limit:
-            break
         time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)

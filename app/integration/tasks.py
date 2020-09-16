@@ -80,10 +80,10 @@ def pull_from_mymove(days=None, hours=None):
 
 
 @shared_task
-def push_mymove_to_actionnetwork(limit=None) -> None:
+def push_mymove_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
     from .mymove import push_to_actionnetwork
 
-    push_to_actionnetwork(limit)
+    push_to_actionnetwork(limit=limit, offset=offset, new_state=new_state)
 
 
 @shared_task
