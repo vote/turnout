@@ -8,7 +8,7 @@ from action.models import Action
 from multi_tenant.models import Client
 from polling_place.models import PollingPlaceLookup
 
-PP_API_ENDPOINT = "/v1/pollingplace/lookup/"
+PP_API_ENDPOINT = "/v1/pollingplace/report/"
 VALID_LOOKUP = {
     "unstructured_address": "1234 spruce st., philadelphia, PA 19103",
     "embed_url": "https://www.greatvoter.com/location/of/embed",

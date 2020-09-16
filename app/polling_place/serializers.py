@@ -7,7 +7,7 @@ from common.validators import zip_validator
 from .models import PollingPlaceLookup
 
 
-class PollingPlaceLookupSerializer(TrackingSerializer, ActionSerializer):
+class PollingPlaceLookupReportSerializer(TrackingSerializer, ActionSerializer):
     zipcode = serializers.CharField(validators=[zip_validator])
 
     class Meta:

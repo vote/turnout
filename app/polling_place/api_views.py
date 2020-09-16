@@ -6,13 +6,13 @@ from rest_framework.viewsets import GenericViewSet
 from election.models import State
 
 from .models import PollingPlaceLookup
-from .serializers import PollingPlaceLookupSerializer
+from .serializers import PollingPlaceLookupReportSerializer
 
 
-class PollingPlaceLookupViewSet(CreateModelMixin, GenericViewSet):
+class PollingPlaceLookupReportViewSet(CreateModelMixin, GenericViewSet):
     permission_classes = [AllowAny]
     model = PollingPlaceLookup
-    serializer_class = PollingPlaceLookupSerializer
+    serializer_class = PollingPlaceLookupReportSerializer
     queryset = PollingPlaceLookup.objects.none()
 
     def create(self, request, *args, **kwargs):
