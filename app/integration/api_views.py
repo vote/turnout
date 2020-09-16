@@ -85,7 +85,7 @@ def lob_letter_status(request):
         if item:
             for fname, days in event_trigger[etype]:
                 tool = type(item).__module__.split(".")[0]
-                task = f"{tool}.{fname}"
+                task = f"{tool}.tasks.{fname}"
                 if days:
                     DelayedTask.schedule_days_later_polite(
                         item.state.code, days, task, str(item.pk)
