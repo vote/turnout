@@ -17,6 +17,15 @@
     color: $white;
     border-radius: 0;
     font-weight: 600;
+
+    a {
+        text-decoration: underline;
+
+        &:hover {
+            text-decoration: none;
+            color: white;
+        }
+    }
 }
 
 .btn-card {
