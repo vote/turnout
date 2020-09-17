@@ -25,9 +25,20 @@ Premium tool users: please use the customized embed code found by logging in at 
 
 ## Absentee tool
 
+_This tool is the same as the Vote By Mail tool with a different header._
+
 ```html
 <script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
 <div class="voteamerica-embed" data-subscriber="public" data-tool="absentee"></div>
+```
+
+## Vote by mail tool
+
+_This tool is the same as the Absentee tool with a different header._
+
+```html
+<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
+<div class="voteamerica-embed" data-subscriber="public" data-tool="votebymail"></div>
 ```
 
 ## Polling place lookup tool
@@ -35,6 +46,13 @@ Premium tool users: please use the customized embed code found by logging in at 
 ```html
 <script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
 <div class="voteamerica-embed" data-subscriber="public" data-tool="locate"></div>
+```
+
+## Election reminders tool
+
+```html
+<script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
+<div class="voteamerica-embed" data-subscriber="public" data-tool="remind"></div>
 ```
 
 ## Local Election Official Directory

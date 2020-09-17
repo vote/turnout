@@ -28,9 +28,32 @@
                     <a href="https://www.voteamerica.com/absentee-ballot/">Absentee Tool</a>
                 </div>
                 <div class="card-body">
+                    <p>
+                        <em>
+                            This tool is the same as the Vote By Mail tool with a different header.
+                        </em>
+                    </p>
                     <code>
                         &lt;script src="https://cdn.voteamerica.com/embed/tools.js" async&gt;&lt;/script&gt;<br>
                         &lt;div class="voteamerica-embed" data-subscriber="{{ user.active_client_slug }}" data-tool="absentee"&gt;&lt;/div&gt;
+                    </code>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <a href="https://www.voteamerica.com/vote-by-mail/">Vote By Mail Tool</a>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <em>
+                            This tool is the same as the Absentee tool with a different header.
+                        </em>
+                    </p>
+                    <code>
+                        &lt;script src="https://cdn.voteamerica.com/embed/tools.js" async&gt;&lt;/script&gt;<br>
+                        &lt;div class="voteamerica-embed" data-subscriber="{{ user.active_client_slug }}" data-tool="votebymail"&gt;&lt;/div&gt;
                     </code>
                 </div>
             </div>
@@ -64,15 +87,91 @@
         <div>
             <div class="card">
                 <div class="card-header">
-                    <a href="https://www.voteamerica.com/local-election-offices/">
-                        Local Election Office Directory Tool
-                    </a>
+                    <a href="https://www.voteamerica.com/election-reminders/">Election Reminders Tool</a>
+                </div>
+                <div class="card-body">
+                    <code>
+                        &lt;script src="https://cdn.voteamerica.com/embed/tools.js" async&gt;&lt;/script&gt;<br>
+                        &lt;div class="voteamerica-embed" data-subscriber="{{ user.active_client_slug }}" data-tool="remind"&gt;&lt;/div&gt;
+                    </code>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <a href="https://www.voteamerica.com/local-election-offices/">Local Election Office Directory Tool</a>
                 </div>
                 <div class="card-body">
                     <code>
                         &lt;script src="https://cdn.voteamerica.com/embed/tools.js" async&gt;&lt;/script&gt;<br>
                         &lt;div class="voteamerica-embed" data-subscriber="{{ user.active_client_slug }}" data-tool="leo"&gt;&lt;/div&gt;
                     </code>
+                </div>
+            </div>
+        </div>
+        <div>
+            <hr>
+            <h2>If you don't want to embed the tools in your own website, you can use the following links to associate signups with your account.</h2>
+            <div class="card">
+                <div class="card-header">Subscriber Links</div>
+                <div class="card-body">
+                    <p>
+                        <strong>Register Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/register-to-vote/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/register-to-vote/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Absentee Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/absentee-ballot/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/absentee-ballot/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Vote By Mail Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/vote-by-mail/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/vote-by-mail/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Verify Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/am-i-registered-to-vote/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/am-i-registered-to-vote/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Polling Place Locator Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/where-is-my-polling-place/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/where-is-my-polling-place/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Election Reminders Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/election-reminders/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/election-reminders/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
+                    <p>
+                        <strong>Local Election Office Directory Tool</strong>
+                    </p>
+                    <p>
+                        <a href="https://www.voteamerica.com/local-election-offices/?subscriber={{ user.active_client_slug }}">
+                            https://www.voteamerica.com/local-election-offices/?subscriber={{ user.active_client_slug }}
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
