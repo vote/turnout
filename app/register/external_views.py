@@ -11,9 +11,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from action.tasks import action_check_unfinished
 from apikey.auth import ApiKeyAuthentication, ApiKeyRequired
 from apikey.crypto import make_action_jwt, verify_action_jwt
-from common.enums import RegistrationFlowType
+from common.enums import EventType, RegistrationFlowType
 from election.choices import STATES
 from election.models import StateInformation
 
@@ -153,6 +154,12 @@ class ExternalRegistrationViewSet(CreateModelMixin, GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         registration = serializer.save()
+
+        action_check_unfinished.apply_async(
+            args=(registration.action.pk,),
+            countdown=settings.ACTION_CHECK_UNFINISHED_DELAY,
+        )
+        registration.action.track_event(EventType.START_ACTION_API)
 
         return Response(generate_response(registration), status=200)
 

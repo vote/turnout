@@ -117,6 +117,7 @@ class FileType(Enum, metaclass=EnumMeta):
 
 class EventType(Enum, metaclass=EnumMeta):
     START = "Start"
+    START_ACTION_API = "StartActionAPI"
     FINISH_SELF_PRINT = "FinishPrint"
     FINISH_EXTERNAL = "FinishExternal"
     FINISH_EXTERNAL_CONFIRMED = "FinishExternalConfirmed"
@@ -138,6 +139,7 @@ class EventType(Enum, metaclass=EnumMeta):
 
     class Labels:
         START = "Started Form"
+        START_ACTION_API = "Started via Action API"
         FINISH_SELF_PRINT = "Finished via Print and Mail"
         FINISH_EXTERNAL = "Finished with External Tool"
         FINISH_EXTERNAL_CONFIRMED = (

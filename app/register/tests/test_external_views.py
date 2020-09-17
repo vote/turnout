@@ -6,8 +6,14 @@ import pytest
 from model_bakery import baker
 from rest_framework.test import APIClient
 
-from common.enums import RegistrationFlowType, RegistrationGender, StateFieldFormats
+from common.enums import (
+    EventType,
+    RegistrationFlowType,
+    RegistrationGender,
+    StateFieldFormats,
+)
 from election.models import StateInformation, StateInformationFieldType
+from event_tracking.models import Event
 from register.external_views import (
     MARKDOWN_TEMPLATE,
     StateRegistrationData,
@@ -388,6 +394,7 @@ def test_create_and_resume_minimal(basic_state_info, mocker):
     mocker.patch(
         "register.external_views.get_custom_ovr_link"
     ).return_value = "some link"
+    mocker.patch("register.external_views.action_check_unfinished")
 
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=basicauth(str(key.uuid), key.hashed_secret()))
@@ -398,6 +405,9 @@ def test_create_and_resume_minimal(basic_state_info, mocker):
     registration = Registration.objects.first()
     assert registration.subscriber == key.subscriber
     assert registration.gender == None
+    assert Event.objects.filter(
+        action=registration.action, event_type=EventType.START_ACTION_API
+    ).exists()
 
     jwt_url = response.json()["buttons"][1]["url"]
     jwt_qs = parse_qs(urlparse(jwt_url).query)
@@ -428,8 +438,9 @@ def test_create_and_resume_minimal(basic_state_info, mocker):
 
 
 @pytest.mark.django_db
-def test_create_maximal(basic_state_info):
+def test_create_maximal(basic_state_info, mocker):
     key = baker.make_recipe("apikey.apikey")
+    mocker.patch("register.external_views.action_check_unfinished")
 
     client = APIClient()
     client.credentials(HTTP_AUTHORIZATION=basicauth(str(key.uuid), key.hashed_secret()))
@@ -440,6 +451,9 @@ def test_create_maximal(basic_state_info):
     registration = Registration.objects.first()
     assert registration.subscriber == key.subscriber
     assert registration.gender == RegistrationGender.MALE
+    assert Event.objects.filter(
+        action=registration.action, event_type=EventType.START_ACTION_API
+    ).exists()
 
 
 @pytest.mark.django_db

@@ -68,6 +68,12 @@ def action_check_unfinished(action_pk: str) -> None:
         if not n:
             return
 
+        # don't nag them about finishing the tool if they came in via the action API
+        if Event.objects.filter(
+            action=action, event_type=EventType.START_ACTION_API,
+        ).exists():
+            return
+
         if "BallotRequest" in str(type(item)):
             # no need to nag in vbm_universal states
             if StateInformation.objects.filter(
@@ -87,5 +93,5 @@ def action_check_unfinished(action_pk: str) -> None:
         else:
             return
         n.send_sms(
-            f"It looks like you didn't finish {what}. To continue the process, please visit {shorten_url(url)}"
+            f"If you weren't able to finish {what}, please visit {shorten_url(url)}"
         )
