@@ -87,7 +87,7 @@ def compile_email(
             "leo_contact_info"
         ] = "https://www.voteamerica.com/local-election-offices/"
 
-    if registration.request_mailing_address1:
+    if registration.result_item_mail:
         context["mail_download_url"] = registration.result_item_mail.download_url
         context["confirm_url"] = PRINT_AND_FORWARD_CONFIRM_URL.format(
             base=settings.WWW_ORIGIN,
@@ -124,18 +124,18 @@ def trigger_notification(registration: Registration) -> None:
     content = compile_email(
         registration,
         PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE
-        if registration.request_mailing_address1
+        if registration.result_item_mail
         else NOTIFICATION_TEMPLATE,
     )
     send_email(
         registration,
-        PRINT_AND_FORWARD_SUBJECT if registration.request_mailing_address1 else SUBJECT,
+        PRINT_AND_FORWARD_SUBJECT if registration.result_item_mail else SUBJECT,
         content,
     )
 
 
 def trigger_reminder(registration: Registration) -> None:
-    if registration.request_mailing_address1:
+    if registration.result_item_mail:
         if not get_feature_bool("drip", "register_confirm_reminder"):
             return
     else:
@@ -145,19 +145,19 @@ def trigger_reminder(registration: Registration) -> None:
     content = compile_email(
         registration,
         PRINT_AND_FORWARD_NOTIFICATION_TEMPLATE
-        if registration.request_mailing_address1
+        if registration.result_item_mail
         else NOTIFICATION_TEMPLATE,
     )
     send_email(
         registration,
         PRINT_AND_FORWARD_REMINDER_SUBJECT
-        if registration.request_mailing_address1
+        if registration.result_item_mail
         else REMINDER_SUBJECT,
         content,
     )
 
     if registration.phone:
-        if registration.request_mailing_address1:
+        if registration.result_item_mail:
             message = f"Before we mail your registration form, you need to click the confirmation link in the email we sent to {registration.email} from VoteAmerica. We just sent another copy in case you lost it."
         else:
             message = f"We emailed your voter registration form, but you haven't downloaded and printed it yet. We've just resent it to {registration.email} from VoteAmerica."

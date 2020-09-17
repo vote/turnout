@@ -30,7 +30,7 @@ def send_registration_notification(registration_pk: str) -> None:
     registration = Registration.objects.select_related().get(pk=registration_pk)
     registration.status = TurnoutActionStatus.PDF_SENT
     registration.save(update_fields=["status"])
-    if registration.request_mailing_address1:
+    if registration.result_item_mail:
         registration.action.track_event(EventType.FINISH_LOB)
 
         # nag them in a few minutes
@@ -61,7 +61,7 @@ def send_registration_reminder(registration_pk: str) -> None:
 
     registration = Registration.objects.select_related().get(pk=registration_pk)
 
-    if registration.request_mailing_address1:
+    if registration.result_item_mail:
         event_type = EventType.FINISH_LOB_CONFIRM
     else:
         event_type = EventType.DOWNLOAD
