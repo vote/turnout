@@ -2,7 +2,10 @@ site_name: VoteAmerica Developer Documentation
 docs_dir: 'turnout'
 nav:
     - Home: 'index.md'
-    - 'Election Information API': '/api/'
+    - 'API':
+        - 'Election Information API': '/api/'
+        - 'State Voter Tool Uptime API': '/api/leouptime/'
+        - 'Action API': '/api/action/'
     - 'Tool Embed':
         - 'Embed Codes': '/embed/'
         - 'Form Prefilling': '/embed/prefill/'
@@ -15,11 +18,9 @@ nav:
         - 'Export Format': '/admin/exportformat/'
     - 'Integrations':
         - 'ActionNetwork': '/integrations/actionnetwork/'
-    - 'State Voter Tool Uptime API': '/api/leouptime/'
-    - 'Advanced APIs':
-        - 'Action API': '/api/action/'
+        - 'Bluelink': '/integrations/bluelink/'
+        - 'The Movement Cooperative': '/integrations/tmc'
     - 'Open Source Development': '/opensource/'
-    - 'Mapping "Legacy Field" To "2020 Field"' : '/api/2020/'
 collapse_navigation: false
 theme:
   name: material

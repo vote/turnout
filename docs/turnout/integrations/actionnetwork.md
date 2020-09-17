@@ -5,8 +5,8 @@ passed to [ActionNetwork](https://actionnetwork.org) to add the user to your ema
 
 ## Enabling
 
-Enable the **Sync to ActionNetwork** checkbox on the **Tool > Settings** page.  You will need to enter
-the API Key provided by ActionNetwork.
+Enable the **Enable ActionNetwork Sync** checkbox under **Third Party Integrations** on the
+**Tools > Settings** page.  You will need to enter the API Key provided by ActionNetwork.
 
 ## Actions
 
