@@ -3,6 +3,7 @@ from uuid import UUID
 from django.conf import settings
 
 from common import enums
+from election.models import StateInformation
 from event_tracking.models import Event
 
 from .models import Registration
@@ -22,6 +23,13 @@ def finish_external(action_id: UUID, event_id: UUID):
         return
 
     registration = Registration.objects.get(action_id=action_id)
+
+    # no upsell in vbm_universal states
+    if StateInformation.objects.filter(
+        state=registration.state, field_type__slug="vbm_universal", text="True",
+    ).exists():
+        return
+
     external_tool_upsell.apply_async(
         (registration.uuid,), countdown=settings.REGISTER_UPSELL_DELAY_SECONDS
     )

@@ -4,6 +4,7 @@ from django.conf import settings
 from action.models import Action
 from common.enums import EventType
 from common.i90 import shorten_url
+from election.models import StateInformation
 from event_tracking.models import Event
 from integration.tasks import sync_action_to_actionnetwork
 from smsbot.tasks import _send_welcome_sms, send_welcome_sms
@@ -59,6 +60,8 @@ def action_check_unfinished(action_pk: str) -> None:
     if settings.ACTIONNETWORK_SYNC:
         sync_action_to_actionnetwork.delay(action_pk)
 
+    voter_lookup_action.delay(action_pk)
+
     item = action.get_source_item()
     if item.phone:
         n = _send_welcome_sms(str(item.phone))
@@ -66,6 +69,12 @@ def action_check_unfinished(action_pk: str) -> None:
             return
 
         if "BallotRequest" in str(type(item)):
+            # no need to nag in vbm_universal states
+            if StateInformation.objects.filter(
+                state=item.state, field_type__slug="vbm_universal", text="True",
+            ).exists():
+                return
+
             what = "requesting your absentee ballot"
             if item.subscriber.is_first_party:
                 query_params = item.get_query_params()
@@ -80,5 +89,3 @@ def action_check_unfinished(action_pk: str) -> None:
         n.send_sms(
             f"It looks like you didn't finish {what}. To continue the process, please visit {shorten_url(url)}"
         )
-
-    voter_lookup_action(action_pk)
