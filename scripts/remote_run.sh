@@ -24,6 +24,7 @@ echo "Account ID: $ACCOUNT_ID"
 export DATABASE_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_url | jq '.Parameter["Value"]' -r)
 export DATABASE_MAX_CONNECTIONS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_max_connections | jq '.Parameter["Value"]' -r)
 export REDIS_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.redis_url | jq '.Parameter["Value"]' -r)
+export AMQP_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.amqp_url | jq '.Parameter["Value"]' -r)
 export SECRET_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.secret_key | jq '.Parameter["Value"]' -r)
 export SENTRY_DSN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.sentry_dsn | jq '.Parameter["Value"]' -r)
 export USVF_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.usvf_sync | jq '.Parameter["Value"]' -r)
@@ -140,6 +141,7 @@ if [ "$2" ]; then
     -e DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
     -e REDIS_URL \
+    -e AMQP_URL \
     -e SECRET_KEY \
     -e SENTRY_DSN \
     -e USVF_SYNC \
@@ -231,6 +233,7 @@ else
     -e DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
     -e REDIS_URL \
+    -e AMQP_URL \
     -e SECRET_KEY \
     -e SENTRY_DSN \
     -e USVF_SYNC \

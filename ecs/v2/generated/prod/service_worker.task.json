@@ -83,6 +83,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.redis_url"
             },
             {
+               "name": "AMQP_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.amqp_url"
+            },
+            {
                "name": "SECRET_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.secret_key"
             },
@@ -493,6 +497,10 @@
             {
                "name": "REDIS_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.redis_url"
+            },
+            {
+               "name": "AMQP_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.amqp_url"
             },
             {
                "name": "SECRET_KEY",

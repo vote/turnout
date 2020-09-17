@@ -14,6 +14,10 @@
         name: 'REDIS_URL',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.amqp_url',
+        name: 'AMQP_URL',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.secret_key',
         name: 'SECRET_KEY',
       },
