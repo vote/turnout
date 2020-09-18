@@ -19,6 +19,15 @@ services:
     volumes:
       - redisdata_turnout:/data
 
+  rabbitmq:
+    container_name: rabbitmq_turnout
+    image: rabbitmq:3.8.8-management
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=turnout
+    ports:
+      - 5672:5672
+      - 15672:15672
+
   server:
     build:
       context: .
@@ -26,7 +35,7 @@ services:
       cache_from:
         - voteamerica/turnout-ci-cache:latest
     image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it postgres:5432 redis:6379 --
+    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --pattern=*.yml --recursive -- python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app:/app:cached
@@ -37,6 +46,7 @@ services:
       - DJANGO_SETTINGS_MODULE=turnout.settings
       - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
       - REDIS_URL=redis://redis:6379
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
       - DD_AGENT_HOST=echo
@@ -46,10 +56,11 @@ services:
     depends_on:
       - postgres
       - redis
+      - rabbitmq
 
   beat:
     image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it postgres:5432 redis:6379 --
+    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --pattern=*.py --recursive -- python -m celery -A turnout.celery_beat beat --scheduler redbeat.RedBeatScheduler
     volumes:
       - ./app:/app
@@ -58,6 +69,7 @@ services:
       - DJANGO_SETTINGS_MODULE=turnout.settings
       - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
       - REDIS_URL=redis://redis:6379
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
       - DD_AGENT_HOST=echo
@@ -67,10 +79,11 @@ services:
     depends_on:
       - postgres
       - redis
+      - rabbitmq
 
   worker:
     image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it postgres:5432 redis:6379 --
+    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default
     volumes:
       - ./app:/app
@@ -79,6 +92,7 @@ services:
       - DJANGO_SETTINGS_MODULE=turnout.settings
       - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
       - REDIS_URL=redis://redis:6379
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
       - DD_AGENT_HOST=echo
@@ -89,10 +103,11 @@ services:
       - postgres
       - redis
       - beat
+      - rabbitmq
 
   worker_high_pri:
     image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it postgres:5432 redis:6379 --
+    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
     volumes:
       - ./app:/app
@@ -101,6 +116,7 @@ services:
       - DJANGO_SETTINGS_MODULE=turnout.settings
       - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
       - REDIS_URL=redis://redis:6379
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
       - DD_AGENT_HOST=echo
@@ -111,6 +127,7 @@ services:
       - postgres
       - redis
       - beat
+      - rabbitmq
 
   selenium:
     image: selenium/standalone-chrome:3.141.59-20200525

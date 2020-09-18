@@ -216,7 +216,8 @@ NETLIFY_TRIGGER_INTERVAL = 10
 # how often to check for delayed tasks (minutes)
 DELAYED_TASKS_INTERVAL = 2
 
-CELERY_BROKER_URL = env.str("REDIS_URL", default="redis://redis:6379")
+CELERY_REDBEAT_REDIS_URL = env.str("REDIS_URL", default="redis://redis:6379")
+CELERY_BROKER_URL = env.str("AMQP_URL", default="amqp://guest:guest@amqp:5672/turnout")
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=8)
 CELERY_TASK_SERIALIZER = "json"
