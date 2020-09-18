@@ -32,6 +32,12 @@ class MymoveLead(UUIDModel, TimestampModel):
     new_zipcode = models.TextField(null=True, validators=[zip_validator])
     new_zipcode_plus4 = models.TextField(null=True)
     new_housing_tenure = models.TextField(null=True)
+    new_region = models.ForeignKey(
+        "official.Region",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="mymovelead_new",
+    )
 
     old_address1 = models.TextField(null=True)
     old_address2 = models.TextField(null=True, blank=True)
@@ -40,8 +46,24 @@ class MymoveLead(UUIDModel, TimestampModel):
     old_zipcode = models.TextField(null=True, validators=[zip_validator])
     old_zipcode_plus4 = models.TextField(null=True)
     old_housing_tenure = models.TextField(null=True)
+    old_region = models.ForeignKey(
+        "official.Region",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="mymovelead_old",
+    )
 
     actionnetwork_person_id = models.TextField(null=True)
 
+    blank_register_forms_action = models.ForeignKey(
+        "action.Action", on_delete=models.PROTECT, null=True, db_index=True
+    )
+    blank_register_forms_item = models.ForeignKey(
+        "storage.StorageItem", null=True, on_delete=models.SET_NULL
+    )
+
     class Meta:
         ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"MymoveLead {self.first_name} {self.last_name}, {self.old_state} -> {self.new_state} ({self.uuid})"

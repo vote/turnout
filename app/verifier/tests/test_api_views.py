@@ -344,7 +344,7 @@ def test_default_subscriber(mock_apicalls, mock_finish):
 
     first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
@@ -367,7 +367,7 @@ def test_inactive_subscriber(mock_apicalls, mock_finish):
         subscriber=second_subscriber,
         slug="verifierslugtwo",
     )
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
 
@@ -409,7 +409,7 @@ def test_custom_subscriber(mock_apicalls, mock_finish):
         subscriber=second_subscriber,
         slug="verifierslugtwo",
     )
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
     response = client.post(url, VALID_LOOKUP)
@@ -429,7 +429,7 @@ def test_invalid_subscriber_key(mock_apicalls, mock_finish):
     first_subscriber = Client.objects.first()
     second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe("multi_tenant.subscriberslug", subscriber=second_subscriber)
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     url = f"{LOOKUP_API_ENDPOINT}?subscriber=INVALID"
     response = client.post(url, VALID_LOOKUP)

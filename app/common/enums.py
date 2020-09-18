@@ -109,10 +109,12 @@ class FileType(Enum, metaclass=EnumMeta):
     REGISTRATION_FORM = "RegForm"
     ABSENTEE_REQUEST_FORM = "AbsForm"
     REPORT = "Report"
+    BLANK_REGISTRATION_FORMS = "BlankRegForms"
 
     class Labels:
         REGISTRATION_FORM = "Registration Form"
         ABSENTEE_REQUEST_FORM = "Absentee Request Form"
+        BLANK_REGISTRATION_FORMS = "Blank registration forms"
 
 
 class EventType(Enum, metaclass=EnumMeta):
@@ -136,6 +138,7 @@ class EventType(Enum, metaclass=EnumMeta):
     LOB_PROCESSED_FOR_DELIVERY = "LobProcessedForDelivery"
     LOB_REROUTED = "LobRerouted"
     LOB_RETURNED = "LobReturned"
+    LOB_SENT_BLANK_REGISTER_FORMS = "LobSendBlankRegisterForms"
 
     class Labels:
         START = "Started Form"
@@ -159,6 +162,7 @@ class EventType(Enum, metaclass=EnumMeta):
         LOB_PROCESSED_FOR_DELIVERY = "Lob letter processed for delivery"
         LOB_REROUTED = "Lob letter rerouted (e.g., change of address)"
         LOB_RETURNED = "Lob letter returned"
+        LOB_SENT_BLANK_REGISTER_FORMS = "Lob sent blank voter registration forms"
 
 
 class SecureUploadType(Enum, metaclass=EnumMeta):

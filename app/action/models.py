@@ -6,6 +6,7 @@ from django.db import models
 from absentee.models import BallotRequest
 from common.utils.models import TimestampModel, UUIDModel
 from event_tracking.models import Event
+from integration.models import MymoveLead
 from register.models import Registration
 from reminder.models import ReminderRequest
 from verifier.models import Lookup
@@ -27,6 +28,10 @@ class Action(UUIDModel, TimestampModel):
                 return cls.objects.get(action=self)
             except ObjectDoesNotExist:
                 pass
+        try:
+            return MymoveLead.objects.get(blank_register_forms_action=self)
+        except ObjectDoesNotExist:
+            pass
         return None
 
 

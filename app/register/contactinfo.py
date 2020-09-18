@@ -37,16 +37,18 @@ def register_address_score(addr: Address) -> int:
         return 3
 
 
-def get_registration_contact_info(registration: Registration) -> RegisterContactInfo:
+def get_nvrf_submission_address(
+    region_id: Optional[int], state_id: str
+) -> RegisterContactInfo:
     contact_info = RegisterContactInfo()
 
-    if not registration.region_id:
+    if not region_id:
         # fallback to statewide address
         try:
             contact_info.address = (
                 StateInformation.objects.only("field_type", "text")
                 .get(
-                    state=registration.state,
+                    state=state_id,
                     field_type__slug="registration_nvrf_submission_address",
                 )
                 .text
@@ -57,7 +59,7 @@ def get_registration_contact_info(registration: Registration) -> RegisterContact
         return contact_info
 
     office_addresses = sorted(
-        Address.objects.filter(office__region__external_id=registration.region_id),
+        Address.objects.filter(office__region__external_id=region_id),
         key=register_address_score,
     )
 
@@ -80,3 +82,7 @@ def get_registration_contact_info(registration: Registration) -> RegisterContact
         )
 
     return contact_info
+
+
+def get_registration_contact_info(registration: Registration) -> RegisterContactInfo:
+    return get_nvrf_submission_address(registration.region_id, registration.state_id)

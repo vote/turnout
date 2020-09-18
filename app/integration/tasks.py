@@ -87,13 +87,34 @@ def push_mymove_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
 
 
 @shared_task
+def geocode_mymove(old_state: str = None, new_state: str = None):
+    from .mymove import geocode_leads
+
+    geocode_leads(old_state=old_state, new_state=new_state)
+
+
+@shared_task
 def sync_mymove():
     if get_feature_bool("mymove", "pull_from_mymove"):
         pull_from_mymove()
     else:
         logger.info("mymove.pull_from_mymove=false")
 
+    if get_feature_bool("mymove", "geocode"):
+        geocode_mymove()
+    else:
+        logger.info("mymove.geocode=false")
+
     if get_feature_bool("mymove", "push_to_actionnetwork"):
         push_mymove_to_actionnetwork()
     else:
         logger.info("mymove.push_to_actionnetwork=false")
+
+
+@shared_task
+def send_mymove_blank_register_forms(lead_pk: str) -> None:
+    from .models import MymoveLead
+    from .mymove import send_blank_register_forms_to_lead
+
+    lead = MymoveLead.objects.get(pk=lead_pk)
+    send_blank_register_forms_to_lead(lead)

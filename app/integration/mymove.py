@@ -1,15 +1,35 @@
 import datetime
 import logging
+import re
 import time
 
 import requests
 import sentry_sdk
 from django.conf import settings
+from django.db.models import OuterRef
+from django.forms.models import model_to_dict
+from django.template.defaultfilters import slugify
+from pdf_template import PDFTemplate, PDFTemplateSection
 
+from action.models import Action
+from common import enums
 from common.apm import tracer
+from common.pdf.pdftemplate import fill_pdf_template
+from election.models import State, StateInformation
+from multi_tenant.models import Client
+from official.api_views import get_regions_for_address
+from register.contactinfo import get_nvrf_submission_address
+from register.generateform import (
+    BLANK_FORMS_COVER_SHEET_8PT_PATH,
+    BLANK_FORMS_COVER_SHEET_9PT_PATH,
+    BLANK_FORMS_COVER_SHEET_PATH,
+    PRINT_AND_FORWARD_TEMPLATE_PATH,
+)
+from storage.models import StorageItem
 
 from .actionnetwork import ActionNetworkError
 from .actionnetwork import get_session as get_actionnetwork_session
+from .lob import get_or_create_lob_address, submit_lob
 from .models import MymoveLead
 
 STAGING_LEADS_ENDPOINT = "https://staging-leads.mymove.com/v2/clients/{client_id}/leads"
@@ -20,11 +40,23 @@ ACTIONNETWORK_ADD_ENDPOINT = (
     "https://actionnetwork.org/api/v2/forms/{form_id}/submissions/"
 )
 
+RE_MARKUP_LINK = re.compile(
+    "\[({0})]\(\s*({1})\s*\)".format(
+        "[^]]+",  # Anything that isn't a square closing bracket
+        "http[s]?://[^)]+",  # http:// or https:// followed by anything but a closing paren
+    )
+)
+
+
 logger = logging.getLogger("integration")
 
 
 class MymoveError(Exception):
     pass
+
+
+def get_mymove_subscriber() -> Client:
+    return Client.objects.filter(default_slug__slug="mymove").first()
 
 
 @tracer.wrap()
@@ -137,6 +169,227 @@ def store_leads(leads):
 
 
 @tracer.wrap()
+def send_blank_register_forms_tx(limit=None) -> None:
+    q = MymoveLead.objects.filter(
+        new_state="TX", blank_register_forms_action__isnull=True,
+    )
+    for lead in q[0:limit]:
+        send_blank_register_forms_to_lead(lead)
+
+
+@tracer.wrap()
+def send_blank_register_forms_blankforms2020(limit=None) -> None:
+    # experimental data set (exclude control group!)
+    q = (
+        MymoveLead.objects.filter(
+            new_state__ne=OuterRef("old_state"),
+            new_state__in=[
+                "AZ",
+                "GA",
+                "FL",
+                "MI",
+                "NC",
+                "PA",
+                "WI",
+                "OH",
+                "MN",
+                "CO",
+                "IA",
+                "ME",
+                "NE",
+                "KS",
+                "SC",
+                "AL",
+                "MS",
+                "MT",
+                "UT",
+            ],
+            created_at__lt=datetime.datetime(
+                2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
+            ),
+            blank_register_forms_action__isnull=True,
+        )
+        .exclude(uuid__startswith="0")
+        .exclude(uuid__startswith="1")
+    )
+    for lead in q[0:limit]:
+        send_blank_register_forms_to_lead(lead)
+
+    # post-experiment, moving forward
+    q = MymoveLead.objects.filter(
+        new_state__ne=OuterRef("old_state"),
+        new_state__in=[
+            "AZ",
+            "GA",
+            "FL",
+            "MI",
+            "NC",
+            "PA",
+            "WI",
+            "OH",
+            "MN",
+            "CO",
+            "IA",
+            "ME",
+            "NE",
+            "KS",
+            "SC",
+            "AL",
+            "MS",
+            "MT",
+            "UT",
+        ],
+        created_at__gte=datetime.datetime(
+            2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
+        ),
+        blank_register_forms_action__isnull=True,
+    )
+    for lead in q[0:limit]:
+        send_blank_register_forms_to_lead(lead)
+
+
+def get_register_form_data(lead: MymoveLead):
+    form_data = model_to_dict(lead)
+    contact_info = get_nvrf_submission_address(lead.new_region_id, lead.new_state)
+    mailto_address = contact_info.address
+
+    # split by linebreaks, because each line is a separate field in the PDF
+    for num, line in enumerate(mailto_address.splitlines()):
+        form_data[f"mailto_line_{num+1}"] = line
+        form_data[f"mailto_line_upper_{num+1}"] = line.upper()
+
+    state = State.objects.get(code=lead.new_state)
+    form_data["new_state_name"] = state.name
+
+    # grab all (new_)state fields
+    for info in StateInformation.objects.select_related("field_type").filter(
+        state=state,
+    ):
+        v = info.text.replace("**Warning:**", "WARNING:")
+        v = v.replace("**", "")  # remove other emphasis
+        v = v.replace("*", "\u2022")
+        if lead.new_state in ["AL"]:
+            # get stingy
+            v = v.replace("\n\n", "\n")
+        form_data[info.field_type.slug] = RE_MARKUP_LINK.sub(r"\1", v)
+
+    form_data["registration_nvrf_combined"] = "\n".join(
+        [
+            "Box 6 (ID Number):",
+            "  " + form_data["registration_nvrf_box_6"],
+            "",
+            "Box 7 (Choice of Party):",
+            "  " + form_data["registration_nvrf_box_7"],
+            "",
+            "Box 8 (Race or Ethnic Group):",
+            "  " + form_data["registration_nvrf_box_8"],
+        ]
+    )
+
+    # 2020 dates
+    def cap_first_letter(s):
+        return s[0].upper() + s[1:]
+
+    dates = [
+        f"Deadline to register: {cap_first_letter(form_data['2020_registration_deadline_by_mail'])}",
+    ]
+    if (
+        form_data["2020_early_voting_starts"]
+        and form_data["2020_early_voting_starts"] != "N/A"
+    ):
+        dates.extend(
+            [
+                f"Early voting starts: {form_data['2020_early_voting_starts']}",
+                f"Early voting ends: {form_data['2020_early_voting_ends']}",
+            ]
+        )
+    dates.append(f"Election day: November 3, 2020")
+    form_data["important_dates"] = "\n".join(dates)
+    form_data["2020_state_deadline"] = form_data["2020_registration_deadline_by_mail"]
+
+    return form_data
+
+
+@tracer.wrap()
+def send_blank_register_forms_to_lead(lead: MymoveLead) -> None:
+    # make sure we've geocoded
+    if not lead.new_region:
+        geocode_lead(lead)
+
+    subscriber = get_mymove_subscriber()
+
+    # generate PDF
+    form_data = get_register_form_data(lead)
+    item = StorageItem(
+        app=enums.FileType.BLANK_REGISTRATION_FORMS,
+        email=lead.email,
+        subscriber=subscriber,
+    )
+    filename = (
+        slugify(f"{lead.new_state} {lead.last_name} blank-register-forms").lower()
+        + ".pdf"
+    )
+    if lead.new_state in ["AL"]:
+        cover_path = BLANK_FORMS_COVER_SHEET_8PT_PATH
+    elif lead.new_state in ["MI"]:
+        cover_path = BLANK_FORMS_COVER_SHEET_9PT_PATH
+    else:
+        cover_path = BLANK_FORMS_COVER_SHEET_PATH
+    fill_pdf_template(
+        PDFTemplate(
+            [
+                PDFTemplateSection(path=cover_path, is_form=True, flatten_form=True),
+                PDFTemplateSection(
+                    path=PRINT_AND_FORWARD_TEMPLATE_PATH,
+                    is_form=False,
+                    flatten_form=False,
+                ),
+                PDFTemplateSection(
+                    path=PRINT_AND_FORWARD_TEMPLATE_PATH,
+                    is_form=False,
+                    flatten_form=False,
+                ),
+            ]
+        ),
+        form_data,
+        item,
+        filename,
+    )
+    lead.blank_register_forms_item = item
+
+    if not lead.blank_register_forms_action:
+        lead.blank_register_forms_action = Action.objects.create()
+    else:
+        logger.info(f"Already have blank forms action for {lead}")
+
+    lead.save()
+
+    # send
+    to_addr = get_or_create_lob_address(
+        str(lead.uuid),
+        f"{lead.first_name} {lead.last_name}".title(),
+        lead.new_address1,
+        lead.new_address2,
+        lead.new_city,
+        lead.new_state,
+        lead.new_zipcode,
+    )
+
+    created_at = submit_lob(
+        f"Blank register, {lead}",
+        lead.blank_register_forms_action,
+        to_addr,
+        lead.blank_register_forms_item.file,
+        subscriber,
+        double_sided=False,
+    )
+
+    lead.blank_register_forms_action.track_event(
+        enums.EventType.LOB_SENT_BLANK_REGISTER_FORMS
+    )
+
+
+@tracer.wrap()
 def get_or_create_form(session: requests.Session) -> str:
     logger.info(f"Fetching forms from ActionNetwork")
 
@@ -228,6 +481,7 @@ def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None
                 "mymove_old_housing_tenure": lead.old_housing_tenure,
                 "mymove_move_date": lead.move_date.isoformat(),
                 "mymove_cross_state": lead.old_state != lead.new_state,
+                "mymove_cross_region": lead.old_region_id != lead.new_region_id,
             },
         },
         "action_network:referrer_data": {"source": "mymove",},
@@ -261,7 +515,7 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
     q = MymoveLead.objects.filter(
         actionnetwork_person_id__isnull=True,
         mymove_created_at__gte=datetime.datetime(
-            2020, 9, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+            2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
         ),
     ).order_by("mymove_created_at")
     if new_state:
@@ -275,3 +529,36 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
     for lead in q[offset:end]:
         push_lead(session, form_id, lead)
         time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
+
+
+def geocode_lead(lead: MymoveLead) -> None:
+    updated = False
+    new_regions, _ = get_regions_for_address(
+        lead.new_address1, lead.new_city, lead.new_state, lead.new_zipcode
+    )
+    if new_regions and len(new_regions) == 1:
+        lead.new_region = new_regions[0]
+        updated = True
+    old_regions, _ = get_regions_for_address(
+        lead.old_address1, lead.old_city, lead.old_state, lead.old_zipcode
+    )
+    if old_regions and len(old_regions) == 1:
+        lead.old_region = old_regions[0]
+        updated = True
+    if updated:
+        lead.save()
+        logger.info(
+            f"Geocoded {lead}: {lead.old_state} {lead.old_region_id} -> {lead.new_state} {lead.new_region_id}"
+        )
+
+
+def geocode_leads(new_state: str = None, old_state: str = None) -> None:
+    q = MymoveLead.objects.filter(
+        new_region_id__isnull=True, old_region_id__isnull=True
+    )
+    if new_state:
+        q = q.filter(new_state=new_state)
+    if old_state:
+        q = q.filter(old_state=old_state)
+    for lead in q:
+        geocode_lead(lead)

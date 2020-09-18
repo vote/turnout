@@ -38,6 +38,14 @@ PDF_TEMPLATE = PDFTemplate(
     ]
 )
 
+BLANK_FORMS_COVER_SHEET_PATH = "register/templates/pdf/blank-register-forms-cover.pdf"
+BLANK_FORMS_COVER_SHEET_9PT_PATH = (
+    "register/templates/pdf/blank-register-forms-cover-9pt.pdf"
+)
+BLANK_FORMS_COVER_SHEET_8PT_PATH = (
+    "register/templates/pdf/blank-register-forms-cover-8pt.pdf"
+)
+
 
 def generate_name(registration, suffix=""):
     n = f"{registration.state.code} {registration.last_name} registrationform"

@@ -279,7 +279,7 @@ def test_default_subscriber(mock_check_unfinished, mock_finish, submission_task_
 
     first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     response = client.post(REGISTER_API_ENDPOINT, VALID_REGISTRATION)
     assert response.status_code == 200
@@ -303,7 +303,7 @@ def test_custom_subscriber(mock_check_unfinished, mock_finish, submission_task_p
         subscriber=second_subscriber,
         slug="custompartertwoslug",
     )
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     url = f"{REGISTER_API_ENDPOINT}?subscriber=custompartertwoslug"
     response = client.post(url, VALID_REGISTRATION)
@@ -327,7 +327,7 @@ def test_invalid_subscriber_key(
     first_subscriber = Client.objects.first()
     second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe("multi_tenant.subscriberslug", subscriber=second_subscriber)
-    assert Client.objects.count() == 2
+    assert Client.objects.count() == 3
 
     url = f"{REGISTER_API_ENDPOINT}?subscriber=INVALID"
     response = client.post(url, VALID_REGISTRATION)

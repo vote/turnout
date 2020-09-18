@@ -9,6 +9,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from absentee.models import BallotRequest
+from action.models import Action
 from common import enums
 from common.apm import tracer
 from register.models import Registration
@@ -130,19 +131,24 @@ def get_or_create_lob_address(
 
 
 @tracer.wrap()
-def send_letter(
-    item: Union[BallotRequest, Registration], double_sided: bool = False
+def submit_lob(
+    description: str,
+    action: Action,
+    to_addr,
+    item_file,
+    subscriber,
+    double_sided: bool = False,
 ) -> datetime.datetime:
     # Try to only do it once.  (This is a racy check, though!)
     link = (
-        Link.objects.filter(
-            action=item.action, external_tool=enums.ExternalToolType.LOB
-        )
+        Link.objects.filter(action=action, external_tool=enums.ExternalToolType.LOB)
         .order_by("created_at")
         .first()
     )
     if link:
-        logger.info(f"Already submitted lob letter {link.external_id} for {item}")
+        logger.info(
+            f"Already submitted lob letter {link.external_id} for {description}"
+        )
         return link.created_at
 
     from_addr = get_or_create_lob_address(
@@ -155,41 +161,29 @@ def send_letter(
         settings.RETURN_ADDRESS["zipcode"],
     )
 
-    to_addr = get_or_create_lob_address(
-        str(item.uuid),
-        item.full_name,
-        item.request_mailing_address1,
-        item.request_mailing_address2,
-        item.request_mailing_city,
-        item.request_mailing_state_id,
-        item.request_mailing_zipcode,
-    )
-
     with tracer.trace("lob.letter.create", service="lob"):
         letter = lob.Letter.create(
-            description=f"{item} print-and-forward",
+            description=description,
             to_address=to_addr,
             from_address=from_addr,
-            file=item.result_item_mail.file,
+            file=item_file,
             color=False,
             double_sided=double_sided,
             address_placement="top_first_page",
             return_envelope=RETURN_ENVELOPE,
             perforated_page=COVER_SHEET_PERFORATED_PAGE,
-            metadata={"action_uuid": item.action.uuid},
+            metadata={"action_uuid": action.uuid},
         )
     link = Link.objects.create(
-        action=item.action,
-        subscriber=item.subscriber,
+        action=action,
+        subscriber=subscriber,
         external_tool=enums.ExternalToolType.LOB,
         external_id=letter["id"],
     )
 
     # make sure I'm the first and only one who completed
     first = (
-        Link.objects.filter(
-            action=item.action, external_tool=enums.ExternalToolType.LOB
-        )
+        Link.objects.filter(action=action, external_tool=enums.ExternalToolType.LOB)
         .order_by("created_at", "uuid")
         .first()
     )
@@ -201,9 +195,36 @@ def send_letter(
         link.delete()
         return first.created_at
 
-    item.action.track_event(enums.EventType.FINISH_LOB_CONFIRM)
-    logger.info(f"Submitted lob letter for {item}")
+    logger.info(f"Submitted lob letter for {description}")
     return link.created_at
+
+
+@tracer.wrap()
+def send_letter(
+    item: Union[BallotRequest, Registration], double_sided: bool = False
+) -> datetime.datetime:
+
+    to_addr = get_or_create_lob_address(
+        str(item.uuid),
+        item.full_name,
+        item.request_mailing_address1,
+        item.request_mailing_address2,
+        item.request_mailing_city,
+        item.request_mailing_state_id,
+        item.request_mailing_zipcode,
+    )
+
+    created_at = submit_lob(
+        str(item),
+        item.action,
+        to_addr,
+        item.result_item_mail.file,
+        item.subscriber,
+        double_sided=double_sided,
+    )
+
+    item.action.track_event(enums.EventType.FINISH_LOB_CONFIRM)
+    return created_at
 
 
 def generate_lob_token(item: Union[BallotRequest, Registration]) -> str:
