@@ -4,6 +4,7 @@ from typing import Dict, Tuple, Union
 import sentry_sdk
 
 from absentee.models import BallotRequest
+from common import enums
 from common.rollouts import get_feature_bool
 from leouptime.proxy import get_random_proxy
 from leouptime.uptime import NoProxyError
@@ -14,11 +15,11 @@ from verifier.models import Lookup
 logger = logging.getLogger("voter")
 
 
-def get_random_proxy_str():
+def get_random_proxy_str_pair():
     # use random proxy (if available)
     try:
         proxy = get_random_proxy()
-        return f"socks5://{proxy.address}"
+        return proxy, f"socks5://{proxy.address}"
     except NoProxyError:
         return None
 
@@ -28,20 +29,32 @@ def lookup_wi(
 ) -> Tuple[str, Dict[str, str]]:
     from ovrlib import wi
 
-    proxy_str = get_random_proxy_str()
-    logger.debug(f"lookup up WI {item} with proxy_str {proxy_str}")
+    tries = 1
+    while tries <= 3:
+        try:
+            proxy, proxy_str = get_random_proxy_str_pair()
+            logger.debug(f"lookup up WI {item} with proxy_str {proxy_str}")
 
-    voters = wi.lookup_voter(
-        first_name=item.first_name,
-        last_name=item.last_name,
-        date_of_birth=item.date_of_birth,
-        proxies={"https": proxy_str},
-    )
-    if voters:
-        for v in voters:
-            logger.info(v)
-            if v.zipcode[0:5] == item.zipcode[0:5]:
-                return v.voter_reg_number, v
+            voters = wi.lookup_voter(
+                first_name=item.first_name,
+                last_name=item.last_name,
+                date_of_birth=item.date_of_birth,
+                proxies={"https": proxy_str},
+            )
+            if voters:
+                for v in voters:
+                    logger.info(v)
+                    if v.zipcode[0:5] == item.zipcode[0:5]:
+                        return v.voter_reg_number, v
+            return None, None
+        except Exception as e:
+            logger.warning(f"Hit exception on WI state API: {e}")
+            tries += 1
+            proxy.failure_count += 1
+            if proxy.failure_count > 2:
+                logger.warning(f"Marking {proxy} BURNED")
+                proxy.state = enums.ProxyStatus.BURNED
+            proxy.save()
     return None, None
 
 
@@ -72,7 +85,7 @@ def lookup_ga(
         logger.warning(f"Unable to geocode county for {item}: addrs {addrs}")
         return None, None
 
-    proxy_str = get_random_proxy_str()
+    proxy, proxy_str = get_random_proxy_str_pair()
     logger.debug(f"lookup up GA {item} with proxy_str {proxy_str}")
     voter = ga.lookup_voter(
         first_name=item.first_name,

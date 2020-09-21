@@ -281,6 +281,29 @@ def check_proxies():
 
     proxy_count = get_feature_int("leouptime", "proxy_count") or settings.PROXY_COUNT
     logger.info(f"proxy_count {proxy_count}")
+
+    # sentence oldest proxy to death?
+    max_age = get_feature_int("leouptime", "proxy_max_age_hours")
+    if max_age and up > proxy_count // 2:
+        proxy = (
+            Proxy.objects.filter(state=enums.ProxyStatus.UP)
+            .order_by("created_at")
+            .first()
+        )
+        if proxy and proxy.created_at < datetime.datetime.utcnow().replace(
+            tzinfo=datetime.timezone.utc
+        ) - datetime.timedelta(hours=max_age):
+            logger.info(
+                f"Burning oldest proxy {proxy} (created_at {proxy.created_at}, max_age {max_age})"
+            )
+            proxy.status = enums.ProxyStatus.BURNED
+            proxy.save()
+            up -= 1
+        else:
+            logger.info(
+                f"Keeping oldest proxy {proxy} (created_at {proxy.created_at}, max_age {max_age})"
+            )
+
     while up < proxy_count:
         create_proxy(random.choice(REGIONS))
         up += 1

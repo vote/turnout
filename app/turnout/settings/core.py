@@ -618,6 +618,15 @@ TARGETSMART_KEY = env.str("TARGETSMART_KEY", default=None)
 ALLOY_KEY = env.str("ALLOY_KEY", default=None)
 ALLOY_SECRET = env.str("ALLOY_SECRET", default=None)
 
+# periodically check alloy about state data freshness
+ALLOY_UPDATE_CHECK_HOURS = env.int("ALLOY_UPDATE_CHECK_HOURS", default=3)
+
+if ALLOY_UPDATE_CHECK_HOURS:
+    CELERY_BEAT_SCHEDULE["trigger-refresh_alloy-dates"] = {
+        "task": "verifier.tasks.refresh_alloy_dates",
+        "schedule": crontab(minute=1, hour=ALLOY_UPDATE_CHECK_HOURS),
+    }
+
 #### END ALLOY CONFIGURATION
 
 
@@ -786,6 +795,8 @@ SLACK_SUBSCRIBER_INTEREST_ENABLED = env.bool(
 SLACK_SUBSCRIBER_INTEREST_WEBHOOK = env.str(
     "SLACK_SUBSCRIBER_INTEREST_WEBHOOK", default=None
 )
+SLACK_ALLOY_UPDATE_ENABLED = env.bool("SLACK_ALLOY_UPDATE_ENABLED", default=False)
+SLACK_ALLOY_UPDATE_WEBHOOK = env.str("SLACK_ALLOY_UPDATE_WEBHOOK", default=None)
 
 #### END SLACK DATA ERROR CONFIGURATION
 
@@ -930,10 +941,9 @@ elif DIGITALOCEAN_KEY:
 
 # spread out lookups over time; max of N lookups every M minutes
 VOTER_CHECK_INTERVAL_MINUTES = 7
-VOTER_CHECK_MAX = 100
 
 # if a voter match fails, recheck it every few days
-VOTER_RECHECK_INTERVAL_DAYS = 5
+VOTER_RECHECK_INTERVAL_DAYS = 7
 
 # give up eventually
 VOTER_RECHECK_MAX_DAYS = 90

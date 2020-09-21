@@ -55,3 +55,13 @@ class Lookup(
 
     def __str__(self):
         return f"Verification - {self.first_name} {self.last_name}, {self.state.pk}".strip()
+
+
+class AlloyDataUpdate(
+    UUIDModel, TimestampModel,
+):
+    state = models.TextField(null=True)
+    state_update_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta(object):
+        ordering = ["-created_at"]

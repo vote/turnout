@@ -98,7 +98,7 @@ def query_alloy(serializer_data):
     return response.json()
 
 
-def get_alloy_state_freshness(state):
+def get_alloy_freshness():
     freshness = cache.get("alloy_freshness", None)
     if not freshness:
         session = get_session()
@@ -107,4 +107,9 @@ def get_alloy_state_freshness(state):
         freshness = response.json().get("data", {}).get("data_freshness", {})
         if freshness:
             cache.set("alloy_freshness", freshness)
+    return freshness
+
+
+def get_alloy_state_freshness(state):
+    freshness = get_alloy_freshness()
     return freshness.get(state)

@@ -11,6 +11,7 @@ from common.apm import tracer
 from common.rollouts import get_feature, get_feature_int
 from smsbot.models import Number
 from verifier.alloy import ALLOY_STATES_ENABLED, query_alloy
+from verifier.models import AlloyDataUpdate
 from verifier.targetsmart import query_targetsmart
 
 from .models import Voter
@@ -259,15 +260,20 @@ def lookup(item):
 
 
 @shared_task
-def check_new_actions(limit=None, state=None):
+def check_new_actions(
+    limit: int = None, state: str = None, max_minutes: int = None
+) -> None:
     if limit is None:
         limit = get_feature_int("voter_action_check", "max_check")
         if not limit:
             logger.info("voter_action_check disabled or max_check==0")
             return
-    if limit is None:
-        limit = settings.VOTER_CHECK_MAX
-    logger.info(f"check_new_actions limit {limit}")
+
+    if max_minutes is None:
+        max_minutes = get_feature_int("voter_action_check", "max_check_minutes") or (
+            settings.VOTER_CHECK_INTERVAL_MINUTES // 2
+        )
+
     query = Action.objects.filter(last_voter_lookup=None)
     if state:
         query = query.filter(
@@ -276,6 +282,15 @@ def check_new_actions(limit=None, state=None):
             | Q(ballotrequest__state_id=state)
             | Q(reminderrequest__state_id=state)
         )
+
+    logger.info(
+        f"check_new_actions limit {limit} of {query.count()}, state{state}, max_minutes {max_minutes}"
+    )
+
+    stop = None
+    if max_minutes:
+        stop = datetime.datetime.utcnow() + datetime.timedelta(minutes=max_minutes)
+
     query = query.order_by("created_at")
     if limit:
         query = query[:limit]
@@ -283,29 +298,86 @@ def check_new_actions(limit=None, state=None):
         item = action.get_source_item()
         if item:
             lookup(item)
+        if stop and stop < datetime.datetime.utcnow():
+            logger.info(f"Hit max runtime ({max_minutes} minutes)")
+            break
 
 
 @shared_task
-def recheck_old_actions(limit=None):
+def recheck_old_actions(
+    limit: int = None,
+    state: str = None,
+    min_check_interval: int = None,
+    since: datetime.datetime = None,
+    max_action_age: int = None,
+    max_minutes: int = None,
+) -> None:
     if limit is None:
         limit = get_feature_int("voter_action_check", "max_recheck")
         if not limit:
             logger.info("voter_action_check disabled or max_recheck==0")
             return
-    if limit is None:
-        limit = settings.VOTER_CHECK_MAX
-    logger.info(f"recheck_old_actions limit {limit}")
-    lookup_cutoff = datetimex.appdatetime.now(
-        tz=datetime.timezone.utc
-    ) - datetime.timedelta(days=settings.VOTER_RECHECK_INTERVAL_DAYS)
+
+    recheck_per_alloy(limit=limit, state=state, max_minutes=max_minutes)
+    recheck_any(limit=limit, state=state, max_minutes=max_minutes)
+
+
+@shared_task
+def recheck_any(
+    limit: int = None,
+    state: str = None,
+    min_check_interval: int = None,
+    max_action_age: int = None,
+    max_minutes: int = None,
+) -> None:
+
+    if max_minutes is None:
+        max_minutes = get_feature_int(
+            "voter_action_check", "max_recheck_any_minutes"
+        ) or (settings.VOTER_CHECK_INTERVAL_MINUTES // 2)
+
+    _recheck_old_actions(
+        limit=limit,
+        state=state,
+        min_check_interval=min_check_interval,
+        max_action_age=max_action_age,
+        max_minutes=max_minutes,
+    )
+
+
+def _recheck_old_actions(
+    limit: int = None,
+    state: str = None,
+    min_check_interval: int = None,
+    since: datetime.datetime = None,
+    max_action_age: int = None,
+    max_minutes: int = None,
+) -> int:
+    query = Action.objects.filter(last_voter_lookup__isnull=False)
+
+    if not since:
+        # don't recheck things we recently checked
+        if min_check_interval is None:
+            min_check_interval = (
+                get_feature_int("voter_action_check", "recheck_internal_days")
+                or settings.VOTER_RECHECK_INTERVAL_DAYS
+            )
+        since = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(
+            days=min_check_interval
+        )
+    query = query.filter(last_voter_lookup__lt=since)
+
+    # ignore very old actions
+    if max_action_age is None:
+        max_action_age = (
+            get_feature_int("voter_action_check", "recheck_max_days")
+            or settings.VOTER_RECHECK_MAX_DAYS
+        )
     action_cutoff = datetime.datetime.now(
         tz=datetime.timezone.utc
-    ) - datetime.timedelta(days=settings.VOTER_RECHECK_MAX_DAYS)
-    query = (
-        Action.objects.filter(last_voter_lookup__isnull=False)
-        .filter(last_voter_lookup__lt=lookup_cutoff)
-        .filter(created_at__gt=action_cutoff)
-    )
+    ) - datetime.timedelta(days=max_action_age)
+    query = query.filter(created_at__gt=action_cutoff)
+
     if state:
         query = query.filter(
             Q(lookup__state_id=state)
@@ -313,13 +385,64 @@ def recheck_old_actions(limit=None):
             | Q(ballotrequest__state_id=state)
             | Q(reminderrequest__state_id=state)
         )
+
+    stop = None
+    if max_minutes:
+        stop = datetime.datetime.utcnow() + datetime.timedelta(minutes=max_minutes)
+
+    logger.info(
+        f"Recheck old actions limit {limit} of {query.count()} in {state} since {since} "
+        f"(min_check_interval {min_check_interval}, max_action_age {max_action_age}, "
+        f"max_minutes {max_minutes})"
+    )
+
     query = query.order_by("created_at")
     if limit:
         query = query[:limit]
+
+    checked = 0
     for action in query:
         item = action.get_source_item()
         if item:
             lookup(item)
+            checked += 1
+        if stop and stop < datetime.datetime.utcnow():
+            logger.info(f"Hit max runtime ({max_minutes} minutes)")
+            break
+
+    return checked
+
+
+@shared_task
+def recheck_per_alloy(limit: int = None, state: str = None, max_minutes: int = None):
+    if max_minutes is None:
+        max_minutes = get_feature_int(
+            "voter_action_check", "max_recheck_alloy_minutes"
+        ) or (settings.VOTER_CHECK_INTERVAL_MINUTES // 2)
+
+    if state:
+        updates = [
+            AlloyDataUpdate.objects.filter(state=state).order_by("-created_at").first()
+        ]
+    else:
+        updates = list(AlloyDataUpdate.objects.all())
+        updates = sorted(updates, key=lambda update: update.created_at)
+        updates.reverse()
+
+    for update in updates:
+        logger.info(
+            f"State {update.state} update for {update.state_update_at} appeared at {update.created_at}"
+        )
+        checked = _recheck_old_actions(
+            limit=limit,
+            state=update.state,
+            since=update.created_at,
+            max_minutes=max_minutes,
+        )
+        if limit is not None and checked:
+            limit -= checked
+            if limit <= 0:
+                return
 
 
 @shared_task

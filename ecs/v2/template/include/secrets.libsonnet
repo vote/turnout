@@ -345,5 +345,13 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mymove_secret',
         name: 'MYMOVE_SECRET',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_alloy_update_enabled',
+        name: 'SLACK_ALLOY_UPDATE_ENABLED',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_alloy_update_webhook',
+        name: 'SLACK_ALLOY_UPDATE_WEBHOOK',
+      },
     ],
 }

@@ -107,6 +107,8 @@ export BEAT_STATS_METRIC_NAMESPACE=$(aws ssm get-parameter --region $REGION --wi
 export I90_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.i90_key | jq '.Parameter["Value"]' -r)
 export MYMOVE_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_id | jq '.Parameter["Value"]' -r)
 export MYMOVE_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_secret | jq '.Parameter["Value"]' -r)
+export SLACK_ALLOY_UPDATE_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_enabled | jq '.Parameter["Value"]' -r)
+export SLACK_ALLOY_UPDATE_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_webhook | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -224,6 +226,8 @@ if [ "$2" ]; then
     -e I90_KEY \
     -e MYMOVE_ID \
     -e MYMOVE_SECRET \
+    -e SLACK_ALLOY_UPDATE_ENABLED \
+    -e SLACK_ALLOY_UPDATE_WEBHOOK \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -316,6 +320,8 @@ else
     -e I90_KEY \
     -e MYMOVE_ID \
     -e MYMOVE_SECRET \
+    -e SLACK_ALLOY_UPDATE_ENABLED \
+    -e SLACK_ALLOY_UPDATE_WEBHOOK \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
