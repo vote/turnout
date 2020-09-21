@@ -13,6 +13,7 @@ from common.enums import ExternalToolType
 from multi_tenant.models import SubscriberIntegrationProperty
 from register.models import Registration
 from reminder.models import ReminderRequest
+from smsbot.models import Number
 from verifier.models import Lookup
 
 from .models import Link
@@ -257,7 +258,12 @@ def _sync_item(item, subscriber_id):
     }
     if item.phone:
         info["person"]["phone_numbers"] = [{"number": str(item.phone),}]
-        if not subscriber_id or item.sms_opt_in_subscriber:
+        if (
+            (not subscriber_id or item.sms_opt_in_subscriber)
+            and not Number.objects.filter(
+                phone=item.phone, opt_out_time__isnull=False
+            ).exists()
+        ):
             info["person"]["phone_numbers"][0]["status"] = "subscribed"
     if item.embed_url:
         info["action_network:referrer_data"]["website"] = item.embed_url
