@@ -21,6 +21,9 @@ logger = logging.getLogger("voter")
 
 @tracer.wrap()
 def lookup(item):
+    if type(item).__name__ not in ["BallotRequest", "Registration", "Lookup"]:
+        return
+
     # alloy
     alloy_id = None
     alloy_result = None
