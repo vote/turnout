@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.conf import settings
 from optimizely import optimizely
 from optimizely.config_manager import PollingConfigManager
@@ -34,7 +36,9 @@ def has_feature_var(flag: str, var: str) -> bool:
     return var in feature.variables
 
 
-def get_feature_int(flag: str, var: str, user_id: str = "__anonymous__") -> bool:
+def get_feature_int(
+    flag: str, var: str, user_id: str = "__anonymous__"
+) -> Optional[bool]:
     if optimizely_client.is_feature_enabled(flag, user_id=user_id) and has_feature_var(
         flag, var
     ):
@@ -44,11 +48,23 @@ def get_feature_int(flag: str, var: str, user_id: str = "__anonymous__") -> bool
     return None
 
 
-def get_feature_bool(flag: str, var: str, user_id: str = "__anonymous__") -> bool:
+def get_feature_bool(
+    flag: str, var: str, user_id: str = "__anonymous__"
+) -> Optional[bool]:
     if optimizely_client.is_feature_enabled(flag, user_id=user_id) and has_feature_var(
         flag, var
     ):
         return optimizely_client.get_feature_variable_boolean(
             flag, var, user_id=user_id
         )
+    return None
+
+
+def get_feature_str(
+    flag: str, var: str, user_id: str = "__anonymous__"
+) -> Optional[str]:
+    if optimizely_client.is_feature_enabled(flag, user_id=user_id) and has_feature_var(
+        flag, var
+    ):
+        return optimizely_client.get_feature_variable_string(flag, var, user_id=user_id)
     return None

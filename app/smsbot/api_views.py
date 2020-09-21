@@ -1,10 +1,10 @@
 import datetime
 import logging
+from typing import Tuple
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -13,6 +13,8 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from common.analytics import statsd
 from common.enums import MessageDirectionType
+from common.rollouts import get_feature_int, get_feature_str
+from integration.actionnetwork import resubscribe_phone
 from smsbot.models import Number, SMSMessage
 
 """
@@ -65,6 +67,84 @@ def validate_twilio_request(func):
     return wrapper
 
 
+def handle_incoming(
+    from_number: str, sid: str, date_created: datetime.datetime, body: str,
+) -> Tuple[Number, str]:
+    n, created = Number.objects.get_or_create(phone=from_number)
+    if created:
+        logger.info(f"New {n}")
+
+    if SMSMessage.objects.filter(phone=n, twilio_sid=sid).exists():
+        logger.debug(f"Ignoring duplicate {n} at {date_created} {sid}: {body}")
+        return n, None
+
+    logger.info(f"Handling {n} at {date_created} {sid}: {body}")
+    SMSMessage.objects.create(
+        phone=n, direction=MessageDirectionType.IN, message=body, twilio_sid=sid,
+    )
+
+    cmd = body.strip().upper()
+    reply = None
+    if cmd in ["STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT"]:
+        logger.info(f"Opt-out from {n} at {date_created}")
+        n.opt_out_time = date_created
+        n.opt_in_time = None
+        n.save()
+    elif cmd in ["JOIN"]:
+        logger.info(f"Opt-in from {n} at {date_created}")
+        n.opt_in_time = date_created
+        n.opt_out_time = None
+        n.save()
+
+        reply = (
+            get_feature_str("smsbot", "autoreply_joined")
+            or "Thank you for subscribing to VoteAmerica election alerts. Reply STOP to cancel."
+        )
+
+        # Try to match this to an ActionNetwork subscriber.  Note that this will may fail if the number
+        # has been used more than once.
+        resubscribe_phone(n.phone)
+    elif cmd in ["HELP", "INFO"]:
+        # ActionNetwork handles this
+        pass
+    else:
+        # check last
+        try:
+            last = (
+                SMSMessage.objects.filter(phone=n, direction=MessageDirectionType.OUT)
+                .exclude(twilio_sid=sid)
+                .latest("created_at")
+            )
+        except SMSMessage.DoesNotExist:
+            last = None
+
+        throttle = (
+            get_feature_int("smsbot", "autoreply_throttle_minutes")
+            or settings.SMS_AUTOREPLY_THROTTLE_MINUTES
+        )
+        if last and last.created_at >= datetime.datetime.now(
+            tz=datetime.timezone.utc
+        ) - datetime.timedelta(minutes=throttle):
+            logger.info(
+                f"Ignoring {n} at {date_created} (last autoreply at {last.created_at}): {body}"
+            )
+        else:
+            logger.info(f"Auto-reply to {n} at {date_created}: {body}")
+            if n.opt_out_time:
+                reply = get_feature_str("smsbot", "autoreply_opted_out") or (
+                    "You have previously opted-out of VoteAmerica election alerts. "
+                    "Reply HELP for help, JOIN to re-join."
+                )
+            else:
+                reply = get_feature_str("smsbot", "autoreply") or (
+                    "Thanks for contacting VoteAmerica. "
+                    "For more information or assistance visit https://voteamerica.com/faq/ "
+                    "or text STOP to opt-out."
+                )
+
+    return n, reply
+
+
 @api_view(["POST"])
 @permission_classes([AllowAny])
 @validate_twilio_request
@@ -72,79 +152,13 @@ def twilio(request):
     number = request.data.get("From", None)
     body = request.data.get("Body", "")
     sid = request.data.get("MessageSid")
+
+    logger.info(f"got request.data {request.data}")
     if not number:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
-    if settings.SMS_OPTOUT_POLL:
-        # ignore -- we are polling instead.
-        return
-
-    n, created = Number.objects.get_or_create(phone=number)
-    SMSMessage.objects.create(
-        phone=n, direction=MessageDirectionType.IN, message=body, twilio_sid=sid,
-    )
-
-    cmd = body.lower().strip()
-    if cmd in ["help"]:
-        # Twilio advanced opt-in will always respond here.
-        reply = None
-    elif cmd in ["join"]:
-        # Twilio advanced opt-in will respond here *if* they previously opted out.
-        # We'll send an additional message either way.
-        if n.opt_in_time:
-            reply = (
-                "You have already signed up for VoteAmerica Election Alerts. "
-                "Reply HELP for help, STOP to cancel."
-            )
-        else:
-            reply = (
-                "Reply YES to join VoteAmerica and receive Election Alerts. "
-                "Msg & Data rates may apply. 4 msgs/month. "
-                "Reply HELP for help, STOP to cancel."
-            )
-    elif cmd in ["yes"]:
-        if n.opt_in_time:
-            reply = (
-                "You have already signed up for VoteAmerica Election Alerts. "
-                "Reply HELP for help, STOP to cancel."
-            )
-        else:
-            reply = (
-                "Thanks for joining VoteAmerica Election Alerts! "
-                "Msg & Data rates may apply. 4 msgs/month. "
-                "Reply HELP for help, STOP to cancel."
-            )
-            n.opt_in_time = timezone.now()
-            n.opt_out_time = None
-            n.save()
-    elif cmd in ["stop"]:
-        # Twilio advanced opt-in will always respond here.
-        reply = None
-        n.opt_out_time = timezone.now()
-        n.opt_in_time = None
-        n.save()
-    else:
-        if n.opt_in_time:
-            reply = (
-                "Hi, I am the VoteAmerica chat bot. Nice to hear from you again!\n"
-                "HELP for help, STOP to cancel."
-            )
-        elif n.opt_out_time:
-            # Twilio won't let them see this, but we can try anyway in case we are
-            # out of sync with twilio's blacklist.
-            reply = (
-                "Hi, I am the VoteAmerica chat bot. "
-                "You have previously opted-out of our Election Alerts list. "
-                "Reply HELP for help, JOIN to join."
-            )
-        else:
-            # We got a random message from an unknown number.
-            reply = (
-                "Hi, I am the VoteAmerica chat bot. "
-                "Reply YES to join VoteAmerica and receive Election Alerts. "
-                "Msg & Data rates may apply. 4 msgs/month. "
-                "Reply HELP for help, STOP to cancel."
-            )
+    date_created = datetime.datetime.now().replace(tzinfo=datetime.timezone.utc)
+    n, reply = handle_incoming(number, sid, date_created, body)
 
     resp = MessagingResponse()
     if reply:

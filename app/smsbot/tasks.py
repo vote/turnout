@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from common.analytics import statsd
+from common.rollouts import get_feature_bool
 
 from .models import Number
 
@@ -58,4 +59,5 @@ def send_welcome_sms(number: str, origin: str = None) -> None:
 def poll_twilio() -> None:
     from .poll import poll
 
-    poll()
+    if get_feature_bool("smsbot", "poll"):
+        poll()
