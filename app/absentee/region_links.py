@@ -75,7 +75,7 @@ def refresh_region_links():
     links = get_florida_data()
 
     with transaction.atomic():
-        RegionOVBMLink.objects.all().delete()
+        RegionOVBMLink.objects.filter(region__state__code="FL").delete()
         RegionOVBMLink.objects.bulk_create(links)
 
 

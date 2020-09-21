@@ -61,6 +61,7 @@
                                 {% if user.can_manage_election_information %}
                                     <a class="dropdown-item" href="{% url 'manage:election:state_list' %}">States</a>
                                     <a class="dropdown-item" href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
+                                    <a class="dropdown-item" href="{% url 'manage:absentee_region_ovbm:region_ovbm_link_list' %}">Region OVBM Links</a>
                                 {% endif %}
                                 {% if user.can_manage_esign %}
                                   <a class="dropdown-item" href="{% url 'manage:absentee_dashboard:esign_dashboard' %}">Absentee E-Sign Dashboard</a>

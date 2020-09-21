@@ -1,0 +1,72 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags tz %}
+
+{% block title %}List of LEO Contact Overrides | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-with-actions">
+                <div>LEO Contact Overrides</div>
+                <div class="card-header-actions">
+                    <a title="New" href="{% url 'manage:absentee_region_ovbm:region_ovbm_link_create' %}">
+                        <span class="mdi mdi-pencil"></span>
+                        New
+                    </a>
+                </div>
+            </div>
+            <!-- Table -->
+            <div class="table-responsive-lg">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Region</th>
+                            <th>URL</th>
+                            <th>Last Updated <small>({{ user.timezone }})</small></th>
+                            <th style="min-width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for region_ovbm_link in region_ovbm_links %}
+                        <tr>
+                            <td>
+                                {{ region_ovbm_link.region.state.pk }}
+                            </td>
+                            <td>
+                                {{ region_ovbm_link.region.name }}
+                            </td>
+                            <td>
+                                <a href="{{ region_ovbm_link.url }}" target="_blank" rel="noopener noreferrer">
+                                    {{ region_ovbm_link.url }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ region_ovbm_link.created_at|timezone:user.timezone|date:"Y-m-d g:i a" }}
+                            </td>
+                            <td>
+                                <a href="{% url 'manage:absentee_region_ovbm:region_ovbm_link_update' region_ovbm_link.pk %}">
+                                    <span class="mdi mdi-pencil"></span>
+                                    Edit
+                                </a>
+                                <br />
+                                <a href="{% url 'manage:absentee_region_ovbm:region_ovbm_link_delete' region_ovbm_link.pk %}">
+                                    <span class="mdi mdi-delete"></span>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if is_paginated %}
+            {% include "management/inc/pagination.html" %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

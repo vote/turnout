@@ -45,6 +45,7 @@ urlpatterns = [
     path("election/", include("election.manage_urls")),
     path("absentee_dashboard/", include("absentee.dashboard.manage_urls")),
     path("subscription/", include("subscription.manage_urls")),
+    path("absentee_overrides/", include("absentee.manage_region_ovbm_urls")),
     path("<slug:subscriber>/verifier/", include("verifier.manage_urls")),
     path("<slug:subscriber>/register/", include("register.manage_urls")),
     path("<slug:subscriber>/absentee/", include("absentee.manage_urls")),
