@@ -6,7 +6,7 @@ import time
 import requests
 import sentry_sdk
 from django.conf import settings
-from django.db.models import OuterRef
+from django.db.models import F
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
 from pdf_template import PDFTemplate, PDFTemplateSection
@@ -16,6 +16,7 @@ from common import enums
 from common.apm import tracer
 from common.pdf.pdftemplate import fill_pdf_template
 from election.models import State, StateInformation
+from event_tracking.models import Event
 from multi_tenant.models import Client
 from official.api_views import get_regions_for_address
 from register.contactinfo import get_nvrf_submission_address
@@ -169,81 +170,106 @@ def store_leads(leads):
 
 
 @tracer.wrap()
-def send_blank_register_forms_tx(limit=None) -> None:
+def send_blank_register_forms_tx(offset=0, limit=None) -> None:
     q = MymoveLead.objects.filter(
-        new_state="TX", blank_register_forms_action__isnull=True,
+        new_state="TX",
+        created_at__gte=datetime.datetime(2020, 9, 16, 0, 0, 0).replace(
+            tzinfo=datetime.timezone.utc
+        ),
+        blank_register_forms_action__isnull=True,
+        new_housing_tenure="rent",
     )
-    for lead in q[0:limit]:
+    end = None
+    if limit:
+        end = offset + limit
+    print(f"offset {offset} limit {limit} count {q.count()}")
+    for lead in q[offset:end]:
         send_blank_register_forms_to_lead(lead)
 
 
 @tracer.wrap()
-def send_blank_register_forms_blankforms2020(limit=None) -> None:
+def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -> None:
     # experimental data set (exclude control group!)
+    states = [
+        "AZ",
+        "GA",
+        "FL",
+        "MI",
+        "NC",
+        "PA",
+        "WI",
+        "OH",
+        "MN",
+        "CO",
+        "IA",
+        "ME",
+        "NE",
+        "KS",
+        "SC",
+        "AL",
+        "MS",
+        "MT",
+        "UT",
+    ]
+    if state:
+        states = [state]
     q = (
         MymoveLead.objects.filter(
-            new_state__ne=OuterRef("old_state"),
-            new_state__in=[
-                "AZ",
-                "GA",
-                "FL",
-                "MI",
-                "NC",
-                "PA",
-                "WI",
-                "OH",
-                "MN",
-                "CO",
-                "IA",
-                "ME",
-                "NE",
-                "KS",
-                "SC",
-                "AL",
-                "MS",
-                "MT",
-                "UT",
-            ],
+            new_state__in=states,
             created_at__lt=datetime.datetime(
                 2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
             ),
             blank_register_forms_action__isnull=True,
+            actionnetwork_person_id__isnull=True,
         )
+        .exclude(new_state=F("old_state"))
         .exclude(uuid__startswith="0")
         .exclude(uuid__startswith="1")
     )
-    for lead in q[0:limit]:
+    end = None
+    if limit:
+        end = offset + limit
+    print(f"states {states} offset {offset} limit {limit} count {q.count()}")
+    for lead in q[offset:end]:
         send_blank_register_forms_to_lead(lead)
 
+
+def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
     # post-experiment, moving forward
+    states = [
+        "AZ",
+        "GA",
+        "FL",
+        "MI",
+        "NC",
+        "PA",
+        "WI",
+        "OH",
+        "MN",
+        "CO",
+        "IA",
+        "ME",
+        "NE",
+        "KS",
+        "SC",
+        "AL",
+        "MS",
+        "MT",
+        "UT",
+    ]
+    if state:
+        states = [state]
     q = MymoveLead.objects.filter(
-        new_state__ne=OuterRef("old_state"),
-        new_state__in=[
-            "AZ",
-            "GA",
-            "FL",
-            "MI",
-            "NC",
-            "PA",
-            "WI",
-            "OH",
-            "MN",
-            "CO",
-            "IA",
-            "ME",
-            "NE",
-            "KS",
-            "SC",
-            "AL",
-            "MS",
-            "MT",
-            "UT",
-        ],
+        new_state__in=states,
         created_at__gte=datetime.datetime(
             2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
         ),
         blank_register_forms_action__isnull=True,
-    )
+        new_housing_tenure="rent",
+    ).exclude(new_state=F("old_state"))
+    if limit:
+        offset + limit
+    print(f"states {states} offset {offset} limit {limit} count {q.count()}")
     for lead in q[0:limit]:
         send_blank_register_forms_to_lead(lead)
 
@@ -307,6 +333,11 @@ def get_register_form_data(lead: MymoveLead):
     form_data["important_dates"] = "\n".join(dates)
     form_data["2020_state_deadline"] = form_data["2020_registration_deadline_by_mail"]
 
+    if lead.new_state == "WI":
+        form_data[
+            "registration_rules"
+        ] += "\n\n\u2022\u2022 WARNING \u2022\u2022 You must also provide Proof of Residence documentation that shows your name and current residential address. Acceptable forms include: a copy of your current and valid WI Driver's License or State ID card; any other official ID card or license issued by a WI governmental body or unit; any ID card issued by an employer with a photo of the card holder, but not including a business card; a real estate tax bill or receipt for the current year or the year preceding the date of the election; a university, college or technical college ID card (must include photo) ONLY if the voter provides a fee receipt dated within the last 9 months or the institution provides a certified housing list to the municipal clerk; a gas, electric or phone utility bill for the period commencing no earlier than 90 days before Election Day; a bank or credit card statement; a paycheck or paystub; a check or other document issued by a unit of government; an intake document from a residential care facility such as a nursing home."
+
     return form_data
 
 
@@ -318,44 +349,49 @@ def send_blank_register_forms_to_lead(lead: MymoveLead) -> None:
 
     subscriber = get_mymove_subscriber()
 
-    # generate PDF
-    form_data = get_register_form_data(lead)
-    item = StorageItem(
-        app=enums.FileType.BLANK_REGISTRATION_FORMS,
-        email=lead.email,
-        subscriber=subscriber,
-    )
-    filename = (
-        slugify(f"{lead.new_state} {lead.last_name} blank-register-forms").lower()
-        + ".pdf"
-    )
-    if lead.new_state in ["AL"]:
-        cover_path = BLANK_FORMS_COVER_SHEET_8PT_PATH
-    elif lead.new_state in ["MI"]:
-        cover_path = BLANK_FORMS_COVER_SHEET_9PT_PATH
+    if not lead.blank_register_forms_item:
+        # generate PDF
+        form_data = get_register_form_data(lead)
+        item = StorageItem(
+            app=enums.FileType.BLANK_REGISTRATION_FORMS,
+            email=lead.email,
+            subscriber=subscriber,
+        )
+        filename = (
+            slugify(f"{lead.new_state} {lead.last_name} blank-register-forms").lower()
+            + ".pdf"
+        )
+        if lead.new_state in ["AL", "WI"]:
+            cover_path = BLANK_FORMS_COVER_SHEET_8PT_PATH
+        elif lead.new_state in ["MI", "FL"]:
+            cover_path = BLANK_FORMS_COVER_SHEET_9PT_PATH
+        else:
+            cover_path = BLANK_FORMS_COVER_SHEET_PATH
+        fill_pdf_template(
+            PDFTemplate(
+                [
+                    PDFTemplateSection(
+                        path=cover_path, is_form=True, flatten_form=True
+                    ),
+                    PDFTemplateSection(
+                        path=PRINT_AND_FORWARD_TEMPLATE_PATH,
+                        is_form=False,
+                        flatten_form=False,
+                    ),
+                    PDFTemplateSection(
+                        path=PRINT_AND_FORWARD_TEMPLATE_PATH,
+                        is_form=False,
+                        flatten_form=False,
+                    ),
+                ]
+            ),
+            form_data,
+            item,
+            filename,
+        )
+        lead.blank_register_forms_item = item
     else:
-        cover_path = BLANK_FORMS_COVER_SHEET_PATH
-    fill_pdf_template(
-        PDFTemplate(
-            [
-                PDFTemplateSection(path=cover_path, is_form=True, flatten_form=True),
-                PDFTemplateSection(
-                    path=PRINT_AND_FORWARD_TEMPLATE_PATH,
-                    is_form=False,
-                    flatten_form=False,
-                ),
-                PDFTemplateSection(
-                    path=PRINT_AND_FORWARD_TEMPLATE_PATH,
-                    is_form=False,
-                    flatten_form=False,
-                ),
-            ]
-        ),
-        form_data,
-        item,
-        filename,
-    )
-    lead.blank_register_forms_item = item
+        logger.info(f"Already generated PDF for {lead}")
 
     if not lead.blank_register_forms_action:
         lead.blank_register_forms_action = Action.objects.create()
@@ -364,29 +400,35 @@ def send_blank_register_forms_to_lead(lead: MymoveLead) -> None:
 
     lead.save()
 
-    # send
-    to_addr = get_or_create_lob_address(
-        str(lead.uuid),
-        f"{lead.first_name} {lead.last_name}".title(),
-        lead.new_address1,
-        lead.new_address2,
-        lead.new_city,
-        lead.new_state,
-        lead.new_zipcode,
-    )
+    if Event.objects.filter(
+        action=lead.blank_register_forms_action,
+        event_type=enums.EventType.LOB_SENT_BLANK_REGISTER_FORMS,
+    ).exists():
+        logger.info(f"Already submitted lob letter for {lead}")
+    else:
+        # send
+        to_addr = get_or_create_lob_address(
+            str(lead.uuid),
+            f"{lead.first_name} {lead.last_name}".title(),
+            lead.new_address1,
+            lead.new_address2,
+            lead.new_city,
+            lead.new_state,
+            lead.new_zipcode,
+        )
 
-    created_at = submit_lob(
-        f"Blank register, {lead}",
-        lead.blank_register_forms_action,
-        to_addr,
-        lead.blank_register_forms_item.file,
-        subscriber,
-        double_sided=False,
-    )
+        created_at = submit_lob(
+            f"Blank register, {lead}",
+            lead.blank_register_forms_action,
+            to_addr,
+            lead.blank_register_forms_item.file,
+            subscriber,
+            double_sided=False,
+        )
 
-    lead.blank_register_forms_action.track_event(
-        enums.EventType.LOB_SENT_BLANK_REGISTER_FORMS
-    )
+        lead.blank_register_forms_action.track_event(
+            enums.EventType.LOB_SENT_BLANK_REGISTER_FORMS
+        )
 
 
 @tracer.wrap()
@@ -463,8 +505,6 @@ def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None
                 },
             ],
             "custom_fields": {
-                "subscriber": "mymove",
-                # store new address here too, in case of competing contact info updates
                 "mymove_new_address": " ".join(
                     [lead.new_address1, lead.new_address2 or ""]
                 ),

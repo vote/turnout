@@ -32,6 +32,7 @@ def test_emails(to: str = None):
     from absentee.leo_fax import trigger_test_fax_emails
     from absentee.leo_email import trigger_test_leo_email
     from absentee.notification import trigger_test_notifications
+    from integration.notification import trigger_test_notifications as test_integration
     from multi_tenant.notification import (
         trigger_test_notifications as test_multi_tenant,
     )
@@ -53,6 +54,8 @@ def test_emails(to: str = None):
     trigger_test_leo_email(addrs)
     logger.info("Sending test absentee notifications")
     trigger_test_notifications(addrs)
+    logger.info("Sending test integration notifications")
+    test_integration(addrs)
     logger.info("Sending test multi_tenant notications")
     test_multi_tenant(addrs)
     logger.info("Sending test register notifications")

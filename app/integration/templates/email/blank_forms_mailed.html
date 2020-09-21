@@ -1,0 +1,111 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+{{ lead.first_name }},<br><br>
+
+{% if reminder %}
+
+Your voter registration forms should have arrived a few days ago,
+along with a stamped return envelope!
+
+<br><br>
+
+We realize that moving can be hectic.  Updating your voter registration
+is just one of the many tasks that can easily get lost in the
+shuffle.  We aim to make registering to vote as easy as possible.  The
+sooner you mail in your registration, the less likely you'll forget!
+
+{% else %}
+
+Check your mail today for two blank voter registration forms from
+VoteAmerica!  Updating your voter registration is one of those
+important tasks that comes with moving that is easy to lose track of.
+We're here to make the process as easy as possible--we've even
+included a stamped return envelope!
+
+{% endif %}
+
+<br><br>
+
+{% if state_info.external_tool_ovr %}
+
+Although {{ state_full }}, like most states, allows <a href="{{
+state_info.external_tool_ovr }}">online voter registration</a>, most
+interstate movers do not yet have an in-state driver's license, which
+means mailing in a form is the most reliable way to update your voter
+registration.
+
+{% endif %}
+
+<br><br>
+
+If you need more forms, or are already registered and would like to
+request your absentee ballot to vote by mail,
+visit <strong><a href="https://voteamerica.com/?refcode=integration_blank_forms_mailed">VoteAmerica.com</a></strong></a>.
+
+<br><br>
+
+A few important dates:
+<ul>
+  <li>Voter registration deadline (by mail): <strong>{{ state_info.2020_registration_deadline_by_mail }}</strong></li>
+  <li>Voter registration deadline (in person): <strong>{{ state_info.2020_registration_deadline_in_person }}</strong></li>
+  {% if state_info.external_tool_ovr %}
+  <li>Voter registration deadline (online): <strong>{{ state_info.2020_registration_deadline_online }}</strong></li>
+  {% endif %}
+  {% if state_info.early_voting_starts != 'N/A' %}
+  <li>Early voting starts: <strong>{{ state_info.2020_early_voting_starts }}</strong></li>
+  <li>Early voting ends: <strong>{{ state_info.2020_early_voting_ends }}</strong></li>
+  {% endif %}
+  <li>Election day: <strong>November 3, 2020</strong></li>
+</ul>
+
+<br><br>
+
+
+{% if state_info.sdr_early_voting == 'True' or state_info.sdr_election_day == 'True' %}
+
+{{ state_full }} allows for <strong>Same Day Registration</strong>
+{% if state_info.sdr_early_voting == 'True' %}
+during the <strong>early voting</strong> period
+{% endif %}{% if state_info.sdr_early_voting == 'True' and state_info.sdr_election_day == 'True' %}
+and
+{% endif %}{% if state_info.sdr_election_day == 'True' %}on <strong>election day</strong>{% endif %}.
+
+The ID requirements are:
+<blockquote>
+  {{ state_info.id_requirements_sdr }}
+</blockquote>
+<br><br>
+{% endif %}
+
+
+{% if lead.new_state == 'WI' %}
+<strong>REMINDER</strong>: Wisconsin requires that you include <strong>proof of residence</strong> with your voter registration form.  All Proof of Residence documents must show your name and current residential address.
+<br><br>
+Acceptable forms include:
+<ul>
+  <li>a copy of your current and valid State of WI Driver's License or State ID card</li>
+  <li>any other official identification card or license issued by a WI governmental body or unit</li>
+  <li>any identification card issued by an employer with a photo of the card holder, but not including a business card</li>
+  <li>a real estate tax bill or receipt for the current year or the year preceding the date of the election</li>
+  <li>a university, college or technical college identification card (must include photo) ONLY if the voter provides a fee receipt dated within the last 9 months or the institution provides a certified housing list to the municipal clerk</li>
+  <li>a gas, electric or telephone service statement (utility bill) for the period commencing no earlier than 90 days before Election Day</li>
+  <li>a bank or credit card statement</li>
+  <li>a paycheck or paystub</li>
+  <li>a check or other document issued by a unit of government</li>
+  <li>a letter on public or private social service agency letterhead identifying a homeless voter and describing the individual's residence for voting purposes</li>
+  <li>an intake document from a residential care facility such as a nursing home or assisted living facility</li>
+</ul>
+<br><br>
+{% endif %}
+
+
+Don't forget to register today!
+
+<br><br>
+
+Happy voting,<br>
+VoteAmerica
+
+{% endblock %}

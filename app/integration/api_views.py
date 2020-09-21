@@ -73,24 +73,39 @@ def lob_letter_status(request):
         action.track_event(event_mapping[etype])
 
     event_trigger = {
-        "letter.processed_for_delivery": [
-            ("send_print_and_forward_mailed", 0),
-            ("send_mail_chase", 14),
-        ],
-        "letter.returned_to_sender": [("send_print_and_forward_returned", 0)],
+        "letter.processed_for_delivery": {
+            "Registration": [
+                ("register.tasks.send_print_and_forward_mailed", 0),
+                ("register.tasks.send_mail_chase", 14),
+            ],
+            "BallotRequest": [
+                ("absentee.tasks.send_print_and_forward_mailed", 0),
+                ("absentee.tasks.send_mail_chase", 14),
+            ],
+            "MymoveLead": [
+                ("integration.tasks.send_mymovelead_mailed", 0),
+                ("integration.tasks.send_mymovelead_reminder", 3),
+                ("integration.tasks.send_mymovelead_chase", 28),
+            ],
+        },
+        "letter.returned_to_sender": {
+            "Registration": [("register.tasks.send_print_and_forward_returned", 0)],
+            "BallotRequest": [("absentee.tasks.send_print_and_forward_returned", 0)],
+        },
     }
 
     if etype in event_trigger:
         item = action.get_source_item()
-        if item:
-            for fname, days in event_trigger[etype]:
-                tool = type(item).__module__.split(".")[0]
-                task = f"{tool}.tasks.{fname}"
+        itype = type(item).__name__
+        if item and itype in event_trigger[etype]:
+            for task, days in event_trigger[etype][itype]:
                 if days:
                     DelayedTask.schedule_days_later_polite(
-                        item.state.code, days, task, str(item.pk)
+                        item.state.code, days, task, str(item.pk), str(action.pk)
                     )
                 else:
-                    DelayedTask.schedule_polite(item.state.code, task, str(item.pk))
+                    DelayedTask.schedule_polite(
+                        item.state.code, task, str(item.pk), str(action.pk)
+                    )
 
     return HttpResponse()

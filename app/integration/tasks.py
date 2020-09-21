@@ -118,3 +118,30 @@ def send_mymove_blank_register_forms(lead_pk: str) -> None:
 
     lead = MymoveLead.objects.get(pk=lead_pk)
     send_blank_register_forms_to_lead(lead)
+
+
+def send_mymovelead_mailed(lead_pk: str, action_pk: str) -> None:
+    from .models import MymoveLead
+    from .notification import trigger_blank_forms_mailed
+
+    lead = MymoveLead.objects.get(pk=lead_pk)
+    if action_pk == lead.blank_register_forms_action_id:
+        trigger_blank_forms_mailed(lead)
+
+
+def send_mymovelead_reminder(lead_pk: str, action_pk: str) -> None:
+    from .models import MymoveLead
+    from .notification import trigger_blank_forms_reminder
+
+    lead = MymoveLead.objects.get(pk=lead_pk)
+    if action_pk == lead.blank_register_forms_action_id:
+        trigger_blank_forms_reminder(lead)
+
+
+def send_mymovelead_chase(lead_pk: str, action_pk: str) -> None:
+    from .models import MymoveLead
+    from .notification import trigger_blank_forms_chase
+
+    lead = MymoveLead.objects.get(pk=lead_pk)
+    if action_pk == lead.blank_register_forms_action_id:
+        trigger_blank_forms_chase(lead)
