@@ -22,6 +22,7 @@ def purge_old_storage():
             app__in=[
                 enums.FileType.REGISTRATION_FORM,
                 enums.FileType.ABSENTEE_REQUEST_FORM,
+                enums.FileType.BLANK_REGISTRATION_FORMS,
             ],
         ):
             logger.info(f"Purging {item}")
