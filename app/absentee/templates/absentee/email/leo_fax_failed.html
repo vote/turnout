@@ -1,0 +1,33 @@
+{% extends "email/base.html" %}
+{% load markdownify %}
+{% block content %}
+
+
+{{ recipient.first_name }},<br><br>
+Unfortunately, we were not able to successfully send your application to your
+local election office. We attempted to send the fax 20 times, and were
+unsuccessful each time.
+<br><br>
+Typically, this means that something is wrong with the fax machine at your
+local election office. You should contact them to confirm that
+{{leo_contact.fax}} is the correct fax number, and that their fax machine
+is working.
+<br><br>
+The contact information for your local election office is:
+<br><br>
+{% if has_leo_contact %}
+  {% if leo_contact.email %}Email: <a href="mailto:{{leo_contact.email}}">{{leo_contact.email}}</a><br>{% endif %}
+  {% if leo_contact.phone %}Phone: <a href="tel:{{leo_contact.phone}}">{{leo_contact.phone}}</a><br>{% endif %}
+{% else %}
+  <a href="https://www.voteamerica.com/local-election-offices/{{ballot_request.state.code}}/{ballot_request.region.external_id}}/">Contact Information</a>
+  <br>
+{% endif %}
+<br><br>
+If the fax number we have for your local election office -- {{leo_contact.fax}} --
+is incorrect, please email us at <a href="mailto:error@voteamerica.com">error@voteamerica.com</a>.
+<br><br>
+
+Happy voting,<br>
+{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+
+{% endblock %}

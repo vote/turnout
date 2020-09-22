@@ -15,6 +15,7 @@ from .tasks import send_ballotrequest_leo_fax_sent_notification
 
 NOTIFICATION_TEMPLATE_SUBMITTED = "absentee/email/leo_fax_submitted.html"
 NOTIFICATION_TEMPLATE_SENT = "absentee/email/leo_fax_sent.html"
+NOTIFICATION_TEMPLATE_FAILED = "absentee/email/leo_fax_failed.html"
 
 REPLY_TO = settings.ABSENTEE_LEO_FAX_EMAIL_REPLY_TO
 
@@ -107,6 +108,24 @@ def send_fax_sent_email(
     msg.send()
 
 
+def send_fax_failed_email(
+    ballot_request: BallotRequest, force_to: Optional[str] = None
+) -> None:
+    leo_contact = get_absentee_contact_info(ballot_request.region.external_id)
+    subject = f"Re: Your absentee ballot application is being sent"
+
+    msg = EmailMessage(
+        subject=subject,
+        body=compile_email(ballot_request, leo_contact, NOTIFICATION_TEMPLATE_FAILED),
+        from_email=ballot_request.subscriber.transactional_from_email_address,
+        to=[force_to or ballot_request.email],
+        reply_to=[REPLY_TO],
+    )
+
+    msg.content_subtype = "html"
+    msg.send()
+
+
 def trigger_test_fax_emails(recipients: List[str]) -> None:
     from event_tracking.models import Event
 
@@ -121,3 +140,4 @@ def trigger_test_fax_emails(recipients: List[str]) -> None:
         for to in recipients:
             send_fax_submitted_email(ballot_request, leo_contact, force_to=to)
             send_fax_sent_email(ballot_request, force_to=to)
+            send_fax_failed_email(ballot_request, force_to=to)

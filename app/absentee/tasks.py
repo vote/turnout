@@ -97,7 +97,7 @@ def send_ballotrequest_leo_fax_sent_notification(
     fax_status_str: str, ballotrequest_pk: str
 ) -> None:
     from .models import BallotRequest
-    from .leo_fax import send_fax_sent_email
+    from .leo_fax import send_fax_sent_email, send_fax_failed_email
 
     ballot_request = BallotRequest.objects.select_related().get(pk=ballotrequest_pk)
 
@@ -109,6 +109,7 @@ def send_ballotrequest_leo_fax_sent_notification(
             )
         )
         log.error(f"Fax submission failed for ballot request {ballotrequest_pk}")
+        send_fax_failed_email(ballot_request)
     else:
         ballot_request.action.track_event(EventType.FINISH_LEO_FAX_SENT)
         send_fax_sent_email(ballot_request)
