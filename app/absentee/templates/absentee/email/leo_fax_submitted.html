@@ -19,7 +19,7 @@ to your local election office.<br><br>
   {% if leo_contact.email %}Email: <a href="mailto:{{leo_contact.email}}">{{leo_contact.email}}</a><br>{% endif %}
   {% if leo_contact.phone %}Phone: <a href="tel:{{leo_contact.phone}}">{{leo_contact.phone}}</a><br>{% endif %}
 {% else %}
-  <a href="https://www.voteamerica.com/local-election-offices/{{ballot_request.state.code}}/{ballot_request.region.external_id}}/">Contact Information</a>
+  <a href="https://www.voteamerica.com/local-election-offices/{{ballot_request.state.code}}/{ballot_request.region.external_id}}/?utm_medium=email&utm_source=turnout&utm_campaign=absentee-leo-fax-submitted&source=va_email_turnout_absentee-leo-fax-submitted&refcode=va_email_turnout_absentee-leo-fax-submitted">Contact Information</a>
   <br>
 {% endif %}
 <br>
