@@ -1,32 +1,38 @@
-pages: 1
+pages: 3
 
 auto_fields:
-  - slug: sig_date
+  - slug: date_signed
     type: todays_date
+  - slug: general_date
+    type: static
+    value: 11/3/2020
 
 manual_fields:
-  - mothers_maiden_name
-  - parish
-  - ssn4
-  - dl_num
   - ward
-  - primary_election
-  - general_election
-  - reason1
-  - reason2
-  - reason3
-  - reason4
-  - reason5
-  - reason6
-  - reason7
-  - reason8
-  - reason9
-  - reason10
-  - reason11
-  - reason12
-  - this_election_only
-  - all_elections
-  - absent_from
-  - absent_thru
-  - submit_by
-  - relationship_to
+  - excuse_covid_risk
+  - excuse_covid_quar
+  - excuse_covid_hcp
+  - excuse_covid_symp
+  - excuse_covid_caring
+  - caretaking_name
+  - mothers_maiden
+  - ParishOfResidence
+  - state_id_number_opt_1
+  - state_id_number_opt_2
+  - primary_date
+  - excuse_senior
+  - excuse_senior_once
+  - excuse_senior_perm
+  - excuse_absent
+  - excuse_absent_start
+  - excuse_absent_end
+  - excuse_offshore
+  - excuse_nursing
+  - excuse_student
+  - excuse_clergy
+  - excuse_moved
+  - excuse_invol
+  - excuse_hospital
+  - excuse_incarcerated
+  - excuse_acp
+  - excuse_juror
