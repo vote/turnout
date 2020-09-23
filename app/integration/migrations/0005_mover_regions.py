@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('official', '0006_region_hidden'),
-        ('integration', '0004_mymove_state_drop_foreign_key'),
+        ('integration', '0004_mover_state_drop_foreign_key'),
     ]
 
     operations = [

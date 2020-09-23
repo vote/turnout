@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('integration', '0003_mymovelead'),
+        ('integration', '0003_moverlead'),
     ]
 
     operations = [

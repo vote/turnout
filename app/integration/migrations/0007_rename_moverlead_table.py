@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('integration', '0006_mymove_blank_forms_fields'),
+        ('integration', '0006_mover_blank_forms_fields'),
     ]
 
     operations = [

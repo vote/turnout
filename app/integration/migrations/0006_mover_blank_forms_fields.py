@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('action', '0010_index_last_voter_lookup'),
         ('storage', '0008_storageitem_preview_of'),
-        ('integration', '0005_mymove_regions'),
+        ('integration', '0005_mover_regions'),
     ]
 
     operations = [
