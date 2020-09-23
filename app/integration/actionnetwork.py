@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 
@@ -289,6 +290,9 @@ def _sync_item(item, subscriber_id):
 
 
 def sync_all_items(cls):
+    cutoff = datetime.datetime.utcnow().replace(
+        tzinfo=datetime.timezone.utc
+    ) - datetime.timedelta(seconds=settings.ACTION_CHECK_UNFINISHED_DELAY)
     for item in (
         cls.objects.annotate(
             no_sync=~Exists(
@@ -299,7 +303,7 @@ def sync_all_items(cls):
                 )
             )
         )
-        .filter(no_sync=True, action__isnull=False)
+        .filter(no_sync=True, action__isnull=False, created_at__lt=cutoff)
         .order_by("created_at")
     ):
         _sync_item(item, None)
@@ -325,7 +329,9 @@ def sync_all_items(cls):
                 )
             ),
         )
-        .filter(no_sync=True, has_api_key=True, action__isnull=False)
+        .filter(
+            no_sync=True, has_api_key=True, action__isnull=False, created_at__lt=cutoff
+        )
         .order_by("created_at")
     ):
         _sync_item(item, item.subscriber_id)
