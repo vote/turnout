@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='MymoveLead',
+            name='MoverLead',
             fields=[
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('modified_at', models.DateTimeField(auto_now=True)),
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('mymove_created_at', models.DateTimeField(null=True)),
+                ('source_created_at', models.DateTimeField(null=True, db_column='mymove_created_at')),
                 ('first_name', models.TextField(null=True)),
                 ('last_name', models.TextField(null=True)),
                 ('email', models.EmailField(max_length=254, null=True)),
@@ -43,6 +43,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['-created_at'],
+                'db_table': 'integration_mymovelead',
             },
         ),
     ]

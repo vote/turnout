@@ -82,10 +82,10 @@ def lob_letter_status(request):
                 ("absentee.tasks.send_print_and_forward_mailed", 0),
                 ("absentee.tasks.send_mail_chase", 14),
             ],
-            "MymoveLead": [
-                ("integration.tasks.send_mymovelead_mailed", 0),
-                ("integration.tasks.send_mymovelead_reminder", 3),
-                ("integration.tasks.send_mymovelead_chase", 28),
+            "MoverLead": [
+                ("integration.tasks.send_moverlead_mailed", 0),
+                ("integration.tasks.send_moverlead_reminder", 3),
+                ("integration.tasks.send_moverlead_chase", 28),
             ],
         },
         "letter.returned_to_sender": {

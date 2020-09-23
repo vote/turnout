@@ -105,8 +105,10 @@ export LOB_LETTER_WEBHOOK_SECRET=$(aws ssm get-parameter --region $REGION --with
 export RETURN_ADDRESS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.return_address | jq '.Parameter["Value"]' -r)
 export BEAT_STATS_METRIC_NAMESPACE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.beat_stats_metric_namespace | jq '.Parameter["Value"]' -r)
 export I90_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.i90_key | jq '.Parameter["Value"]' -r)
-export MYMOVE_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_id | jq '.Parameter["Value"]' -r)
-export MYMOVE_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mymove_secret | jq '.Parameter["Value"]' -r)
+export MOVER_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mover_id | jq '.Parameter["Value"]' -r)
+export MOVER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mover_secret | jq '.Parameter["Value"]' -r)
+export MOVER_SOURCE=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mover_source | jq '.Parameter["Value"]' -r)
+export MOVER_LEADS_ENDPOINT=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mover_leads_endpoint | jq '.Parameter["Value"]' -r)
 export SLACK_ALLOY_UPDATE_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_ALLOY_UPDATE_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_webhook | jq '.Parameter["Value"]' -r)
 
@@ -224,8 +226,10 @@ if [ "$2" ]; then
     -e RETURN_ADDRESS \
     -e BEAT_STATS_METRIC_NAMESPACE \
     -e I90_KEY \
-    -e MYMOVE_ID \
-    -e MYMOVE_SECRET \
+    -e MOVER_ID \
+    -e MOVER_SECRET \
+    -e MOVER_SOURCE \
+    -e MOVER_LEADS_ENDPOINT \
     -e SLACK_ALLOY_UPDATE_ENABLED \
     -e SLACK_ALLOY_UPDATE_WEBHOOK \
 -e DEBUG=$DEBUG \
@@ -318,8 +322,10 @@ else
     -e RETURN_ADDRESS \
     -e BEAT_STATS_METRIC_NAMESPACE \
     -e I90_KEY \
-    -e MYMOVE_ID \
-    -e MYMOVE_SECRET \
+    -e MOVER_ID \
+    -e MOVER_SECRET \
+    -e MOVER_SOURCE \
+    -e MOVER_LEADS_ENDPOINT \
     -e SLACK_ALLOY_UPDATE_ENABLED \
     -e SLACK_ALLOY_UPDATE_WEBHOOK \
 -e DEBUG=$DEBUG \

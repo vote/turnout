@@ -338,12 +338,20 @@
         name: 'I90_KEY',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mymove_id',
-        name: 'MYMOVE_ID',
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mover_id',
+        name: 'MOVER_ID',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mymove_secret',
-        name: 'MYMOVE_SECRET',
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mover_secret',
+        name: 'MOVER_SECRET',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mover_source',
+        name: 'MOVER_SOURCE',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mover_leads_endpoint',
+        name: 'MOVER_LEADS_ENDPOINT',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_alloy_update_enabled',

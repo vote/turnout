@@ -843,19 +843,21 @@ if ACTIONNETWORK_SYNC and ACTIONNETWORK_SYNC_DAILY:
 #### END ACTIONNETWORK CONFIGURATION
 
 
-#### MYMOVE CONFIGURATION
+#### MOVER CONFIGURATION
 
-MYMOVE_ID = env.str("MYMOVE_ID", None)
-MYMOVE_SECRET = env.str("MYMOVE_SECRET", None)
-MYMOVE_PULL_INTERVAL_HOURS = env.int("MYMOVE_PULL_HOURS", 1)
+MOVER_LEADS_ENDPOINT = env.str("MOVER_LEADS_ENDPOINT", None)
+MOVER_SOURCE = env.str("MOVER_SOURCE", None)
+MOVER_ID = env.str("MOVER_ID", None)
+MOVER_SECRET = env.str("MOVER_SECRET", None)
+MOVER_PULL_INTERVAL_HOURS = env.int("MOVER_PULL_HOURS", 1)
 
-if MYMOVE_ID and MYMOVE_PULL_INTERVAL_HOURS:
-    CELERY_BEAT_SCHEDULE["trigger-sync-mymove"] = {
-        "task": "integration.tasks.sync_mymove",
-        "schedule": crontab(minute=5, hour=f"*/{MYMOVE_PULL_INTERVAL_HOURS}",),
+if MOVER_ID and MOVER_PULL_INTERVAL_HOURS:
+    CELERY_BEAT_SCHEDULE["trigger-sync-mover"] = {
+        "task": "integration.tasks.sync_mover",
+        "schedule": crontab(minute=5, hour=f"*/{MOVER_PULL_INTERVAL_HOURS}",),
     }
 
-#### END MYMOVE CONFIGURATION
+#### END MOVER CONFIGURATION
 
 
 #### OPTIMIZELY CONFIGURATION

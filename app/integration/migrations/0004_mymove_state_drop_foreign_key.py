@@ -11,12 +11,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='new_state',
             field=models.TextField(null=True),
         ),
         migrations.AlterField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='old_state',
             field=models.TextField(null=True),
         ),

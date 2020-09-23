@@ -18,8 +18,8 @@ class Link(UUIDModel, TimestampModel):
         ordering = ["-created_at"]
 
 
-class MymoveLead(UUIDModel, TimestampModel):
-    mymove_created_at = models.DateTimeField(null=True)
+class MoverLead(UUIDModel, TimestampModel):
+    source_created_at = models.DateTimeField(null=True)
     first_name = models.TextField(null=True)
     last_name = models.TextField(null=True)
     email = models.EmailField(null=True)
@@ -36,7 +36,7 @@ class MymoveLead(UUIDModel, TimestampModel):
         "official.Region",
         null=True,
         on_delete=models.SET_NULL,
-        related_name="mymovelead_new",
+        related_name="moverlead_new",
     )
 
     old_address1 = models.TextField(null=True)
@@ -50,7 +50,7 @@ class MymoveLead(UUIDModel, TimestampModel):
         "official.Region",
         null=True,
         on_delete=models.SET_NULL,
-        related_name="mymovelead_old",
+        related_name="moverlead_old",
     )
 
     actionnetwork_person_id = models.TextField(null=True)
@@ -66,4 +66,4 @@ class MymoveLead(UUIDModel, TimestampModel):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"MymoveLead {self.first_name} {self.last_name}, {self.old_state} -> {self.new_state} ({self.uuid})"
+        return f"MoverLead {self.first_name} {self.last_name}, {self.old_state} -> {self.new_state} ({self.uuid})"

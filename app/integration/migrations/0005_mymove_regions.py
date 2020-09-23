@@ -13,13 +13,13 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='new_region',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mymovelead_new', to='official.Region'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='moverlead_new', to='official.Region'),
         ),
         migrations.AddField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='old_region',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='mymovelead_old', to='official.Region'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='moverlead_old', to='official.Region'),
         ),
     ]

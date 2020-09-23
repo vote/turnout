@@ -14,12 +14,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='blank_register_forms_action',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='action.Action'),
         ),
         migrations.AddField(
-            model_name='mymovelead',
+            model_name='moverlead',
             name='blank_register_forms_item',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='storage.StorageItem'),
         ),

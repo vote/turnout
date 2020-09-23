@@ -407,12 +407,20 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.i90_key"
             },
             {
-               "name": "MYMOVE_ID",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mymove_id"
+               "name": "MOVER_ID",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_id"
             },
             {
-               "name": "MYMOVE_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mymove_secret"
+               "name": "MOVER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_secret"
+            },
+            {
+               "name": "MOVER_SOURCE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_source"
+            },
+            {
+               "name": "MOVER_LEADS_ENDPOINT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_leads_endpoint"
             },
             {
                "name": "SLACK_ALLOY_UPDATE_ENABLED",
@@ -831,12 +839,20 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.i90_key"
             },
             {
-               "name": "MYMOVE_ID",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mymove_id"
+               "name": "MOVER_ID",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_id"
             },
             {
-               "name": "MYMOVE_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mymove_secret"
+               "name": "MOVER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_secret"
+            },
+            {
+               "name": "MOVER_SOURCE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_source"
+            },
+            {
+               "name": "MOVER_LEADS_ENDPOINT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mover_leads_endpoint"
             },
             {
                "name": "SLACK_ALLOY_UPDATE_ENABLED",

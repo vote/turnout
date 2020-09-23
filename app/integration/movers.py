@@ -31,10 +31,7 @@ from storage.models import StorageItem
 from .actionnetwork import ActionNetworkError
 from .actionnetwork import get_session as get_actionnetwork_session
 from .lob import get_or_create_lob_address, submit_lob
-from .models import MymoveLead
-
-STAGING_LEADS_ENDPOINT = "https://staging-leads.mymove.com/v2/clients/{client_id}/leads"
-PROD_LEADS_ENDPOINT = "https://leads.mymove.com/v2/clients/{client_id}/leads"
+from .models import MoverLead
 
 ACTIONNETWORK_FORM_ENDPOINT = "https://actionnetwork.org/api/v2/forms/"
 ACTIONNETWORK_ADD_ENDPOINT = (
@@ -52,44 +49,41 @@ RE_MARKUP_LINK = re.compile(
 logger = logging.getLogger("integration")
 
 
-class MymoveError(Exception):
+class MoverError(Exception):
     pass
 
 
-def get_mymove_subscriber() -> Client:
-    return Client.objects.filter(default_slug__slug="mymove").first()
+def get_mover_subscriber() -> Client:
+    return Client.objects.filter(default_slug__slug=settings.MOVER_SOURCE).first()
 
 
 @tracer.wrap()
 def pull(days: int = None, hours: int = None) -> None:
-    if settings.ENV == "prod":
-        url = PROD_LEADS_ENDPOINT
-    else:
-        url = STAGING_LEADS_ENDPOINT
+    url = settings.MOVER_LEADS_ENDPOINT
 
     if not days and not hours:
         # include an extra hour|day so we don't miss any records
-        hours = settings.MYMOVE_PULL_INTERVAL_HOURS + 1
+        hours = settings.MOVER_PULL_INTERVAL_HOURS + 1
     if hours:
         url += f"?hrs={hours}"
     elif days:
         url += f"?days={days}"
-    url = url.format(client_id=settings.MYMOVE_ID)
+    url = url.format(client_id=settings.MOVER_ID)
 
-    with tracer.trace("mymove.leads", service="mymove"):
+    with tracer.trace("mover.leads", service="mover"):
         response = requests.get(
             url,
             headers={
-                "Authorization": settings.MYMOVE_SECRET,
+                "Authorization": settings.MOVER_SECRET,
                 "Content-Type": "application/json",
             },
         )
     if response.status_code != 200:
         logger.error(
-            f"Mymove endpoint {url} returned {response.status_code}: {response.text}"
+            f"Mover endpoint {url} returned {response.status_code}: {response.text}"
         )
         sentry_sdk.capture_exception(
-            MymoveError(f"Mymove endpoint {url} return {response.status_code}")
+            MoverError(f"Mover endpoint {url} return {response.status_code}")
         )
         return
 
@@ -138,11 +132,11 @@ def store_leads(leads):
             move_date = datetime.datetime.strptime(
                 lead["move_date"], "%Y-%m-%d"
             ).replace(tzinfo=datetime.timezone.utc)
-        lead, created = MymoveLead.objects.get_or_create(
+        lead, created = MoverLead.objects.get_or_create(
             email=lead.get("email"),
-            mymove_created_at=created_at,
+            source_created_at=created_at,
             defaults={
-                "mymove_created_at": created_at,
+                "source_created_at": created_at,
                 "email": lead.get("email"),
                 "first_name": lead.get("first_name"),
                 "last_name": lead.get("last_name"),
@@ -171,7 +165,7 @@ def store_leads(leads):
 
 @tracer.wrap()
 def send_blank_register_forms_tx(offset=0, limit=None) -> None:
-    q = MymoveLead.objects.filter(
+    q = MoverLead.objects.filter(
         new_state="TX",
         created_at__gte=datetime.datetime(2020, 9, 16, 0, 0, 0).replace(
             tzinfo=datetime.timezone.utc
@@ -214,7 +208,7 @@ def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -
     if state:
         states = [state]
     q = (
-        MymoveLead.objects.filter(
+        MoverLead.objects.filter(
             new_state__in=states,
             created_at__lt=datetime.datetime(
                 2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
@@ -259,7 +253,7 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
     ]
     if state:
         states = [state]
-    q = MymoveLead.objects.filter(
+    q = MoverLead.objects.filter(
         new_state__in=states,
         created_at__gte=datetime.datetime(
             2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
@@ -274,7 +268,7 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
         send_blank_register_forms_to_lead(lead)
 
 
-def get_register_form_data(lead: MymoveLead):
+def get_register_form_data(lead: MoverLead):
     form_data = model_to_dict(lead)
     contact_info = get_nvrf_submission_address(lead.new_region_id, lead.new_state)
     mailto_address = contact_info.address
@@ -342,12 +336,12 @@ def get_register_form_data(lead: MymoveLead):
 
 
 @tracer.wrap()
-def send_blank_register_forms_to_lead(lead: MymoveLead) -> None:
+def send_blank_register_forms_to_lead(lead: MoverLead) -> None:
     # make sure we've geocoded
     if not lead.new_region:
         geocode_lead(lead)
 
-    subscriber = get_mymove_subscriber()
+    subscriber = get_mover_subscriber()
 
     if not lead.blank_register_forms_item:
         # generate PDF
@@ -435,10 +429,7 @@ def send_blank_register_forms_to_lead(lead: MymoveLead) -> None:
 def get_or_create_form(session: requests.Session) -> str:
     logger.info(f"Fetching forms from ActionNetwork")
 
-    if settings.ENV != "prod":
-        form_name = "staging_mymove_lead"
-    else:
-        form_name = "prod_mymove_lead"
+    form_name = f"{settings.ENV}_{settings.MOVER_SOURCE}_lead"
 
     def get_form_id(ids):
         an_id = None
@@ -464,7 +455,7 @@ def get_or_create_form(session: requests.Session) -> str:
 
     # create form
     logger.info(f"Creating form {form_name}")
-    title = f"VoteAmerica MyMove lead"
+    title = f"VoteAmerica {settings.MOVER_SOURCE} lead"
     if settings.ENV != "prod":
         title += f" ({settings.ENV})"
     with tracer.trace("an.form_create", service="actionnetwork"):
@@ -489,7 +480,7 @@ def get_or_create_form(session: requests.Session) -> str:
 
 
 @tracer.wrap()
-def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None:
+def push_lead(session: requests.Session, form_id: str, lead: MoverLead) -> None:
     info = {
         "person": {
             "given_name": lead.first_name,
@@ -505,35 +496,36 @@ def push_lead(session: requests.Session, form_id: str, lead: MymoveLead) -> None
                 },
             ],
             "custom_fields": {
-                "mymove_new_address": " ".join(
+                f"{settings.MOVER_SOURCE}_new_address": " ".join(
                     [lead.new_address1, lead.new_address2 or ""]
                 ),
-                "mymove_new_city": lead.new_city,
-                "mymove_new_state": lead.new_state,
-                "mymove_new_zipcode": lead.new_zipcode,
-                "mymove_new_housing_tenure": lead.new_housing_tenure,
-                "mymove_old_address": " ".join(
+                f"{settings.MOVER_SOURCE}_new_city": lead.new_city,
+                f"{settings.MOVER_SOURCE}_new_state": lead.new_state,
+                f"{settings.MOVER_SOURCE}_new_zipcode": lead.new_zipcode,
+                f"{settings.MOVER_SOURCE}_new_housing_tenure": lead.new_housing_tenure,
+                f"{settings.MOVER_SOURCE}_old_address": " ".join(
                     [lead.old_address1, lead.old_address2 or ""]
                 ),
-                "mymove_old_city": lead.old_city,
-                "mymove_old_state": lead.old_state,
-                "mymove_old_zipcode": lead.old_zipcode,
-                "mymove_old_housing_tenure": lead.old_housing_tenure,
-                "mymove_move_date": lead.move_date.isoformat(),
-                "mymove_cross_state": lead.old_state != lead.new_state,
-                "mymove_cross_region": lead.old_region_id != lead.new_region_id,
+                f"{settings.MOVER_SOURCE}_old_city": lead.old_city,
+                f"{settings.MOVER_SOURCE}_old_state": lead.old_state,
+                f"{settings.MOVER_SOURCE}_old_zipcode": lead.old_zipcode,
+                f"{settings.MOVER_SOURCE}_old_housing_tenure": lead.old_housing_tenure,
+                f"{settings.MOVER_SOURCE}_move_date": lead.move_date.isoformat(),
+                f"{settings.MOVER_SOURCE}_cross_state": lead.old_state
+                != lead.new_state,
+                f"{settings.MOVER_SOURCE}_cross_region": lead.old_region_id
+                != lead.new_region_id,
             },
         },
-        "action_network:referrer_data": {"source": "mymove",},
     }
     url = ACTIONNETWORK_ADD_ENDPOINT.format(form_id=form_id)
-    with tracer.trace("an.mymove_form", service="actionnetwork"):
+    with tracer.trace("an.mover_form", service="actionnetwork"):
         response = session.post(url, json=info,)
 
     if response.status_code != 200:
         sentry_sdk.capture_exception(
             ActionNetworkError(
-                f"Error posting mymove lead to form {url}, status code {response.status_code}"
+                f"Error posting mover lead to form {url}, status code {response.status_code}"
             )
         )
         logger.error(
@@ -552,12 +544,12 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
 
     form_id = get_or_create_form(session)
 
-    q = MymoveLead.objects.filter(
+    q = MoverLead.objects.filter(
         actionnetwork_person_id__isnull=True,
-        mymove_created_at__gte=datetime.datetime(
+        source_created_at__gte=datetime.datetime(
             2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
         ),
-    ).order_by("mymove_created_at")
+    ).order_by("source_created_at")
     if new_state:
         q = q.filter(new_state=new_state)
 
@@ -571,7 +563,7 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
         time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
 
 
-def geocode_lead(lead: MymoveLead) -> None:
+def geocode_lead(lead: MoverLead) -> None:
     updated = False
     new_regions, _ = get_regions_for_address(
         lead.new_address1, lead.new_city, lead.new_state, lead.new_zipcode
@@ -593,9 +585,7 @@ def geocode_lead(lead: MymoveLead) -> None:
 
 
 def geocode_leads(new_state: str = None, old_state: str = None) -> None:
-    q = MymoveLead.objects.filter(
-        new_region_id__isnull=True, old_region_id__isnull=True
-    )
+    q = MoverLead.objects.filter(new_region_id__isnull=True, old_region_id__isnull=True)
     if new_state:
         q = q.filter(new_state=new_state)
     if old_state:

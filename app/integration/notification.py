@@ -9,7 +9,7 @@ from common.apm import tracer
 from election.models import State
 from register.contactinfo import get_nvrf_submission_address
 
-from .models import MymoveLead
+from .models import MoverLead
 
 BLANK_FORMS_MAILED_TEMPLATE = "email/blank_forms_mailed.html"
 BLANK_FORMS_CHASE_TEMPLATE = "email/blank_forms_chase.html"
@@ -23,7 +23,7 @@ logger = logging.getLogger("integration")
 
 
 @tracer.wrap()
-def compile_email(lead: MymoveLead, template: str, reminder: bool = None) -> str:
+def compile_email(lead: MoverLead, template: str, reminder: bool = None) -> str:
     contact_info = get_nvrf_submission_address(lead.new_region_id, lead.new_state)
     mailing_address = (
         contact_info.address
@@ -55,7 +55,7 @@ def compile_email(lead: MymoveLead, template: str, reminder: bool = None) -> str
 
 
 def send_email(
-    lead: MymoveLead, subject, content: str, force_to: Optional[str] = None
+    lead: MoverLead, subject, content: str, force_to: Optional[str] = None
 ) -> None:
     msg = EmailMessage(
         subject,
@@ -67,25 +67,25 @@ def send_email(
     msg.send()
 
 
-def trigger_blank_forms_mailed(lead: MymoveLead) -> None:
+def trigger_blank_forms_mailed(lead: MoverLead) -> None:
     content = compile_email(lead, BLANK_FORMS_MAILED_TEMPLATE, False)
     send_email(lead, BLANK_FORMS_MAILED_SUBJECT, content)
 
 
-def trigger_blank_forms_reminder(lead: MymoveLead) -> None:
+def trigger_blank_forms_reminder(lead: MoverLead) -> None:
     content = compile_email(lead, BLANK_FORMS_MAILED_TEMPLATE, True)
     send_email(lead, BLANK_FORMS_REMINDER_SUBJECT, content)
 
 
-def trigger_blank_forms_chase(lead: MymoveLead) -> None:
+def trigger_blank_forms_chase(lead: MoverLead) -> None:
     content = compile_email(lead, BLANK_FORMS_CHASE_TEMPLATE)
     send_email(lead, BLANK_FORMS_CHASE_SUBJECT, content)
 
 
 def trigger_test_notifications(recipients: List[str]) -> None:
-    lead = MymoveLead.objects.filter(blank_register_forms_action__isnull=False).last()
+    lead = MoverLead.objects.filter(blank_register_forms_action__isnull=False).last()
     if not lead:
-        logger.warning("No MymoveLead blank form emails")
+        logger.warning("No MoverLead blank form emails")
     else:
         content1 = compile_email(lead, BLANK_FORMS_MAILED_TEMPLATE, False)
         content2 = compile_email(lead, BLANK_FORMS_MAILED_TEMPLATE, True)

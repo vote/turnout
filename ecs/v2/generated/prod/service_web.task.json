@@ -410,12 +410,20 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.i90_key"
             },
             {
-               "name": "MYMOVE_ID",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mymove_id"
+               "name": "MOVER_ID",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mover_id"
             },
             {
-               "name": "MYMOVE_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mymove_secret"
+               "name": "MOVER_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mover_secret"
+            },
+            {
+               "name": "MOVER_SOURCE",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mover_source"
+            },
+            {
+               "name": "MOVER_LEADS_ENDPOINT",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mover_leads_endpoint"
             },
             {
                "name": "SLACK_ALLOY_UPDATE_ENABLED",
