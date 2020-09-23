@@ -950,8 +950,12 @@ VOTER_RECHECK_INTERVAL_DAYS = 7
 # give up eventually
 VOTER_RECHECK_MAX_DAYS = 90
 
-CELERY_BEAT_SCHEDULE["trigger-voter-check-new_actions"] = {
+CELERY_BEAT_SCHEDULE["trigger-voter-check-new-actions"] = {
     "task": "voter.tasks.check_new_actions",
+    "schedule": crontab(minute=f"*/{VOTER_CHECK_INTERVAL_MINUTES}"),
+}
+CELERY_BEAT_SCHEDULE["trigger-voter-recheck-old-actions"] = {
+    "task": "voter.tasks.recheck_old_actions",
     "schedule": crontab(minute=f"*/{VOTER_CHECK_INTERVAL_MINUTES}"),
 }
 
