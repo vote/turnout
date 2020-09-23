@@ -134,7 +134,7 @@ def geocode_to_regions(street, city, state, zipcode):
         return None
 
     # assume the first address match is the correct (only) state
-    state_code = addrs[0]["address_components"]["state"]
+    state_code = addrs[0]["address_components"].get("state")
     if state_code != state:
         # if the address match gets the state wrong, return *no* result
         logger.warning(
