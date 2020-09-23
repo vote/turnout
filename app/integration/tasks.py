@@ -113,13 +113,40 @@ def sync_movers():
 
 
 @shared_task
-def send_movers_blank_register_forms(lead_pk: str) -> None:
+def send_blank_register_forms_to_lead(lead_pk: str) -> None:
     from .movers import send_blank_register_forms_to_lead
 
     lead = MoverLead.objects.get(pk=lead_pk)
     send_blank_register_forms_to_lead(lead)
 
 
+@shared_task
+def send_blank_register_forms_tx(offset=0, limit=None) -> None:
+    from .movers import send_blank_register_forms_tx
+
+    send_blank_register_forms_tx(offset=offset, limit=limit)
+
+
+@shared_task
+def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
+    from .movers import send_blank_register_forms
+
+    send_blank_register_forms(offset=offset, limit=limit, state=state)
+
+
+@shared_task
+def send_movers_blank_register_forms() -> None:
+    if get_feature_bool("movers", "blank_forms"):
+        send_blank_register_forms()
+    else:
+        logger.info("movers.blank_forms=false")
+    if get_feature_bool("movers", "blank_forms_tx"):
+        send_blank_register_forms_tx()
+    else:
+        logger.info("movers.blank_forms_tx=false")
+
+
+@shared_task
 def send_moverlead_mailed(lead_pk: str, action_pk: str) -> None:
     from .notification import trigger_blank_forms_mailed
 
@@ -128,6 +155,7 @@ def send_moverlead_mailed(lead_pk: str, action_pk: str) -> None:
         trigger_blank_forms_mailed(lead)
 
 
+@shared_task
 def send_moverlead_reminder(lead_pk: str, action_pk: str) -> None:
     from .notification import trigger_blank_forms_reminder
 
@@ -136,6 +164,7 @@ def send_moverlead_reminder(lead_pk: str, action_pk: str) -> None:
         trigger_blank_forms_reminder(lead)
 
 
+@shared_task
 def send_moverlead_chase(lead_pk: str, action_pk: str) -> None:
     from .notification import trigger_blank_forms_chase
 
