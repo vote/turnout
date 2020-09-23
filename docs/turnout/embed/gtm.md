@@ -59,6 +59,19 @@ Here's a list of events provided by VoteAmerica. Some events have variable param
   tool: 'register',
   state: {{ state }},
 }
+
+{
+  event: 'action-finish',
+  method: 'pdf-forward',
+  tool: 'register',
+  state: {{ state }},
+}
+
+{
+  event: 'action-finish',
+  method: 'pdf-forward-confirmed',
+  tool: 'register',
+}
 ```
 
 ### Absentee Tool
@@ -112,6 +125,19 @@ Here's a list of events provided by VoteAmerica. Some events have variable param
   method: 'pdf',
   tool: 'absentee',
   state: {{ state }},
+}
+
+{
+  event: 'action-finish',
+  method: 'pdf-forward',
+  tool: 'absentee',
+  state: {{ state }},
+}
+
+{
+  event: 'action-finish',
+  method: 'pdf-forward-confirmed',
+  tool: 'absentee',
 }
 
 {
