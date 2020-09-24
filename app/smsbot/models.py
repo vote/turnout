@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
+from requests.exceptions import ConnectionError
 from twilio.rest import Client as TwilioClient
 
 from common.apm import tracer
@@ -72,11 +73,27 @@ class Number(TimestampModel):
             msg = SMSMessage.objects.create(
                 phone=self, direction=MessageDirectionType.OUT, message=text,
             )
-            r = twilio_client.messages.create(
-                to=str(self.phone),
-                messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
-                body=text,
-                status_callback=msg.delivery_status_webhook(),
-            )
-            msg.twilio_sid = r.sid
-            msg.save()
+            max_tries = 2
+            tries = 0
+            while True:
+                tries += 1
+                if tries > max_tries:
+                    logger.warning(
+                        f"Gave up sending to twilio after {max_tries} tries: {msg}"
+                    )
+                    break
+                try:
+                    r = twilio_client.messages.create(
+                        to=str(self.phone),
+                        messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
+                        body=text,
+                        status_callback=msg.delivery_status_webhook(),
+                    )
+                    msg.twilio_sid = r.sid
+                    msg.save()
+                    break
+                except ConnectionError as e:
+                    logger.info(
+                        f"Failed to send via twilio (attempt {tries}): {e} ({msg})"
+                    )
+                    time.sleep(tries)
