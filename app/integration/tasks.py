@@ -230,13 +230,14 @@ def process_lob_letter_status(letter_id: str, etype: str) -> None:
     if etype in event_trigger:
         item = action.get_source_item()
         itype = type(item).__name__
+        state = item.new_state if itype == "MoverLead" else item.state.code
         if item and itype in event_trigger[etype]:
             for task, days in event_trigger[etype][itype]:
                 if days:
                     DelayedTask.schedule_days_later_polite(
-                        item.state.code, days, task, str(item.pk), str(action.pk)
+                        state, days, task, str(item.pk), str(action.pk)
                     )
                 else:
                     DelayedTask.schedule_polite(
-                        item.state.code, task, str(item.pk), str(action.pk)
+                        state, task, str(item.pk), str(action.pk)
                     )
