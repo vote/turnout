@@ -7,10 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 from common.analytics import statsd
-from common.enums import EventType, ExternalToolType
-from common.models import DelayedTask
 
-from .models import Link
+from .tasks import process_lob_letter_status
 
 logger = logging.getLogger("integration")
 
@@ -43,69 +41,11 @@ def validate_lob_request(func):
 @validate_lob_request
 def lob_letter_status(request):
     letter_id = request.data.get("body", {}).get("id")
+    etype = request.data.get("event_type", {}).get("id")
+
     if not letter_id:
         logger.warning(f"Got lob webhook without object id: {request.data}")
         raise Http404
 
-    link = None
-    for link in Link.objects.filter(
-        external_tool=ExternalToolType.LOB, external_id=letter_id
-    ):
-        break
-    if not link:
-        logger.warning(f"Got lob webhook on unknown letter id {letter_id}")
-        raise Http404
-    action = link.action
-
-    event_mapping = {
-        "letter.mailed": EventType.LOB_MAILED,
-        "letter.processed_for_delivery": EventType.LOB_PROCESSED_FOR_DELIVERY,
-        "letter.re-routed": EventType.LOB_REROUTED,
-        "letter.returned_to_sender": EventType.LOB_RETURNED,
-    }
-
-    etype = request.data.get("event_type", {}).get("id")
-
-    item = action.get_source_item()
-    logger.info(f"Received lob status update on {item} of {etype}")
-
-    if etype in event_mapping:
-        action.track_event(event_mapping[etype])
-
-    event_trigger = {
-        "letter.processed_for_delivery": {
-            "Registration": [
-                ("register.tasks.send_print_and_forward_mailed", 0),
-                ("register.tasks.send_mail_chase", 14),
-            ],
-            "BallotRequest": [
-                ("absentee.tasks.send_print_and_forward_mailed", 0),
-                ("absentee.tasks.send_mail_chase", 14),
-            ],
-            "MoverLead": [
-                ("integration.tasks.send_moverlead_mailed", 0),
-                ("integration.tasks.send_moverlead_reminder", 3),
-                ("integration.tasks.send_moverlead_chase", 28),
-            ],
-        },
-        "letter.returned_to_sender": {
-            "Registration": [("register.tasks.send_print_and_forward_returned", 0)],
-            "BallotRequest": [("absentee.tasks.send_print_and_forward_returned", 0)],
-        },
-    }
-
-    if etype in event_trigger:
-        item = action.get_source_item()
-        itype = type(item).__name__
-        if item and itype in event_trigger[etype]:
-            for task, days in event_trigger[etype][itype]:
-                if days:
-                    DelayedTask.schedule_days_later_polite(
-                        item.state.code, days, task, str(item.pk), str(action.pk)
-                    )
-                else:
-                    DelayedTask.schedule_polite(
-                        item.state.code, task, str(item.pk), str(action.pk)
-                    )
-
+    process_lob_letter_status.delay(letter_id, etype)
     return HttpResponse()

@@ -4,13 +4,16 @@ from celery import shared_task
 
 from absentee.models import BallotRequest
 from action.models import Action
+from common.enums import EventType, ExternalToolType
+from common.models import DelayedTask
 from common.rollouts import get_feature_bool
+from event_tracking.models import Event
 from register.models import Registration
 from reminder.models import ReminderRequest
 from verifier.models import Lookup
 
 from .actionnetwork import sync, sync_all_items, sync_item
-from .models import MoverLead
+from .models import Link, MoverLead
 
 logger = logging.getLogger("integration")
 
@@ -171,3 +174,69 @@ def send_moverlead_chase(lead_pk: str, action_pk: str) -> None:
     lead = MoverLead.objects.get(pk=lead_pk)
     if action_pk == lead.blank_register_forms_action_id:
         trigger_blank_forms_chase(lead)
+
+
+@shared_task(rate_limit="60/m")
+def process_lob_letter_status(letter_id: str, etype: str) -> None:
+    link = (
+        Link.objects.filter(external_tool=ExternalToolType.LOB, external_id=letter_id)
+        .order_by("created_at")
+        .first()
+    )
+    if not link:
+        logger.warning(
+            f"Got lob webhook on unknown letter id {letter_id} etype {etype}"
+        )
+        return
+    action = link.action
+
+    event_mapping = {
+        "letter.mailed": EventType.LOB_MAILED,
+        "letter.processed_for_delivery": EventType.LOB_PROCESSED_FOR_DELIVERY,
+        "letter.re-routed": EventType.LOB_REROUTED,
+        "letter.returned_to_sender": EventType.LOB_RETURNED,
+    }
+
+    item = action.get_source_item()
+    logger.info(f"Received lob status update on {item} of {etype}")
+
+    if etype in event_mapping:
+        t = event_mapping[etype]
+        if not Event.objects.filter(event_type=t, action=action).exists():
+            action.track_event(t)
+
+    event_trigger = {
+        "letter.processed_for_delivery": {
+            "Registration": [
+                ("register.tasks.send_print_and_forward_mailed", 0),
+                ("register.tasks.send_mail_chase", 14),
+            ],
+            "BallotRequest": [
+                ("absentee.tasks.send_print_and_forward_mailed", 0),
+                ("absentee.tasks.send_mail_chase", 14),
+            ],
+            "MoverLead": [
+                ("integration.tasks.send_moverlead_mailed", 0),
+                ("integration.tasks.send_moverlead_reminder", 3),
+                ("integration.tasks.send_moverlead_chase", 28),
+            ],
+        },
+        "letter.returned_to_sender": {
+            "Registration": [("register.tasks.send_print_and_forward_returned", 0)],
+            "BallotRequest": [("absentee.tasks.send_print_and_forward_returned", 0)],
+        },
+    }
+
+    if etype in event_trigger:
+        item = action.get_source_item()
+        itype = type(item).__name__
+        if item and itype in event_trigger[etype]:
+            for task, days in event_trigger[etype][itype]:
+                if days:
+                    DelayedTask.schedule_days_later_polite(
+                        item.state.code, days, task, str(item.pk), str(action.pk)
+                    )
+                else:
+                    DelayedTask.schedule_polite(
+                        item.state.code, task, str(item.pk), str(action.pk)
+                    )

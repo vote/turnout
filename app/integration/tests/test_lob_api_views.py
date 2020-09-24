@@ -14,6 +14,7 @@ from common.enums import (
 )
 from event_tracking.models import Event
 from integration.models import Link
+from integration.tasks import process_lob_letter_status
 
 LOB_LETTER_STATUS_API_ENDPOINT = "/v1/integration/lob-letter-status/"
 
@@ -32,10 +33,11 @@ LOB_LETTER_STATUS_BODY = {
 
 
 # Test lob letter status callbacks
-@pytest.mark.django_db
-def test_lob_letter_status():
+def test_lob_letter_status(mocker):
     import hashlib
     import hmac
+
+    process_patch = mocker.patch("integration.api_views.process_lob_letter_status")
 
     settings.LOB_LETTER_WEBHOOK_SECRET = "foo"
 
@@ -62,6 +64,46 @@ def test_lob_letter_status():
         **{"HTTP_LOB_SIGNATURE_TIMESTAMP": timestamp, "HTTP_LOB_SIGNATURE": signature,},
     )
     assert response.status_code == 200
+
+    process_patch.assert_called_once_with(
+        LOB_LETTER_STATUS_BODY["body"]["id"], LOB_LETTER_STATUS_BODY["event_type"]["id"]
+    )
+
+
+@pytest.mark.django_db
+def test_lob_letter_status(mocker):
+    ballot_request = baker.make_recipe("absentee.ballot_request")
+    link = Link.objects.create(
+        action=ballot_request.action,
+        external_tool=ExternalToolType.LOB,
+        external_id=LOB_LETTER_STATUS_BODY["body"]["id"],
+    )
+
+    process_lob_letter_status(
+        LOB_LETTER_STATUS_BODY["body"]["id"], LOB_LETTER_STATUS_BODY["event_type"]["id"]
+    )
+
+    events = list(Event.objects.filter(action=ballot_request.action))
+    assert len(events) == 1
+    assert events[0].event_type == EventType.LOB_MAILED
+
+
+@pytest.mark.django_db
+def test_dup_lob_letter_status(mocker):
+    ballot_request = baker.make_recipe("absentee.ballot_request")
+    link = Link.objects.create(
+        action=ballot_request.action,
+        external_tool=ExternalToolType.LOB,
+        external_id=LOB_LETTER_STATUS_BODY["body"]["id"],
+    )
+
+    process_lob_letter_status(
+        LOB_LETTER_STATUS_BODY["body"]["id"], LOB_LETTER_STATUS_BODY["event_type"]["id"]
+    )
+    process_lob_letter_status(
+        LOB_LETTER_STATUS_BODY["body"]["id"], LOB_LETTER_STATUS_BODY["event_type"]["id"]
+    )
+
     events = list(Event.objects.filter(action=ballot_request.action))
     assert len(events) == 1
     assert events[0].event_type == EventType.LOB_MAILED
