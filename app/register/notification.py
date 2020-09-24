@@ -69,7 +69,6 @@ def compile_email(
         "mailing_address": mailing_address,
         "state_info": registration.state.data,
         "query_params": query_params,
-        "vbm_link": f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}",
     }
     if registration.result_item:
         context["download_url"] = registration.result_item.download_url
@@ -201,9 +200,9 @@ def trigger_external_tool_upsell(registration: Registration) -> None:
     if registration.phone:
         query_params = registration.get_query_params()
         if registration.subscriber.is_first_party:
-            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}&utm_medium=email&utm_source=turnout&utm_campaign=register-external-tool-upsell-sms&source=va_email_turnout_register-external-tool-upsell-sms&refcode=va_email_turnout_register-external-tool-upsell-sms"
         else:
-            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/"
+            vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?utm_medium=email&utm_source=turnout&utm_campaign=register-external-tool-upsell-sms&source=va_email_turnout_register-external-tool-upsell-sms&refcode=va_email_turnout_register-external-tool-upsell-sms"
         try:
             n = Number.objects.get(phone=registration.phone)
             n.send_sms(

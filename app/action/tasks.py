@@ -84,9 +84,9 @@ def action_check_unfinished(action_pk: str) -> None:
             what = "requesting your absentee ballot"
             if item.subscriber.is_first_party:
                 query_params = item.get_query_params()
-                url = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
+                url = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}&utm_medium=email&utm_source=turnout&utm_campaign=action-check-unfinished-sms&source=va_email_turnout_action-check-unfinished-sms&refcode=va_email_turnout_action-check-unfinished-sms"
             else:
-                url = f"{settings.WWW_ORIGIN}/vote-by-mail/"
+                url = f"{settings.WWW_ORIGIN}/vote-by-mail/?utm_medium=email&utm_source=turnout&utm_campaign=action-check-unfinished-sms&source=va_email_turnout_action-check-unfinished-sms&refcode=va_email_turnout_action-check-unfinished-sms"
         elif "Registration" in str(type(item)):
             what = "registering to vote"
             url = f"{settings.WWW_ORIGIN}/register-to-vote/resume/?uuid={item.uuid}"
