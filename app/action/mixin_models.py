@@ -36,13 +36,5 @@ class ActionModel(models.Model):
             "email": self.email,  # type: ignore
             "phone": self.phone,  # type: ignore
             "subscriber": self.subscriber.default_slug,  # type: ignore
-            "utm_campaign": self.utm_campaign,  # type: ignore
-            "utm_source": self.utm_source,  # type: ignore
-            "utm_medium": self.utm_medium,  # type: ignore
-            "utm_term": self.utm_term,  # type: ignore
-            "utm_content": self.utm_content,  # type: ignore
-            "source": self.source,  # type: ignore
-            "email_referrer": self.email_referrer,  # type: ignore
-            "mobile_referrer": self.mobile_referrer,  # type: ignore
         }
         return urllib.parse.urlencode({k: v for k, v in query_param_dict.items() if v})
