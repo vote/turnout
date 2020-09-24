@@ -23,7 +23,6 @@ logger = logging.getLogger("verifier")
 
 @tracer.wrap()
 def compile_upsell_email(lookup: Lookup) -> str:
-    query_params = lookup.get_query_params()
     preheader_text = f"{lookup.first_name}, here's what to do next"
     recipient = {
         "first_name": lookup.first_name,
@@ -64,10 +63,14 @@ def trigger_upsell(lookup: Lookup) -> None:
             n = Number.objects.get(phone=lookup.phone)
             if lookup.subscriber.is_first_party:
                 query_params = lookup.get_query_params()
-                reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}&utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms",
+                reg_link = (
+                    f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}&utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms",
+                )
                 vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}&utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms"
             else:
-                reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/?utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms",
+                reg_link = (
+                    f"{settings.WWW_ORIGIN}/register-to-vote/?utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms",
+                )
                 vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?utm_medium=email&utm_source=turnout&utm_campaign=verify-external-tool-upsell-sms&source=va_email_turnout_verify-external-tool-upsell-sms&refcode=va_email_turnout_verify-external-tool-upsell-sms"
             n.send_sms(
                 f"Thanks for checking your registration with VoteAmerica! If you are not registered to vote, we can help you register at {shorten_url(reg_link)}"
