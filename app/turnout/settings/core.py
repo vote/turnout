@@ -388,6 +388,7 @@ CORS_ORIGIN_REGEX_WHITELIST = [
     r"^https:\/\/[\w-]+--voteamerica.netlify.app$",  # branch builds
     r"^http:\/\/localhost:8000$",  # local
     r"^http:\/\/localhost:6007$",  # local storybook
+    r"^https:\/\/\w*.creditkarma.com$",
 ]
 
 #### END CORS CONFIGURATION
