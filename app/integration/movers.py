@@ -426,7 +426,7 @@ def send_blank_register_forms_to_lead(lead: MoverLead) -> None:
         )
 
 
-def get_form_id(ids):
+def get_form_id(ids, form_name):
     an_id = None
     is_form = False
     for gid in ids:
@@ -454,7 +454,7 @@ def get_or_create_form(session: requests.Session) -> str:
         with tracer.trace("an.form", service="actionnetwork"):
             response = session.get(nexturl,)
         for form in response.json()["_embedded"]["osdi:forms"]:
-            an_id = get_form_id(form["identifiers"])
+            an_id = get_form_id(form["identifiers"], form_name)
             if an_id:
                 logger.info(f"Found existing {form_name} form {an_id}")
                 cache.set(cache_key, an_id)
@@ -489,7 +489,7 @@ def create_form(session: requests.Session):
         raise ActionNetworkError(
             f"Failed to create {form_name} form, status_code {response.status_code}"
         )
-    form_id = get_form_id(response.json()["identifiers"])
+    form_id = get_form_id(response.json()["identifiers"], form_name)
     logger.info(f"Created {form_name} form {form_id}")
     return form_id
 
