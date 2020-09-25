@@ -214,6 +214,12 @@ def process_lob_letter_status(letter_id: str, etype: str) -> None:
     }
 
     item = action.get_source_item()
+    if not item:
+        logger.warning(
+            f"Recieved lob status update on action {action} with not item, {etype}"
+        )
+        return
+
     logger.info(f"Received lob status update on {item} of {etype}")
 
     if etype in event_mapping:
@@ -244,10 +250,9 @@ def process_lob_letter_status(letter_id: str, etype: str) -> None:
     }
 
     if etype in event_trigger:
-        item = action.get_source_item()
         itype = type(item).__name__
         state = item.new_state if itype == "MoverLead" else item.state.code
-        if item and itype in event_trigger[etype]:
+        if itype in event_trigger[etype]:
             for task, days in event_trigger[etype][itype]:
                 if days:
                     DelayedTask.schedule_days_later_polite(
