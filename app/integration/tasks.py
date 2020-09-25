@@ -192,7 +192,7 @@ def send_moverlead_chase(lead_pk: str, action_pk: str) -> None:
         trigger_blank_forms_chase(lead)
 
 
-@shared_task(rate_limit="60/m")
+@shared_task(rate_limit="50/s")
 def process_lob_letter_status(letter_id: str, etype: str) -> None:
     link = (
         Link.objects.filter(external_tool=ExternalToolType.LOB, external_id=letter_id)
