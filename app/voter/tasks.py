@@ -353,7 +353,11 @@ def _recheck_old_actions(
     max_action_age: int = None,
     max_minutes: int = None,
 ) -> int:
+    # start with actions we've previously tried to match
     query = Action.objects.filter(last_voter_lookup__isnull=False)
+
+    # unmatched or unregistered
+    query = query.filter(Q(voter_id__isnull=True) | Q(voter__registered=False))
 
     if not since:
         # don't recheck things we recently checked

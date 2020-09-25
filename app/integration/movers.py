@@ -6,6 +6,7 @@ import time
 import requests
 import sentry_sdk
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import F
 from django.forms.models import model_to_dict
 from django.template.defaultfilters import slugify
@@ -425,22 +426,28 @@ def send_blank_register_forms_to_lead(lead: MoverLead) -> None:
         )
 
 
+def get_form_id(ids):
+    an_id = None
+    is_form = False
+    for gid in ids:
+        (org, pid) = gid.split(":")
+        if org == "action_network":
+            an_id = pid
+        elif org == "voteamerica" and pid == form_name:
+            is_form = True
+    return an_id if is_form else None
+
+
 @tracer.wrap()
 def get_or_create_form(session: requests.Session) -> str:
     logger.info(f"Fetching forms from ActionNetwork")
 
     form_name = f"{settings.ENV}_{settings.MOVER_SOURCE}_lead"
 
-    def get_form_id(ids):
-        an_id = None
-        is_form = False
-        for gid in ids:
-            (org, pid) = gid.split(":")
-            if org == "action_network":
-                an_id = pid
-            elif org == "voteamerica" and pid == form_name:
-                is_form = True
-        return an_id if is_form else None
+    cache_key = f"actionnetwork_form_{form_name}"
+    form_id = cache.get(cache_key)
+    if form_id:
+        return form_id
 
     nexturl = ACTIONNETWORK_FORM_ENDPOINT
     while nexturl:
@@ -450,8 +457,16 @@ def get_or_create_form(session: requests.Session) -> str:
             an_id = get_form_id(form["identifiers"])
             if an_id:
                 logger.info(f"Found existing {form_name} form {an_id}")
+                cache.set(cache_key, an_id)
                 return an_id
         nexturl = response.json().get("_links", {}).get("next", {}).get("href")
+
+    raise ActionNetworkError(f"Missing form {form_name}")
+
+
+@tracer.wrap()
+def create_form(session: requests.Session):
+    form_name = f"{settings.ENV}_{settings.MOVER_SOURCE}_lead"
 
     # create form
     logger.info(f"Creating form {form_name}")
@@ -480,7 +495,14 @@ def get_or_create_form(session: requests.Session) -> str:
 
 
 @tracer.wrap()
-def push_lead(session: requests.Session, form_id: str, lead: MoverLead) -> None:
+def push_lead(lead: MoverLead) -> None:
+    session = get_actionnetwork_session(settings.ACTIONNETWORK_KEY)
+    form_id = get_or_create_form(session)
+    _push_lead(session, form_id, lead)
+
+
+@tracer.wrap()
+def _push_lead(session: requests.Session, form_id: str, lead: MoverLead) -> None:
     info = {
         "person": {
             "given_name": lead.first_name,
@@ -559,7 +581,7 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
         end = None
 
     for lead in q[offset:end]:
-        push_lead(session, form_id, lead)
+        _push_lead(session, form_id, lead)
         time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
 
 

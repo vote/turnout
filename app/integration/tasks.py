@@ -98,6 +98,22 @@ def geocode_movers(old_state: str = None, new_state: str = None):
 
 
 @shared_task
+def geocode_mover(mover_pk: str) -> None:
+    from .movers import geocode_lead
+
+    lead = MoverLead.objects.get(pk=mover_pk)
+    geocode_lead(lead)
+
+
+@shared_task
+def push_mover_to_actionnetwork(mover_pk: str) -> None:
+    from .movers import push_lead
+
+    lead = MoverLead.objects.get(pk=mover_pk)
+    push_lead(lead)
+
+
+@shared_task
 def sync_movers():
     if get_feature_bool("movers", "pull_movers"):
         pull_movers()
