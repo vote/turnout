@@ -166,7 +166,7 @@ def twilio(request):
             phone=n, direction=MessageDirectionType.OUT, message=reply,
         )
         resp.message(reply, action=reply_message.delivery_status_webhook())
-    return HttpResponse(str(resp))
+    return HttpResponse(str(resp), content_type="application/xml")
 
 
 @api_view(["POST"])
