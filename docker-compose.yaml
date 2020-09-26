@@ -84,7 +84,7 @@ services:
   worker:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,voter,movers,actionnetwork,leouptime,usvf,lob-status-updates
     volumes:
       - ./app:/app
     environment:

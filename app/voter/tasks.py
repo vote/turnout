@@ -449,7 +449,7 @@ def recheck_per_alloy(limit: int = None, state: str = None, max_minutes: int = N
                 return
 
 
-@shared_task
+@shared_task(queue="voter")
 def voter_lookup_action(pk):
     if not get_feature("voter_action_check"):
         logger.info("voter_action_check disabled")

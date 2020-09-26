@@ -226,6 +226,11 @@ CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
     Queue("high-pri", routing_key="high-pri.#"),
+    Queue("voter", routing_key="voter.#"),
+    Queue("leouptime", routing_key="leouptime.#"),
+    Queue("movers", routing_key="movers.#"),
+    Queue("actionnetwork", routing_key="actionnetwork.#"),
+    Queue("lob-status-updates", routing_key="lob.#"),
 }
 
 CELERY_TASK_ROUTES = {
@@ -239,6 +244,7 @@ CELERY_TASK_ROUTES = {
     "absentee.tasks.send_print_and_forward_confirm_nag": {"queue": "high-pri"},
     "absentee.tasks.external_tool_upsell": {"queue": "high-pri"},
     "multi_tenant.tasks.send_invite_notification": {"queue": "high-pri"},
+    "official.tasks.sunc_usvotefoundation": {"queue": "usvf"},
     "register.tasks.send_registration_notification": {"queue": "high-pri"},
     "register.tasks.send_registration_state_confirmation": {"queue": "high-pri"},
     "register.tasks.send_registration_reminder": {"queue": "high-pri"},
@@ -249,6 +255,7 @@ CELERY_TASK_ROUTES = {
     "register.tasks.send_mail_chase": {"queue": "high-pri"},
     "subscription.tasks.send_organization_welcome_notification": {"queue": "high-pri"},
     "verifier.tasks.external_tool_upsell": {"queue": "high-pri"},
+    "leouptime.tasks.*": {"queue": "leouptime"},
 }
 
 CELERY_BEAT_SCHEDULE = {

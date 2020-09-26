@@ -3,7 +3,7 @@
       {
          "command": [
             "/app/ops/worker_launch.sh",
-            "default"
+            "default,voter,movers,actionnetwork,leouptime,usvf,lob-status-updates"
          ],
          "dependsOn": [
             {

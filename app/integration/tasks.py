@@ -18,27 +18,27 @@ from .models import Link, MoverLead
 logger = logging.getLogger("integration")
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def sync_lookup_to_actionnetwork(pk: str) -> None:
     sync_item(Lookup.objects.get(uuid=pk))
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def sync_ballotrequest_to_actionnetwork(pk: str) -> None:
     sync_item(BallotRequest.objects.get(uuid=pk))
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def sync_registration_to_actionnetwork(pk: str) -> None:
     sync_item(Registration.objects.get(uuid=pk))
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def sync_reminderrequest_to_actionnetwork(pk: str) -> None:
     sync_item(ReminderRequest.objects.get(uuid=pk))
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def sync_action_to_actionnetwork(pk: str) -> None:
     action = Action.objects.get(pk=pk)
     sync_item(action.get_source_item())
@@ -97,7 +97,7 @@ def geocode_movers(old_state: str = None, new_state: str = None):
     geocode_leads(old_state=old_state, new_state=new_state)
 
 
-@shared_task
+@shared_task(queue="movers")
 def geocode_mover(mover_pk: str) -> None:
     from .movers import geocode_lead
 
@@ -105,7 +105,7 @@ def geocode_mover(mover_pk: str) -> None:
     geocode_lead(lead)
 
 
-@shared_task
+@shared_task(queue="actionnetwork")
 def push_mover_to_actionnetwork(mover_pk: str) -> None:
     from .movers import push_lead
 
@@ -131,7 +131,7 @@ def sync_movers():
         logger.info("movers.push_to_actionnetwork=false")
 
 
-@shared_task
+@shared_task(queue="movers")
 def send_blank_register_forms_to_lead(lead_pk: str) -> None:
     from .movers import send_blank_register_forms_to_lead
 
@@ -192,7 +192,7 @@ def send_moverlead_chase(lead_pk: str, action_pk: str) -> None:
         trigger_blank_forms_chase(lead)
 
 
-@shared_task(rate_limit="50/s")
+@shared_task(queue="lob-status-updates", rate_limit="50/s")
 def process_lob_letter_status(letter_id: str, etype: str) -> None:
     link = (
         Link.objects.filter(external_tool=ExternalToolType.LOB, external_id=letter_id)
