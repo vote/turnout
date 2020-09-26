@@ -11,6 +11,16 @@ class StateViewSet(CDNCachedView, ReadOnlyModelViewSet):
     serializer_class = StateSerializer
     queryset = State.states.all()
 
+    def list(self, request):
+        response = super().list(request)
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
+
+    def retrieve(self, request, pk=None):
+        response = super().retrieve(request, pk=pk)
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
+
 
 class StateFieldsViewSet(CDNCachedView, ReadOnlyModelViewSet):
     model = StateInformationFieldType
@@ -20,8 +30,12 @@ class StateFieldsViewSet(CDNCachedView, ReadOnlyModelViewSet):
 
     def list(self, request):
         self.serializer_class = FieldSerializer
-        return super().list(request)
+        response = super().list(request)
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
 
     def retrieve(self, request, slug=None):
         self.serializer_class = StateFieldSerializer
-        return super().retrieve(request, slug)
+        response = super().retrieve(request, slug)
+        response["Access-Control-Allow-Origin"] = "*"
+        return response
