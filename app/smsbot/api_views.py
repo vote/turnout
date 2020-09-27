@@ -122,25 +122,32 @@ def handle_incoming(
             get_feature_int("smsbot", "autoreply_throttle_minutes")
             or settings.SMS_AUTOREPLY_THROTTLE_MINUTES
         )
-        if last and last.created_at >= datetime.datetime.now(
-            tz=datetime.timezone.utc
-        ) - datetime.timedelta(minutes=throttle):
+
+        if n.opt_out_time:
+            reply = get_feature_str("smsbot", "autoreply_opted_out") or (
+                "You have previously opted-out of VoteAmerica election alerts. "
+                "Reply HELP for help, JOIN to re-join."
+            )
+        else:
+            reply = get_feature_str("smsbot", "autoreply") or (
+                "Thanks for contacting VoteAmerica. "
+                "For more information or assistance visit https://voteamerica.com/faq/ "
+                "or text STOP to opt-out."
+            )
+
+        if (
+            last
+            and last.created_at
+            >= datetime.datetime.now(tz=datetime.timezone.utc)
+            - datetime.timedelta(minutes=throttle)
+            and last.message == reply
+        ):
             logger.info(
                 f"Ignoring {n} at {date_created} (last autoreply at {last.created_at}): {body}"
             )
+            reply = None
         else:
             logger.info(f"Auto-reply to {n} at {date_created}: {body}")
-            if n.opt_out_time:
-                reply = get_feature_str("smsbot", "autoreply_opted_out") or (
-                    "You have previously opted-out of VoteAmerica election alerts. "
-                    "Reply HELP for help, JOIN to re-join."
-                )
-            else:
-                reply = get_feature_str("smsbot", "autoreply") or (
-                    "Thanks for contacting VoteAmerica. "
-                    "For more information or assistance visit https://voteamerica.com/faq/ "
-                    "or text STOP to opt-out."
-                )
 
     return n, reply
 
