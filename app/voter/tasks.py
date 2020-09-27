@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from action.models import Action
 from common.apm import tracer
-from common.rollouts import get_feature, get_feature_int
+from common.rollouts import get_feature, get_feature_bool, get_feature_int
 from smsbot.models import Number
 from verifier.alloy import ALLOY_STATES_ENABLED, query_alloy
 from verifier.models import AlloyDataUpdate
@@ -287,20 +287,28 @@ def check_new_actions(
         f"check_new_actions limit {limit} of {query.count()}, state{state}, max_minutes {max_minutes}"
     )
 
-    stop = None
-    if max_minutes:
+    if not max_minutes:
+        max_minutes = settings.VOTER_CHECK_INTERVAL_MINUTES
+
+    queue_async = get_feature_bool("voter_action_check", "check_async")
+    if not queue_async:
         stop = datetime.datetime.utcnow() + datetime.timedelta(minutes=max_minutes)
 
     query = query.order_by("created_at")
     if limit:
         query = query[:limit]
     for action in query:
-        item = action.get_source_item()
-        if item:
-            lookup(item)
-        if stop and stop < datetime.datetime.utcnow():
-            logger.info(f"Hit max runtime ({max_minutes} minutes)")
-            break
+        if queue_async:
+            voter_lookup_action.apply_async(
+                args=(str(action.uuid),), expires=(max_minutes * 6)
+            )
+        else:
+            item = action.get_source_item()
+            if item:
+                lookup(item)
+            if stop < datetime.datetime.utcnow():
+                logger.info(f"Hit max runtime ({max_minutes} minutes)")
+                break
 
 
 @shared_task
@@ -390,8 +398,11 @@ def _recheck_old_actions(
             | Q(reminderrequest__state_id=state)
         )
 
-    stop = None
-    if max_minutes:
+    if not max_minutes:
+        max_minutes = settings.VOTER_CHECK_INTERVAL_MINUTES
+
+    queue_async = get_feature_bool("voter_action_check", "recheck_async")
+    if not queue_async:
         stop = datetime.datetime.utcnow() + datetime.timedelta(minutes=max_minutes)
 
     logger.info(
@@ -406,13 +417,19 @@ def _recheck_old_actions(
 
     checked = 0
     for action in query:
-        item = action.get_source_item()
-        if item:
-            lookup(item)
+        if queue_async:
+            voter_lookup_action.apply_async(
+                args=(str(action.uuid),), expires=(max_minutes * 6)
+            )
             checked += 1
-        if stop and stop < datetime.datetime.utcnow():
-            logger.info(f"Hit max runtime ({max_minutes} minutes)")
-            break
+        else:
+            item = action.get_source_item()
+            if item:
+                lookup(item)
+                checked += 1
+            if stop < datetime.datetime.utcnow():
+                logger.info(f"Hit max runtime ({max_minutes} minutes)")
+                break
 
     return checked
 
@@ -449,7 +466,7 @@ def recheck_per_alloy(limit: int = None, state: str = None, max_minutes: int = N
                 return
 
 
-@shared_task(queue="voter")
+@shared_task(queue="voter", rate_limit="5/s")
 def voter_lookup_action(pk):
     if not get_feature("voter_action_check"):
         logger.info("voter_action_check disabled")

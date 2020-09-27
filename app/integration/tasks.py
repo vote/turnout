@@ -18,27 +18,7 @@ from .models import Link, MoverLead
 logger = logging.getLogger("integration")
 
 
-@shared_task(queue="actionnetwork")
-def sync_lookup_to_actionnetwork(pk: str) -> None:
-    sync_item(Lookup.objects.get(uuid=pk))
-
-
-@shared_task(queue="actionnetwork")
-def sync_ballotrequest_to_actionnetwork(pk: str) -> None:
-    sync_item(BallotRequest.objects.get(uuid=pk))
-
-
-@shared_task(queue="actionnetwork")
-def sync_registration_to_actionnetwork(pk: str) -> None:
-    sync_item(Registration.objects.get(uuid=pk))
-
-
-@shared_task(queue="actionnetwork")
-def sync_reminderrequest_to_actionnetwork(pk: str) -> None:
-    sync_item(ReminderRequest.objects.get(uuid=pk))
-
-
-@shared_task(queue="actionnetwork")
+@shared_task(queue="actionnetwork", rate_limit="1/s")
 def sync_action_to_actionnetwork(pk: str) -> None:
     action = Action.objects.get(pk=pk)
     sync_item(action.get_source_item())
@@ -91,13 +71,13 @@ def push_movers_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
 
 
 @shared_task
-def geocode_movers(old_state: str = None, new_state: str = None):
+def geocode_movers(old_state: str = None, new_state: str = None, limit: int = None):
     from .movers import geocode_leads
 
-    geocode_leads(old_state=old_state, new_state=new_state)
+    geocode_leads(old_state=old_state, new_state=new_state, limit=limit)
 
 
-@shared_task(queue="movers")
+@shared_task(queue="movers", rate_limit="5/s")
 def geocode_mover(mover_pk: str) -> None:
     from .movers import geocode_lead
 
@@ -105,7 +85,7 @@ def geocode_mover(mover_pk: str) -> None:
     geocode_lead(lead)
 
 
-@shared_task(queue="actionnetwork")
+@shared_task(queue="actionnetwork", rate_limit="1/s")
 def push_mover_to_actionnetwork(mover_pk: str) -> None:
     from .movers import push_lead
 
@@ -131,7 +111,7 @@ def sync_movers():
         logger.info("movers.push_to_actionnetwork=false")
 
 
-@shared_task(queue="movers")
+@shared_task(queue="movers", rate_limit="10/s")
 def send_blank_register_forms_to_lead(lead_pk: str) -> None:
     from .movers import send_blank_register_forms_to_lead
 

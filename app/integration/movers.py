@@ -16,6 +16,7 @@ from action.models import Action
 from common import enums
 from common.apm import tracer
 from common.pdf.pdftemplate import fill_pdf_template
+from common.rollouts import get_feature_bool, get_feature_int
 from election.models import State, StateInformation
 from event_tracking.models import Event
 from multi_tenant.models import Client
@@ -166,6 +167,8 @@ def store_leads(leads):
 
 @tracer.wrap()
 def send_blank_register_forms_tx(offset=0, limit=None) -> None:
+    from .tasks import send_blank_register_forms_to_lead as send_forms_task
+
     q = MoverLead.objects.filter(
         new_state="TX",
         created_at__gte=datetime.datetime(2020, 9, 16, 0, 0, 0).replace(
@@ -177,9 +180,17 @@ def send_blank_register_forms_tx(offset=0, limit=None) -> None:
     end = None
     if limit:
         end = offset + limit
-    print(f"offset {offset} limit {limit} count {q.count()}")
+    queue_async = get_feature_bool("movers", "blank_forms_tx_async")
+    max_minutes = get_feature_int("movers", "blank_forms_tx_max_minutes") or 55
+    logger.info(
+        f"send_blank_register_forms_tx offset={offset}, limit={limit}, count={q.count()}, "
+        f"async={queue_async}, max_minutes={max_minutes}"
+    )
     for lead in q[offset:end]:
-        send_blank_register_forms_to_lead(lead)
+        if queue_async:
+            send_forms_task.apply_async(args=(lead.uuid,), expire=(max_minutes * 60))
+        else:
+            send_blank_register_forms_to_lead(lead)
 
 
 @tracer.wrap()
@@ -230,6 +241,8 @@ def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -
 
 
 def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
+    from .tasks import send_blank_register_forms_to_lead as send_forms_task
+
     # post-experiment, moving forward
     states = [
         "AZ",
@@ -264,9 +277,16 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
     ).exclude(new_state=F("old_state"))
     if limit:
         offset + limit
-    print(f"states {states} offset {offset} limit {limit} count {q.count()}")
+    queue_async = get_feature_bool("movers", "blank_forms_tx_async")
+    max_minutes = get_feature_int("movers", "blank_forms_tx_max_minutes") or 55
+    logger.info(
+        f"send_blank_register_forms states {states}, offset={offset}, limit={limit}, count={q.count()}, async={queue_async}, max_minutes={max_minutes}"
+    )
     for lead in q[0:limit]:
-        send_blank_register_forms_to_lead(lead)
+        if queue_async:
+            send_forms_task.apply_async(args=(lead.uuid,), expire=(max_minutes * 60))
+        else:
+            send_blank_register_forms_to_lead(lead)
 
 
 def get_register_form_data(lead: MoverLead):
@@ -562,6 +582,8 @@ def _push_lead(session: requests.Session, form_id: str, lead: MoverLead) -> None
 
 @tracer.wrap()
 def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
+    from .tasks import push_mover_to_actionnetwork
+
     session = get_actionnetwork_session(settings.ACTIONNETWORK_KEY)
 
     form_id = get_or_create_form(session)
@@ -580,9 +602,17 @@ def push_to_actionnetwork(limit=None, offset=0, new_state=None) -> None:
     else:
         end = None
 
+    queue_async = get_feature_bool("movers", "push_to_actionnetwork_async")
+    max_minutes = get_feature_int("movers", "push_to_actionnetwork_max_minutes") or 55
+
     for lead in q[offset:end]:
-        _push_lead(session, form_id, lead)
-        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
+        if queue_async:
+            push_mover_to_actionnetwork.apply_async(
+                args=(lead.pk,), expire=(max_minutes * 60)
+            )
+        else:
+            _push_lead(session, form_id, lead)
+            time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
 
 
 def geocode_lead(lead: MoverLead) -> None:
@@ -606,11 +636,21 @@ def geocode_lead(lead: MoverLead) -> None:
         )
 
 
-def geocode_leads(new_state: str = None, old_state: str = None) -> None:
+def geocode_leads(
+    new_state: str = None, old_state: str = None, limit: int = None
+) -> None:
+    from .tasks import geocode_mover
+
     q = MoverLead.objects.filter(new_region_id__isnull=True, old_region_id__isnull=True)
     if new_state:
         q = q.filter(new_state=new_state)
     if old_state:
         q = q.filter(old_state=old_state)
-    for lead in q:
-        geocode_lead(lead)
+
+    queue_async = get_feature_bool("movers", "geocode_async")
+    max_minutes = get_feature_int("movers", "geocode_max_minutes") or 55
+    for lead in q[0:limit]:
+        if queue_async:
+            geocode_mover.apply_async(args=(str(lead.uuid),), expire=(max_minutes * 60))
+        else:
+            geocode_lead(lead)
