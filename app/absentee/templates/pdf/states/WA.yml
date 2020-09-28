@@ -1,0 +1,14 @@
+pages: 1
+manual_fields:
+  - date_signed
+  - mailing_country
+  - district_province
+  - registered_voter
+  - military_overseas
+  - election_general
+  - election_primary
+  - election_regular
+  - delivery_pickup
+  - delivery_reg
+  - delivery_mailing
+  - past_deadline

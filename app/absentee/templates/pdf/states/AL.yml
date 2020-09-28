@@ -1,0 +1,34 @@
+pages: 2
+manual_fields:
+  - precint_name
+  - dl_state
+  - state_id_number_opt_1
+  - state_id_number_opt_2
+  - primary_runoff_party_other
+  - primary_party_other
+  - phone_work
+  - special_election
+  - expiration
+  - election_primary
+  - election_general
+  - election_primary_runoff
+  - election_special
+  - election_primary_democratic
+  - election_primary_other
+  - election_primary_republican
+  - election_primary_nonpartisan
+  - election_primary_runoff_democratic
+  - election_primary_runoff_republican
+  - election_primary_runoff_other
+  - election_primary_runoff_nonpartisan
+  - election_special_democratic
+  - election_special_republican
+  - excuse_1
+  - excuse_2
+  - excuse_3
+  - excuse_4
+  - excuse_5
+  - excuse_6
+  - excuse_7
+  - excuse_8
+  - excuse_9
