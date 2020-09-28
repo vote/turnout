@@ -84,7 +84,31 @@ services:
   worker:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,voter,movers,actionnetwork,leouptime,usvf,lob-status-updates
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,leouptime,usvf
+    volumes:
+      - ./app:/app
+    environment:
+      - SECRET_KEY=abcd
+      - DJANGO_SETTINGS_MODULE=turnout.settings
+      - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
+      - REDIS_URL=redis://redis:6379
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
+      - ALLOWED_HOSTS=*
+      - DEBUG=True
+      - DD_AGENT_HOST=echo
+      - DD_DOGSTATSD_PORT=3333
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - beat
+      - rabbitmq
+
+  worker_bulk:
+    image: voteamerica/turnout-ci-cache:latest
+    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q voter,movers,actionnetwork,lob-status-updates
     volumes:
       - ./app:/app
     environment:

@@ -22,7 +22,12 @@ logger = logging.getLogger("voter")
 
 @tracer.wrap()
 def lookup(item):
-    if type(item).__name__ not in ["BallotRequest", "Registration", "Lookup"]:
+    if type(item).__name__ not in [
+        "BallotRequest",
+        "Registration",
+        "Lookup",
+        "ReminderRequest",
+    ]:
         return
 
     # alloy
@@ -292,7 +297,7 @@ def check_new_actions(
         )
 
     logger.info(
-        f"check_new_actions limit {limit} of {query.count()}, state{state}, max_minutes {max_minutes}"
+        f"check_new_actions limit {limit} of {query.count()}, state {state}, max_minutes {max_minutes}"
     )
 
     if not max_minutes:
@@ -308,7 +313,7 @@ def check_new_actions(
     for action in query:
         if queue_async:
             voter_lookup_action.apply_async(
-                args=(str(action.uuid),), expires=(max_minutes * 6)
+                args=(str(action.uuid),), expires=(max_minutes * 60)
             )
         else:
             item = action.get_source_item()
@@ -435,7 +440,7 @@ def _recheck_old_actions(
     for action in query:
         if queue_async:
             voter_lookup_action.apply_async(
-                args=(str(action.uuid),), expires=(max_minutes * 6)
+                args=(str(action.uuid),), expires=(max_minutes * 60)
             )
             checked += 1
         else:
