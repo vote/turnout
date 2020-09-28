@@ -78,7 +78,7 @@ def handle_incoming(
         logger.debug(f"Ignoring duplicate {n} at {date_created} {sid}: {body}")
         return n, None
 
-    logger.info(f"Handling {n} at {date_created} {sid}: {body}")
+    logger.debug(f"Handling {n} at {date_created} {sid}: {body}")
     SMSMessage.objects.create(
         phone=n, direction=MessageDirectionType.IN, message=body, twilio_sid=sid,
     )
@@ -160,7 +160,6 @@ def twilio(request):
     body = request.data.get("Body", "")
     sid = request.data.get("MessageSid")
 
-    logger.info(f"got request.data {request.data}")
     if not number:
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
