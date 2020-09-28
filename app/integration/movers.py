@@ -197,25 +197,18 @@ def send_blank_register_forms_tx(offset=0, limit=None) -> None:
 def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -> None:
     # experimental data set (exclude control group!)
     states = [
-        "AZ",
-        "GA",
-        "FL",
-        "MI",
-        "NC",
-        "PA",
-        "WI",
-        "OH",
-        "MN",
-        "CO",
-        "IA",
-        "ME",
-        "NE",
-        "KS",
-        "SC",
-        "AL",
-        "MS",
-        "MT",
-        "UT",
+        "NC",  # postmarked by 2020-10-09
+        "KS",  # postmarked by 2020-10-13
+        "NE",  # postmarked by 2020-10-16
+        "AL",  # postmarked by 2020-10-19
+        "MI",  # postmarked by 2020-10-19
+        "CO",  # postmarked by 2020-10-26
+        "MT",  # postmarked by 2020-10-26
+        "MN",  # received by 2020-10-13
+        "PA",  # received by 2020-10-19
+        "ME",  # received by 2020-10-19
+        "UT",  # received by 2020-10-23
+        "IA",  # received by 2020-10-24
     ]
     if state:
         states = [state]
