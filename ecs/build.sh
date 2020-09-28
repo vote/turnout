@@ -18,14 +18,17 @@ jsonnetfmt -i ./v2/template/include/*.libsonnet
 jsonnet ./v2/template/service_web.jsonnet --ext-str env=dev > ./v2/generated/dev/service_web.task.json
 jsonnet ./v2/template/service_beat.jsonnet --ext-str env=dev > ./v2/generated/dev/service_beat.task.json
 jsonnet ./v2/template/service_worker.jsonnet --ext-str env=dev > ./v2/generated/dev/service_worker.task.json
+jsonnet ./v2/template/service_bulk.jsonnet --ext-str env=dev > ./v2/generated/dev/service_bulk.task.json
 
 jsonnet ./v2/template/service_web.jsonnet --ext-str env=staging > ./v2/generated/staging/service_web.task.json
 jsonnet ./v2/template/service_beat.jsonnet --ext-str env=staging > ./v2/generated/staging/service_beat.task.json
 jsonnet ./v2/template/service_worker.jsonnet --ext-str env=staging > ./v2/generated/staging/service_worker.task.json
+jsonnet ./v2/template/service_bulk.jsonnet --ext-str env=staging > ./v2/generated/staging/service_bulk.task.json
 
 jsonnet ./v2/template/service_web.jsonnet --ext-str env=prod > ./v2/generated/prod/service_web.task.json
 jsonnet ./v2/template/service_beat.jsonnet --ext-str env=prod > ./v2/generated/prod/service_beat.task.json
 jsonnet ./v2/template/service_worker.jsonnet --ext-str env=prod > ./v2/generated/prod/service_worker.task.json
+jsonnet ./v2/template/service_bulk.jsonnet --ext-str env=prod > ./v2/generated/prod/service_bulk.task.json
 
 jsonnet -S ./v2/template/remote_run.jsonnet --ext-str env=prod > ../scripts/remote_run.sh
 EOF

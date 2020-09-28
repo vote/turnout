@@ -10,12 +10,8 @@ local memory = std.extVar('memory');
   taskRoleArn: 'arn:aws:iam::719108811834:role/Turnout-ECS-' + capitalEnv + '-TaskRole',
   containerDefinitions: [
     turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
-      name: 'worker',
-      command: ['/app/ops/worker_launch.sh', 'default,leouptime,usvf'],
-    },
-    turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
-      name: 'workerhigh',
-      command: ['/app/ops/worker_launch.sh', 'high-pri'],
+      name: 'workerbulk',
+      command: ['/app/ops/worker_launch.sh', 'voter,movers,actionnetwork,lob-status-updates'],
     },
   ] + datadogContainers.for_env(env),
   memory: '8192',
