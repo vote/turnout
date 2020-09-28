@@ -282,6 +282,14 @@ def check_new_actions(
             | Q(ballotrequest__state_id=state)
             | Q(reminderrequest__state_id=state)
         )
+    else:
+        # make sure it matches an item that we actually check
+        query = query.filter(
+            Q(lookup__isnull=False)
+            | Q(registration__isnull=False)
+            | Q(ballotrequest__isnull=False)
+            | Q(reminderrequest__isnull=False)
+        )
 
     logger.info(
         f"check_new_actions limit {limit} of {query.count()}, state{state}, max_minutes {max_minutes}"
@@ -397,6 +405,14 @@ def _recheck_old_actions(
             | Q(ballotrequest__state_id=state)
             | Q(reminderrequest__state_id=state)
         )
+    else:
+        # make sure it matches an item that we actually check
+        query = query.filter(
+            Q(lookup__isnull=False)
+            | Q(registration__isnull=False)
+            | Q(ballotrequest__isnull=False)
+            | Q(reminderrequest__isnull=False)
+        )
 
     if not max_minutes:
         max_minutes = settings.VOTER_CHECK_INTERVAL_MINUTES
@@ -446,9 +462,12 @@ def recheck_per_alloy(limit: int = None, state: str = None, max_minutes: int = N
             AlloyDataUpdate.objects.filter(state=state).order_by("-created_at").first()
         ]
     else:
-        updates = list(AlloyDataUpdate.objects.all())
-        updates = sorted(updates, key=lambda update: update.created_at)
-        updates.reverse()
+        saw_state = set()
+        updates = []
+        for update in AlloyDataUpdate.objects.order_by("-created_at"):
+            if update.state not in saw_state:
+                saw_state.add(update.state)
+                updates.append(update)
 
     for update in updates:
         logger.info(
