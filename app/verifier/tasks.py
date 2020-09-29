@@ -15,7 +15,7 @@ from .models import AlloyDataUpdate
 logger = logging.getLogger("verifier")
 
 
-@shared_task(**EMAIL_RETRY_PROPS)
+@shared_task(queue="high-pri", **EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.absentee.verifier_external_tool_upsell")
 def external_tool_upsell(lookup_pk: str) -> None:
     from .models import Lookup

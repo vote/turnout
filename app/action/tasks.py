@@ -11,7 +11,7 @@ from smsbot.tasks import _send_welcome_sms, send_welcome_sms
 from voter.tasks import voter_lookup_action
 
 
-@shared_task
+@shared_task(queue="high-pri")
 def action_finish(action_pk: str) -> None:
     action = Action.objects.get(pk=action_pk)
     item = action.get_source_item()
@@ -34,10 +34,10 @@ def action_finish(action_pk: str) -> None:
             args=(str(item.phone), tool), countdown=settings.SMS_OPTIN_REMINDER_DELAY,
         )
 
-    voter_lookup_action(action_pk)
+    voter_lookup_action.delay(action_pk)
 
 
-@shared_task
+@shared_task(queue="high-pri")
 def action_check_unfinished(action_pk: str) -> None:
     action = Action.objects.get(pk=action_pk)
 

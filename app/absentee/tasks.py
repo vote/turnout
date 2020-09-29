@@ -130,7 +130,7 @@ def send_print_and_forward_confirm_nag(pk: str) -> None:
     trigger_print_and_forward_confirm_nag(ballot_request)
 
 
-@shared_task(**EMAIL_RETRY_PROPS)
+@shared_task(queue="high-pri", **EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.absentee.external_tool_upsell")
 def external_tool_upsell(ballot_request_pk: str) -> None:
     from .models import BallotRequest

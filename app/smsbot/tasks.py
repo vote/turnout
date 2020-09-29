@@ -50,7 +50,7 @@ def _send_welcome_sms(number: str, origin: str = None) -> Number:
     return n
 
 
-@shared_task
+@shared_task(queue="high-pri")
 def send_welcome_sms(number: str, origin: str = None) -> None:
     _send_welcome_sms(number, origin)
 

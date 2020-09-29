@@ -87,7 +87,7 @@ def send_print_and_forward_confirm_nag(registration_pk: str) -> None:
     trigger_print_and_forward_confirm_nag(registration)
 
 
-@shared_task(**EMAIL_RETRY_PROPS)
+@shared_task(queue="high-pri", **EMAIL_RETRY_PROPS)
 @statsd.timed("turnout.register.external_tool_upsell")
 def external_tool_upsell(registration_pk: str) -> None:
     from .models import Registration
