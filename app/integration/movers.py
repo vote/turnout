@@ -193,9 +193,10 @@ def send_blank_register_forms_tx(offset=0, limit=None) -> None:
             send_blank_register_forms_to_lead(lead)
 
 
-@tracer.wrap()
-def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -> None:
-    # experimental data set (exclude control group!)
+def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
+    from .tasks import send_blank_register_forms_to_lead as send_forms_task
+
+    # post-experiment, moving forward
     states = [
         "NC",  # postmarked by 2020-10-09
         "KS",  # postmarked by 2020-10-13
@@ -209,54 +210,6 @@ def send_blank_register_forms_blankforms2020(offset=0, limit=None, state=None) -
         "ME",  # received by 2020-10-19
         "UT",  # received by 2020-10-23
         "IA",  # received by 2020-10-24
-    ]
-    if state:
-        states = [state]
-    q = (
-        MoverLead.objects.filter(
-            new_state__in=states,
-            created_at__lt=datetime.datetime(
-                2020, 9, 16, 0, 0, 0, tzinfo=datetime.timezone.utc
-            ),
-            blank_register_forms_action__isnull=True,
-            actionnetwork_person_id__isnull=True,
-        )
-        .exclude(new_state=F("old_state"))
-        .exclude(uuid__startswith="0")
-        .exclude(uuid__startswith="1")
-    )
-    end = None
-    if limit:
-        end = offset + limit
-    print(f"states {states} offset {offset} limit {limit} count {q.count()}")
-    for lead in q[offset:end]:
-        send_blank_register_forms_to_lead(lead)
-
-
-def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
-    from .tasks import send_blank_register_forms_to_lead as send_forms_task
-
-    # post-experiment, moving forward
-    states = [
-        "AZ",
-        "GA",
-        "FL",
-        "MI",
-        "NC",
-        "PA",
-        "WI",
-        "OH",
-        "MN",
-        "CO",
-        "IA",
-        "ME",
-        "NE",
-        "KS",
-        "SC",
-        "AL",
-        "MS",
-        "MT",
-        "UT",
     ]
     if state:
         states = [state]
