@@ -279,7 +279,11 @@ def check_new_actions(
             settings.VOTER_CHECK_INTERVAL_MINUTES // 2
         )
 
-    query = Action.objects.filter(last_voter_lookup=None)
+    cutoff = datetime.datetime.utcnow().replace(
+        tzinfo=datetime.timezone.utc
+    ) - datetime.timedelta(seconds=settings.ACTION_CHECK_UNFINISHED_DELAY)
+
+    query = Action.objects.filter(last_voter_lookup=None, created_at__lt=cutoff)
     if state:
         query = query.filter(
             Q(lookup__state_id=state)
