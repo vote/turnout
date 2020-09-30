@@ -84,7 +84,9 @@ MOVOTE_PARAM_DOB_M = "field95899936M"
 MOVOTE_PARAM_DOB_D = "field95899936D"
 MOVOTE_PARAM_DOB_Y = "field95899936Y"
 MOVOTE_PARAM_ADDR12 = "field95899939"
-MOVOTE_PARAM_ADDR3 = "field95899940"
+MOVOTE_PARAM_ADDR_CITY = "field95899940"
+MOVOTE_PARAM_ADDR_STATE = "field97542631"
+MOVOTE_PARAM_ADDR_ZIPCODE = "field97542630"
 MOVOTE_PARAM_PHONE = "field95899945"
 MOVOTE_PARAM_EMAIL = "field95899946"
 
@@ -100,7 +102,9 @@ def build_movote_url(request: BallotRequest) -> str:
         MOVOTE_PARAM_ADDR12: " ".join(
             [s for s in (request.address1, request.address2) if s]
         ),
-        MOVOTE_PARAM_ADDR3: f"{request.city}, {request.state_id} {request.zipcode}",
+        MOVOTE_PARAM_ADDR_CITY: request.city,
+        MOVOTE_PARAM_ADDR_STATE: request.state_id,
+        MOVOTE_PARAM_ADDR_ZIPCODE: request.zipcode,
         MOVOTE_PARAM_PHONE: str(request.phone) if request.phone else "",
         MOVOTE_PARAM_EMAIL: request.email,
     }

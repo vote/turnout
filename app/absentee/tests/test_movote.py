@@ -6,8 +6,10 @@ from model_bakery import baker
 
 from absentee.region_links import (
     MOVOTE_BASE_URL,
-    MOVOTE_PARAM_ADDR3,
     MOVOTE_PARAM_ADDR12,
+    MOVOTE_PARAM_ADDR_CITY,
+    MOVOTE_PARAM_ADDR_STATE,
+    MOVOTE_PARAM_ADDR_ZIPCODE,
     MOVOTE_PARAM_DOB_D,
     MOVOTE_PARAM_DOB_M,
     MOVOTE_PARAM_DOB_Y,
@@ -54,7 +56,9 @@ def test_movote_full():
         MOVOTE_PARAM_DOB_D: "23",
         MOVOTE_PARAM_DOB_Y: "37",
         MOVOTE_PARAM_ADDR12: "30 Beacon Street #1776",
-        MOVOTE_PARAM_ADDR3: "Boston, MA 02108",
+        MOVOTE_PARAM_ADDR_CITY: "Boston",
+        MOVOTE_PARAM_ADDR_STATE: "MA",
+        MOVOTE_PARAM_ADDR_ZIPCODE: "02108",
         MOVOTE_PARAM_PHONE: "(617) 555-7890",
         MOVOTE_PARAM_EMAIL: "john@hancock.local",
     }
@@ -84,7 +88,9 @@ def test_movote_no_addr2():
         MOVOTE_PARAM_DOB_D: "23",
         MOVOTE_PARAM_DOB_Y: "37",
         MOVOTE_PARAM_ADDR12: "30 Beacon Street",
-        MOVOTE_PARAM_ADDR3: "Boston, MA 02108",
+        MOVOTE_PARAM_ADDR_CITY: "Boston",
+        MOVOTE_PARAM_ADDR_STATE: "MA",
+        MOVOTE_PARAM_ADDR_ZIPCODE: "02108",
         MOVOTE_PARAM_PHONE: "(617) 555-7890",
         MOVOTE_PARAM_EMAIL: "john@hancock.local",
     }
@@ -114,7 +120,9 @@ def test_movote_no_phone():
         MOVOTE_PARAM_DOB_D: "23",
         MOVOTE_PARAM_DOB_Y: "37",
         MOVOTE_PARAM_ADDR12: "30 Beacon Street #1776",
-        MOVOTE_PARAM_ADDR3: "Boston, MA 02108",
+        MOVOTE_PARAM_ADDR_CITY: "Boston",
+        MOVOTE_PARAM_ADDR_STATE: "MA",
+        MOVOTE_PARAM_ADDR_ZIPCODE: "02108",
         MOVOTE_PARAM_EMAIL: "john@hancock.local",
     }
 
@@ -143,7 +151,9 @@ def test_movote_no_mailing():
         MOVOTE_PARAM_DOB_D: "23",
         MOVOTE_PARAM_DOB_Y: "37",
         MOVOTE_PARAM_ADDR12: "30 Beacon Street #1776",
-        MOVOTE_PARAM_ADDR3: "Boston, MA 02108",
+        MOVOTE_PARAM_ADDR_CITY: "Boston",
+        MOVOTE_PARAM_ADDR_STATE: "MA",
+        MOVOTE_PARAM_ADDR_ZIPCODE: "02108",
         MOVOTE_PARAM_PHONE: "(617) 555-7890",
         MOVOTE_PARAM_EMAIL: "john@hancock.local",
     }
