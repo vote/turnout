@@ -1,12 +1,33 @@
 import datetime
+import importlib
+import json
 import logging
+from queue import Empty
 
 from celery import shared_task
 from django.conf import settings
 
+from turnout.celery_app import app
+
 from .models import DelayedTask
 
 logger = logging.getLogger("common")
+conn = app.connection_for_read()
+
+
+# Process a single token: if there is work in the queue, run the task.
+@shared_task
+def process_token(name):
+    queue = conn.SimpleQueue(name, no_ack=True)
+    try:
+        item = queue.get(block=False)
+        mname, fname = item.headers["task"].rsplit(".", 1)
+        mhandle = importlib.import_module(mname)
+        func = getattr(mhandle, fname)
+        body = json.loads(item.body)
+        func(*body[0], **body[1])
+    except Empty:
+        pass
 
 
 @shared_task

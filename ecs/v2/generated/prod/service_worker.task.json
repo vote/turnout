@@ -435,7 +435,7 @@
       {
          "command": [
             "/app/ops/worker_launch.sh",
-            "voter,movers,actionnetwork,lob-status-updates"
+            "bulk-tokens"
          ],
          "dependsOn": [
             {
