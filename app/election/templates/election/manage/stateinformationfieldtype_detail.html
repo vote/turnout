@@ -8,6 +8,13 @@
 
 <div class="content-wrapper">
         <div class="col-lg-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ fieldtype.long_name }} ({{ fieldtype.slug }})</li>
+                </ol>
+            </nav>
             <h1>{{ fieldtype.long_name }}</h1>
             <div class="table-responsive-lg">
                 <table class="table table__state-info">

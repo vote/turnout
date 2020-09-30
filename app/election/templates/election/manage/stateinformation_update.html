@@ -14,7 +14,7 @@
                 <li class="breadcrumb-item"><a href="{% url 'manage:election:fieldinformationtype_list' %}">Fields</a>
                 </li>
                 <li class="breadcrumb-item"><a
-                        href="{% url 'manage:election:fieldinformationtype' state_information.field_type.slug %}">{{ state_information.field_type.long_name }} ( {{ state_information.field_type.slug }} )</a></li>
+                        href="{% url 'manage:election:fieldinformationtype' state_information.field_type.slug %}">{{ state_information.field_type.long_name }} ({{ state_information.field_type.slug }})</a></li>
                 <li class="breadcrumb-item active" aria-current="page">{{ state_information.state.name }}</li>
                 {% else %}
                 <li class="breadcrumb-item"><a href="{% url 'manage:election:state_list' %}">States</a></li>
