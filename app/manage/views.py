@@ -42,17 +42,18 @@ class RedirectToSubscriberManageView(LoginRequiredMixin, FormView):
     template_name = "management/manage_nosubscriber.html"
 
     def dispatch(self, request, *args, **kwargs):
-        # If the user is not authorized with 2 factor, send them there
-        if not request.user.is_verified():
-            return HttpResponseRedirect(reverse("two_factor:profile"))
+        # only add special behavior if authenticated
+        if request.user.is_authenticated:
+            # If the user is not authorized with 2 factor, send them there
+            if not request.user.is_verified():
+                return HttpResponseRedirect(reverse("two_factor:profile"))
 
-        # If the user has an "active client" (nearly all will) redirect to that dashboard
-        if request.user.active_client:
-            return HttpResponseRedirect(
-                reverse("manage:home", args=[self.request.user.active_client_slug])
-            )
+            # If the user has an "active client" (nearly all will) redirect to that dashboard
+            if request.user.active_client:
+                return HttpResponseRedirect(
+                    reverse("manage:home", args=[self.request.user.active_client_slug])
+                )
 
-        # If the user does not have an "active client" show them the roadblock page
         return super().dispatch(request, *args, **kwargs)
 
     def get_form(self):
