@@ -52,33 +52,3 @@ Returns all elections information fields for a single state. `{state}` should be
     ]
 }
 ```
-
-## GET `/official/address/`
-
-Map an address to a Voting Region. A Voting Region is a geographic area that is served by a particular election office.
-
-You must provide the following URL parameters to this endpoint:
-
-- `address1`: First line of the street address
-- `city`: Name of the city
-- `state`: Two-letter state code
-- `zipcode`: Five-digit ZIP code
-
-For example, `https://api.voteamerica.com/v1/official/address/?address1=1600+Pennsylvania+Ave&city=Washington&state=DC&zipcode=20006`
-
-The endpoint will return a list of possible regions. In almost all cases, the list will have just a single region, but there are some ambiguous addresses where we may return multiple possible regions. We may also return no regions if we were not able to determine the region for the address. If that provided address could not be geocoded (typically because the address is invalid), this endpoint will return a `400` status code.
-
-Example response:
-
-```json
-[
-    {
-        "name": "District of Columbia",
-        "external_id": 430653
-    }
-]
-```
-
-The `external_id` can be used to link to the VoteAmerica LEO contact page for that region, e.g. `https://www.voteamerica.com/local-election-offices/DC/430653/`. It can also be used to match to a region in the [US Vote Foundation Data Set](https://civicdata.usvotefoundation.org/content/local-election-official-and-office-contact-data){target=_blank}. You'll need to [reach out to the US Vote Foundation](https://civicdata.usvotefoundation.org/#request-access){target=_blank} for access to that data set.
-
-
