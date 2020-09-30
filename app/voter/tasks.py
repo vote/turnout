@@ -54,8 +54,20 @@ def lookup(item):
         ):
             alloy_result = alloy.get("data")
             if (
-                alloy_result["registration_status"] == "Active"
-                and alloy_result["registration_date"]
+                alloy_result["registration_status"]
+                in [
+                    "Active",
+                    "Inactive",
+                    "Suspense",
+                    "Unregistered",
+                    "Cancelled",
+                    "Purged",
+                    "Pending",
+                    "Preregistered",
+                    "Rejected",
+                ]
+                and alloy_result.get("registration_date")
+                and alloy_result.get("alloy_person_id")
             ):
                 alloy_id = alloy_result["alloy_person_id"]
 
