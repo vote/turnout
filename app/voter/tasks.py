@@ -195,12 +195,18 @@ def lookup(item):
             voter.last_ts_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
 
         if alloy_id:
+            now = datetime.datetime.now(tz=datetime.timezone.utc)
             reg_date = datetime.datetime.strptime(
                 alloy_result["registration_date"], "%Y-%m-%dT%H:%M:%SZ",
             ).replace(tzinfo=datetime.timezone.utc)
             last_updated = datetime.datetime.strptime(
                 alloy_result["last_updated_date"], "%Y-%m-%dT%H:%M:%SZ",
             ).replace(tzinfo=datetime.timezone.utc)
+            if reg_date > last_updated and reg_date < now:
+                logger.info(
+                    f"Adjusting bad last_updated from Alloy: reg date {reg_date} > last_updated {last_updated}"
+                )
+                last_updated = reg_date
             if reg_date > last_updated:
                 logger.warning(
                     f"Bad data from Alloy: reg date {reg_date} > last_updated {last_updated}: {alloy_result}"
@@ -212,7 +218,7 @@ def lookup(item):
                     last_updated,
                 )
             voter.alloy_result = alloy_result
-            voter.last_alloy_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
+            voter.last_alloy_refresh = now
 
         if state_voter_id:
             voter.last_state_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
