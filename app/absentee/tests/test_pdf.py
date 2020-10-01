@@ -27,6 +27,9 @@ def random_string(length=8):
 def test_gen_pdf(state, mocker, settings):
     settings.PDF_GENERATION_LAMBDA_ENABLED = False
 
+    mocker.patch("absentee.generateform.shorten_url", return_value="foo")
+    mocker.patch("absentee.generateform.get_shortened_url", return_value=None)
+
     patched_leo_email = mocker.patch(
         "absentee.generateform.send_ballotrequest_leo_email"
     )

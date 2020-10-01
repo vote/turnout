@@ -33,8 +33,14 @@ def test_generate_name():
     )
 
 
+@pytest.fixture
+def mock_i90(mocker):
+    mocker.patch("absentee.generateform.shorten_url", return_value="foo")
+    mocker.patch("absentee.generateform.get_shortened_url", return_value=None)
+
+
 @pytest.mark.django_db
-def test_prepare_formdata():
+def test_prepare_formdata(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -52,7 +58,7 @@ def test_prepare_formdata():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_just_phone():
+def test_prepare_formdata_just_phone(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address", email=None)
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -67,7 +73,7 @@ def test_prepare_formdata_just_phone():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_no_phone_or_email():
+def test_prepare_formdata_no_phone_or_email(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address", email=None, phone=None)
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -86,7 +92,7 @@ def test_prepare_formdata_no_phone_or_email():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_no_deadline():
+def test_prepare_formdata_no_deadline(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -102,7 +108,7 @@ def test_prepare_formdata_no_deadline():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_no_first_day_to_apply():
+def test_prepare_formdata_no_first_day_to_apply(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -120,7 +126,7 @@ def test_prepare_formdata_no_first_day_to_apply():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_state_fields():
+def test_prepare_formdata_state_fields(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -136,7 +142,7 @@ def test_prepare_formdata_state_fields():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_no_state_fields():
+def test_prepare_formdata_no_state_fields(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -153,7 +159,7 @@ def test_prepare_formdata_no_state_fields():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_state_fields_dont_overwrite():
+def test_prepare_formdata_state_fields_dont_overwrite(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -168,7 +174,7 @@ def test_prepare_formdata_state_fields_dont_overwrite():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_state_id_number():
+def test_prepare_formdata_state_id_number(mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -207,7 +213,7 @@ def test_prepare_formdata_state_id_number():
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_auto_todays_date(mocker):
+def test_prepare_formdata_auto_todays_date(mocker, mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -227,7 +233,7 @@ def test_prepare_formdata_auto_todays_date(mocker):
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_auto_copy(mocker):
+def test_prepare_formdata_auto_copy(mocker, mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -267,7 +273,7 @@ def test_prepare_formdata_auto_copy(mocker):
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_auto_static(mocker):
+def test_prepare_formdata_auto_static(mocker, mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(
@@ -288,7 +294,7 @@ def test_prepare_formdata_auto_static(mocker):
 
 
 @pytest.mark.django_db
-def test_prepare_formdata_auto_conditional(mocker):
+def test_prepare_formdata_auto_conditional(mocker, mock_i90):
     addr = baker.make_recipe("official.absentee_ballot_address")
     state = baker.make_recipe("election.state")
     ballot_request = baker.make_recipe(

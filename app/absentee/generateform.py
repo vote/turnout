@@ -9,6 +9,7 @@ from pdf_template import PDFTemplate, PDFTemplateSection, SignatureBoundingBox
 
 from common import enums
 from common.apm import tracer
+from common.i90 import get_shortened_url, shorten_url
 from common.models import DelayedTask
 from common.pdf.pdftemplate import fill_pdf_template
 from common.utils.format import StringFormatter
@@ -282,7 +283,7 @@ def prepare_formdata(
 
     # ballot tracker tool
     try:
-        tracker = (
+        tracker_url = (
             StateInformation.objects.only("field_type", "text")
             .get(
                 state=ballot_request.state,
@@ -291,10 +292,36 @@ def prepare_formdata(
             .text
         )
     except StateInformation.DoesNotExist:
-        tracker = ""
-    form_data["external_tool_absentee_ballot_tracker"] = tracker
+        tracker_url = ""
+
+    # use a shortened version
+    short_url = get_short_url(tracker_url, f"track-ballot-{ballot_request.state_id}")
+    form_data["external_tool_absentee_ballot_tracker"] = short_url
 
     return form_data
+
+
+def get_short_url(dest: str, token_base: str) -> str:
+    tries = 0
+    while tries < 10:
+        if tries:
+            token = f"{token_base}-{tries}"
+        else:
+            token = token_base
+
+        existing = get_shortened_url(token)
+        if existing:
+            if existing == dest:
+                # sadly i90 GET doesn't return the shortened URL
+                return f"https://go.voteamerica.com/{token}"
+            else:
+                tries += 1
+                continue
+
+        return shorten_url(dest, token=token)
+
+    logger.warning(f"Gave up trying to shorten {dest} to token_base {token_base}")
+    return dest
 
 
 @tracer.wrap()
