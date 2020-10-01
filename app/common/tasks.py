@@ -1,8 +1,6 @@
 import datetime
-import importlib
 import json
 import logging
-from queue import Empty
 
 from celery import shared_task
 from django.conf import settings
@@ -18,16 +16,24 @@ conn = app.connection_for_read()
 # Process a single token: if there is work in the queue, run the task.
 @shared_task
 def process_token(name):
+    from celery.app.trace import _fast_trace_task
+    from celery.exceptions import Ignore
+    from queue import Empty
+
     queue = conn.SimpleQueue(name, no_ack=True)
     try:
         item = queue.get(block=False)
-        mname, fname = item.headers["task"].rsplit(".", 1)
-        mhandle = importlib.import_module(mname)
-        func = getattr(mhandle, fname)
-        body = json.loads(item.body)
-        func(*body[0], **body[1])
+        _fast_trace_task(
+            item.headers["task"],
+            item.headers["id"],
+            item.headers,
+            json.loads(item.body),
+            None,
+            None,
+        )
     except Empty:
         pass
+    raise Ignore
 
 
 @shared_task

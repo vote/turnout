@@ -229,9 +229,10 @@ CELERY_TASK_QUEUES = {
     Queue("voter", routing_key="voter.#"),
     Queue("leouptime", routing_key="leouptime.#"),
     Queue("movers", routing_key="movers.#"),
+    Queue("geocode", routing_key="geocode.#"),
     Queue("actionnetwork", routing_key="actionnetwork.#"),
     Queue("lob-status-updates", routing_key="lob.#"),
-    Queue("bulk-tokens", max_length=10),
+    Queue("bulk-tokens", max_length=10, durable=False),
 }
 
 # Celery rate limits are almost completely useless, in our case
@@ -249,7 +250,8 @@ CELERY_TASK_QUEUES = {
 BULK_QUEUE_RATE_LIMITS = {
     "voter": 1 / 10,
     "actionnetwork": 1 / 4,
-    "movers": 1 / 10,
+    "movers": 1 / 5,
+    "geocode": 1 / 10,
     "lob-status-updates": 1 / 10,
 }
 
