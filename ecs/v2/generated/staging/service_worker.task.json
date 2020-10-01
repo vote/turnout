@@ -435,7 +435,7 @@
       {
          "command": [
             "/app/ops/worker_launch.sh",
-            "bulk-tokens"
+            "bulk-tokens-a,bulk-tokens-b"
          ],
          "dependsOn": [
             {

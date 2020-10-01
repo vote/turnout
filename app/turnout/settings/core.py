@@ -222,18 +222,6 @@ CELERY_RESULT_BACKEND = "django-db"
 CELERY_WORKER_CONCURRENCY = env.int("CELERY_WORKER_CONCURRENCY", default=8)
 CELERY_TASK_SERIALIZER = "json"
 
-CELERY_TASK_DEFAULT_QUEUE = "default"
-CELERY_TASK_QUEUES = {
-    Queue("default", routing_key="task.#"),
-    Queue("high-pri", routing_key="high-pri.#"),
-    Queue("voter", routing_key="voter.#"),
-    Queue("leouptime", routing_key="leouptime.#"),
-    Queue("movers", routing_key="movers.#"),
-    Queue("geocode", routing_key="geocode.#"),
-    Queue("actionnetwork", routing_key="actionnetwork.#"),
-    Queue("lob-status-updates", routing_key="lob.#"),
-    Queue("bulk-tokens", max_length=10, durable=False),
-}
 
 # Celery rate limits are almost completely useless, in our case
 # because we have tasks with different rate limits on the same worker,
@@ -246,13 +234,31 @@ CELERY_TASK_QUEUES = {
 # Caveats:
 #  - very high rates are inefficient since we are generating tokens
 #    regardless of whether there is work to do.
-
+BULK_TOKEN_QUEUE = "bulk-tokens-a"  # toggle between a and b when switching options
 BULK_QUEUE_RATE_LIMITS = {
     "voter": 1 / 10,
     "actionnetwork": 1 / 4,
     "movers": 1 / 5,
     "geocode": 1 / 10,
     "lob-status-updates": 1 / 10,
+}
+
+BULK_QUEUE_TOKEN_SECONDS = 5  # schedule this far into the future for non-empty queues
+BULK_QUEUE_TOKEN_SLOP = 2  # overschedule a bit to accomodate jitter in beat
+BULK_QUEUE_SLACK = 1  # schedule slack
+
+
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_QUEUES = {
+    Queue("default", routing_key="task.#"),
+    Queue("high-pri", routing_key="high-pri.#"),
+    Queue("voter", routing_key="voter.#"),
+    Queue("leouptime", routing_key="leouptime.#"),
+    Queue("movers", routing_key="movers.#"),
+    Queue("geocode", routing_key="geocode.#"),
+    Queue("actionnetwork", routing_key="actionnetwork.#"),
+    Queue("lob-status-updates", routing_key="lob.#"),
+    Queue(BULK_TOKEN_QUEUE, durable=False),
 }
 
 CELERY_TASK_ROUTES = {
@@ -293,16 +299,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "common.tasks.deliver_delayed_tasks",
         "schedule": crontab(minute=f"*/{DELAYED_TASKS_INTERVAL}"),
     },
+    "trigger-queue-bulk-tokens": {
+        "task": "common.tasks.enqueue_tokens",
+        "schedule": BULK_QUEUE_TOKEN_SECONDS,
+        "args": (BULK_QUEUE_TOKEN_SECONDS + BULK_QUEUE_TOKEN_SLOP, BULK_QUEUE_SLACK),
+    },
 }
-
-for name, rate in BULK_QUEUE_RATE_LIMITS.items():
-    CELERY_BEAT_SCHEDULE[f"trigger-bulk-tokens-{name}"] = {
-        "task": "common.tasks.process_token",
-        "schedule": rate,
-        "options": {"queue": f"bulk-tokens"},
-        "args": (name,),
-    }
-
 
 CELERY_TIMEZONE = "UTC"
 

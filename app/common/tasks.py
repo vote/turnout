@@ -2,8 +2,10 @@ import datetime
 import json
 import logging
 
+import dateutil.parser
 from celery import shared_task
 from django.conf import settings
+from django.core.cache import cache
 
 from turnout.celery_app import app
 
@@ -34,6 +36,37 @@ def process_token(name):
     except Empty:
         pass
     raise Ignore
+
+
+@shared_task
+def enqueue_tokens(seconds, slack):
+    start = datetime.datetime.now()
+    end = start + datetime.timedelta(seconds=seconds)
+
+    # don't reschedule any period we already scheduled
+    last = cache.get("bulk_tokens_watermark")
+    if last:
+        last = dateutil.parser.isoparse(last)
+        if last > start:
+            start = last
+    cache.set("bulk_tokens_watermark", end.isoformat())
+
+    span = (end - start).total_seconds()
+
+    for name, interval in settings.BULK_QUEUE_RATE_LIMITS.items():
+        # see if queue is empty
+        queue = conn.SimpleQueue(name, no_ack=True)
+        if not queue.qsize():
+            continue
+
+        # queue some tokens
+        for i in range(int(span / interval)):
+            process_token.apply_async(
+                args=(name,),
+                queue=settings.BULK_TOKEN_QUEUE,
+                eta=start + datetime.timedelta(seconds=i * interval),
+                expire=start + datetime.timedelta(seconds=(i * interval + slack)),
+            )
 
 
 @shared_task
