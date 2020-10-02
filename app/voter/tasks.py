@@ -202,7 +202,8 @@ def lookup(item):
             last_updated = datetime.datetime.strptime(
                 alloy_result["last_updated_date"], "%Y-%m-%dT%H:%M:%SZ",
             ).replace(tzinfo=datetime.timezone.utc)
-            if reg_date > last_updated and reg_date < now:
+            # allow registration dates a bit into the future (TX seems to set it about a month into the future)
+            if reg_date > last_updated and reg_date < now + datetime.timedelta(days=35):
                 logger.info(
                     f"Adjusting bad last_updated from Alloy: reg date {reg_date} > last_updated {last_updated}"
                 )
