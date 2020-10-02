@@ -1,6 +1,5 @@
 import datetime
 import logging
-import time
 
 import requests
 import sentry_sdk
@@ -290,6 +289,10 @@ def _sync_item(item, subscriber_id):
 
 
 def sync_all_items(cls):
+    from .tasks import sync_action_to_actionnetwork
+
+    pks = set()
+
     cutoff = datetime.datetime.utcnow().replace(
         tzinfo=datetime.timezone.utc
     ) - datetime.timedelta(seconds=settings.ACTION_CHECK_UNFINISHED_DELAY)
@@ -306,10 +309,7 @@ def sync_all_items(cls):
         .filter(no_sync=True, action__isnull=False, created_at__lt=cutoff)
         .order_by("created_at")
     ):
-        _sync_item(item, None)
-
-        # be nice
-        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
+        pks.add(str(item.action_id))
 
     for item in (
         cls.objects.filter(subscriber__is_first_party=False)
@@ -334,10 +334,11 @@ def sync_all_items(cls):
         )
         .order_by("created_at")
     ):
-        _sync_item(item, item.subscriber_id)
+        pks.add(str(item.action_id))
 
-        # be nice
-        time.sleep(settings.ACTIONNETWORK_SYNC_DELAY)
+    logger.info(f"queueing {len(pks)} items to sync to actionnetwork")
+    for pk in pks:
+        sync_action_to_actionnetwork.delay(pk)
 
 
 @tracer.wrap()
