@@ -1,0 +1,31 @@
+pages: 2
+manual_fields:
+  - Male
+  - Female
+  - UOCAVA Military
+  - UOCAVA Overseas
+  - UOCAVA Mail
+  - UOCAVA Online
+  - UOCAVA
+  - AD Ballot
+  - Rep Ballot
+  - BM Ballot
+  - voter_number
+  - previous_full_name
+  - party
+  - phone_evening
+  - fax
+  - date_signed
+  - citizen
+  - citizen_no
+  - is_18_or_over_no
+  - election_all
+  - election_primary
+  - election_general
+  - election_reaa
+  - state_id_number_opt_1
+  - state_id_number_opt_2
+  - no_state_id
+  - remote_ak
+missing_mandatory_fields:
+  - zipcode
