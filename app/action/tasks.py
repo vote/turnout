@@ -34,7 +34,10 @@ def action_finish(action_pk: str) -> None:
             args=(str(item.phone), tool), countdown=settings.SMS_OPTIN_REMINDER_DELAY,
         )
 
-    voter_lookup_action.delay(action_pk)
+    if item.state_id == "WI":
+        voter_lookup_action.apply_async(args=(action_pk,), queue="voter-wi")
+    else:
+        voter_lookup_action.delay(action_pk)
 
 
 @shared_task(queue="high-pri")
@@ -60,7 +63,11 @@ def action_check_unfinished(action_pk: str) -> None:
     if settings.ACTIONNETWORK_SYNC:
         sync_action_to_actionnetwork.delay(action_pk)
 
-    voter_lookup_action.delay(action_pk)
+    item = action.get_source_item()
+    if item.state_id == "WI":
+        voter_lookup_action.apply_async(args=(action_pk,), queue="voter-wi")
+    else:
+        voter_lookup_action.delay(action_pk)
 
     item = action.get_source_item()
     if item.phone:

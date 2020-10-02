@@ -243,6 +243,7 @@ CELERY_TASK_SERIALIZER = "json"
 BULK_TOKEN_QUEUE = "bulk-tokens-a"  # toggle between a and b when switching options
 BULK_QUEUE_RATE_LIMITS = {
     "voter": 1 / 10,
+    "voter-wi": 1,
     "actionnetwork": 1 / 4,
     "movers": 1 / 5,
     "geocode": 1 / 10,

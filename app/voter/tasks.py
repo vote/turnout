@@ -334,9 +334,16 @@ def check_new_actions(
         query = query[:limit]
     for action in query:
         if queue_async:
-            voter_lookup_action.apply_async(
-                args=(str(action.uuid),), expires=(max_minutes * 60)
-            )
+            if state == "WI":
+                voter_lookup_action.apply_async(
+                    args=(str(action.uuid),),
+                    expires=(max_minutes * 60),
+                    queue=f"voter-{state}",
+                )
+            else:
+                voter_lookup_action.apply_async(
+                    args=(str(action.uuid),), expires=(max_minutes * 60)
+                )
         else:
             item = action.get_source_item()
             if item:
@@ -443,6 +450,14 @@ def _recheck_old_actions(
 
     if not max_minutes:
         max_minutes = settings.VOTER_CHECK_INTERVAL_MINUTES
+
+    if state == "WI":
+        # adjust limit for queue rate
+        limit = int(
+            limit
+            * settings.BULK_QUEUE_RATE_LIMITS["voter"]
+            / settings.BULK_QUEUE_RATE_LIMITS["voter-wi"]
+        )
 
     queue_async = get_feature_bool("voter_action_check", "recheck_async")
     if not queue_async:
