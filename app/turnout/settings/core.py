@@ -240,7 +240,7 @@ CELERY_TASK_SERIALIZER = "json"
 # Caveats:
 #  - very high rates are inefficient since we are generating tokens
 #    regardless of whether there is work to do.
-BULK_TOKEN_QUEUE = "bulk-tokens-a"  # toggle between a and b when switching options
+BULK_TOKEN_QUEUE = "tokens"
 BULK_QUEUE_RATE_LIMITS = {
     "voter": 1 / 10,
     "voter-wi": 1,
@@ -265,7 +265,7 @@ CELERY_TASK_QUEUES = {
     Queue("geocode", routing_key="geocode.#"),
     Queue("actionnetwork", routing_key="actionnetwork.#"),
     Queue("lob-status-updates", routing_key="lob.#"),
-    Queue(BULK_TOKEN_QUEUE, durable=False),
+    Queue(BULK_TOKEN_QUEUE),
 }
 
 CELERY_TASK_ROUTES = {

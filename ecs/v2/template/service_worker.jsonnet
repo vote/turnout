@@ -15,7 +15,7 @@ local memory = std.extVar('memory');
     },
     turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
       name: 'workerbulk',
-      command: ['/app/ops/worker_launch.sh', 'bulk-tokens-a,bulk-tokens-b'],
+      command: ['/app/ops/worker_launch.sh', 'tokens'],
     },
     turnoutContainer.common('turnoutworker', 'celery', '/app/ops/worker_health.sh || exit 1') + {
       name: 'workerhigh',
