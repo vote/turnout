@@ -282,6 +282,7 @@ def prepare_formdata(
     ] = f"Your form must be {state_mail_deadline_2020}"
 
     # ballot tracker tool
+    short_url = ""
     try:
         tracker_url = (
             StateInformation.objects.only("field_type", "text")
@@ -291,11 +292,14 @@ def prepare_formdata(
             )
             .text
         )
+        if tracker_url:
+            # use a shortened version
+            short_url = get_short_url(
+                tracker_url, f"track-ballot-{ballot_request.state_id}"
+            )
     except StateInformation.DoesNotExist:
-        tracker_url = ""
+        pass
 
-    # use a shortened version
-    short_url = get_short_url(tracker_url, f"track-ballot-{ballot_request.state_id}")
     form_data["external_tool_absentee_ballot_tracker"] = short_url
 
     return form_data
