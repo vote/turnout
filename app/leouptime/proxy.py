@@ -124,8 +124,9 @@ def create_proxy(region):
             },
         )
         for v4 in response.json()["droplet"]["networks"].get("v4", []):
-            ip = v4["ip_address"]
-            break
+            if v4["type"] == "public":
+                ip = v4["ip_address"]
+                break
         if ip:
             break
         logger.info("waiting for IP")
