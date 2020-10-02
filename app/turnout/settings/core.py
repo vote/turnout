@@ -219,7 +219,7 @@ DELAYED_TASKS_INTERVAL = 2
 # specify a max_loop_interval AND lock timeout that ensure we don't
 # pause too long during/after a redeploy
 CELERY_BEAT_MAX_LOOP_INTERVAL = 5
-CELERY_REDBEAT_REDIS_LOCK_TIMEOUT = 30
+CELERY_REDBEAT_LOCK_TIMEOUT = 30
 
 CELERY_REDBEAT_REDIS_URL = env.str("REDIS_URL", default="redis://redis:6379")
 
