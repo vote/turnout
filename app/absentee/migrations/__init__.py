@@ -137,13 +137,16 @@ SELECT
   COALESCE(stats_7d.emails_sent, 0) AS emails_sent_7d,
   COALESCE(stats_7d.faxes_sent, 0) AS faxes_sent_7d,
   COALESCE(stats_1d.emails_sent, 0) AS emails_sent_1d,
-  COALESCE(stats_1d.faxes_sent, 0) AS faxes_sent_1d
+  COALESCE(stats_1d.faxes_sent, 0) AS faxes_sent_1d,
+  COALESCE(stats_7d.forms_sent, 0) AS forms_sent_7d,
+  COALESCE(stats_1d.forms_sent, 0) AS forms_sent_1d
 FROM official_region region
 LEFT JOIN (
 	SELECT
 	  ballotrequest.region_id AS external_id,
 	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEO') AS emails_sent,
-	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEOFaxPending') AS faxes_sent
+	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEOFaxPending') AS faxes_sent,
+	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLobConfirm') AS forms_sent
 	FROM absentee_ballotrequest ballotrequest
 	JOIN event_tracking_event event ON event.action_id = ballotrequest.action_id
 	WHERE event.created_at > NOW() - interval '7 days'
@@ -154,7 +157,8 @@ LEFT JOIN (
 	SELECT
 	  ballotrequest.region_id AS external_id,
 	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEO') AS emails_sent,
-	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEOFaxPending') AS faxes_sent
+	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLEOFaxPending') AS faxes_sent,
+	  COUNT(DISTINCT ballotrequest.action_id) FILTER (WHERE event.event_type = 'FinishLobConfirm') AS forms_sent
 	FROM absentee_ballotrequest ballotrequest
 	JOIN event_tracking_event event ON event.action_id = ballotrequest.action_id
 	WHERE event.created_at > NOW() - interval '1 days'

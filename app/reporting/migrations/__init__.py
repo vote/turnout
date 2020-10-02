@@ -45,7 +45,8 @@ SELECT
     action_details.finish_external AS finished_external_service,
     action_details.finish_leo AS leo_message_sent,
     action_details.download_count AS total_downloads,
-    br.referring_tool
+    br.referring_tool,
+    action_details.finish_lob AS forms_sent
 FROM
     absentee_ballotrequest br
 LEFT JOIN multi_tenant_client subscriber ON br.partner_id = subscriber.uuid
@@ -109,7 +110,8 @@ SELECT
     action_details.self_print,
     action_details.finish_external AS finished_external_service,
     action_details.finish_leo AS leo_message_sent,
-    action_details.download_count AS total_downloads
+    action_details.download_count AS total_downloads,
+    action_details.finish_lob AS forms_sent
 FROM
     register_registration reg
 LEFT JOIN multi_tenant_client subscriber ON reg.partner_id = subscriber.uuid

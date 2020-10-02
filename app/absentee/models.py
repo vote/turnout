@@ -202,8 +202,10 @@ class EsignSubmitStats(models.Model):
 
     emails_sent_7d = models.IntegerField()
     faxes_sent_7d = models.IntegerField()
+    forms_sent_7d = models.IntegerField()
     emails_sent_1d = models.IntegerField()
     faxes_sent_1d = models.IntegerField()
+    forms_sent_1d = models.IntegerField()
 
     class Meta:
         managed = False

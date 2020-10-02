@@ -50,6 +50,7 @@ class ActionDetails(models.Model):
     leo_message_sent = models.BooleanField(null=True, db_column="finish_leo")
     total_downloads = models.IntegerField(null=True, db_column="download_count")
     latest_event = models.DateTimeField(null=True, db_column="latest_event")
+    finished_print_and_forward = models.BooleanField(null=True, db_column="finish_lob")
 
     class Meta:
         managed = False

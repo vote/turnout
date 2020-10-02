@@ -6,7 +6,7 @@ ACTIONDETAIL_VIEW_CREATION_SQL = """
 CREATE OR REPLACE VIEW action_actiondetails AS
 SELECT
   action.uuid AS action_id,
-  action.events && ARRAY['Finish', 'FinishExternal', 'FinishExternalAPI', 'FinishExternalConfirmed', 'FinishLEO', 'FinishLEOFaxPending', 'FinishLEOFaxSent', 'FinishLEOFaxFailed', 'Download'] AS finished,
+  action.events && ARRAY['Finish', 'FinishExternal', 'FinishExternalAPI', 'FinishExternalConfirmed', 'FinishLEO', 'FinishLEOFaxPending', 'FinishLEOFaxSent', 'FinishLEOFaxFailed', 'Download', 'FinishLobConfirm'] AS finished,
   action.events && ARRAY['FinishPrint'] AS self_print,
   action.events && ARRAY['FinishExternal', 'FinishExternalConfirmed'] AS finish_external,
   action.events && ARRAY['FinishLEO', 'FinishLEOFaxPending', 'FinishLEOFaxSent', 'FinishLEOFaxFailed'] AS finish_leo,
@@ -15,7 +15,8 @@ SELECT
     THEN download_count
     ELSE NULL
   END AS download_count,
-  action.latest_event
+  action.latest_event,
+  action.events && ARRAY['FinishLobConfirm'] AS finish_lob
 FROM (
 	SELECT
 	  a.uuid,
