@@ -339,7 +339,7 @@ def check_new_actions(
                 voter_lookup_action.apply_async(
                     args=(str(action.uuid),),
                     expires=(max_minutes * 60),
-                    queue=f"voter-{state}",
+                    queue=f"voter-wi",
                 )
             else:
                 voter_lookup_action.apply_async(
@@ -452,7 +452,7 @@ def _recheck_old_actions(
     if not max_minutes:
         max_minutes = settings.VOTER_CHECK_INTERVAL_MINUTES
 
-    if state == "WI":
+    if limit and state == "WI":
         # adjust limit for queue rate
         limit = int(
             limit
@@ -464,8 +464,12 @@ def _recheck_old_actions(
     if not queue_async:
         stop = datetime.datetime.utcnow() + datetime.timedelta(minutes=max_minutes)
 
+    count = query.count()
+    if not count:
+        return 0
+
     logger.info(
-        f"Recheck old actions limit {limit} of {query.count()} in {state} since {since} "
+        f"Recheck old actions limit {limit} of {count} in {state} since {since} "
         f"(min_check_interval {min_check_interval}, max_action_age {max_action_age}, "
         f"max_minutes {max_minutes})"
     )
@@ -477,9 +481,16 @@ def _recheck_old_actions(
     checked = 0
     for action in query:
         if queue_async:
-            voter_lookup_action.apply_async(
-                args=(str(action.uuid),), expires=(max_minutes * 60)
-            )
+            if state == "WI":
+                voter_lookup_action.apply_async(
+                    args=(str(action.uuid),),
+                    expires=(max_minutes * 60),
+                    queue=f"voter-wi",
+                )
+            else:
+                voter_lookup_action.apply_async(
+                    args=(str(action.uuid),), expires=(max_minutes * 60)
+                )
             checked += 1
         else:
             item = action.get_source_item()
