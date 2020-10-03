@@ -198,14 +198,12 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
 
     # post-experiment, moving forward
     states = [
-        "NC",  # postmarked by 2020-10-09
         "KS",  # postmarked by 2020-10-13
         "NE",  # postmarked by 2020-10-16
         "AL",  # postmarked by 2020-10-19
         "MI",  # postmarked by 2020-10-19
         "CO",  # postmarked by 2020-10-26
         "MT",  # postmarked by 2020-10-26
-        "MN",  # received by 2020-10-13
         "PA",  # received by 2020-10-19
         "ME",  # received by 2020-10-19
         "UT",  # received by 2020-10-23
