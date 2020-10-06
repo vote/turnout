@@ -113,14 +113,14 @@ def lookup(item):
         if alloy_id and not voter:
             try:
                 voter = Voter.objects.filter(
-                    ts_voterbase_id=alloy_id, state=item.state
+                    alloy_person_id=alloy_id, state=item.state
                 ).first()
             except ObjectDoesNotExist:
                 pass
         if state_voter_id and not voter:
             try:
                 voter = Voter.objects.filter(
-                    ts_voterbase_id=state_voter_id, state=item.state
+                    state_voter_id=state_voter_id, state=item.state
                 ).first()
             except ObjectDoesNotExist:
                 pass
