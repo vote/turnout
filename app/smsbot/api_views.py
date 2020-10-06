@@ -105,49 +105,44 @@ def handle_incoming(
         # has been used more than once.
         resubscribe_phone(n.phone)
     elif cmd in ["HELP", "INFO"]:
-        # ActionNetwork handles this
-        pass
+        # reply IFF optimizely has a value for this
+        reply = get_feature_str("smsbot", "help")
     else:
-        # check last
-        try:
-            last = (
-                SMSMessage.objects.filter(phone=n, direction=MessageDirectionType.OUT)
-                .exclude(twilio_sid=sid)
-                .latest("created_at")
-            )
-        except SMSMessage.DoesNotExist:
-            last = None
-
-        throttle = (
-            get_feature_int("smsbot", "autoreply_throttle_minutes")
-            or settings.SMS_AUTOREPLY_THROTTLE_MINUTES
-        )
-
         if n.opt_out_time:
-            reply = get_feature_str("smsbot", "autoreply_opted_out") or (
-                "You have previously opted-out of VoteAmerica election alerts. "
-                "Reply HELP for help, JOIN to re-join."
-            )
+            reply = get_feature_str("smsbot", "autoreply_opted_out")
         else:
-            reply = get_feature_str("smsbot", "autoreply") or (
-                "Thanks for contacting VoteAmerica. "
-                "For more information or assistance visit https://voteamerica.com/faq/ "
-                "or text STOP to opt-out."
-            )
+            reply = get_feature_str("smsbot", "autoreply")
 
-        if (
-            last
-            and last.created_at
-            >= datetime.datetime.now(tz=datetime.timezone.utc)
-            - datetime.timedelta(minutes=throttle)
-            and last.message == reply
-        ):
-            logger.info(
-                f"Ignoring {n} at {date_created} (last autoreply at {last.created_at}): {body}"
+        if reply:
+            # check last
+            try:
+                last = (
+                    SMSMessage.objects.filter(
+                        phone=n, direction=MessageDirectionType.OUT
+                    )
+                    .exclude(twilio_sid=sid)
+                    .latest("created_at")
+                )
+            except SMSMessage.DoesNotExist:
+                last = None
+
+            throttle_minutes = (
+                get_feature_int("smsbot", "autoreply_throttle_minutes")
+                or settings.SMS_AUTOREPLY_THROTTLE_MINUTES
             )
-            reply = None
-        else:
-            logger.info(f"Auto-reply to {n} at {date_created}: {body}")
+            if (
+                last
+                and last.message == reply
+                and last.created_at
+                >= datetime.datetime.now(tz=datetime.timezone.utc)
+                - datetime.timedelta(minutes=throttle_minutes)
+            ):
+                logger.info(
+                    f"Ignoring {n} at {date_created} (last autoreply at {last.created_at}): {body}"
+                )
+                reply = None
+            else:
+                logger.info(f"Auto-reply to {n} at {date_created}: {body}")
 
     return n, reply
 
