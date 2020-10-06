@@ -21,7 +21,7 @@ def get_random_proxy_str_pair():
         proxy = get_random_proxy()
         return proxy, f"socks5://{proxy.address}"
     except NoProxyError:
-        return None
+        return None, None
 
 
 def lookup_wi(
@@ -49,12 +49,16 @@ def lookup_wi(
             return None, None
         except Exception as e:
             logger.warning(f"Hit exception on WI state API: {e}")
-            tries += 1
-            proxy.failure_count += 1
-            if proxy.failure_count > 2:
-                logger.warning(f"Marking {proxy} BURNED")
-                proxy.state = enums.ProxyStatus.BURNED
-            proxy.save()
+            if proxy:
+                tries += 1
+                proxy.failure_count += 1
+                if proxy.failure_count > 2:
+                    logger.warning(f"Marking {proxy} BURNED")
+                    proxy.state = enums.ProxyStatus.BURNED
+                proxy.save()
+            else:
+                # don't bother trying again
+                break
     return None, None
 
 
