@@ -72,7 +72,7 @@ def geocode(**kwargs):
         except Exception as e:
             extra = {"url": API_ENDPOINT, "api_args": str(args), "exception": str(e)}
             logger.warning(
-                "Error querying geocodio %(url)s, exception %(exception)s",
+                "Error querying geocodio args %(api_args)s, exception %(exception)s",
                 extra,
                 extra=extra,
             )
@@ -87,7 +87,7 @@ def geocode(**kwargs):
             "status_code": r.status_code,
         }
         logger.warning(
-            "Error querying geocodio %(url)s, args %(args)s, status code %(status_code)s",
+            "Error querying geocodio args %(api_args)s, status code %(status_code)s",
             extra,
             extra=extra,
         )
