@@ -121,12 +121,26 @@ def test_get_request_disallowed():
 
 def test_blank_api_request(requests_mock):
     client = APIClient()
-    response = client.post(PP_API_ENDPOINT, {})
+    response = client.post(PP_API_ENDPOINT, {}, format="json")
     assert response.status_code == 400
     expected_response = {
         "unstructured_address": ["This field is required."],
     }
     assert response.json() == expected_response
+
+
+@pytest.mark.django_db
+def test_blank_dnc_result(requests_mock):
+    client = APIClient()
+    response = client.post(
+        PP_API_ENDPOINT,
+        {"unstructured_address": "foo", "dnc_result": None,},
+        format="json",
+    )
+    print(response.json())
+    assert response.status_code == 200
+    action = Action.objects.first()
+    assert response.json() == {"action_id": str(action.pk)}
 
 
 @pytest.mark.django_db

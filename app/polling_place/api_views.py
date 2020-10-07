@@ -19,12 +19,11 @@ class PollingPlaceLookupReportViewSet(CreateModelMixin, GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        serializer.validated_data["dnc_status"] = request.data.get(
-            "dnc_result", {}
-        ).get("status")
+        dnc_result = request.data.get("dnc_result") or {}
+        serializer.validated_data["dnc_status"] = dnc_result.get("status")
 
         # extract address from geocod.io fields (embedded in dnc_result)
-        addr = request.data.get("dnc_result", {}).get("home_address", {})
+        addr = dnc_result.get("home_address", {})
         serializer.validated_data["address1"] = addr.get("address_line_1")
         serializer.validated_data["address2"] = addr.get("address_line_2")
         serializer.validated_data["city"] = addr.get("city")
