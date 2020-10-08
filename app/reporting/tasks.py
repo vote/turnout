@@ -10,6 +10,7 @@ from absentee.models import BallotRequest
 from common.analytics import statsd
 from mailer.retry import EMAIL_RETRY_PROPS
 from multi_tenant.models import Client
+from polling_place.models import PollingPlaceLookup
 from register.models import Registration
 from verifier.models import Lookup
 
@@ -80,6 +81,7 @@ def calc_subscriber_stats(uuid):
         .select_related("action", "action__details")
         .count()
     )
+    r["locator"] = PollingPlaceLookup.objects.filter(subscriber_id=uuid).count()
 
     # breakdown by state
     r["by_state"] = {}
@@ -113,5 +115,14 @@ def calc_subscriber_stats(uuid):
         if i["state_id"] not in r["by_state"]:
             r["by_state"][i["state_id"]] = {}
         r["by_state"][i["state_id"]]["absentee"] = i["count"]
+    for i in (
+        PollingPlaceLookup.objects.filter(subscriber_id=uuid)
+        .values("state_id")
+        .annotate(count=Count("state_id"))
+        .order_by("state_id")
+    ):
+        if i["state_id"] not in r["by_state"]:
+            r["by_state"][i["state_id"]] = {}
+        r["by_state"][i["state_id"]]["locator"] = i["count"]
 
     cache.set(f"client.stats/{uuid}", r, 24 * 60 * 60)
