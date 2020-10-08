@@ -4,8 +4,14 @@
 
 
 {{ recipient.first_name }},<br><br>
-Just a few more steps to complete your voter registration.
-<br><br>
+
+Just a few more steps to complete your voter registration.  This is where we will send your registration form:
+<blockquote>
+  {{ registration.first_name }} {{ registration.last_name }}<br>
+  {{ registration.request_mailing_address1 }} {{ registration.request_mailing_address2|default:"" }}<br>
+  {{ registration.request_mailing_city }}, {{ registration.request_mailing_state.code }} {{ registration.request_mailing_zipcode }}
+</blockquote>
+
 
 <!--[if gte mso 9]>
 <br>
@@ -32,7 +38,7 @@ Just a few more steps to complete your voter registration.
 <![endif]-->
 
 <ol style="margin-left:0;padding-left:0">
-    <li>Click the button above to confirm that you'd like us to mail your voter registration form, complete with a stamped return envelope.</li>
+    <li>Click the button above to confirm that you'd like us to mail your voter registration form, complete with a stamped return envelope.  (If there is a problem, go back and <a href="https://voteamerica.com/register-to-vote/resume/?uuid={{ registration.uuid }}/">complete the registration form again</a>.)</li>
     <li>Wait 6-10 days for the letter to arrive.</li>
     <li><strong>Sign and date</strong> the form.</li>
     <li>Mail your completed form using the provided envelope to your local election clerk:</li>

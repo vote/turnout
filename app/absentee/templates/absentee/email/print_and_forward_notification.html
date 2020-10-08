@@ -4,9 +4,14 @@
 
 
 {{ recipient.first_name }},<br><br>
-Just a few more steps to request your absentee ballot.
-<br><br>
 
+Just a few more steps to request your absentee ballot.  This is where we will send your ballot request form:
+
+<blockquote>
+  {{ ballot_request.first_name }} {{ ballot_request.last_name }}<br>
+  {{ ballot_request.request_mailing_address1 }} {{ ballot_request.request_mailing_address2|default:"" }}<br>
+  {{ ballot_request.request_mailing_city }}, {{ ballot_request.request_mailing_state.code }} {{ ballot_request.request_mailing_zipcode }}
+</blockquote>
 
 <!--[if gte mso 9]>
 <br>
@@ -33,7 +38,7 @@ Just a few more steps to request your absentee ballot.
 <![endif]-->
 
 <ol style="margin-left:0;padding-left:0">
-    <li>Click the button above to confirm that you'd like us to mail your absentee ballot application.</li>
+    <li>Click the button above to confirm that you'd like us to mail your absentee ballot application.  (If there is a problem, go back and <a href="https://voteamerica.com/vote-by-mail/">complete the absentee request form</a> again.)</li>
     <li>Wait 6-10 days for the letter to arrive.</li>
     <li>Finish filling out the form (instructions will be provided)</li>
     <li><strong>Sign and date</strong> the form.</li>
