@@ -137,6 +137,26 @@ VERIFIER_FIELDS: List[Tuple[str, str]] = [
     ("updated_at", "Updated At (UTC)"),
 ]
 
+LOCATOR_FIELDS: List[Tuple[str, str]] = [
+    ("uuid", "ID"),
+    ("subscriber_name", "Subscriber"),
+    ("created_at", "Time Started (UTC)"),
+    ("unstructured_address", "Unstructured Address"),
+    ("state_id", "State"),
+    ("county", "County"),
+    ("city", "City"),
+    ("zipcode", "Zipcode"),
+    ("precinct_code", "Precinct code"),
+    ("source", "source"),
+    ("utm_source", "utm_source"),
+    ("utm_medium", "utm_medium"),
+    ("utm_campaign", "utm_campaign"),
+    ("utm_content", "utm_content"),
+    ("utm_term", "utm_term"),
+    ("embed_url", "Embed URL"),
+    ("session_id", "Session ID"),
+]
+
 
 def generate_name(report: Report):
     if report.subscriber:
@@ -160,6 +180,9 @@ def report_runner(report: Report):
     elif report.type == enums.ReportType.VERIFY:
         table = "reporting_verifyreport"
         fields = VERIFIER_FIELDS
+    elif report.type == enums.ReportType.LOCATOR:
+        table = "reporting_locatorreport"
+        fields = LOCATOR_FIELDS
     else:
         raise Exception("Invalid Report Type")
 

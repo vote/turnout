@@ -193,11 +193,13 @@ class ReportType(Enum, metaclass=EnumMeta):
     VERIFY = "verify"
     REGISTER = "register"
     ABSENTEE = "absentee"
+    LOCATOR = "locator"
 
     class Labels:
         VERIFY = "Verify Tool Export"
         REGISTER = "Register Tool Export"
         ABSENTEE = "Absentee Tool Export"
+        LOCATOR = "Locator Tool Export"
 
 
 class ReportStatus(Enum, metaclass=EnumMeta):

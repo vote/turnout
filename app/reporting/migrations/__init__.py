@@ -149,10 +149,60 @@ SELECT
 FROM
     verifier_lookup ver
 LEFT JOIN multi_tenant_client subscriber ON ver.partner_id = subscriber.uuid;
+
+
+CREATE OR REPLACE VIEW reporting_locatorreport AS
+SELECT
+    lookup.uuid,
+    subscriber.name AS subscriber_name,
+    subscriber.uuid AS subscriber_id,
+    lookup.created_at,
+    lookup.modified_at AS updated_at,
+    lookup.unstructured_address,
+    lookup.dnc_status,
+    lookup.civic_status,
+    CASE WHEN lookup.dnc_result IS NOT NULL THEN
+      lookup.dnc_result->'data'->'state'
+    ELSE
+      lookup.civic_result->'normalizedInput'->'state'
+    END as state_id,
+    CASE WHEN lookup.dnc_result IS NOT NULL THEN
+      lookup.dnc_result->'data'->'county'
+    ELSE
+      NULL
+    END as county,
+    CASE WHEN lookup.dnc_result IS NOT NULL THEN
+      lookup.dnc_result->'data'->'home_address'->'city'
+    ELSE
+      lookup.civic_result->'normalizedInput'->'city'
+    END as city,
+    CASE WHEN lookup.dnc_result IS NOT NULL THEN
+      lookup.dnc_result->'data'->'home_address'->'zipcode'
+    ELSE
+      lookup.civic_result->'normalizedInput'->'zip'
+    END as zipcode,
+    CASE WHEN lookup.dnc_result IS NOT NULL THEN
+      lookup.dnc_result->'data'->'precinct_code'
+    ELSE
+      NULL
+    END as precinct_code,
+    lookup.source,
+    lookup.utm_source,
+    lookup.utm_medium,
+    lookup.utm_campaign,
+    lookup.utm_content,
+    lookup.utm_term,
+    lookup.embed_url,
+    lookup.session_id
+FROM
+    polling_place_pollingplacelookup lookup
+LEFT JOIN multi_tenant_client subscriber ON lookup.partner_id = subscriber.uuid;
+
 """
 
 VIEW_DROP_SQL = """
 DROP VIEW IF EXISTS reporting_ballotrequestreport;
 DROP VIEW IF EXISTS reporting_registerreport;
 DROP VIEW IF EXISTS reporting_verifyreport;
+DROP VIEW IF EXISTS reporting_locatorreport;
 """
