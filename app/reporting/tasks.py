@@ -116,7 +116,7 @@ def calc_subscriber_stats(uuid):
             r["by_state"][i["state_id"]] = {}
         r["by_state"][i["state_id"]]["absentee"] = i["count"]
     for i in (
-        PollingPlaceLookup.objects.filter(subscriber_id=uuid)
+        PollingPlaceLookup.objects.filter(subscriber_id=uuid, state_id__isnull=False)
         .values("state_id")
         .annotate(count=Count("state_id"))
         .order_by("state_id")
