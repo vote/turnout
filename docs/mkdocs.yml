@@ -1,18 +1,18 @@
-site_name: VoteAmerica Developer Documentation
+site_name: VoteAmerica Documentation
 docs_dir: 'turnout'
 nav:
     - Home: 'index.md'
+    - 'Tool Embed':
+        - 'Embed Details': '/embed/'
+        - 'Free Embed Code': '/embed/free/'
+        - 'Form Prefilling': '/embed/prefill/'
+        - 'Events and Google Tag Manager': '/embed/gtm/'
+        - 'Source Tracking': '/embed/tracking/'
+        - 'WordPress': '/embed/wordpress/'
     - 'API':
         - 'Election Information API': '/api/'
         - 'State Voter Tool Uptime API': '/api/leouptime/'
         - 'Action API': '/api/action/'
-    - 'Tool Embed':
-        - 'Embed Codes': '/embed/'
-        - 'Form Prefilling': '/embed/prefill/'
-        - 'Free Embed Code': '/embed/free/'
-        - 'Events and Google Tag Manager': '/embed/gtm/'
-        - 'Source Tracking': '/embed/tracking/'
-        - 'WordPress': '/embed/wordpress/'
     - 'Tool Admin':
         - 'Introduction': '/admin/'
         - 'Export Format': '/admin/exportformat/'
