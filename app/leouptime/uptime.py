@@ -109,7 +109,9 @@ def check_group(slug, down_sites=False):
                     try:
                         last_check = site.sitecheck_set.order_by("-created_at").first()
                         if (
-                            last_check.created_at + datetime.timedelta(minutes=interval)
+                            last_check
+                            and last_check.created_at
+                            + datetime.timedelta(minutes=interval)
                             > now
                         ):
                             logger.info(
@@ -321,6 +323,10 @@ def check_site_with(driver, proxy, site):
             if item in title.lower():
                 up = False
                 error = f"'{item}' in page title"
+        for item in ["network outage"]:
+            if item in content.lower():
+                up = False
+                error = f"'{item}' in page content"
 
         REQUIRED_STRINGS = [
             "vote",
