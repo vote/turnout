@@ -4,6 +4,7 @@ from django.conf import settings
 from action.models import Action
 from common.enums import EventType
 from common.i90 import shorten_url
+from common.rollouts import get_feature_bool
 from election.models import StateInformation
 from event_tracking.models import Event
 from integration.tasks import sync_action_to_actionnetwork
@@ -70,7 +71,7 @@ def action_check_unfinished(action_pk: str) -> None:
         voter_lookup_action.delay(action_pk)
 
     item = action.get_source_item()
-    if item.phone:
+    if item.phone and get_feature_bool("drip", "action_unfinished"):
         n = _send_welcome_sms(str(item.phone))
         if not n:
             return
