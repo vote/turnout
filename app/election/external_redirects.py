@@ -13,6 +13,7 @@ SLUG_FALLBACK_URLS = {
     "external_tool_ovr": "https://voteamerica.com/register-to-vote",
     "external_tool_vbm_application": "https://voteamerica.com/absentee-ballot",
     "external_tool_polling_place": "https://www.voteamerica.com/where-is-my-polling-place",
+    "external_tool_absentee_ballot_tracker": "https://www.voteamerica.com/vote-by-mail-ballot-tracker/",
 }
 
 
