@@ -32,7 +32,7 @@ class BallotRequest(
     suffix = models.TextField(null=True, blank=True)
     date_of_birth = models.DateField(null=True)
     email = models.EmailField(null=True)
-    phone = PhoneNumberField(null=True, blank=True)
+    phone = PhoneNumberField(null=True, blank=True, db_index=True)
     address1 = models.TextField(null=True)
     address2 = models.TextField(null=True, blank=True)
     city = models.TextField(null=True)

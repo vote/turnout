@@ -28,7 +28,7 @@ class ReminderRequest(
     address2 = models.TextField(null=True, blank=True)
     city = models.TextField(null=True, blank=True)
     zipcode = models.TextField(null=True, blank=True, validators=[zip_validator])
-    phone = PhoneNumberField(null=True, blank=True)
+    phone = PhoneNumberField(null=True, blank=True, db_index=True)
     email = models.EmailField(null=True, blank=True)
     sms_opt_in = models.BooleanField(null=True, blank=True, default=None)
 

@@ -46,7 +46,7 @@ class Lookup(
     zipcode = models.TextField(null=True, blank=True, validators=[zip_validator])
     age = models.IntegerField(null=True, blank=True)
     gender = TurnoutEnumField(enums.TargetSmartGender, null=True)
-    phone = PhoneNumberField(null=True, blank=True)
+    phone = PhoneNumberField(null=True, blank=True, db_index=True)
     email = models.EmailField(null=True, blank=True)
     sms_opt_in = models.BooleanField(null=True, blank=True, default=None)
 
