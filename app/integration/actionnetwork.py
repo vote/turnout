@@ -5,7 +5,7 @@ import requests
 import sentry_sdk
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef
 
 from absentee.models import BallotRequest
 from common.apm import tracer
@@ -350,21 +350,39 @@ def sync():
 
 
 @tracer.wrap()
+def lookup_person_by_phone(phone: str) -> str:
+    last = None
+    for cls in BallotRequest, Registration, Lookup, ReminderRequest:
+        item = (
+            cls.objects.annotate(
+                has_an_person=Exists(
+                    Link.objects.filter(
+                        external_tool=ExternalToolType.ACTIONNETWORK,
+                        action=OuterRef("action"),
+                    )
+                )
+            )
+            .filter(phone=phone, has_an_person=True,)
+            .order_by("-created_at")
+            .first()
+        )
+        if item and (not last or last.created_at < item.created_at):
+            last = item
+
+    if last:
+        link = Link.objects.filter(
+            action=last.action, external_tool=ExternalToolType.ACTIONNETWORK
+        ).first()
+        if link:
+            return link.external_id
+    return None
+
+
+@tracer.wrap()
 def unsubscribe_phone(phone):
     # unsubscribe the most recent user of this phone number
-    last = (
-        Link.objects.filter(external_tool=ExternalToolType.ACTIONNETWORK)
-        .filter(
-            Q(action__registration__phone=phone)
-            | Q(action__lookup__phone=phone)
-            | Q(action__ballotrequest__phone=phone)
-            | Q(action__reminderrequest__phone=phone)
-        )
-        .order_by("-created_at")
-        .first()
-    )
-    if last:
-        person_id = last.external_id
+    person_id = lookup_person_by_phone(phone)
+    if person_id:
         session = get_session(settings.ACTIONNETWORK_KEY)
         with tracer.trace("an.person_update", service="actionnetwork"):
             response = session.put(
@@ -379,19 +397,8 @@ def unsubscribe_phone(phone):
 @tracer.wrap()
 def resubscribe_phone(phone):
     # re-subscribe the most recent user of this phone number
-    last = (
-        Link.objects.filter(external_tool=ExternalToolType.ACTIONNETWORK)
-        .filter(
-            Q(action__registration__phone=phone)
-            | Q(action__lookup__phone=phone)
-            | Q(action__ballotrequest__phone=phone)
-            | Q(action__reminderrequest__phone=phone)
-        )
-        .order_by("-created_at")
-        .first()
-    )
-    if last:
-        person_id = last.external_id
+    person_id = lookup_person_by_phone(phone)
+    if person_id:
         session = get_session(settings.ACTIONNETWORK_KEY)
         with tracer.trace("an.person_update", service="actionnetwork"):
             response = session.put(
