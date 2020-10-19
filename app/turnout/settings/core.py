@@ -910,10 +910,10 @@ if MOVER_ID and MOVER_PULL_INTERVAL_HOURS:
         "task": "integration.tasks.sync_movers",
         "schedule": crontab(minute=5, hour=f"*/{MOVER_PULL_INTERVAL_HOURS}",),
     }
-    CELERY_BEAT_SCHEDULE["trigger-send-movers-blank-register-forms"] = {
-        "task": "integration.tasks.send_movers_blank_register_forms",
-        "schedule": crontab(minute=35, hour=f"*/{MOVER_PULL_INTERVAL_HOURS}",),
-    }
+#    CELERY_BEAT_SCHEDULE["trigger-send-movers-blank-register-forms"] = {
+#        "task": "integration.tasks.send_movers_blank_register_forms",
+#        "schedule": crontab(minute=35, hour=f"*/{MOVER_PULL_INTERVAL_HOURS}",),
+#    }
 
 #### END MOVER CONFIGURATION
 

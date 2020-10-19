@@ -198,8 +198,8 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
 
     # post-experiment, moving forward
     states = [
-        "CO",  # postmarked by 2020-10-26
-        "MT",  # postmarked by 2020-10-26
+        #        "CO",  # postmarked by 2020-10-26
+        #        "MT",  # postmarked by 2020-10-26
     ]
     if state:
         states = [state]
