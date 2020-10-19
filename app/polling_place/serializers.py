@@ -16,7 +16,9 @@ class PollingPlaceLookupReportSerializer(TrackingSerializer, ActionSerializer):
             "unstructured_address",
         ]
         optional_fields = [
+            "dnc_status",
             "dnc_result",
+            "civic_status",
             "civic_result",
             "utm_campaign",
             "utm_source",

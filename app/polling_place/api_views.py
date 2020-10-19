@@ -20,9 +20,10 @@ class PollingPlaceLookupReportViewSet(CreateModelMixin, GenericViewSet):
         serializer.is_valid(raise_exception=True)
 
         dnc_result = request.data.get("dnc_result") or {}
-        serializer.validated_data["dnc_status"] = dnc_result.get("data", {}).get(
-            "status"
-        )
+        if not serializer.validated_data.get("dnc_status"):
+            serializer.validated_data["dnc_status"] = dnc_result.get("data", {}).get(
+                "status"
+            )
 
         # extract address from geocod.io fields (embedded in dnc_result)
         addr = dnc_result.get("data", {}).get("home_address", {})
@@ -36,6 +37,9 @@ class PollingPlaceLookupReportViewSet(CreateModelMixin, GenericViewSet):
             )
         except State.DoesNotExist:
             pass
+
+        # never store civic result
+        serializer.validated_data["civic_result"] = None
 
         instance = serializer.save()
 

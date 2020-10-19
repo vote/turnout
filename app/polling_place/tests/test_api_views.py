@@ -13,6 +13,8 @@ VALID_LOOKUP = {
     "unstructured_address": "1234 spruce st., philadelphia, PA 19103",
     "embed_url": "https://www.greatvoter.com/location/of/embed",
     "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
+    "civic_status": "swell",
+    "civic_result": {"foo": "don't store me"},
     "dnc_result": {
         "data": {
             "confidence_score": "1.0",
@@ -168,3 +170,5 @@ def test_object_created(mocker):
     assert lookup.session_id == UUID("7293d330-3216-439b-aa1a-449c7c458ebe")
     first_subscriber = Client.objects.first()
     assert lookup.subscriber == first_subscriber
+    assert lookup.civic_status == "swell"
+    assert lookup.civic_result == None
