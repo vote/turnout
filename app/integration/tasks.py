@@ -56,6 +56,20 @@ def sync_250ok_to_actionnetwork():
     add_test_addrs()
 
 
+@shared_task(queue="actionnetwork")
+def unsubscribe_phone_from_actionnetwork(phone: str) -> None:
+    from .actionnetwork import unsubscribe_phone
+
+    unsubscribe_phone(phone)
+
+
+@shared_task(queue="actionnetwork")
+def resubscribe_phone_to_actionnetwork(phone: str) -> None:
+    from .actionnetwork import resubscribe_phone
+
+    resubscribe_phone(phone)
+
+
 @shared_task
 def pull_movers(days=None, hours=None):
     from .movers import pull

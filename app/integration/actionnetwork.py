@@ -350,27 +350,56 @@ def sync():
 
 
 @tracer.wrap()
+def unsubscribe_phone(phone):
+    # unsubscribe the most recent user of this phone number
+    last = (
+        Link.objects.filter(external_tool=ExternalToolType.ACTIONNETWORK)
+        .filter(
+            Q(action__registration__phone=phone)
+            | Q(action__lookup__phone=phone)
+            | Q(action__ballotrequest__phone=phone)
+            | Q(action__reminderrequest__phone=phone)
+        )
+        .order_by("-created_at")
+        .first()
+    )
+    if last:
+        person_id = last.external_id
+        session = get_session(settings.ACTIONNETWORK_KEY)
+        with tracer.trace("an.person_update", service="actionnetwork"):
+            response = session.put(
+                PEOPLE_ENDPOINT.format(person_id=person_id),
+                json={
+                    "phone_numbers": [{"number": str(phone), "status": "unsubscribed"}]
+                },
+            )
+        logger.info(f"Unsubscribed {phone} from actionnetwork person_id {person_id}")
+
+
+@tracer.wrap()
 def resubscribe_phone(phone):
     # re-subscribe the most recent user of this phone number
-    person_id_by_date = {}
-    for link in Link.objects.filter(
-        external_tool=ExternalToolType.ACTIONNETWORK
-    ).filter(
-        Q(action__registration__phone=phone)
-        | Q(action__lookup__phone=phone)
-        | Q(action__ballotrequest__phone=phone)
-        | Q(action__reminderrequest__phone=phone)
-    ):
-        person_id_by_date[link.created_at] = link.external_id
-
-    if person_id_by_date:
-        last = sorted(person_id_by_date.keys())[-1]
-        person_id = person_id_by_date[last]
-        session = get_session(settings.ACTIONNETWORK_KEY)
-        response = session.put(
-            PEOPLE_ENDPOINT.format(person_id=person_id),
-            json={"phone_numbers": [{"number": str(phone), "status": "subscribed"}]},
+    last = (
+        Link.objects.filter(external_tool=ExternalToolType.ACTIONNETWORK)
+        .filter(
+            Q(action__registration__phone=phone)
+            | Q(action__lookup__phone=phone)
+            | Q(action__ballotrequest__phone=phone)
+            | Q(action__reminderrequest__phone=phone)
         )
+        .order_by("-created_at")
+        .first()
+    )
+    if last:
+        person_id = last.external_id
+        session = get_session(settings.ACTIONNETWORK_KEY)
+        with tracer.trace("an.person_update", service="actionnetwork"):
+            response = session.put(
+                PEOPLE_ENDPOINT.format(person_id=person_id),
+                json={
+                    "phone_numbers": [{"number": str(phone), "status": "subscribed"}]
+                },
+            )
         logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")
 
 

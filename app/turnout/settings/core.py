@@ -649,11 +649,6 @@ LOGGING = {
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
         },
-        "optimizely": {
-            "handlers": [handler],
-            "level": env.str("DJANGO_LOGGING_LEVEL", default="DEBUG"),
-            "propagate": False,
-        },
     },
 }
 

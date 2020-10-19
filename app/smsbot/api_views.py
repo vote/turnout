@@ -8,14 +8,22 @@ from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
+from apikey.auth import ApiKeyAuthentication, ApiKeyRequired
 from common.analytics import statsd
 from common.enums import MessageDirectionType
 from common.rollouts import get_feature_int, get_feature_str
-from integration.actionnetwork import resubscribe_phone
+from integration.tasks import (
+    resubscribe_phone_to_actionnetwork,
+    unsubscribe_phone_from_actionnetwork,
+)
 from smsbot.models import Number, SMSMessage
+
+from .serializers import OptInOutSerializer
 
 """
 Twilio's advanced opt-in should be configured with these messages:
@@ -103,7 +111,7 @@ def handle_incoming(
 
         # Try to match this to an ActionNetwork subscriber.  Note that this will may fail if the number
         # has been used more than once.
-        resubscribe_phone(n.phone)
+        resubscribe_phone_to_actionnetwork.delay(str(n.phone))
     elif cmd in ["HELP", "INFO"]:
         # reply IFF optimizely has a value for this
         reply = get_feature_str("smsbot", "help")
@@ -182,3 +190,93 @@ def twilio_message_status(request, pk):
     except ObjectDoesNotExist:
         return HttpResponse("Message id not found", status=status.HTTP_404_NOT_FOUND)
     return HttpResponse()
+
+
+class OptOutView(APIView):
+    authentication_classes = [ApiKeyAuthentication]
+    permission_classes = [ApiKeyRequired]
+
+    def post(self, request, format=None):
+        if not request.auth.subscriber.is_first_party:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        serializer = OptInOutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        phone = serializer.validated_data.get("phone")
+        opt_out_time = serializer.validated_data.get("time")
+
+        if not opt_out_time:
+            opt_out_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+        n = Number.objects.filter(phone=phone).first()
+        if not n:
+            logger.info(f"Ignoring opt-out on unknown {phone}")
+            return Response()
+
+        if n.opt_out_time and n.opt_out_time > opt_out_time:
+            logger.info(
+                f"Ignoring opt-out on {n}: {opt_out_time} before existing opt_out_time {n.opt_out_time}"
+            )
+            return Response()
+        if n.welcome_time and n.welcome_time > opt_out_time:
+            logger.info(
+                f"Ignoring opt-out on {n}: {opt_out_time} before existing welcome_time {n.welcome_time}"
+            )
+            return Response()
+
+        logger.info(f"Opt-out on {n} at {opt_out_time}")
+        n.opt_in_time = None
+        n.opt_out_time = opt_out_time
+        n.save()
+
+        unsubscribe_phone_from_actionnetwork.delay(str(n.phone))
+
+        return Response()
+
+
+class OptInView(APIView):
+    authentication_classes = [ApiKeyAuthentication]
+    permission_classes = [ApiKeyRequired]
+
+    def post(self, request, format=None):
+        if not request.auth.subscriber.is_first_party:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        serializer = OptInOutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        phone = serializer.validated_data.get("phone")
+        opt_in_time = serializer.validated_data.get("time")
+
+        if not opt_in_time:
+            opt_in_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+        n, _ = Number.objects.get_or_create(phone=phone)
+        if n.opt_in_time and n.opt_in_time > opt_in_time:
+            logger.info(
+                f"Ignoring opt-in on {n}: {opt_in_time} before existing opt_in_time {n.opt_in_time}"
+            )
+            return Response()
+        if n.welcome_time and n.welcome_time > opt_in_time:
+            logger.info(
+                f"Ignoring opt-in on {n}: {opt_in_time} before existing welcome_time {n.welcome_time}"
+            )
+            return Response()
+
+        if not n.welcome_time:
+            reply = (
+                get_feature_str("smsbot", "autoreply_joined")
+                or "Thank you for subscribing to VoteAmerica election alerts. Reply STOP to cancel."
+            )
+            n.send_sms(reply)
+            n.welcome_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+        logger.info(f"Opt-in on {n} at {opt_in_time}")
+        n.opt_out_time = None
+        n.opt_in_time = opt_in_time
+        n.save()
+
+        resubscribe_phone_to_actionnetwork.delay(str(n.phone))
+
+        return Response()
