@@ -18,7 +18,7 @@ from common.enums import SubmissionType, TurnoutActionStatus
 from common.rollouts import flag_enabled_for_state
 from election.models import State, StateInformation
 from integration.lob import check_deliverable, generate_lob_token, send_letter
-from official.api_views import get_regions_for_address
+from official.match import get_regions_for_address
 from official.models import Region
 
 from .contactinfo import get_absentee_contact_info

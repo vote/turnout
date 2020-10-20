@@ -10,7 +10,7 @@ from common.enums import (
     RegistrationGender,
     TurnoutActionStatus,
 )
-from official.api_views import geocode_to_regions
+from official.match import geocode_to_regions
 from official.models import Region
 from storage.models import SecureUploadItem
 

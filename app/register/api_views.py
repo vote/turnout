@@ -21,7 +21,7 @@ from common.enums import (
     TurnoutActionStatus,
 )
 from integration.lob import check_deliverable, generate_lob_token, send_letter
-from official.api_views import get_regions_for_address
+from official.match import get_regions_for_address
 
 from .custom_ovr_links import get_custom_ovr_link
 from .generateform import process_registration

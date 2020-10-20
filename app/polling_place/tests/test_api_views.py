@@ -141,20 +141,26 @@ def test_blank_dnc_result(requests_mock):
         {"unstructured_address": "foo", "dnc_result": None,},
         format="json",
     )
-    print(response.json())
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"action_id": str(action.pk)}
+    assert response.json() == {"action_id": str(action.pk), "state_id": None}
 
 
 @pytest.mark.django_db
 def test_object_created(mocker):
     baker.make_recipe("election.state", code="PA")
+    region = baker.make_recipe("official.region", name="Foo County", external_id=12345)
+    mocker.patch(
+        "polling_place.api_views.get_region_for_address", return_value=region,
+    )
+
     client = APIClient()
     response = client.post(PP_API_ENDPOINT, VALID_LOOKUP, format="json")
     assert response.status_code == 200
     action = Action.objects.first()
-    assert response.json() == {"action_id": str(action.pk)}
+    assert response.json()["action_id"] == str(action.pk)
+    assert response.json()["state_id"] == "PA"
+    assert response.json()["region"]["external_id"] == region.external_id
 
     assert PollingPlaceLookup.objects.count() == 1
     lookup = PollingPlaceLookup.objects.first()

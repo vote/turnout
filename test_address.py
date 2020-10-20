@@ -90,7 +90,8 @@ API_URL = "http://localhost:9001/v1/official/address/"
         ("304 E Main St", "Albany", "WI", "53502", [{"name":"Village of Albany, Green County","external_id":437902}]),
         ("6490 Chippewa Rd", "Land O' Lakes", "WI", "54540", [{'external_id': 437244, 'name': "Town of Land O' Lakes, Vilas County"}]),
         ("14990 Superior St", "Drummond", "WI", "54832", [{'external_id': 436948, 'name': 'Town of Drummond, Bayfield County'}]),
-        ("1100 co rd a", "Hudson", "WI", "54016", [{"name":"Town of Saint Joseph, Saint Croix County","external_id":437702}]),
+        ("1100 co rd a", "Hudson", "WI", "54016", [{"name":"City of Hudson, Saint Croix County","external_id":436511}]),
+        ("1337 co rd v", "houlton", "WI", "54082", [{"name":"Town of Saint Joseph, Saint Croix County","external_id":437702}]),
 
         # or
         ("500 holly st", "ashland", "OR", "97530", [{'name': 'Jackson County', 'external_id': 432109}]),

@@ -20,7 +20,7 @@ from common.rollouts import get_feature_bool, get_feature_int
 from election.models import State, StateInformation
 from event_tracking.models import Event
 from multi_tenant.models import Client
-from official.api_views import get_regions_for_address
+from official.match import get_regions_for_address
 from register.contactinfo import get_nvrf_submission_address
 from register.generateform import (
     BLANK_FORMS_COVER_SHEET_8PT_PATH,
