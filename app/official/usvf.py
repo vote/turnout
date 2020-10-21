@@ -228,11 +228,29 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
     )
 
     # Update any records that are already in our database
-    Office.objects.bulk_update(
+    def slow_bulk_update(cls, pk, records, keys):
+        # this is slower than django's bulk_update(), but it (1)
+        # respects modified_at and (2) works on aurora
+        for r in records:
+            obj = cls.objects.get(pk=r.pk)
+            for k in keys:
+                changed = False
+                if getattr(obj, k) != getattr(r, k):
+                    setattr(obj, k, getattr(r, k))
+                    changed = True
+                if changed:
+                    logger.info(f"Updated {obj}")
+                    obj.save()
+
+    slow_bulk_update(
+        Office,
+        'external_id',
         [x[1] for x in offices_dict.values() if x[0] == Action.UPDATE],
         ["hours", "notes"],
     )
-    Address.objects.bulk_update(
+    slow_bulk_update(
+        Address,
+        'external_id',
         [x[1] for x in addresses_dict.values() if x[0] == Action.UPDATE],
         [
             "address",
