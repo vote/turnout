@@ -238,9 +238,9 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
                 if getattr(obj, k) != getattr(r, k):
                     setattr(obj, k, getattr(r, k))
                     changed = True
-                if changed:
-                    logger.info(f"Updated {obj}")
-                    obj.save()
+            if changed:
+                logger.info(f"Updated {obj}")
+                obj.save()
 
     slow_bulk_update(
         Office,
