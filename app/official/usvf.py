@@ -244,13 +244,13 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
 
     slow_bulk_update(
         Office,
-        'external_id',
+        "external_id",
         [x[1] for x in offices_dict.values() if x[0] == Action.UPDATE],
         ["hours", "notes"],
     )
     slow_bulk_update(
         Address,
-        'external_id',
+        "external_id",
         [x[1] for x in addresses_dict.values() if x[0] == Action.UPDATE],
         [
             "address",
