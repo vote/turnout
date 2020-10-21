@@ -501,7 +501,7 @@ def get_region_for_address(street, city, state, zipcode, county):
     regions, _ = get_regions_for_address(street, city, state, zipcode)
     if regions:
         return regions[0]
-    return none
+    return None
 
 
 # Returns (regions, was_geocode_error).
