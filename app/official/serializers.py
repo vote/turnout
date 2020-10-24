@@ -10,6 +10,19 @@ class RegionNameSerializer(serializers.ModelSerializer):
 
 
 class AddressSerializer(serializers.ModelSerializer):
+    lat = serializers.SerializerMethodField("get_lat")
+    lng = serializers.SerializerMethodField("get_lng")
+
+    def get_lat(self, address):
+        if address.location:
+            return address.location.y
+        return None
+
+    def get_lng(self, address):
+        if address.location:
+            return address.location.x
+        return None
+
     class Meta:
         model = Address
         fields = [
@@ -31,6 +44,8 @@ class AddressSerializer(serializers.ModelSerializer):
             "process_absentee_ballots",
             "process_overseas_requests",
             "process_overseas_ballots",
+            "lat",
+            "lng",
         ]
 
 
