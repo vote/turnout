@@ -91,11 +91,12 @@ def geocode(**kwargs):
             extra,
             extra=extra,
         )
-        sentry_sdk.capture_exception(
-            GeocodioAPIError(
-                f"Error querying {API_ENDPOINT}, status code {r.status_code}"
+        if r.status_code != 422:  # we get this from bogus addresses
+            sentry_sdk.capture_exception(
+                GeocodioAPIError(
+                    f"Error querying {API_ENDPOINT}, status code {r.status_code}"
+                )
             )
-        )
         return None
     return r.json().get("results", None)
 
