@@ -22,10 +22,6 @@ script:
   - docker-compose exec server pytest -n auto /app/
   - docker-compose exec server mypy /app/
 
-after_success:
-  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-  - docker push $CACHE_IMAGE:latest
-
 notifications:
   email: false
 
