@@ -334,6 +334,7 @@ def check_site_with(driver, proxy, site):
             "Poll",
             "poll",
             "Absentee",
+            "ballot",
             "Please enable JavaScript to view the page content.",  # for CT
             "application/pdf",  # for WY
         ]
