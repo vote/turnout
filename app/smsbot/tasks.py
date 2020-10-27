@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from celery import shared_task
 from django.conf import settings
@@ -7,7 +8,9 @@ from django.utils import timezone
 from common.analytics import statsd
 from common.rollouts import get_feature_bool
 
-from .models import Number
+from .models import Blast, Number
+
+logger = logging.getLogger("smsbot")
 
 
 @statsd.timed("turnout.smsbot.tasks._send_welcome_sms")
@@ -61,3 +64,22 @@ def poll_twilio() -> None:
 
     if get_feature_bool("smsbot", "poll"):
         poll()
+
+
+@shared_task(queue="blast-sms")
+def trigger_blast_sms(number_id: str, blast_id: str) -> None:
+    from .blast import send_blast_sms
+
+    number = Number.objects.get(pk=number_id)
+    blast = Blast.objects.get(pk=blast_id)
+    send_blast_sms(number, blast)
+
+
+@shared_task(queue="blast-mms")
+def trigger_voter_map_mms(voter_id: str, blast_id: str, destination: str) -> None:
+    from voter.models import Voter
+    from .blast import send_voter_map_mms
+
+    voter = Voter.objects.get(uuid=voter_id)
+    blast = Blast.objects.get(uuid=blast_id)
+    send_voter_map_mms(voter, blast, destination)

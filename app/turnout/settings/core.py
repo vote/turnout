@@ -248,6 +248,8 @@ BULK_QUEUE_RATE_LIMITS = {
     "movers": 1 / 5,
     "geocode": 1 / 10,
     "lob-status-updates": 1 / 10,
+    "blast-mms": 1 / 28,
+    "blast-sms": 1 / 300,
 }
 
 BULK_QUEUE_TOKEN_SECONDS = 5  # schedule this far into the future for non-empty queues
@@ -1037,3 +1039,9 @@ I90_KEY = env.str("I90_KEY", None)
 I90_URL = env.str("I90_URL", "https://go.voteamerica.com")
 
 #### END I90 CONFIGURATION
+
+#### MAPBOX CONFIGURATION
+
+MAPBOX_KEY = env.str("MAPBOX_KEY", None)
+
+#### END MAPBOX CONFIGURATION

@@ -22,6 +22,7 @@ from integration.tasks import (
     unsubscribe_phone_from_actionnetwork,
 )
 from smsbot.models import Number, SMSMessage
+from voter.models import Voter
 
 from .serializers import OptInOutSerializer
 
@@ -115,6 +116,24 @@ def handle_incoming(
     elif cmd in ["HELP", "INFO"]:
         # reply IFF optimizely has a value for this
         reply = get_feature_str("smsbot", "help")
+    elif (
+        cmd in ["PPMAP", "EVMAP"]
+        or cmd.startswith("PPMAP ")
+        or cmd.startswith("EVMAP ")
+    ):
+        from .blast import send_map_mms
+
+        # is this a known voter?
+        dest = cmd[0:2].lower()
+        rest = cmd.split(" ")[1:]
+        if rest:
+            reply = send_map_mms(n, address_full=" ".join(rest), destination=dest)
+        else:
+            voter = Voter.objects.filter(phone=from_number).first()
+            if voter:
+                reply = send_map_mms(n, voter=voter, destination=dest)
+            else:
+                reply = f"I don't have a voter record for {from_number}"
     else:
         if n.opt_out_time:
             reply = get_feature_str("smsbot", "autoreply_opted_out")
