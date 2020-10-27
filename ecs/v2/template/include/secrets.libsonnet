@@ -361,5 +361,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_alloy_update_webhook',
         name: 'SLACK_ALLOY_UPDATE_WEBHOOK',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mapbox_key',
+        name: 'MAPBOX_KEY',
+      },
     ],
 }

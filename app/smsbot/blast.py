@@ -8,6 +8,7 @@ from django.conf import settings
 
 from common.geocode import geocode
 from common.i90 import shorten_url
+from election.models import StateInformation
 from voter.models import Voter
 
 from .models import Blast, Number, SMSMessage
@@ -79,7 +80,13 @@ def send_map_mms(
         if not dest:
             logger.info(f"No early_vote location for {voter} {address_full}")
             return f"No early vote location for {voter} {address_full}"
-        message = f"You can vote early! If you are registered to vote at {home_address_partial.upper()} then your early voting location is:"
+
+        if dest[0]["state"] == "AL":
+            message = "The last day of early voting is this Thursday, October 29th!"
+        else:
+            message = "You can vote early!"
+
+        message = f"{message} If you are registered to vote at {home_address_partial.upper()} then your early voting location is:"
         what = "early voting location"
     else:
         return f"Unrecognized address type {destination}"

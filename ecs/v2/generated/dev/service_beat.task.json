@@ -428,6 +428,10 @@
             {
                "name": "SLACK_ALLOY_UPDATE_WEBHOOK",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.slack_alloy_update_webhook"
+            },
+            {
+               "name": "MAPBOX_KEY",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mapbox_key"
             }
          ]
       },

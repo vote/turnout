@@ -111,6 +111,7 @@ export MOVER_SOURCE=$(aws ssm get-parameter --region $REGION --with-decryption -
 export MOVER_LEADS_ENDPOINT=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mover_leads_endpoint | jq '.Parameter["Value"]' -r)
 export SLACK_ALLOY_UPDATE_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_ALLOY_UPDATE_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_alloy_update_webhook | jq '.Parameter["Value"]' -r)
+export MAPBOX_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mapbox_key | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -232,6 +233,7 @@ if [ "$2" ]; then
     -e MOVER_LEADS_ENDPOINT \
     -e SLACK_ALLOY_UPDATE_ENABLED \
     -e SLACK_ALLOY_UPDATE_WEBHOOK \
+    -e MAPBOX_KEY \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -328,6 +330,7 @@ else
     -e MOVER_LEADS_ENDPOINT \
     -e SLACK_ALLOY_UPDATE_ENABLED \
     -e SLACK_ALLOY_UPDATE_WEBHOOK \
+    -e MAPBOX_KEY \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
