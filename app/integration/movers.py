@@ -198,8 +198,25 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
 
     # post-experiment, moving forward
     states = [
-        #        "CO",  # postmarked by 2020-10-26
-        #        "MT",  # postmarked by 2020-10-26
+        "AZ",
+        "GA",
+        "FL",
+        "MI",
+        "NC",
+        "PA",
+        "WI",
+        "OH",
+        "MN",
+        "CO",
+        "IA",
+        "ME",
+        "NE",
+        "KS",
+        "SC",
+        "AL",
+        "MS",
+        "MT",
+        "UT",
     ]
     if state:
         states = [state]
@@ -213,8 +230,8 @@ def send_blank_register_forms(offset=0, limit=None, state=None) -> None:
     ).exclude(new_state=F("old_state"))
     if limit:
         offset + limit
-    queue_async = get_feature_bool("movers", "blank_forms_tx_async")
-    max_minutes = get_feature_int("movers", "blank_forms_tx_max_minutes") or 55
+    queue_async = get_feature_bool("movers", "blank_forms_async")
+    max_minutes = get_feature_int("movers", "blank_forms_max_minutes") or 55
     logger.info(
         f"send_blank_register_forms states {states}, offset={offset}, limit={limit}, count={q.count()}, async={queue_async}, max_minutes={max_minutes}"
     )
@@ -267,6 +284,9 @@ def get_register_form_data(lead: MoverLead):
     def cap_first_letter(s):
         return s[0].upper() + s[1:]
 
+    def lower_first_letter(s):
+        return s[0].lower() + s[1:]
+
     dates = [
         f"Deadline to register: {cap_first_letter(form_data['2020_registration_deadline_by_mail'])}",
     ]
@@ -281,8 +301,21 @@ def get_register_form_data(lead: MoverLead):
             ]
         )
     dates.append(f"Election day: November 3, 2020")
-    form_data["important_dates"] = "\n".join(dates)
-    form_data["2020_state_deadline"] = form_data["2020_registration_deadline_by_mail"]
+
+    # no dates for now.  Instead, note existence of EDR.
+    # form_data["important_dates"] = "\n".join(dates)
+    if form_data["sdr_election_day"].lower() == "true":
+        form_data[
+            "important_dates"
+        ] = "Election Day is November 3, 2020\n\nYou can register to vote in person at the polls.\n\nvoteamerica.com/where-to-vote"
+    else:
+        form_data["important_dates"] = ""
+
+    # mangle the deadline a bit to accomodate mixed case (these strings all look something like
+    # "Received 21 business days before Election Day")
+    form_data["state_deadline"] = "Must be " + lower_first_letter(
+        form_data["registration_deadline_mail"]
+    )
 
     if lead.new_state == "WI":
         form_data[
