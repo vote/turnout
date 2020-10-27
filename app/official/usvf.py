@@ -233,8 +233,8 @@ def scrape_offices(session: requests.Session, regions: Sequence[Region]) -> None
         # respects modified_at and (2) works on aurora
         for r in records:
             obj = cls.objects.get(pk=r.pk)
+            changed = False
             for k in keys:
-                changed = False
                 if getattr(obj, k) != getattr(r, k):
                     setattr(obj, k, getattr(r, k))
                     changed = True
