@@ -46,6 +46,7 @@ def strip_address_number_alpha_suffix(address: str) -> str:
     return " ".join(ls)
 
 
+@tracer.wrap()
 def geocode(**kwargs):
     RETRIES = 2
     TIMEOUT = 6.0  # seems to be enough to handle slow apartment build queries

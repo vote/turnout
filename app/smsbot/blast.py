@@ -6,9 +6,9 @@ from urllib.parse import urlencode
 import requests
 from django.conf import settings
 
+from common.apm import tracer
 from common.geocode import geocode
 from common.i90 import shorten_url
-from election.models import StateInformation
 from voter.models import Voter
 
 from .models import Blast, Number, SMSMessage
@@ -40,6 +40,7 @@ def send_voter_map_mms(voter: Voter, blast: Blast, destination: str) -> None:
     send_map_mms(number, blast=blast, voter=voter, destination=destination)
 
 
+@tracer.wrap()
 def send_map_mms(
     number: Number,
     blast: Blast = None,
@@ -67,7 +68,8 @@ def send_map_mms(
     home_loc = f"{home[0]['location']['lng']},{home[0]['location']['lat']}"
 
     # geocode destination
-    response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
+    with tracer.trace("ppapi.location", service="dnc"):
+        response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
     if destination == "pp":
         dest = response.json().get("data", {}).get("election_day_locations", [])
         if not dest:
