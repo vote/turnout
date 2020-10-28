@@ -70,7 +70,7 @@ def send_map_mms(
     home_loc = f"{home[0]['location']['lng']},{home[0]['location']['lat']}"
 
     # geocode destination
-    with tracer.trace("ppapi.location", service="dnc"):
+    with tracer.trace("pollproxy.lookup", service="pollproxy"):
         response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
     if destination == "pp":
         dest = response.json().get("data", {}).get("election_day_locations", [])
