@@ -15,7 +15,7 @@ from .models import Blast, Number, SMSMessage
 
 DNC_API_ENDPOINT = "https://locator-api.voteamerica.com/lookup"
 
-HIRES = False  # 512x512 or 256x256?
+HIRES = True  # 512x512 or 256x256?
 
 logger = logging.getLogger("smsbot")
 
@@ -56,11 +56,11 @@ def send_map_mms(
         home_address = (
             f"{voter.address_full}, {voter.city}, {voter.state_id} {voter.zipcode}"
         )
-        home_address_partial = f"{voter.address_full}, {voter.city}"
+        home_address_partial = voter.address_full
     else:
         home = geocode(q=address_full)
         home_address = address_full
-        home_address_partial = address_full
+        home_address_partial = address_full.split(",")[0]
     if not home:
         logger.info(f"Failed to geocode {voter} {address_full}")
         return f"Failed to geocode {voter} {address_full}"
