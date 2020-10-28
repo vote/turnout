@@ -15,7 +15,7 @@ VALID_LOOKUP = {
     "session_id": "7293d330-3216-439b-aa1a-449c7c458ebe",
     "civic_status": "swell",
     "civic_result": {"foo": "don't store me"},
-    "dnc_result": {
+    "source_result": {
         "data": {
             "confidence_score": "1.0",
             "county": "Philadelphia",
@@ -138,7 +138,7 @@ def test_blank_dnc_result(requests_mock):
     client = APIClient()
     response = client.post(
         PP_API_ENDPOINT,
-        {"unstructured_address": "foo", "dnc_result": None,},
+        {"unstructured_address": "foo", "source_result": None,},
         format="json",
     )
     assert response.status_code == 200
@@ -166,8 +166,8 @@ def test_object_created(mocker):
     lookup = PollingPlaceLookup.objects.first()
 
     assert lookup.unstructured_address == VALID_LOOKUP["unstructured_address"]
-    assert lookup.dnc_result == VALID_LOOKUP["dnc_result"]
-    assert lookup.dnc_status == VALID_LOOKUP["dnc_result"]["data"]["status"]
+    assert lookup.dnc_result == VALID_LOOKUP["source_result"]
+    assert lookup.dnc_status == VALID_LOOKUP["source_result"]["data"]["status"]
     assert lookup.address1 == "1234 Spruce St"
     assert lookup.city == "Philadelphia"
     assert lookup.state_id == "PA"

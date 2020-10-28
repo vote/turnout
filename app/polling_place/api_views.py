@@ -26,9 +26,9 @@ class PollingPlaceLookupReportViewSet(CreateModelMixin, GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        dnc_result = request.data.get("dnc_result") or {}
-        if not serializer.validated_data.get("dnc_status"):
-            serializer.validated_data["dnc_status"] = dnc_result.get("data", {}).get(
+        dnc_result = serializer.validated_data.get("source_result") or {}
+        if not serializer.validated_data.get("source_status"):
+            serializer.validated_data["source_status"] = dnc_result.get("data", {}).get(
                 "status"
             )
 

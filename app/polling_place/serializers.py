@@ -9,6 +9,13 @@ from .models import PollingPlaceLookup
 
 class PollingPlaceLookupReportSerializer(TrackingSerializer, ActionSerializer):
     zipcode = serializers.CharField(validators=[zip_validator])
+    source_result = serializers.JSONField(write_only=True, allow_null=True)
+    source_status = serializers.CharField(write_only=True, allow_null=True)
+
+    def create(self, validated_data):
+        validated_data["dnc_result"] = validated_data.pop("source_result", None)
+        validated_data["dnc_status"] = validated_data.pop("source_status", None)
+        return super().create(validated_data)
 
     class Meta:
         model = PollingPlaceLookup
@@ -16,8 +23,8 @@ class PollingPlaceLookupReportSerializer(TrackingSerializer, ActionSerializer):
             "unstructured_address",
         ]
         optional_fields = [
-            "dnc_status",
-            "dnc_result",
+            "source_result",
+            "source_status",
             "civic_status",
             "civic_result",
             "utm_campaign",
