@@ -156,7 +156,7 @@ Here's a list of events provided by VoteAmerica. Some events have variable param
 }
 ```
 
-### Locate Tool
+### Where To Vote Tool
 
 ```js
 {

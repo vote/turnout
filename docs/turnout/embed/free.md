@@ -41,7 +41,7 @@ _This tool is the same as the Absentee tool with a different header._
 <div class="voteamerica-embed" data-subscriber="public" data-tool="votebymail"></div>
 ```
 
-## Polling place lookup tool
+## Where To Vote tool
 
 ```html
 <script src="https://cdn.voteamerica.com/embed/tools.js" async></script>
