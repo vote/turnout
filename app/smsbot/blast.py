@@ -1,5 +1,6 @@
 import logging
 import math
+import uuid
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -7,6 +8,7 @@ import requests
 from django.conf import settings
 
 from common.apm import tracer
+from common.aws import s3_client
 from common.geocode import geocode
 from common.i90 import shorten_url
 from voter.models import Voter
@@ -123,8 +125,32 @@ def send_map_mms(
     centery = (float(dest["lat"]) + float(home[0]["location"]["lat"])) / 2
     map_loc = f"{centerx},{centery},{zoom}"
 
-    # send
+    # fetch map
     map_url = f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-home+00f({home_loc}),pin-s-p+f00({dest_loc})/{map_loc}/{size}?access_token={settings.MAPBOX_KEY}"
+    response = requests.get(map_url)
+    if response.status_code != 200:
+        logger.error(f"Failed to fetch map, got status code {response.status_code}")
+        return "Failed to fetch map"
+    map_image = response.content
+    map_image_type = response.headers["content-type"]
+
+    # store map in s3
+    filename = str(uuid.uuid4()) + "." + map_image_type.split("/")[-1]
+    upload = s3_client.put_object(
+        Bucket=settings.MMS_ATTACHMENT_BUCKET,
+        Key=filename,
+        ContentType=map_image_type,
+        ACL="public-read",
+        Body=map_image,
+    )
+    if upload.get("ResponseMetadata", {}).get("HTTPStatusCode") != 200:
+        logger.warning(f"Unable to push {filename} to {settings.MMS_ATTACHMENT_BUCKET}")
+        return "Unable to upload map"
+    stored_map_url = (
+        f"https://{settings.MMS_ATTACHMENT_BUCKET}.s3.amazonaws.com/{filename}"
+    )
+
+    # send
     locator_url = f"https://www.voteamerica.com/where-to-vote/?{urlencode({'address':home_address})}"
     if blast:
         locator_url += f"&utm_medium=mms&utm_source=turnout&utm_campaign={blast.campaign}&source=va_mms_turnout_{blast.campaign}"
@@ -139,7 +165,7 @@ def send_map_mms(
 
 If that is not your address, find your {what} at https://my.voteamerica.com/vote or reply HELPLINE with any questions about voting.
 """,
-        media_url=[map_url],
+        media_url=[stored_map_url],
         blast=blast,
     )
     logger.info(

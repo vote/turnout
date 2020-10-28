@@ -433,6 +433,10 @@
             {
                "name": "MAPBOX_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mapbox_key"
+            },
+            {
+               "name": "MMS_ATTACHMENT_BUCKET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mms_attachment_bucket"
             }
          ]
       },
@@ -869,6 +873,10 @@
             {
                "name": "MAPBOX_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mapbox_key"
+            },
+            {
+               "name": "MMS_ATTACHMENT_BUCKET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mms_attachment_bucket"
             }
          ]
       },
@@ -1305,6 +1313,10 @@
             {
                "name": "MAPBOX_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mapbox_key"
+            },
+            {
+               "name": "MMS_ATTACHMENT_BUCKET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.mms_attachment_bucket"
             }
          ]
       },

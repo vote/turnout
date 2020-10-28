@@ -432,6 +432,10 @@
             {
                "name": "MAPBOX_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mapbox_key"
+            },
+            {
+               "name": "MMS_ATTACHMENT_BUCKET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.mms_attachment_bucket"
             }
          ]
       },
