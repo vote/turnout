@@ -883,7 +883,7 @@ ACTIONNETWORK_KEY = env.str("ACTIONNETWORK_KEY", default=None)
 ACTIONNETWORK_FORM_CACHE_TIMEOUT = env.int(
     "ACTIONNETWORK_FORM_CACHE_TIMEOUT", 24 * 60 * 60
 )
-ACTIONNETWORK_FORM_PREFIX = env.str("ACTIONNETWORK_FORM_PREFIX", "staging")
+ACTIONNETWORK_FORM_PREFIX = "prod" if ENV == "prod" else "staging"
 
 # This (daily?) sync is only to catch stragglers that don't sync in realtime.
 ACTIONNETWORK_SYNC = env.bool("ACTIONNETWORK_SYNC", False)

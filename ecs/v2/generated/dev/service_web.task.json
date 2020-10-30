@@ -306,20 +306,8 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_key"
             },
             {
-               "name": "ACTIONNETWORK_FORM_PREFIX",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.actionnetwork_form_prefix"
-            },
-            {
                "name": "OPTIMIZELY_SDK_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.optimizely_sdk_key"
-            },
-            {
-               "name": "PA_OVR_KEY",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.pa_ovr_key"
-            },
-            {
-               "name": "PA_OVR_STAGING",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.pa_ovr_staging"
             },
             {
                "name": "SLACK_SUBSCRIBER_INTEREST_ENABLED",

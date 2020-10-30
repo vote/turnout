@@ -234,20 +234,8 @@
         name: 'ACTIONNETWORK_KEY',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_form_prefix',
-        name: 'ACTIONNETWORK_FORM_PREFIX',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.optimizely_sdk_key',
         name: 'OPTIMIZELY_SDK_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pa_ovr_key',
-        name: 'PA_OVR_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.pa_ovr_staging',
-        name: 'PA_OVR_STAGING',
       },
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_subscriber_interest_enabled',
