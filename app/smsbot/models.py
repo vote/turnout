@@ -4,13 +4,13 @@ import uuid
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
-from django.db import models
+from django.db import connections, models
 from phonenumber_field.modelfields import PhoneNumberField
 from requests.exceptions import ConnectionError
 from twilio.rest import Client as TwilioClient
 
 from common.apm import tracer
-from common.enums import MessageDirectionType, SMSDeliveryStatus
+from common.enums import BlastType, MessageDirectionType, SMSDeliveryStatus
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
 
@@ -69,6 +69,7 @@ class Number(TimestampModel):
     def __str__(self):
         return f"Number - {self.phone}"
 
+    @tracer.wrap()
     def send_sms(self, text, ignore_opt_out=False, blast=None, **kwargs):
         if self.opt_out_time and not ignore_opt_out:
             return
@@ -111,34 +112,63 @@ class Number(TimestampModel):
 
 
 class Blast(TimestampModel, UUIDModel):
-    description = models.TextField(null=True)
+    description = models.CharField(max_length=100, null=True)
     content = models.TextField(null=True)
     sql = models.TextField(null=True)
-    campaign = models.TextField(null=True)
+    campaign = models.CharField(max_length=100, null=True)
+    blast_type = TurnoutEnumField(BlastType, null=True)
 
     class Meta(object):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Blast - {self.description} ({self.uuid})"
+        return f"Blast - {self.description} - {self.blast_type} ({self.uuid})"
 
-    def enqueue_sms_blast(self, limit: int = None):
-        from .tasks import trigger_blast_sms
+    @tracer.wrap()
+    def count(self):
+        with connections["readonly"].cursor() as cursor:
+            cursor.execute(
+                f"SELECT count(*) FROM ({self.sql.format(blast_id=str(self.uuid),)}) a"
+            )
+            return cursor.fetchall()[0][0]
 
-        logger.info(f"Enqueueing {self}")
-        num = 0
-        for n in Number.objects.raw(self.sql)[0:limit]:
-            trigger_blast_sms.delay(str(n.pk), self.pk)
-            num += 1
-        logger.info(f"Enqueued {self} with {num} messages")
+    @tracer.wrap()
+    def enqueue(self, test_phone: str = None):
+        from .tasks import trigger_blast_sms, trigger_blast_mms_map
 
-    def enqueue_voter_map_mms_blast(self, destination: str, limit: int = None):
-        from voter.models import Voter
-        from .tasks import trigger_voter_map_mms
+        if self.blast_type == BlastType.SMS and test_phone:
+            trigger_blast_sms.delay(self.pk, test_phone, force_dup=True)
+            return
 
-        logger.info(f"Enqueueing {self}")
-        num = 0
-        for voter in Voter.objects.raw(self.sql)[0:limit]:
-            trigger_voter_map_mms.delay(voter.uuid, self.uuid, destination)
-            num += 1
-        logger.info(f"Enqueued {self} with {num} messages")
+        with connections["readonly"].cursor() as cursor:
+            cursor.execute(self.sql.format(blast_id=str(self.uuid),))
+            columns = [col[0] for col in cursor.description]
+            if test_phone:
+                logger.info(f"Enqueueing test message for {self} to {test_phone}")
+            else:
+                logger.info(f"Enqueueing {cursor.rowcount} messages for {self}")
+            for row in cursor.fetchall():
+                r = dict(zip(columns, row))
+                if self.blast_type == BlastType.SMS:
+                    trigger_blast_sms.delay(self.pk, r["phone"])  # type: ignore
+                elif self.blast_type == BlastType.MMS_MAP:
+                    if test_phone:
+                        trigger_blast_mms_map.delay(
+                            self.pk,
+                            test_phone,
+                            r["map_type"],  # type: ignore
+                            r["address_full"],  # type: ignore
+                            force_dup=True,
+                        )
+                    else:
+                        trigger_blast_mms_map.delay(
+                            self.pk, r["phone"], r["map_type"], r["address_full"]  # type: ignore
+                        )
+                else:
+                    logger.error(
+                        f"unrecognized blast_type {self.blast_type} for {self}"
+                    )
+                if test_phone:
+                    break
+            if not test_phone:
+                logger.info(f"Done enqueueing {cursor.rowcount} messages for {self}")

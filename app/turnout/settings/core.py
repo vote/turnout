@@ -43,13 +43,22 @@ BUILD = env.str("BUILD", default="0")
 DATABASES = {
     "default": env.dj_db_url(
         "DATABASE_URL", default="postgis://postgres:turnout@postgres:5432/turnout"
-    )
+    ),
+    "readonly": env.dj_db_url(
+        "READONLY_DATABASE_URL",
+        default="postgis://postgres:turnout@postgres:5432/turnout",
+    ),
 }
 DATABASES["default"]["ENGINE"] = "common.db"
 DATABASES["default"]["CONN_MAX_AGE"] = 0
 DATABASES["default"]["OPTIONS"] = {
     "MAX_CONNS": env.int("DATABASE_MAX_CONNECTIONS", default=4)
 }
+
+# ugly kludge to make django behave with a read-only database while
+# testing
+if env.str("TEST", default=None):
+    DATABASES.pop("readonly")
 
 ##### END DATABASE CONFIGURATION
 

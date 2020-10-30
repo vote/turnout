@@ -67,19 +67,20 @@ def poll_twilio() -> None:
 
 
 @shared_task(queue="blast-sms")
-def trigger_blast_sms(number_id: str, blast_id: str) -> None:
+def trigger_blast_sms(blast_id: str, phone: str, force_dup: bool = False) -> None:
     from .blast import send_blast_sms
 
-    number = Number.objects.get(pk=number_id)
     blast = Blast.objects.get(pk=blast_id)
-    send_blast_sms(number, blast)
+    number = Number.objects.get(pk=phone)
+    send_blast_sms(blast, number, force_dup=force_dup)
 
 
 @shared_task(queue="blast-mms")
-def trigger_voter_map_mms(voter_id: str, blast_id: str, destination: str) -> None:
-    from voter.models import Voter
-    from .blast import send_voter_map_mms
+def trigger_blast_mms_map(
+    blast_id: str, phone: str, map_type: str, address_full: str, force_dup: bool = False
+) -> None:
+    from .blast import send_blast_mms_map
 
-    voter = Voter.objects.get(uuid=voter_id)
     blast = Blast.objects.get(uuid=blast_id)
-    send_voter_map_mms(voter, blast, destination)
+    number = Number.objects.get(pk=phone)
+    send_blast_mms_map(blast, number, map_type, address_full, force_dup=force_dup)

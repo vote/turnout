@@ -22,6 +22,7 @@ fi
 
 echo "Account ID: $ACCOUNT_ID"
 export DATABASE_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_url | jq '.Parameter["Value"]' -r)
+export READONLY_DATABASE_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.readonly_database_url | jq '.Parameter["Value"]' -r)
 export DATABASE_MAX_CONNECTIONS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.database_max_connections | jq '.Parameter["Value"]' -r)
 export REDIS_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.redis_url | jq '.Parameter["Value"]' -r)
 export AMQP_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.amqp_url | jq '.Parameter["Value"]' -r)
@@ -145,6 +146,7 @@ echo "Running Image $IMAGE"
 if [ "$2" ]; then
   docker run \
     -e DATABASE_URL \
+    -e READONLY_DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
     -e REDIS_URL \
     -e AMQP_URL \
@@ -243,6 +245,7 @@ $IMAGE \
 else
   docker run -i -t \
     -e DATABASE_URL \
+    -e READONLY_DATABASE_URL \
     -e DATABASE_MAX_CONNECTIONS \
     -e REDIS_URL \
     -e AMQP_URL \

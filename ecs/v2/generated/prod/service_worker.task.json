@@ -75,6 +75,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.database_url"
             },
             {
+               "name": "READONLY_DATABASE_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.readonly_database_url"
+            },
+            {
                "name": "DATABASE_MAX_CONNECTIONS",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.database_max_connections"
             },
@@ -515,6 +519,10 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.database_url"
             },
             {
+               "name": "READONLY_DATABASE_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.readonly_database_url"
+            },
+            {
                "name": "DATABASE_MAX_CONNECTIONS",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.database_max_connections"
             },
@@ -953,6 +961,10 @@
             {
                "name": "DATABASE_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.database_url"
+            },
+            {
+               "name": "READONLY_DATABASE_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.prod.readonly_database_url"
             },
             {
                "name": "DATABASE_MAX_CONNECTIONS",

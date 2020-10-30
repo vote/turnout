@@ -1,7 +1,7 @@
 import logging
 import math
 import uuid
-from typing import Optional
+from typing import Dict, Optional
 from urllib.parse import urlencode
 
 import requests
@@ -11,7 +11,6 @@ from common.apm import tracer
 from common.aws import s3_client
 from common.geocode import geocode
 from common.i90 import shorten_url
-from voter.models import Voter
 
 from .models import Blast, Number, SMSMessage
 
@@ -22,84 +21,81 @@ HIRES = True  # 512x512 or 256x256?
 logger = logging.getLogger("smsbot")
 
 
-def send_blast_sms(number: Number, blast: Blast) -> None:
-    if SMSMessage.objects.filter(phone=number, blast=blast).exists():
+@tracer.wrap()
+def send_blast_sms(blast: Blast, number: Number, force_dup: bool = False) -> None:
+    if not force_dup and SMSMessage.objects.filter(phone=number, blast=blast).exists():
         logger.info(f"Already sent {blast} to {number}")
         return
 
     number.send_sms(blast.content, blast=blast)
 
 
-def send_voter_map_mms(voter: Voter, blast: Blast, destination: str) -> None:
-    number = Number.objects.filter(phone=voter.phone).first()
-    if not number:
-        logger.info(f"No phone for {voter}")
-        return
-    if SMSMessage.objects.filter(phone=number, blast=blast).exists():
+@tracer.wrap()
+def send_blast_mms_map(
+    blast: Blast,
+    number: Number,
+    map_type: str,
+    address_full: str,
+    force_dup: bool = False,
+) -> None:
+    if not force_dup and SMSMessage.objects.filter(phone=number, blast=blast).exists():
         logger.info(f"Already sent {blast} to {number}")
         return
 
-    send_map_mms(number, blast=blast, voter=voter, destination=destination)
+    if force_dup:
+        # do not link the test MMS to the blast (since blast queries
+        # may/should exclude numbers that have already been texted for
+        # this blast as part of the query).
+        send_map_mms(number, map_type, address_full, blast.content)
+    else:
+        send_map_mms(number, map_type, address_full, blast.content, blast=blast)
 
 
 @tracer.wrap()
 def send_map_mms(
     number: Number,
+    map_type: str,  # 'pp' or 'ev'
+    address_full: str,
+    content: str = None,
     blast: Blast = None,
-    voter: Voter = None,
-    address_full: str = None,
-    destination: str = "pp",
 ) -> Optional[str]:
+    formdata: Dict[str, str] = {}
+
     # geocode home
-    if voter:
-        home = geocode(
-            street=voter.address_full, city=voter.city, state=voter.state_id,
-        )
-        home_address = (
-            f"{voter.address_full}, {voter.city}, {voter.state_id} {voter.zipcode}"
-        )
-        home_address_partial = voter.address_full
-    else:
-        home = geocode(q=address_full)
-        home_address = address_full
-        home_address_partial = address_full.split(",")[0]
+    home = geocode(q=address_full)
+    home_address = address_full
     if not home:
-        logger.info(f"Failed to geocode {voter} {address_full}")
-        return f"Failed to geocode {voter} {address_full}"
+        logger.info(f"Failed to geocode {address_full}")
+        return f"Failed to geocode {address_full}"
+    formdata["home_address_short"] = address_full.split(",")[0].upper()
 
     home_loc = f"{home[0]['location']['lng']},{home[0]['location']['lat']}"
 
     # geocode destination
     with tracer.trace("pollproxy.lookup", service="pollproxy"):
         response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
-    if destination == "pp":
+    if map_type == "pp":
         dest = response.json().get("data", {}).get("election_day_locations", [])
         if not dest:
-            logger.info(f"No election day location for {voter} {address_full}")
-            return f"No election day location for {voter} {address_full}"
-        message = f"Tuesday, November 3rd is Election Day! If you are registered to vote at {home_address_partial.upper()} then your polling place is:"
-        what = "polling place"
-    elif destination == "ev":
+            logger.info(f"No election day location for {address_full}")
+            return f"No election day location for {address_full}"
+        dest = dest[0]
+    elif map_type == "ev":
         dest = response.json().get("data", {}).get("early_vote_locations", [])
         if not dest:
-            logger.info(f"No early_vote location for {voter} {address_full}")
-            return f"No early vote location for {voter} {address_full}"
-
-        if dest[0]["state"] == "AL":
-            message = "The last day of early voting is this Thursday, October 29th!"
-        else:
-            message = "You can vote early!"
-
-        message = f"{message} If you are registered to vote at {home_address_partial.upper()} then your early voting location is:"
-        what = "early voting location"
+            logger.info(f"No early_vote location for {address_full}")
+            return f"No early vote location for {address_full}"
+        dest = dest[0]
     else:
-        return f"Unrecognized address type {destination}"
+        return f"Unrecognized address type {map_type}"
 
-    dest = dest[0]
-    dest_address = (
-        f"{dest['address_line_1']}, {dest['city']}, {dest['state']} {dest['zip']}"
-    )
     dest_loc = f"{dest['lon']},{dest['lat']}"
+
+    formdata["dest_name"] = dest["location_name"].upper()
+    formdata[
+        "dest_address"
+    ] = f"{dest['address_line_1']}, {dest['city']}, {dest['state']} {dest['zip']}".upper()
+    formdata["dest_hours"] = dest["dates_hours"]
 
     # Pick a reasonable zoom level for the map, since mapbox pushes
     # the markers to the very edge of the map.
@@ -150,25 +146,17 @@ def send_map_mms(
         f"https://{settings.MMS_ATTACHMENT_BUCKET}.s3.amazonaws.com/{filename}"
     )
 
-    # send
+    # locator link
     locator_url = f"https://www.voteamerica.com/where-to-vote/?{urlencode({'address':home_address})}"
     if blast:
         locator_url += f"&utm_medium=mms&utm_source=turnout&utm_campaign={blast.campaign}&source=va_mms_turnout_{blast.campaign}"
+    formdata["locator_url"] = shorten_url(locator_url)
+
+    # send
     number.send_sms(
-        f"""{shorten_url(locator_url)}
-
-{message}
-
-{dest['location_name'].upper()}
-{dest_address.upper()}
-{dest['dates_hours']}
-
-If that is not your address, find your {what} at https://my.voteamerica.com/vote or reply HELPLINE with any questions about voting.
-""",
-        media_url=[stored_map_url],
-        blast=blast,
+        content.format(**formdata), media_url=[stored_map_url], blast=blast,
     )
     logger.info(
-        f"Sent {destination} map for {home_address_partial} (blast {blast}) to {number}"
+        f"Sent {map_type} map for {formdata['home_address_short']} (blast {blast}) to {number}"
     )
     return None

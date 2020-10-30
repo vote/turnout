@@ -282,3 +282,12 @@ class SubscriberSMSOption(Enum, metaclass=EnumMeta):
     AUTO_OPT_IN = "auto_opt_in"
     BOX_UNCHECKED = "box_unchecked"
     BOX_CHECKED = "box_checked"
+
+
+class BlastType(Enum, metaclass=EnumMeta):
+    SMS = "sms"
+    MMS_MAP = "mms_map"
+
+    class Labels:
+        SMS = "SMS"
+        MMS_MAP = "MMS map"

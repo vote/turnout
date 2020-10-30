@@ -11,3 +11,8 @@ class NumberAdmin(admin.ModelAdmin):
 @admin.register(models.SMSMessage)
 class SMSMessageAdmin(admin.ModelAdmin):
     list_display = ("phone", "created_at", "direction", "message")
+
+
+@admin.register(models.Blast)
+class BlastAdmin(admin.ModelAdmin):
+    list_display = ("uuid", "description", "campaign", "blast_type")

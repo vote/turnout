@@ -124,14 +124,32 @@ def handle_incoming(
         from .blast import send_map_mms
 
         # is this a known voter?
-        dest = cmd[0:2].lower()
+        map_type = cmd[0:2].lower()
         rest = cmd.split(" ")[1:]
+        content = """{locator_url}
+
+If you are registered to vote at {home_address_short} then your WHAT is:
+
+{dest_name}
+{dest_address}
+{dest_hours}
+
+If that is not your address, find your polling place at: https://my.voteamerica.com/vote
+Reply HELPLINE with any questions about voting, or VOTED if you have already voted.
+""".replace(
+            "WHAT", "polling place" if map_type == "pp" else "early voting location"
+        )
         if rest:
-            reply = send_map_mms(n, address_full=" ".join(rest), destination=dest)
+            reply = send_map_mms(n, map_type, " ".join(rest), content=content)
         else:
             voter = Voter.objects.filter(phone=from_number).first()
             if voter:
-                reply = send_map_mms(n, voter=voter, destination=dest)
+                reply = send_map_mms(
+                    n,
+                    map_type,
+                    f"{voter.address_full}, {voter.city}, {voter.state_id} {voter.zipcode}",
+                    content=content,
+                )
             else:
                 reply = f"I don't have a voter record for {from_number}"
     else:
