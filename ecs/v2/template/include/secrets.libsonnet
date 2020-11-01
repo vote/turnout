@@ -361,5 +361,9 @@
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.mms_attachment_bucket',
         name: 'MMS_ATTACHMENT_BUCKET',
       },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.civic_key',
+        name: 'CIVIC_KEY',
+      },
     ],
 }

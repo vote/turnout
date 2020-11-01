@@ -1051,8 +1051,9 @@ I90_URL = env.str("I90_URL", "https://go.voteamerica.com")
 
 #### END I90 CONFIGURATION
 
-#### MAPBOX CONFIGURATION
+#### MISC CONFIGURATION
 
 MAPBOX_KEY = env.str("MAPBOX_KEY", None)
+CIVIC_KEY = env.str("CIVIC_KEY", None)
 
-#### END MAPBOX CONFIGURATION
+#### END MISC CONFIGURATION
