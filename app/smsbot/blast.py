@@ -79,7 +79,9 @@ def send_map_mms(
         with tracer.trace("pollproxy.lookup", service="pollproxy"):
             response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
         if response.status_code != 200:
-            logger.error(f"Got {response.status_code} from dnc query on {home_address}")
+            logger.warning(
+                f"Got {response.status_code} from dnc query on {home_address}"
+            )
             return f"Failure querying data source"
         if map_type == "pp":
             dest = response.json().get("data", {}).get("election_day_locations", [])
@@ -120,7 +122,7 @@ def send_map_mms(
                 },
             )
         if response.status_code != 200:
-            logger.error(
+            logger.warning(
                 f"Got {response.status_code} from civic query on {home_address}"
             )
             return f"Failure querying data source"
@@ -182,7 +184,7 @@ def send_map_mms(
     map_url = f"https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-home+00f({home_loc}),pin-s-p+f00({dest_lon},{dest_lat})/{map_loc}/{size}?access_token={settings.MAPBOX_KEY}"
     response = requests.get(map_url)
     if response.status_code != 200:
-        logger.error(
+        logger.warning(
             f"{number}: Failed to fetch map, got status code {response.status_code}"
         )
         return "Failed to fetch map"
@@ -217,7 +219,5 @@ def send_map_mms(
     number.send_sms(
         content.format(**formdata), media_url=[stored_map_url], blast=blast,
     )
-    logger.info(
-        f"Sent {map_type} map for {formdata['home_address_short']} (blast {blast}) to {number}"
-    )
+    logger.info(f"Sent {map_type} map for {address_full} (blast {blast}) to {number}")
     return None
