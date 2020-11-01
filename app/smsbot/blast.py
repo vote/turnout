@@ -78,10 +78,15 @@ def send_map_mms(
         # pollproxy
         with tracer.trace("pollproxy.lookup", service="pollproxy"):
             response = requests.get(DNC_API_ENDPOINT, {"address": home_address})
+        if response.status_code != 200:
+            logger.error(f"Got {response.status_code} from dnc query on {home_address}")
+            return f"Failure querying data source"
         if map_type == "pp":
             dest = response.json().get("data", {}).get("election_day_locations", [])
             if not dest:
-                logger.info(f"{number}: No election day location for {address_full}")
+                logger.info(
+                    f"{number}: No election day location for {address_full}: {response.json()}"
+                )
                 return f"No election day location for {address_full}"
             dest = dest[0]
         elif map_type == "ev":
@@ -93,13 +98,16 @@ def send_map_mms(
         else:
             return f"Unrecognized address type {map_type}"
 
-        dest_lon = dest["lon"]
-        dest_lat = dest["lat"]
         dest_name = dest["location_name"]
         dest_address = (
             f"{dest['address_line_1']}, {dest['city']}, {dest['state']} {dest['zip']}"
         )
         dest_hours = dest["dates_hours"]
+        if "lon" not in dest or "lat" not in dest:
+            logger.warning(f"Lon/lat missing from {dest_address} (pollproxy): {dest}")
+            return f"Lon/lat missing from {dest_address} (pollproxy)"
+        dest_lon = dest["lon"]
+        dest_lat = dest["lat"]
     else:
         # civic
         with tracer.trace("civicapi.voterlookup", service="google"):
@@ -111,10 +119,17 @@ def send_map_mms(
                     "key": settings.CIVIC_KEY,
                 },
             )
+        if response.status_code != 200:
+            logger.error(
+                f"Got {response.status_code} from civic query on {home_address}"
+            )
+            return f"Failure querying data source"
         if map_type == "pp":
             dest = response.json().get("pollingLocations", [])
             if not dest:
-                logger.info(f"{number}: No election day location for {address_full}")
+                logger.info(
+                    f"{number}: No election day location for {address_full}: {dest}"
+                )
                 return f"No election day location for {address_full}"
             dest = dest[0]
         elif map_type == "ev":
@@ -126,11 +141,14 @@ def send_map_mms(
         else:
             return f"Unrecognized address type {map_type}"
 
-        dest_lon = dest["longitude"]
-        dest_lat = dest["latitude"]
         dest_name = dest["address"]["locationName"]
         dest_address = f"{dest['address']['line1']}, {dest['address']['city']}, {dest['address']['state']} {dest['address']['zip']}"
         dest_hours = dest["pollingHours"]
+        if "longitude" not in dest or "latitude" not in dest:
+            logger.warning(f"Lon/lat missing from {dest_address} (pollproxy): {dest}")
+            return f"Lon/lat missing from {dest_address} (civic)"
+        dest_lon = dest["longitude"]
+        dest_lat = dest["latitude"]
 
     formdata["dest_name"] = dest_name.upper()
     formdata["dest_address"] = dest_address.upper()

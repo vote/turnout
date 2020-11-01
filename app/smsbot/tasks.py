@@ -71,7 +71,7 @@ def trigger_blast_sms(blast_id: str, phone: str, force_dup: bool = False) -> Non
     from .blast import send_blast_sms
 
     blast = Blast.objects.get(pk=blast_id)
-    number = Number.objects.get(pk=phone)
+    number, _ = Number.objects.get_or_create(pk=phone)
     send_blast_sms(blast, number, force_dup=force_dup)
 
 
@@ -82,5 +82,5 @@ def trigger_blast_mms_map(
     from .blast import send_blast_mms_map
 
     blast = Blast.objects.get(uuid=blast_id)
-    number = Number.objects.get(pk=phone)
+    number, _ = Number.objects.get_or_create(pk=phone)
     send_blast_mms_map(blast, number, map_type, address_full, force_dup=force_dup)
