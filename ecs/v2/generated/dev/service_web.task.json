@@ -382,14 +382,6 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.pdf_generation_lambda_function"
             },
             {
-               "name": "LOB_KEY",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.lob_key"
-            },
-            {
-               "name": "LOB_LETTER_WEBHOOK_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.lob_letter_webhook_secret"
-            },
-            {
                "name": "RETURN_ADDRESS",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.return_address"
             },
