@@ -302,14 +302,9 @@ def get_register_form_data(lead: MoverLead):
         )
     dates.append(f"Election day: November 3, 2020")
 
-    # no dates for now.  Instead, note existence of EDR.
+    # no dates or other info for now.
     # form_data["important_dates"] = "\n".join(dates)
-    if form_data["sdr_election_day"].lower() == "true":
-        form_data[
-            "important_dates"
-        ] = "Election Day is November 3, 2020\n\nYou can register to vote in person at the polls.\n\nvoteamerica.com/where-to-vote"
-    else:
-        form_data["important_dates"] = ""
+    form_data["important_dates"] = ""
 
     # mangle the deadline a bit to accomodate mixed case (these strings all look something like
     # "Received 21 business days before Election Day")
