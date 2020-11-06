@@ -68,3 +68,7 @@ def get_feature_str(
     ):
         return optimizely_client.get_feature_variable_string(flag, var, user_id=user_id)
     return None
+
+
+def get_optimizely_version():
+    return conf_manager._config.version

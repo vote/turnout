@@ -322,6 +322,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": BULK_QUEUE_TOKEN_SECONDS,
         "args": (BULK_QUEUE_TOKEN_SECONDS + BULK_QUEUE_TOKEN_SLOP, BULK_QUEUE_SLACK),
     },
+    "trigger-test-optimizely": {
+        "task": "common.tasks.test_optimizely",
+        "schedule": crontab(minute="*/5"),
+    },
 }
 
 CELERY_TIMEZONE = "UTC"

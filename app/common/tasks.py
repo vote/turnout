@@ -126,3 +126,12 @@ def test_emails(to: str = None):
     test_subscription(addrs)
     logger.info("Sending test verify notifications")
     test_verify(addrs)
+
+
+@shared_task
+def test_optimizely():
+    from .rollouts import get_feature, get_feature_bool, get_optimizely_version
+
+    logger.info(
+        f"test_optimizely task: version {get_optimizely_version()}, feature {get_feature('test_optimizely')}, var {get_feature_bool('test_optimizely', 'var')}"
+    )
