@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 from django.conf import settings
 from model_bakery import baker
@@ -1095,8 +1093,8 @@ def test_lob_confirm(mocker):
         result_item_mail=baker.make_recipe("storage.ballot_request_form"),
     )
 
-    send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
-    send = mocker.patch("absentee.api_views.send_letter", return_value=send_date)
+    # send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
+    # send = mocker.patch("absentee.api_views.send_letter", return_value=send_date)
 
     client = APIClient()
     response = client.put(
@@ -1105,8 +1103,10 @@ def test_lob_confirm(mocker):
         ),
     )
 
-    send.assert_called_once_with(ballot_request, double_sided=True)
-    assert response.json() == {"send_date": send_date.isoformat()}
+    assert response.status_code == 503
+    assert "error" in response.json()
+    # send.assert_called_once_with(ballot_request, double_sided=True)
+    # assert response.json() == {"send_date": send_date.isoformat()}
 
 
 @pytest.mark.django_db

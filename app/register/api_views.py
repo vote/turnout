@@ -1,10 +1,8 @@
 import logging
 
-import sentry_sdk
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from lob.error import LobError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.mixins import UpdateModelMixin
@@ -20,7 +18,7 @@ from common.enums import (
     RegistrationGender,
     TurnoutActionStatus,
 )
-from integration.lob import check_deliverable, generate_lob_token, send_letter
+from integration.lob import check_deliverable, generate_lob_token
 from official.match import get_regions_for_address
 
 from .custom_ovr_links import get_custom_ovr_link
@@ -183,11 +181,8 @@ def lob_confirm(request, uuid):
     if generate_lob_token(registration) != request.GET.get("token", ""):
         raise Http404
 
-    try:
-        send_date = send_letter(registration)
-        return Response({"send_date": send_date.isoformat()})
-    except LobError as e:
-        sentry_sdk.capture_exception(e)
-        return Response(
-            {"lob_error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE
-        )
+    # disable this
+    return Response(
+        {"error": "This feature is disabled for the time being"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )

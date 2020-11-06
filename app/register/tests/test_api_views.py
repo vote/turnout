@@ -946,8 +946,8 @@ def test_lob_confirm(mocker):
         result_item_mail=baker.make_recipe("storage.registration_form"),
     )
 
-    send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
-    send = mocker.patch("register.api_views.send_letter", return_value=send_date)
+    # send_date = datetime.datetime(2020, 1, 1, 1, 1, 1)
+    # send = mocker.patch("register.api_views.send_letter", return_value=send_date)
 
     client = APIClient()
     response = client.put(
@@ -956,9 +956,10 @@ def test_lob_confirm(mocker):
         ),
     )
 
-    assert response.status_code == 200
-    assert response.json() == {"send_date": send_date.isoformat()}
-    send.assert_called_once_with(registration)
+    assert response.status_code == 503
+    assert "error" in response.json()
+    # assert response.json() == {"send_date": send_date.isoformat()}
+    # send.assert_called_once_with(registration)
 
 
 @pytest.mark.django_db

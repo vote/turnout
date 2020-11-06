@@ -1,11 +1,9 @@
 import logging
 from typing import Any, Dict
 
-import sentry_sdk
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from lob.error import LobError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -17,7 +15,7 @@ from action.tasks import action_check_unfinished, action_finish
 from common.enums import SubmissionType, TurnoutActionStatus
 from common.rollouts import flag_enabled_for_state
 from election.models import State, StateInformation
-from integration.lob import check_deliverable, generate_lob_token, send_letter
+from integration.lob import check_deliverable, generate_lob_token
 from official.match import get_regions_for_address
 from official.models import Region
 
@@ -257,11 +255,7 @@ def lob_confirm(request, uuid):
     if generate_lob_token(ballot_request) != request.GET.get("token", ""):
         raise Http404
 
-    try:
-        send_date = send_letter(ballot_request, double_sided=True)
-        return Response({"send_date": send_date.isoformat()})
-    except LobError as e:
-        sentry_sdk.capture_exception(e)
-        return Response(
-            {"lob_error": str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE
-        )
+    return Response(
+        {"error": "This feature is disabled for the time being"},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
