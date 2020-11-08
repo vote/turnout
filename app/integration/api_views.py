@@ -22,6 +22,8 @@ def validate_lob_request(func):
         timestamp = request.headers.get("Lob-Signature-Timestamp", "")
         message = timestamp + "." + request.body.decode("utf-8")
         secret = settings.LOB_LETTER_WEBHOOK_SECRET
+        if not secret:
+            return HttpResponse("Bad lob signature", status=status.HTTP_403_FORBIDDEN)
         signature = hmac.new(
             secret.encode("utf-8"), message.encode("utf-8"), digestmod=hashlib.sha256,
         ).hexdigest()
