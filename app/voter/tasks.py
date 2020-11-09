@@ -250,8 +250,11 @@ def lookup(item):
             voter.last_name = ts_result.get("vb.tsmart_last_name")
             voter.suffix = ts_result.get("vb.tsmart_name_suffix")
         elif state_voter_id:
-            voter.first_name = state_result.first_and_middle_name
-            voter.last_name = state_result.last_name
+            # NOTE: we assume the first name has no space here...
+            names = state_result.full_name.split()
+            voter.first_name = names.pop(0)
+            voter.last_name = names.pop()
+            voter.middle_name = " ".join(names)
 
         # other PII (prefer state)
         if state_voter_id:

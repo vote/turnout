@@ -81,6 +81,8 @@ def lookup_ga(
     county = None
     for addr in addrs:
         county = addr.get("address_components", {}).get("county", "").upper()
+        if addr.get("address_components", {}).get("state") != "GA":
+            continue
         if county.endswith(" COUNTY"):
             county = county[0:-7]
         if county:
@@ -100,7 +102,7 @@ def lookup_ga(
     )
     if not voter:
         return None, None
-
+    logger.info(voter)
     return voter.voter_reg_number, voter
 
 
