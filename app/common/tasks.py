@@ -129,9 +129,9 @@ def test_emails(to: str = None):
 
 
 @shared_task
-def test_optimizely():
+def test_optimizely(feature: str = "test_optimizely", var: str = "var"):
     from .rollouts import get_feature, get_feature_bool, get_optimizely_version
 
     logger.info(
-        f"test_optimizely task: version {get_optimizely_version()}, feature {get_feature('test_optimizely')}, var {get_feature_bool('test_optimizely', 'var')}"
+        f"test_optimizely task: version {get_optimizely_version()}, feature {feature}={get_feature(feature)}, var {var}={get_feature_bool(feature, var)}"
     )

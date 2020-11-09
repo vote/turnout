@@ -71,4 +71,4 @@ def get_feature_str(
 
 
 def get_optimizely_version():
-    return conf_manager._config.version
+    return conf_manager._config.revision
