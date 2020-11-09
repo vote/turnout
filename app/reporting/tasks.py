@@ -46,7 +46,7 @@ def calc_all_subscriber_stats():
                 INSERT INTO reporting_subscriberstats (uuid, partner_id, tool, count)
                 (
                     SELECT
-                    %(reg_uuid)s AS uuid,
+                    uuid_generate_v4() AS uuid,
                     partner_id,
                     'register' AS tool,
                     COUNT(*)
@@ -57,7 +57,7 @@ def calc_all_subscriber_stats():
                     UNION ALL
 
                     SELECT
-                    %(verify_uuid)s AS uuid,
+                    uuid_generate_v4() AS uuid,
                     partner_id,
                     'verify' AS tool,
                     COUNT(*)
@@ -68,7 +68,7 @@ def calc_all_subscriber_stats():
                     UNION ALL
 
                     SELECT
-                    %(absentee_uuid)s AS uuid,
+                    uuid_generate_v4() AS uuid,
                     partner_id,
                     'absentee' AS tool,
                     COUNT(*)
@@ -79,7 +79,7 @@ def calc_all_subscriber_stats():
                     UNION ALL
 
                     SELECT
-                    %(locate_uuid)s AS uuid,
+                    uuid_generate_v4() AS uuid,
                     partner_id,
                     'locate' AS tool,
                     COUNT(*)
@@ -93,14 +93,7 @@ def calc_all_subscriber_stats():
 
             cursor.execute(
                 SQL_QUERY,
-                {
-                    "start_time": refresh_obj.last_run,
-                    "end_time": current_update_time,
-                    "reg_uuid": uuid.uuid4(),
-                    "verify_uuid": uuid.uuid4(),
-                    "absentee_uuid": uuid.uuid4(),
-                    "locate_uuid": uuid.uuid4(),
-                },
+                {"start_time": refresh_obj.last_run, "end_time": current_update_time},
             )
 
             StatsRefresh.objects.update(last_run=current_update_time)
