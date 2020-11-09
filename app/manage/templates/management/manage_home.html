@@ -16,7 +16,7 @@
 			<li><strong>Register:</strong> {{ stats.register|intcomma }}</li>
 			<li><strong>Verify:</strong> {{ stats.verify|intcomma }}</li>
 			<li><strong>Absentee:</strong> {{ stats.absentee|intcomma }}</li>
-			<li><strong>Locator:</strong> {{ stats.locator|intcomma }}</li>
+			<li><strong>Locator:</strong> {{ stats.locate|intcomma }}</li>
 		</ul>
 
 		{% endif %}
@@ -45,34 +45,5 @@
 			</ul>
 			<a href="https://docs.voteamerica.com" class="btn btn-primary">Read the documentation</a>
 		</div>
-
- {% comment %} <table class="table">
-	<thead>
-	  <th>State</th><th>Register</th><th>Verify</th><th>Absentee</th>
-	</thead>
-	<tbody>
-	  {% for state, d in by_state %}
-	  <tr>
-	    <td>{{ state }}</td>
-	    <td>{{ d.register }}</td>
-	    <td>{{ d.verify }}</td>
-	    <td>{{ d.absentee }}</td>
-	  </tr>
-	  {% endfor %}
-	  <tfoot>
-	    <td>Total</td>
-	    <td>{{stats.register}}</td>
-	    <td>{{stats.verify}}</td>
-	    <td>{{stats.absentee}}</td>
-	  </tfoot>
-	</tbody>
-      </table>
-    <p>
-      {% if stats.last_updated %}
-      {% load tz %}
-      Last updated: {{ stats.last_updated|timezone:user.timezone }} ({{ user.timezone }})
-      {% endif %}
-  </div>
-		 {% endcomment %}
 </div>
 {% endblock %}

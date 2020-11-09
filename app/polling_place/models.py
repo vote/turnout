@@ -24,6 +24,9 @@ class PollingPlaceLookup(
 
     class Meta(object):
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_at"]),
+        ]
 
     def __str__(self):
         return f"Polling Place Lookup - {self.address1}, {self.city}, {self.state.pk} {self.zipcode}".strip()

@@ -15,3 +15,15 @@ class Report(SubscriberModel, UUIDModel, TimestampModel):
     result_item = models.ForeignKey(
         "storage.StorageItem", null=True, on_delete=models.SET_NULL, blank=True
     )
+
+
+class SubscriberStats(SubscriberModel, UUIDModel):
+    tool = TurnoutEnumField(enums.ToolName)
+    count = models.BigIntegerField()
+
+    class Meta:
+        unique_together = (("subscriber", "tool"),)
+
+
+class StatsRefresh(models.Model):
+    last_run = models.DateTimeField(primary_key=True)

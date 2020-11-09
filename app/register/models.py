@@ -127,6 +127,9 @@ class Registration(
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_at"]),
+        ]
 
     def __str__(self):
         return f"Registration - {self.first_name} {self.last_name}, {self.state.pk}".strip()

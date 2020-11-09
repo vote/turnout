@@ -1,20 +1,14 @@
-import datetime
 import logging
+import uuid
+from datetime import datetime, timedelta, timezone
 
 from celery import shared_task
-from django.conf import settings
-from django.core.cache import cache
-from django.db.models import Count
+from django.db import connection, transaction
 
-from absentee.models import BallotRequest
 from common.analytics import statsd
 from mailer.retry import EMAIL_RETRY_PROPS
-from multi_tenant.models import Client
-from polling_place.models import PollingPlaceLookup
-from register.models import Registration
-from verifier.models import Lookup
 
-from .models import Report
+from .models import Report, StatsRefresh
 from .notification import trigger_notification
 from .runner import report_runner
 
@@ -39,90 +33,74 @@ def send_report_notification(report_pk: str):
 @shared_task
 @statsd.timed("turnout.reporting.calc_all_subscriber_stats")
 def calc_all_subscriber_stats():
-    OFFSET_SECONDS = 2
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            # We fetch stats starting from the last update time, and going until (now - 1 minute).
+            # The 1 minute offset is to account for differences between the DB clock and
+            # the app server clock -- if the app server is ahead of the DB, we don't
+            # want to think that we have data up to, e.g. 4PM if the DB thinks it's 3:59PM.
+            current_update_time = datetime.now(tz=timezone.utc) - timedelta(minutes=1)
+            refresh_obj = StatsRefresh.objects.all()[0]
 
-    expiration = settings.CALC_STATS_INTERVAL * 60
-    limit = expiration / OFFSET_SECONDS
+            SQL_QUERY = """
+                INSERT INTO reporting_subscriberstats (uuid, partner_id, tool, count)
+                (
+                    SELECT
+                    %(reg_uuid)s AS uuid,
+                    partner_id,
+                    'register' AS tool,
+                    COUNT(*)
+                    FROM register_registration
+                    WHERE created_at > %(start_time)s AND created_at <= %(end_time)s
+                    GROUP BY partner_id
 
-    logger.info(f"Recalculating all subscriber stats (limit {limit})")
-    n = 0
-    for client in Client.objects.order_by("?")[:limit]:
-        calc_subscriber_stats.apply_async(
-            (client.uuid,), countdown=n, expires=expiration
-        )
-        n += OFFSET_SECONDS
+                    UNION ALL
 
+                    SELECT
+                    %(verify_uuid)s AS uuid,
+                    partner_id,
+                    'verify' AS tool,
+                    COUNT(*)
+                    FROM verifier_lookup
+                    WHERE created_at > %(start_time)s AND created_at <= %(end_time)s
+                    GROUP BY partner_id
 
-@shared_task
-@statsd.timed("turnout.reporting.calc_subscriber_stats")
-def calc_subscriber_stats(uuid):
-    extra = {
-        "subscriber_uuid": uuid,
-    }
-    logger.info("Calculated Subscriber Stats %(subscriber_uuid)s", extra, extra=extra)
+                    UNION ALL
 
-    r = {
-        "last_updated": datetime.datetime.utcnow(),
-    }
+                    SELECT
+                    %(absentee_uuid)s AS uuid,
+                    partner_id,
+                    'absentee' AS tool,
+                    COUNT(*)
+                    FROM absentee_ballotrequest
+                    WHERE created_at > %(start_time)s AND created_at <= %(end_time)s
+                    GROUP BY partner_id
 
-    # some totals
-    r["register"] = (
-        Registration.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .count()
-    )
-    r["verify"] = (
-        Lookup.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .count()
-    )
-    r["absentee"] = (
-        BallotRequest.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .count()
-    )
-    r["locator"] = PollingPlaceLookup.objects.filter(subscriber_id=uuid).count()
+                    UNION ALL
 
-    # breakdown by state
-    r["by_state"] = {}
-    for i in (
-        Lookup.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .values("state_id")
-        .order_by("state_id")
-        .annotate(count=Count("state_id"))
-    ):
-        if i["state_id"] not in r["by_state"]:
-            r["by_state"][i["state_id"]] = {}
-        r["by_state"][i["state_id"]]["verify"] = i["count"]
-    for i in (
-        Registration.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .values("state_id")
-        .annotate(count=Count("state_id"))
-        .order_by("state_id")
-    ):
-        if i["state_id"] not in r["by_state"]:
-            r["by_state"][i["state_id"]] = {}
-        r["by_state"][i["state_id"]]["register"] = i["count"]
-    for i in (
-        BallotRequest.objects.filter(subscriber_id=uuid)
-        .select_related("action", "action__details")
-        .values("state_id")
-        .annotate(count=Count("state_id"))
-        .order_by("state_id")
-    ):
-        if i["state_id"] not in r["by_state"]:
-            r["by_state"][i["state_id"]] = {}
-        r["by_state"][i["state_id"]]["absentee"] = i["count"]
-    for i in (
-        PollingPlaceLookup.objects.filter(subscriber_id=uuid, state_id__isnull=False)
-        .values("state_id")
-        .annotate(count=Count("state_id"))
-        .order_by("state_id")
-    ):
-        if i["state_id"] not in r["by_state"]:
-            r["by_state"][i["state_id"]] = {}
-        r["by_state"][i["state_id"]]["locator"] = i["count"]
+                    SELECT
+                    %(locate_uuid)s AS uuid,
+                    partner_id,
+                    'locate' AS tool,
+                    COUNT(*)
+                    FROM polling_place_pollingplacelookup
+                    WHERE created_at > %(start_time)s AND created_at <= %(end_time)s
+                    GROUP BY partner_id
+                )
+                ON CONFLICT (partner_id, tool)
+                DO UPDATE SET count = reporting_subscriberstats.count + excluded.count
+            """
 
-    cache.set(f"client.stats/{uuid}", r, 24 * 60 * 60)
+            cursor.execute(
+                SQL_QUERY,
+                {
+                    "start_time": refresh_obj.last_run,
+                    "end_time": current_update_time,
+                    "reg_uuid": uuid.uuid4(),
+                    "verify_uuid": uuid.uuid4(),
+                    "absentee_uuid": uuid.uuid4(),
+                    "locate_uuid": uuid.uuid4(),
+                },
+            )
+
+            StatsRefresh.objects.update(last_run=current_update_time)

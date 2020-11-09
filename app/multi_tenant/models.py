@@ -1,6 +1,5 @@
 import reversion
 from django.conf import settings
-from django.core.cache import cache
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.functional import cached_property
@@ -8,6 +7,7 @@ from django.utils.functional import cached_property
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import TimestampModel, UUIDModel
+from reporting.models import StatsRefresh
 
 DISCLAIMER_TEMPLATE = "multi_tenant/disclaimer.txt"
 
@@ -88,8 +88,20 @@ class Client(UUIDModel, TimestampModel):
 
     @property
     def stats(self):
-        # NOTE: callers should be able to cope with getting an empty dict here
-        return cache.get(f"client.stats/{self.uuid}") or {}
+        refresh_obj = StatsRefresh.objects.all()[0]
+
+        stats = {
+            "last_updated": refresh_obj.last_run,
+            "register": 0,
+            "verify": 0,
+            "absentee": 0,
+            "locate": 0,
+        }
+
+        for stat in self.subscriberstats_set.all():
+            stats[stat.tool.value] = stat.count
+
+        return stats
 
     @cached_property
     def disclaimer(self):
