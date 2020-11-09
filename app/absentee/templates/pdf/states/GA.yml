@@ -12,7 +12,7 @@ form_fields:
   # that election and don't need to ask for party.
   - type: section
     label: Election date
-    note: This form will request a ballot for the General Election on Nov. 3, 2020.
+    note: This form will request a ballot for the Federal General Election Runoff on Jan. 5, 2021.
 
 
 auto_fields:
@@ -20,7 +20,7 @@ auto_fields:
     type: todays_date
   - slug: election_date
     type: static
-    value: 11/03/2020
+    value: 01/05/2021
 
 manual_fields:
   - update_address
