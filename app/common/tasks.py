@@ -130,8 +130,14 @@ def test_emails(to: str = None):
 
 @shared_task
 def test_optimizely(feature: str = "test_optimizely", var: str = "var"):
-    from .rollouts import get_feature, get_feature_bool, get_optimizely_version
+    from .rollouts import (
+        get_feature,
+        get_feature_bool,
+        get_feature_int,
+        get_feature_str,
+        get_optimizely_version,
+    )
 
     logger.info(
-        f"test_optimizely task: version {get_optimizely_version()}, feature {feature}={get_feature(feature)}, var {var}={get_feature_bool(feature, var)}"
+        f"test_optimizely task: version {get_optimizely_version()}, feature {feature}={get_feature(feature)}, var {var}=bool({get_feature_bool(feature, var)}),int({get_feature_int(feature, var)}),str({get_feature_str(feature, var)})"
     )

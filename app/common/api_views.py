@@ -4,7 +4,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .rollouts import get_feature, get_feature_bool, get_optimizely_version
+from .rollouts import (
+    get_feature,
+    get_feature_bool,
+    get_feature_int,
+    get_feature_str,
+    get_optimizely_version,
+)
 from .tasks import test_optimizely as test_optimizely_task
 
 logger = logging.getLogger("common")
@@ -26,7 +32,9 @@ def test_optimizely(request):
             "feature": feature,
             "var": var,
             "overall": get_feature(feature),
-            "var": get_feature_bool(feature, var),
+            "as_bool": get_feature_bool(feature, var),
+            "as_int": get_feature_int(feature, var),
+            "as_str": get_feature_str(feature, var),
             "version": get_optimizely_version(),
         }
     )
