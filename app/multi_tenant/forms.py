@@ -20,20 +20,24 @@ sms_mode_choice = forms.ChoiceField(
     label="SMS program opt-in behavior",
     widget=forms.RadioSelect,
     choices=[
-        (SubscriberSMSOption.NONE, "We do not have an SMS program."),
-        (
-            SubscriberSMSOption.AUTO_OPT_IN,
-            "We automatically opt everyone into our SMS program. There is no checkbox. (You should consult a TCPA attorney to confirm this is legal for your organization before selecting this option)",
-        ),
         (
             SubscriberSMSOption.BOX_UNCHECKED,
-            "We surface an SMS opt-in box that is unchecked by default.",
+            "We surface an SMS opt-in box that is unchecked by default. (Recommended for all tax-statuses.)",
         ),
         (
             SubscriberSMSOption.BOX_CHECKED,
-            "We surface an SMS opt-in box that is checked by default. (If you are not sure, choose this option. This will help you build your SMS list in a way that is compliant for all organizations)",
+            "We surface an SMS opt-in box that is checked by default.**",
+        ),
+        (
+            SubscriberSMSOption.AUTO_OPT_IN,
+            "We would like to automatically opt everyone into our SMS program, without providing a checkbox.**",
+        ),
+        (
+            SubscriberSMSOption.NONE,
+            "We do not have an SMS program and do not require opt-in options.",
         ),
     ],
+    # initial=SubscriberSMSOption.BOX_UNCHECKED,
 )
 
 

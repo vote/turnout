@@ -18,12 +18,13 @@
                     {{ form.privacy_policy|as_crispy_field }}
                     <h3>SMS Program</h3>
                     {{ form.sms_mode|as_crispy_field }}
+                    <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
                     <h3>Third Party Integrations</h3>
                     <p><small>Bluelink and TMC syncs happen nightly. Your VoteAmerica subscriber ID is <code><small>{{ user.active_client_slug }}</small></code>.</small></p>
                     {{ form.sync_bluelink|as_crispy_field }}
                     {{ form.sync_tmc|as_crispy_field }}
-		    {{ form.sync_actionnetwork|as_crispy_field }}
-		    {{ form.actionnetwork_api_key|as_crispy_field }}
+                    {{ form.sync_actionnetwork|as_crispy_field }}
+                    {{ form.actionnetwork_api_key|as_crispy_field }}
                     <button type="submit" class="btn btn-block btn-primary">Update</button>
                     {% csrf_token %}
                 </form>

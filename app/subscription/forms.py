@@ -25,6 +25,7 @@ class InterestForm(forms.ModelForm):
             "product",
             "nonprofit",
             "ein",
+            "sms_mode",
         ]
         labels = {
             "organization_name": "Organization Name",
@@ -71,7 +72,7 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
             "sync_bluelink",
         ]
         help_texts = {
-            "email": "Only change this after the subscriber has added our DKIM records"
+            "email": "Only change this after the subscriber has added our DKIM records",
         }
         field_classes = {
             "sync_tmc": forms.BooleanField,

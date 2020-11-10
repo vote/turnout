@@ -16,3 +16,17 @@ html {
     padding: 0;
     display: block;
 }
+
+form input[type=radio] ~ label.form-check-label {
+    font-weight: normal;
+    margin-bottom: 10px;
+}
+
+.manual-help {
+    margin-top: -15px;
+    margin-bottom: 15px;
+}
+
+h3 {
+    margin-top: 40px
+}

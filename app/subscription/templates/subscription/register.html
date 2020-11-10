@@ -10,8 +10,21 @@
                     <div class="col-md-12">
                         <h1>Sign up for premium tools</h1>
                         <form action="" method="post">
-                            {{ form|crispy }}
+                            <h3>Contact Info</h3>
+                            {{ form.organization_name|as_crispy_field }}
+                            {{ form.website|as_crispy_field }}
+                            {{ form.first_name|as_crispy_field }}
+                            {{ form.last_name|as_crispy_field }}
+                            {{ form.email|as_crispy_field }}
 
+                            <h3>Subscription</h3>
+                            {{ form.product|as_crispy_field }}
+                            {{ form.nonprofit|as_crispy_field }}
+                            {{ form.ein|as_crispy_field }}
+
+                            <h3>SMS Program</h3>
+                            {{ form.sms_mode|as_crispy_field }}
+                            <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
                             <button type="submit" class="btn btn-block btn-primary">Submit</button>
                             {% csrf_token %}
                         </form>
