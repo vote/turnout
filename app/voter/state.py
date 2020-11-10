@@ -80,9 +80,9 @@ def lookup_ga(
 
     county = None
     for addr in addrs:
-        county = addr.get("address_components", {}).get("county", "").upper()
         if addr.get("address_components", {}).get("state") != "GA":
             continue
+        county = addr.get("address_components", {}).get("county", "").upper()
         if county.endswith(" COUNTY"):
             county = county[0:-7]
         if county:
