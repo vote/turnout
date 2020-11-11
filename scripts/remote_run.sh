@@ -79,6 +79,7 @@ export REGISTER_CO_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-d
 export REGISTER_WA_VRD_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_id | jq '.Parameter["Value"]' -r)
 export REGISTER_WA_VRD_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_wa_vrd_enabled | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_key | jq '.Parameter["Value"]' -r)
+export ACTIONNETWORK_SUBSCRIBERS_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_subscribers_key | jq '.Parameter["Value"]' -r)
 export OPTIMIZELY_SDK_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.optimizely_sdk_key | jq '.Parameter["Value"]' -r)
 export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_enabled | jq '.Parameter["Value"]' -r)
 export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
@@ -199,6 +200,7 @@ if [ "$2" ]; then
     -e REGISTER_WA_VRD_ID \
     -e REGISTER_WA_VRD_ENABLED \
     -e ACTIONNETWORK_KEY \
+    -e ACTIONNETWORK_SUBSCRIBERS_KEY \
     -e OPTIMIZELY_SDK_KEY \
     -e SLACK_SUBSCRIBER_INTEREST_ENABLED \
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
@@ -294,6 +296,7 @@ else
     -e REGISTER_WA_VRD_ID \
     -e REGISTER_WA_VRD_ENABLED \
     -e ACTIONNETWORK_KEY \
+    -e ACTIONNETWORK_SUBSCRIBERS_KEY \
     -e OPTIMIZELY_SDK_KEY \
     -e SLACK_SUBSCRIBER_INTEREST_ENABLED \
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \

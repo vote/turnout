@@ -10,7 +10,7 @@ from django.db.models import Exists, OuterRef
 from absentee.models import BallotRequest
 from common.apm import tracer
 from common.enums import ExternalToolType
-from multi_tenant.models import SubscriberIntegrationProperty
+from multi_tenant.models import Client, SubscriberIntegrationProperty
 from register.models import Registration
 from reminder.models import ReminderRequest
 from smsbot.models import Number
@@ -83,6 +83,7 @@ def get_api_key(subscriber_id):
     return settings.ACTIONNETWORK_KEY
 
 
+# parse out form (uu)id *and* action name (for forms created for ACTIONS dict)
 def get_form_ids(ids, prefix):
     an_id = None
     va_action = None
@@ -93,6 +94,19 @@ def get_form_ids(ids, prefix):
         elif org == "voteamerica" and pid.startswith(prefix + "_"):
             va_action = pid.split("_", 2)[1]
     return an_id, va_action
+
+
+# parse out form (uu)id for a given form name
+def get_form_id(ids, form_name):
+    an_id = None
+    is_form = False
+    for gid in ids:
+        (org, pid) = gid.split(":")
+        if org == "action_network":
+            an_id = pid
+        elif org == "voteamerica" and pid == form_name:
+            is_form = True
+    return an_id if is_form else None
 
 
 def setup_action_forms(subscriber_id, api_key, slug):
@@ -347,6 +361,101 @@ def sync():
     sync_all_items(BallotRequest)
     sync_all_items(Registration)
     sync_all_items(ReminderRequest)
+
+
+@tracer.wrap()
+def sync_subscriber(subscriber: Client) -> None:
+    session = get_session(settings.ACTIONNETWORK_SUBSCRIBERS_KEY)
+    form_id = get_form(session, "VoteAmerica Tool Users", "subscriber")
+
+    # This is a bit messy: we don't have clear owner information for a
+    # subscriber beyond the interest when they signed up.
+    interest = None
+    for sub in subscriber.subscription_set.all():
+        if sub.interest:
+            interest = sub.interest
+            break
+    if not interest:
+        logger.info(f"No Interest for subscriber {subscriber}")
+        return
+
+    info = {
+        "person": {
+            "given_name": interest.first_name,
+            "family_name": interest.last_name,
+            "email_addresses": [{"address": interest.email}],
+            "custom_fields": {
+                "subscriber_is_c3": interest.nonprofit,
+                "subscriber_slug": subscriber.default_slug.slug,
+            },
+        },
+    }
+    url = ADD_ENDPOINT.format(form_id=form_id)
+    with tracer.trace("an.subscriber_form", service="actionnetwork"):
+        response = session.post(url, json=info)
+
+    if response.status_code != 200:
+        sentry_sdk.capture_exception(
+            ActionNetworkError(
+                f"Error posting subscriber to form {url}, status code {response.status_code}"
+            )
+        )
+        logger.warning(
+            f"Failed to post subscriber {subscriber} info {info} to actionnetwork: {response.text}"
+        )
+    logger.info(f"Posted subscriber {subscriber} to actionnetwork")
+
+
+def get_form(session, form_description: str, form_name: str) -> str:
+    if settings.ENV != "prod":
+        form_name = f"staging_{form_name}"
+
+    cache_key = f"actionnetwork_form_{form_name}"
+    form_id = cache.get(cache_key)
+    if form_id:
+        return form_id
+
+    nexturl = FORM_ENDPOINT
+    while nexturl:
+        with tracer.trace("an.form", service="actionnetwork"):
+            response = session.get(nexturl,)
+        for form in response.json()["_embedded"]["osdi:forms"]:
+            an_id = get_form_id(form["identifiers"], form_name)
+            if an_id:
+                logger.info(f"Found existing {form_name} form {an_id}")
+                cache.set(cache_key, an_id)
+                return an_id
+        nexturl = response.json().get("_links", {}).get("next", {}).get("href")
+
+    raise ActionNetworkError(f"Missing form {form_name}")
+
+
+def create_form(session, form_description: str, form_name: str) -> str:
+    if settings.ENV != "prod":
+        form_name = f"staging_{form_name}"
+        form_description += " (staging)"
+
+    # create form
+    logger.info(f"Creating form {form_name}")
+    with tracer.trace("an.form_create", service="actionnetwork"):
+        response = session.post(
+            FORM_ENDPOINT,
+            json={
+                "identifiers": [f"voteamerica:{form_name}"],
+                "title": form_description,
+                "origin_system": "voteamerica",
+            },
+        )
+    if response.status_code != 200:
+        logger.error(
+            f"Failed to create ActionNetwork {form_name} form: {response.status_code} {response.text}"
+        )
+        raise ActionNetworkError(
+            f"Failed to create {form_name} form, status_code {response.status_code}"
+        )
+    form_id = get_form_id(response.json()["identifiers"], form_name)
+    logger.info(f"Created {form_name} form {form_id}")
+    return form_id
 
 
 @tracer.wrap()

@@ -8,6 +8,7 @@ from common.enums import EventType, ExternalToolType
 from common.models import DelayedTask
 from common.rollouts import get_feature_bool
 from event_tracking.models import Event
+from multi_tenant.models import Client
 from register.models import Registration
 from reminder.models import ReminderRequest
 from verifier.models import Lookup
@@ -54,6 +55,14 @@ def sync_250ok_to_actionnetwork():
     from .actionnetwork import add_test_addrs
 
     add_test_addrs()
+
+
+@shared_task(queue="actionnetwork")
+def sync_subscriber_to_actionnetwork(pk: str) -> None:
+    from .actionnetwork import sync_subscriber
+
+    subscriber = Client.objects.get(pk=pk)
+    sync_subscriber(subscriber)
 
 
 @shared_task(queue="actionnetwork")

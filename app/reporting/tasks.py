@@ -1,5 +1,4 @@
 import logging
-import uuid
 from datetime import datetime, timedelta, timezone
 
 from celery import shared_task

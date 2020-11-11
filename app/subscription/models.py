@@ -7,6 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from common import enums
 from common.fields import TurnoutEnumField
 from common.utils.models import SearchableModel, TimestampModel, UUIDModel
+from integration.tasks import sync_subscriber_to_actionnetwork
 from multi_tenant.invite import invite_user
 
 from .tasks import send_organization_welcome_notification
@@ -81,6 +82,7 @@ class Interest(
 
         invite_user(initial_user_email, subscriber)
         send_organization_welcome_notification.delay(subscriber.pk, initial_user_email)
+        sync_subscriber_to_actionnetwork.delay(subscriber.pk)
 
 
 class Subscription(UUIDModel, TimestampModel):

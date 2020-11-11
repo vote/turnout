@@ -234,6 +234,10 @@
         name: 'ACTIONNETWORK_KEY',
       },
       {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.actionnetwork_subscribers_key',
+        name: 'ACTIONNETWORK_SUBSCRIBERS_KEY',
+      },
+      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.optimizely_sdk_key',
         name: 'OPTIMIZELY_SDK_KEY',
       },
