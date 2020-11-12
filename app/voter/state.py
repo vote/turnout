@@ -116,5 +116,5 @@ def lookup_state(
             return lookup_ga(item)
     except Exception as e:
         sentry_sdk.capture_exception(e)
-        logger.error(f"Hit exception doing state lookup on {item}: {e}")
+        logger.warning(f"Hit exception doing state lookup on {item}: {e}")
     return None, None
