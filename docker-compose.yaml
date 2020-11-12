@@ -84,7 +84,7 @@ services:
   worker:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -P gevent -Q default,leouptime,usvf --without-heartbeat --without-mingle --without-gossip
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,leouptime,usvf
     volumes:
       - ./app:/app
     environment:
@@ -108,7 +108,7 @@ services:
   worker_bulk:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -P gevent -Q tokens
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q tokens
     volumes:
       - ./app:/app
     environment:
@@ -132,7 +132,7 @@ services:
   worker_high_pri:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -P gevent -Q high-pri
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
     volumes:
       - ./app:/app
     environment:

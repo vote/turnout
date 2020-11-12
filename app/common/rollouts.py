@@ -1,17 +1,13 @@
-import logging
 from typing import Optional
 
 from django.conf import settings
 from optimizely import optimizely
 from optimizely.config_manager import PollingConfigManager
 
-logger = logging.getLogger("optimizely")
-
 conf_manager = PollingConfigManager(
     sdk_key=settings.OPTIMIZELY_SDK_KEY,
     update_interval=settings.OPTIMIZELY_UPDATE_INTERVAL_SECONDS,
     url_template="https://optimizely.s3.amazonaws.com/datafiles/{sdk_key}.json",
-    logger=logger,
 )
 
 optimizely_client = optimizely.Optimizely(config_manager=conf_manager)
