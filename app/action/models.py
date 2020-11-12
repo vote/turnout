@@ -18,6 +18,9 @@ class Action(UUIDModel, TimestampModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_at"]),
+        ]
 
     def track_event(self, event_type: Any) -> Event:
         return Event.objects.create(action=self, event_type=event_type)

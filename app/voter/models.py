@@ -31,7 +31,7 @@ class Voter(UUIDModel, TimestampModel):
     ts_result = JSONField(null=True)
 
     # registration status
-    registered = models.BooleanField(null=True)
+    registered = models.BooleanField(null=True, db_index=True)
     registration_date = models.DateField(null=True)
     last_registration_refresh = models.DateTimeField(null=True)
 
@@ -55,6 +55,9 @@ class Voter(UUIDModel, TimestampModel):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_at"]),
+        ]
 
     def refresh_registration_status(
         self,
