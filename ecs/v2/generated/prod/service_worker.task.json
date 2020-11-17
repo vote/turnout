@@ -1373,7 +1373,7 @@
    ],
    "cpu": "1024",
    "executionRoleArn": "arn:aws:iam::719108811834:role/Turnout-ECS-Prod",
-   "memory": "2048",
+   "memory": "4096",
    "networkMode": "awsvpc",
    "requiresCompatibilities": [
       "FARGATE"
