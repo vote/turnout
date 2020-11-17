@@ -22,8 +22,8 @@ local memory = std.extVar('memory');
       command: ['/app/ops/worker_launch.sh', 'high-pri'],
     },
   ] + datadogContainers.for_env(env),
-  memory: '8192',
+  memory: '2048',
   requiresCompatibilities: ['FARGATE'],
   networkMode: 'awsvpc',
-  cpu: '4096',
+  cpu: '1024',
 }

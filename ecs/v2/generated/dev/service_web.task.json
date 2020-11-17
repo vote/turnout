@@ -510,9 +510,9 @@
          "name": "log_router"
       }
    ],
-   "cpu": "4096",
+   "cpu": "1024",
    "executionRoleArn": "arn:aws:iam::719108811834:role/Turnout-ECS-Dev",
-   "memory": "8192",
+   "memory": "2048",
    "networkMode": "awsvpc",
    "requiresCompatibilities": [
       "FARGATE"
