@@ -501,6 +501,9 @@ def unsubscribe_phone(phone):
                 },
             )
         logger.info(f"Unsubscribed {phone} from actionnetwork person_id {person_id}")
+        return True
+    else:
+        return False
 
 
 @tracer.wrap()
@@ -517,6 +520,9 @@ def resubscribe_phone(phone):
                 },
             )
         logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")
+        return True
+    else:
+        return False
 
 
 @tracer.wrap()

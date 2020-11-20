@@ -17,10 +17,8 @@ from apikey.auth import ApiKeyAuthentication, ApiKeyRequired
 from common.analytics import statsd
 from common.enums import MessageDirectionType
 from common.rollouts import get_feature_int, get_feature_str
-from integration.tasks import (
-    resubscribe_phone_to_actionnetwork,
-    unsubscribe_phone_from_actionnetwork,
-)
+from integration.actionnetwork import resubscribe_phone
+from integration.tasks import unsubscribe_phone_from_actionnetwork
 from smsbot.models import Number, SMSMessage
 from voter.models import Voter
 
@@ -99,20 +97,24 @@ def handle_incoming(
         n.opt_out_time = date_created
         n.opt_in_time = None
         n.save()
+
+        # reply IFF optimizely has a value
+        reply = get_feature_str("smsbot", "stop")
+
     elif cmd in ["JOIN"]:
         logger.info(f"Opt-in from {n} at {date_created}")
         n.opt_in_time = date_created
         n.opt_out_time = None
         n.save()
 
-        reply = (
-            get_feature_str("smsbot", "autoreply_joined")
-            or "Thank you for subscribing to VoteAmerica election alerts. Reply STOP to cancel."
-        )
+        # Try to match this to an ActionNetwork subscriber.  Note that
+        # this will may fail if the number has been used more than
+        # once.
+        if resubscribe_phone(str(n.phone)):
+            reply = get_feature_str("smsbot", "join_success")
+        else:
+            reply = get_feature_str("smsbot", "join_fail")
 
-        # Try to match this to an ActionNetwork subscriber.  Note that this will may fail if the number
-        # has been used more than once.
-        resubscribe_phone_to_actionnetwork.delay(str(n.phone))
     elif cmd in ["HELP", "INFO"]:
         # reply IFF optimizely has a value for this
         reply = get_feature_str("smsbot", "help")
