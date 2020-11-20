@@ -299,6 +299,7 @@ def check_site_with(driver, proxy, site):
     BURN_LIST = [
         "Request unsuccessful. Incapsula incident ID",
         "<html><head></head><body></body></html>",
+        "our cyber-security service, which provides protection for our customers and systems,  has identified a problem that prevents us from completing your request",
     ]
     if get_feature_bool("leouptime", "enable_burn_list"):
         for b in BURN_LIST:
