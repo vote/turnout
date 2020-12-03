@@ -488,9 +488,68 @@ def lookup_person_by_phone(phone: str) -> str:
 
 
 @tracer.wrap()
-def unsubscribe_phone(phone):
-    # unsubscribe the most recent user of this phone number
-    person_id = lookup_person_by_phone(phone)
+def lookup_person_by_email(email: str) -> str:
+    session = get_session(settings.ACTIONNETWORK_KEY)
+    with tracer.trace("an.person_lookup", service="actionnetwork"):
+        response = session.get(
+            PERSON_HELPER_ENDPOINT, params={"filter": f"email_address eq '{email}'"}
+        )
+        people = response.json().get("_embedded", {}).get("osdi:people", [])
+        if len(people):
+            for i in people[0].get("identifiers", []):
+                if i.startswith("action_network:"):
+                    return i[len("action_network:") :]
+    return None
+
+
+@tracer.wrap()
+def lookup_person_by_email_and_phone(email: str, phone: str) -> str:
+    # AN does not include the leading + or any spaces or parens
+    phone = phone.replace(" ", "").replace("+", "").replace("(", "").replace(")", "")
+
+    session = get_session(settings.ACTIONNETWORK_KEY)
+    with tracer.trace("an.person_lookup", service="actionnetwork"):
+        response = session.get(
+            PERSON_HELPER_ENDPOINT, params={"filter": f"email_address eq '{email}'"}
+        )
+        people = response.json().get("_embedded", {}).get("osdi:people", [])
+        if len(people):
+            for n in people[0].get("phone_numbers", []):
+                if n.get("number") == phone:
+                    # matched both email and phone!
+                    for i in people[0].get("identifiers", []):
+                        if i.startswith("action_network:"):
+                            return i[len("action_network:") :]
+    return None
+
+
+@tracer.wrap()
+def unsubscribe_email(email):
+    person_id = lookup_person_by_email(email)
+    if person_id:
+        session = get_session(settings.ACTIONNETWORK_KEY)
+        with tracer.trace("an.person_update", service="actionnetwork"):
+            response = session.put(
+                PEOPLE_ENDPOINT.format(person_id=person_id),
+                json={"email_addresses": [{"status": "unsubscribed"}],},
+            )
+        logger.info(f"Unsubscribed {email} from actionnetwork person_id {person_id}")
+        return True
+    else:
+        logger.info(
+            f"Failed to unsubscribe {email}: unable to match to an actionnetwork person_id"
+        )
+        return False
+
+
+@tracer.wrap()
+def unsubscribe_phone(phone, email=None):
+    if email:
+        # this checks actionnetwork, but both the email and phone must match
+        person_id = lookup_person_by_email_and_phone(email, phone)
+    else:
+        # this checks turnout db only
+        person_id = lookup_person_by_phone(phone)
     if person_id:
         session = get_session(settings.ACTIONNETWORK_KEY)
         with tracer.trace("an.person_update", service="actionnetwork"):
@@ -503,6 +562,9 @@ def unsubscribe_phone(phone):
         logger.info(f"Unsubscribed {phone} from actionnetwork person_id {person_id}")
         return True
     else:
+        logger.info(
+            f"Failed to unsubscribe {phone}: unable to match to an actionnetwork person_id"
+        )
         return False
 
 
@@ -522,6 +584,9 @@ def resubscribe_phone(phone):
         logger.info(f"Resubscribed {phone} to actionnetwork person_id {person_id}")
         return True
     else:
+        logger.info(
+            f"Failed to resubscribe {phone}: unable to match to an actionnetwork person_id"
+        )
         return False
 
 

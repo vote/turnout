@@ -66,10 +66,17 @@ def sync_subscriber_to_actionnetwork(pk: str) -> None:
 
 
 @shared_task(queue="actionnetwork")
-def unsubscribe_phone_from_actionnetwork(phone: str) -> None:
+def unsubscribe_email_from_actionnetwork(email: str) -> None:
+    from .actionnetwork import unsubscribe_email
+
+    unsubscribe_email(email)
+
+
+@shared_task(queue="actionnetwork")
+def unsubscribe_phone_from_actionnetwork(phone: str, email: str = None) -> None:
     from .actionnetwork import unsubscribe_phone
 
-    unsubscribe_phone(phone)
+    unsubscribe_phone(phone, email=email)
 
 
 @shared_task(queue="actionnetwork")
