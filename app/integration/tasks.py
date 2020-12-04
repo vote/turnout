@@ -86,6 +86,13 @@ def resubscribe_phone_to_actionnetwork(phone: str) -> None:
     resubscribe_phone(phone)
 
 
+@shared_task(queue="actionnetwork")
+def change_actionnetwork_name(email: str, first_name: str, last_name: str) -> None:
+    from .actionnetwork import change_name
+
+    change_name(email, first_name, last_name)
+
+
 @shared_task
 def pull_movers(days=None, hours=None):
     from .movers import pull

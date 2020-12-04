@@ -591,6 +591,30 @@ def resubscribe_phone(phone):
 
 
 @tracer.wrap()
+def change_name(email, first_name, last_name):
+    session = get_session(settings.ACTIONNETWORK_KEY)
+    with tracer.trace("an.name_change", service="actionnetwork"):
+        response = session.post(
+            PERSON_HELPER_ENDPOINT,
+            json={
+                "person": {
+                    "given_name": first_name,
+                    "family_name": last_name,
+                    "email_addresses": [{"address": email}],
+                }
+            },
+        )
+        if response.status_code == 200:
+            logger.info(
+                f"Successfully changed name for {email} to {first_name} {last_name}"
+            )
+        else:
+            logger.warning(
+                f"Failed to change name for {email} to {first_name} {last_name}"
+            )
+
+
+@tracer.wrap()
 def add_test_addrs():
     from common.tasks import TEST_ADDRS
 

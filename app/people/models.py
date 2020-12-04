@@ -76,3 +76,12 @@ class Address(UUIDModel, TimestampModel):
     address2 = models.TextField(blank=True, null=True)
     city = models.TextField(blank=True, null=True)
     zipcode = models.TextField(blank=True, null=True)
+
+
+class NameOverride(UUIDModel, TimestampModel):
+    email = models.EmailField(max_length=150, null=True)
+    first_name = models.TextField(blank=True, null=True)
+    last_name = models.TextField(blank=True, null=True)
+
+    class Meta(object):
+        ordering = ["-created_at"]
