@@ -19,8 +19,8 @@ class NameOverrideSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
         ]
-        minimum_necessary_fields = [
-            "email",
-            "first_name",
-            "last_name",
-        ]
+        extra_kwargs = {
+            "email": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+        }
