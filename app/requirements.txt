@@ -11,8 +11,8 @@ kombu==4.6.11
 celery-redbeat==1.0.*
 django-celery-results==1.1.*
 django-redis==4.11.*
-ddtrace==0.39.*
-datadog==0.36.*
+ddtrace==0.45.*
+datadog==0.39.*
 python-json-logger==0.1.11
 sendgrid==6.1.*
 django-sendgrid-v5==0.8.*
