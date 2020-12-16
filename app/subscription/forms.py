@@ -18,11 +18,11 @@ class InterestForm(forms.ModelForm):
             # ),
             (
                 enums.SubscriberPlan.PREMIUM,
-                "Premium - $2,500/mo: Get contact information for voters who use your instance of the VoteAmerica tools.",
+                "Premium - $2,000/mo: Get contact information for voters who use your instance of the VoteAmerica tools.",
             ),
             (
                 enums.SubscriberPlan.NONPROFIT,
-                "Nonprofit - $1,500/mo: 501(c)3 charitable organizations can use VoteAmerica's premium tools at a 40% discount.",
+                "Nonprofit - $0/mo: 501(c)3 charitable organizations can use VoteAmerica's premium tools for free.",
             ),
         ],
         widget=forms.RadioSelect,
