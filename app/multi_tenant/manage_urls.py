@@ -10,6 +10,11 @@ urlpatterns = [
         manage_views.SubscriberUpdateSettingsView.as_view(),
         name="settings",
     ),
+    path(
+        "subscription/",
+        manage_views.SubscriptionUpdateView.as_view(),
+        name="subscription",
+    ),
     path("users/", manage_views.ManagerListView.as_view(), name="manager_list"),
     path(
         "users/<slug:pk>/remove/",

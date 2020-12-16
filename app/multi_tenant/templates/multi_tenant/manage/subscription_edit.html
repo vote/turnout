@@ -1,0 +1,27 @@
+{% extends "management/manage_base.html" %}
+{% load sekizai_tags crispy_forms_tags %}
+
+{% block title %}Update Subscription | {{ block.super }}{% endblock title %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="col-lg-12">
+        <h1>Subscription Settings</h1>
+        <p>
+          You are on the <strong>{{subscription.plan}}</strong> plan.
+          Email <a href="mailto:premium@voteamerica.com">premium@voteamerica.com</a>
+          to change your plan.
+        </p>
+        <div class="card">
+            <div class="card-header">Subscription Contact Info</div>
+            <div class="card-body">
+                <form role="form" method="POST" action="" novalidate>
+                  {{ form|crispy }}
+                  <button type="submit" class="btn btn-block btn-primary">Update</button>
+                  {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

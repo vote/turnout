@@ -21,7 +21,10 @@ class SubscriberSlugViewSet(GenericViewSet):
                 "url": subscriber.url,
                 "terms_of_service": subscriber.terms_of_service,
                 "privacy_policy": subscriber.privacy_policy,
-                "sms_enabled": subscriber.sms_enabled == True,
+                "has_data_access": subscriber.plan_has_data_access(),
+                "sms_enabled": subscriber.sms_enabled == True
+                if subscriber.plan_has_data_access()
+                else False,
                 "sms_checkbox_default": subscriber.sms_checkbox_default == True,
                 "sms_disclaimer": subscriber.sms_disclaimer,
                 "sms_checkbox": subscriber.sms_checkbox == True,

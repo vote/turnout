@@ -1,18 +1,32 @@
 from django import forms
 
+from common import enums
 from multi_tenant.forms import sms_mode_choice
 from multi_tenant.models import Client, SubscriberSlug
 
-from .models import Interest, Product
+from .models import Interest, Subscription
 
 
 class InterestForm(forms.ModelForm):
-    product = forms.ModelChoiceField(
-        label="Term",
-        queryset=Product.objects.filter(public=True),
+    sms_mode = sms_mode_choice
+
+    plan = forms.ChoiceField(
+        choices=[
+            # (
+            #     enums.SubscriberPlan.FREE,
+            #     "Free: Embed VoteAmerica's tools on your own website and see aggregated stats, at no cost.",
+            # ),
+            (
+                enums.SubscriberPlan.PREMIUM,
+                "Premium - $2,500/mo: Get contact information for voters who use your instance of the VoteAmerica tools.",
+            ),
+            (
+                enums.SubscriberPlan.NONPROFIT,
+                "Nonprofit - $1,500/mo: 501(c)3 charitable organizations can use VoteAmerica's premium tools at a 40% discount.",
+            ),
+        ],
         widget=forms.RadioSelect,
     )
-    sms_mode = sms_mode_choice
 
     class Meta:
         model = Interest
@@ -22,8 +36,8 @@ class InterestForm(forms.ModelForm):
             "first_name",
             "last_name",
             "email",
-            "product",
-            "nonprofit",
+            "phone",
+            "plan",
             "ein",
             "sms_mode",
         ]
@@ -31,14 +45,7 @@ class InterestForm(forms.ModelForm):
             "organization_name": "Organization Name",
             "first_name": "First Name",
             "last_name": "Last Name",
-            "nonprofit": "Check here if you are a 501(c)3 Non-Profit organization",
-            "ein": "If yes to 501(c)3 please enter the EIN below",
-        }
-        help_texts = {
-            "nonprofit": "If so, you will receive a 100% discount for the entirety of 2020.",
-        }
-        field_classes = {
-            "nonprofit": forms.BooleanField,
+            "ein": "If you are signing up for the Nonprofit plan, please provide your EIN here.",
         }
         widgets = {
             "organization_name": forms.TextInput,
@@ -50,7 +57,10 @@ class InterestForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        if cleaned_data["nonprofit"] and not cleaned_data["ein"]:
+        if (
+            cleaned_data["plan"] == str(enums.SubscriberPlan.NONPROFIT)
+            and not cleaned_data["ein"]
+        ):
             self.add_error(
                 "ein", "In order to receive a 501(c)3 discount, you must provide an EIN"
             )
@@ -64,7 +74,6 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
         fields = [
             "name",
             "url",
-            "status",
             "email",
             "privacy_policy",
             "sms_disclaimer",
@@ -77,6 +86,23 @@ class SubscriberAdminSettingsForm(forms.ModelForm):
         field_classes = {
             "sync_tmc": forms.BooleanField,
             "sync_bluelink": forms.BooleanField,
+        }
+
+
+class SubscriptionAdminSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Subscription
+        fields = [
+            "primary_contact_first_name",
+            "primary_contact_last_name",
+            "primary_contact_email",
+            "primary_contact_phone",
+            "plan",
+            "internal_notes",
+        ]
+        widgets = {
+            "primary_contact_first_name": forms.TextInput,
+            "primary_contact_last_name": forms.TextInput,
         }
 
 

@@ -16,6 +16,7 @@
                     <h3>URLs</h3>
                     {{ form.url|as_crispy_field }}
                     {{ form.privacy_policy|as_crispy_field }}
+                    {% if user.active_client.plan_has_data_access %}
                     <h3>SMS Program</h3>
                     {{ form.sms_mode|as_crispy_field }}
                     <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
@@ -25,6 +26,7 @@
                     {{ form.sync_tmc|as_crispy_field }}
                     {{ form.sync_actionnetwork|as_crispy_field }}
                     {{ form.actionnetwork_api_key|as_crispy_field }}
+                    {% endif %}
                     <button type="submit" class="btn btn-block btn-primary">Update</button>
                     {% csrf_token %}
                 </form>

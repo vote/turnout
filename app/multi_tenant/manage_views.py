@@ -26,6 +26,7 @@ from .forms import (
     InviteAssociationManageDeleteForm,
     InviteCreateForm,
     SubscriberSettingsForm,
+    SubscriptionSettingsForm,
 )
 from .invite import invite_user
 from .mixins_manage_views import SubscriberManageViewMixin
@@ -91,6 +92,18 @@ class SubscriberUpdateSettingsView(
                 old_key.delete()
 
         return super().form_valid(form)
+
+
+class SubscriptionUpdateView(
+    SuccessMessageMixin, SubscriberManageViewMixin, UpdateView
+):
+    form_class = SubscriptionSettingsForm
+    template_name = "multi_tenant/manage/subscription_edit.html"
+    success_url = reverse_lazy("manage:home_redirect")
+    context_object_name = "subscription"
+
+    def get_object(self):
+        return self.subscriber.subscription
 
 
 class ChangeSubscriberView(ManageViewMixin, FormView):

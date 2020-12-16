@@ -9,7 +9,7 @@ from django.views.generic import (
 )
 
 from .forms import InterestForm
-from .models import Interest, Product
+from .models import Interest
 from .tasks import notify_slack_interest
 
 
@@ -19,15 +19,6 @@ class RegisterView(CreateView):
     template_name = "subscription/register.html"
     success_url = reverse_lazy("subscribe:register_thanks")
     form_class = InterestForm
-
-    def get_form(self):
-        form = super().get_form()
-        if Product.objects.exists():
-            form.fields["product"].empty_label = None
-            form.fields[
-                "product"
-            ].widget.choices.field.initial = Product.objects.first()
-        return form
 
     def form_valid(self, form):
         response = super().form_valid(form)

@@ -172,16 +172,16 @@ def generate_name(report: Report):
 
 def report_runner(report: Report):
     if report.type == enums.ReportType.ABSENTEE:
-        table = "reporting_ballotrequestreport"
+        table = "reporting_subscriber_ballotrequestreport"
         fields = ABSENTEE_FIELDS
     elif report.type == enums.ReportType.REGISTER:
-        table = "reporting_registerreport"
+        table = "reporting_subscriber_registerreport"
         fields = REGISTER_FIELDS
     elif report.type == enums.ReportType.VERIFY:
-        table = "reporting_verifyreport"
+        table = "reporting_subscriber_verifyreport"
         fields = VERIFIER_FIELDS
     elif report.type == enums.ReportType.LOCATOR:
-        table = "reporting_locatorreport"
+        table = "reporting_subscriber_locatorreport"
         fields = LOCATOR_FIELDS
     else:
         raise Exception("Invalid Report Type")

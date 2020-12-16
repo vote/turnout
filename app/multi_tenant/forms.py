@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from accounts.models import Invite
 from common.enums import ExternalToolType, SubscriberSMSOption
+from subscription.models import Subscription
 
 from .models import (
     Association,
@@ -19,6 +20,7 @@ sms_mode_choice = forms.ChoiceField(
     required=True,
     label="SMS program opt-in behavior",
     widget=forms.RadioSelect,
+    initial=SubscriberSMSOption.BOX_UNCHECKED,
     choices=[
         (
             SubscriberSMSOption.BOX_UNCHECKED,
@@ -37,7 +39,6 @@ sms_mode_choice = forms.ChoiceField(
             "We do not have an SMS program and do not require opt-in options.",
         ),
     ],
-    # initial=SubscriberSMSOption.BOX_UNCHECKED,
 )
 
 
@@ -112,6 +113,21 @@ class SubscriberSettingsForm(forms.ModelForm):
         field_classes = {
             "sync_tmc": forms.BooleanField,
             "sync_bluelink": forms.BooleanField,
+        }
+
+
+class SubscriptionSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Subscription
+        fields = [
+            "primary_contact_first_name",
+            "primary_contact_last_name",
+            "primary_contact_email",
+            "primary_contact_phone",
+        ]
+        widgets = {
+            "primary_contact_first_name": forms.TextInput,
+            "primary_contact_last_name": forms.TextInput,
         }
 
 

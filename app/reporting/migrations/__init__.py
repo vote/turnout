@@ -46,12 +46,20 @@ SELECT
     action_details.finish_leo AS leo_message_sent,
     action_details.download_count AS total_downloads,
     br.referring_tool,
-    action_details.finish_lob AS forms_sent
+    action_details.finish_lob AS forms_sent,
+    action.visible_to_subscriber
 FROM
     absentee_ballotrequest br
 LEFT JOIN multi_tenant_client subscriber ON br.partner_id = subscriber.uuid
-LEFT JOIN action_actiondetails action_details ON br.action_id = action_details.action_id;
+LEFT JOIN action_actiondetails action_details ON br.action_id = action_details.action_id
+LEFT JOIN action_action action ON br.action_id = action.uuid;
 
+CREATE OR REPLACE VIEW reporting_subscriber_ballotrequestreport AS
+SELECT
+  *
+FROM
+  reporting_ballotrequestreport
+WHERE visible_to_subscriber;
 
 CREATE OR REPLACE VIEW reporting_registerreport AS
 SELECT
@@ -111,12 +119,20 @@ SELECT
     action_details.finish_external AS finished_external_service,
     action_details.finish_leo AS leo_message_sent,
     action_details.download_count AS total_downloads,
-    action_details.finish_lob AS forms_sent
+    action_details.finish_lob AS forms_sent,
+    action.visible_to_subscriber
 FROM
     register_registration reg
 LEFT JOIN multi_tenant_client subscriber ON reg.partner_id = subscriber.uuid
-LEFT JOIN action_actiondetails action_details ON reg.action_id = action_details.action_id;
+LEFT JOIN action_actiondetails action_details ON reg.action_id = action_details.action_id
+LEFT JOIN action_action action ON reg.action_id = action.uuid;
 
+CREATE OR REPLACE VIEW reporting_subscriber_registerreport AS
+SELECT
+  *
+FROM
+  reporting_registerreport
+WHERE visible_to_subscriber;
 
 CREATE OR REPLACE VIEW reporting_verifyreport AS
 SELECT
@@ -145,10 +161,19 @@ SELECT
     ver.utm_content,
     ver.utm_term,
     ver.embed_url,
-    ver.session_id
+    ver.session_id,
+    action.visible_to_subscriber
 FROM
     verifier_lookup ver
-LEFT JOIN multi_tenant_client subscriber ON ver.partner_id = subscriber.uuid;
+LEFT JOIN multi_tenant_client subscriber ON ver.partner_id = subscriber.uuid
+LEFT JOIN action_action action ON ver.action_id = action.uuid;
+
+CREATE OR REPLACE VIEW reporting_subscriber_verifyreport AS
+SELECT
+  *
+FROM
+  reporting_verifyreport
+WHERE visible_to_subscriber;
 
 
 CREATE OR REPLACE VIEW reporting_locatorreport AS
@@ -193,11 +218,19 @@ SELECT
     lookup.utm_content,
     lookup.utm_term,
     lookup.embed_url,
-    lookup.session_id
+    lookup.session_id,
+    action.visible_to_subscriber
 FROM
     polling_place_pollingplacelookup lookup
-LEFT JOIN multi_tenant_client subscriber ON lookup.partner_id = subscriber.uuid;
+LEFT JOIN multi_tenant_client subscriber ON lookup.partner_id = subscriber.uuid
+LEFT JOIN action_action action ON lookup.action_id = action.uuid;
 
+CREATE OR REPLACE VIEW reporting_subscriber_locatorreport AS
+SELECT
+  *
+FROM
+  reporting_locatorreport
+WHERE visible_to_subscriber;
 """
 
 VIEW_DROP_SQL = """

@@ -5,10 +5,17 @@
 {% block content %}
 <div class="content-wrapper">
     <div class="col-lg-10 offset-lg-1">
-        <div>
-            <h1>{{ user.active_client }} Embed Code</h1>
-            <p>Insert the following snippets of code into your website to embed VoteAmerica's tools.</p>
-        </div>
+        <h1>{{ user.active_client }} Embed Codes and Links</h1>
+        <p>
+            Use these <a href="#embed-codes">embed codes</a> and
+            <a href="#direct-links">direct links</a> to put the VoteAmerica tools
+            on your website, or link directly to VoteAmerica's tools and
+            associate signups with your account.
+        </p>
+        <hr>
+
+        <h2 id="embed-codes">Embed Codes</h2>
+        <p>Insert the following snippets of code into your website to embed VoteAmerica's tools.</p>
         <div>
             <div class="card">
                 <div class="card-header">
@@ -112,7 +119,7 @@
         </div>
         <div>
             <hr>
-            <h2>Direct Links</h2>
+            <h2 id="direct-links">Direct Links</h2>
             <p>If you don't want to embed the tools in your own website, you can use the following links to associate signups with your account.</p>
             <p><strong>If you choose to directly link to VoteAmerica and wish to use the information collected through the VoteAmerica tools we recommend you set a Privacy Policy URL in your <a href="{% url 'manage:multi_tenant:settings' user.active_client_slug %}">settings</a>.
             Subscribers who list a privacy policy in their settings will have their privacy policy listed below all forms that collect data on their behalf on both embeds and the VoteAmerica website.</strong></p>

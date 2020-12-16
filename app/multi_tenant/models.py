@@ -109,6 +109,18 @@ class Client(UUIDModel, TimestampModel):
             "\n", ""
         )
 
+    @cached_property
+    def plan(self):
+        if hasattr(self, "subscription"):
+            return self.subscription.plan
+        else:
+            # System subscribers -- like VoteAmerica, and the dev Default one,
+            # don't have subscriptions.
+            return enums.SubscriberPlan.PREMIUM
+
+    def plan_has_data_access(self):
+        return self.plan != enums.SubscriberPlan.FREE
+
     def get_sms_mode(self):
         if not self.sms_enabled:
             return enums.SubscriberSMSOption.NONE

@@ -27,3 +27,12 @@ class SubscriberManageViewMixin(ManageViewMixin):
 class SubscriberGenericViewMixin:
     def get_queryset(self):
         return super().get_queryset().filter(subscriber=self.subscriber)
+
+
+class SubscriberDataViewMixin(SubscriberManageViewMixin):
+    def check_subscriber_access(self):
+        if not self.subscriber.plan_has_data_access():
+            raise Http404
+
+    def get_queryset(self):
+        return super().get_queryset().filter(action__visible_to_subscriber=True)

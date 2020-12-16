@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     # One models.py importing from another can cause circular import hell
     from multi_tenant.models import Client
 
-
+# DEPRECATED
 class Product(UUIDModel, TimestampModel):
     months = models.PositiveIntegerField(null=True, blank=True)
     cost = models.PositiveIntegerField(null=True)
@@ -40,8 +40,9 @@ class Interest(
     last_name = models.TextField(null=True)
     email = models.EmailField(null=True)
     phone = PhoneNumberField(blank=True, null=True)
-    product = models.ForeignKey(Product, null=True, on_delete=models.SET_NULL)
-    nonprofit = models.BooleanField(null=True)
+    plan = TurnoutEnumField(
+        enums.SubscriberPlan, default=enums.SubscriberPlan.FREE, null=True,
+    )
     ein = models.TextField(null=True, blank=True)
     status = TurnoutEnumField(
         enums.SubscriptionInterestStatus,
@@ -54,6 +55,10 @@ class Interest(
         default=enums.SubscriberSMSOption.BOX_UNCHECKED,
         null=True,
     )
+
+    # DEPRECATED
+    nonprofit = models.BooleanField(null=True)
+    product = models.ForeignKey(Product, null=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ["-created_at"]
@@ -77,7 +82,14 @@ class Interest(
         subscriber.set_sms_mode(str(self.sms_mode))
         subscriber.save()
         sub = Subscription.objects.create(
-            subscriber=subscriber, product=self.product, interest=self,
+            subscriber=subscriber,
+            product=self.product,
+            plan=self.plan,
+            primary_contact_first_name=self.first_name,
+            primary_contact_last_name=self.last_name,
+            primary_contact_email=self.email,
+            primary_contact_phone=self.phone,
+            interest=self,
         )
 
         invite_user(initial_user_email, subscriber)
@@ -86,14 +98,26 @@ class Interest(
 
 
 class Subscription(UUIDModel, TimestampModel):
-    subscriber = models.ForeignKey("multi_tenant.Client", on_delete=models.PROTECT)
-    product = models.ForeignKey(
-        Product, null=True, blank=True, on_delete=models.SET_NULL
-    )
+    subscriber = models.OneToOneField("multi_tenant.Client", on_delete=models.PROTECT)
     interest = models.ForeignKey(
         Interest, null=True, blank=True, on_delete=models.SET_NULL
     )
     expires = models.DateField(null=True, blank=True, db_index=True)
+    plan = TurnoutEnumField(
+        enums.SubscriberPlan, default=enums.SubscriberPlan.FREE, null=True,
+    )
+
+    primary_contact_first_name = models.TextField(null=True)
+    primary_contact_last_name = models.TextField(null=True)
+    primary_contact_email = models.EmailField(null=True)
+    primary_contact_phone = PhoneNumberField(blank=True, null=True)
+
+    internal_notes = models.TextField(null=True, blank=True)
+
+    # DEPRECATED
+    product = models.ForeignKey(
+        Product, null=True, blank=True, on_delete=models.SET_NULL
+    )
 
     def __str__(self):
         return f"{self.subscriber} {self.expires}"

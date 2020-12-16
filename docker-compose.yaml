@@ -57,6 +57,7 @@ services:
       - postgres
       - redis
       - rabbitmq
+    restart: unless-stopped
 
   beat:
     image: voteamerica/turnout-ci-cache:latest
@@ -84,7 +85,7 @@ services:
   worker:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,leouptime,usvf
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,leouptime,usvf,tokens,high-pri
     volumes:
       - ./app:/app
     environment:
@@ -105,59 +106,59 @@ services:
       - beat
       - rabbitmq
 
-  worker_bulk:
-    image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q tokens
-    volumes:
-      - ./app:/app
-    environment:
-      - SECRET_KEY=abcd
-      - DJANGO_SETTINGS_MODULE=turnout.settings
-      - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
-      - REDIS_URL=redis://redis:6379
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
-      - ALLOWED_HOSTS=*
-      - DEBUG=True
-      - DD_AGENT_HOST=ddagent
-      - DD_DOGSTATSD_PORT=3333
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - redis
-      - beat
-      - rabbitmq
+  # worker_bulk:
+  #   image: voteamerica/turnout-ci-cache:latest
+  #   entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
+  #   command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q tokens
+  #   volumes:
+  #     - ./app:/app
+  #   environment:
+  #     - SECRET_KEY=abcd
+  #     - DJANGO_SETTINGS_MODULE=turnout.settings
+  #     - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
+  #     - REDIS_URL=redis://redis:6379
+  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
+  #     - ALLOWED_HOSTS=*
+  #     - DEBUG=True
+  #     - DD_AGENT_HOST=ddagent
+  #     - DD_DOGSTATSD_PORT=3333
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - beat
+  #     - rabbitmq
 
-  worker_high_pri:
-    image: voteamerica/turnout-ci-cache:latest
-    entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
-    volumes:
-      - ./app:/app
-    environment:
-      - SECRET_KEY=abcd
-      - DJANGO_SETTINGS_MODULE=turnout.settings
-      - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
-      - REDIS_URL=redis://redis:6379
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
-      - ALLOWED_HOSTS=*
-      - DEBUG=True
-      - DD_AGENT_HOST=ddagent
-      - DD_DOGSTATSD_PORT=3333
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - redis
-      - beat
-      - rabbitmq
+  # worker_high_pri:
+  #   image: voteamerica/turnout-ci-cache:latest
+  #   entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
+  #   command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
+  #   volumes:
+  #     - ./app:/app
+  #   environment:
+  #     - SECRET_KEY=abcd
+  #     - DJANGO_SETTINGS_MODULE=turnout.settings
+  #     - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
+  #     - REDIS_URL=redis://redis:6379
+  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
+  #     - ALLOWED_HOSTS=*
+  #     - DEBUG=True
+  #     - DD_AGENT_HOST=ddagent
+  #     - DD_DOGSTATSD_PORT=3333
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - beat
+  #     - rabbitmq
 
-  selenium:
-    image: selenium/standalone-chrome:3.141.59-20200525
-    ports:
-      - "4444:4444"
-    shm_size: '2gb'
+  # selenium:
+  #   image: selenium/standalone-chrome:3.141.59-20200525
+  #   ports:
+  #     - "4444:4444"
+  #   shm_size: '2gb'
 
   client:
     image: voteamerica/turnout-ci-cache:latest
@@ -196,15 +197,15 @@ services:
     env_file:
       - .env
 
-  docs:
-    build:
-      context: .
-      dockerfile: Dockerfile-docs
-    command: mkdocs serve -a 0.0.0.0:8000
-    volumes:
-      - ./docs:/docs
-    ports:
-      - "9003:8000"
+  # docs:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile-docs
+  #   command: mkdocs serve -a 0.0.0.0:8000
+  #   volumes:
+  #     - ./docs:/docs
+  #   ports:
+  #     - "9003:8000"
 
 volumes:
   pgdata_turnout:

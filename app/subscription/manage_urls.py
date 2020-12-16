@@ -30,4 +30,9 @@ urlpatterns = [
         manage_views.SubscriberUpdateView.as_view(),
         name="edit_subscriber",
     ),
+    path(
+        "subscribers/<slug:subscriber_slug>/edit_subscription/",
+        manage_views.SubscriptionUpdateView.as_view(),
+        name="edit_subscription",
+    ),
 ]

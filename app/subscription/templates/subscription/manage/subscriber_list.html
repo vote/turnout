@@ -16,18 +16,32 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Status</th>
+                        <th>Subscriber</th>
+                        <th>Primary Contact</th>
+                        <th>Plan</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for subscriber in subscribers %}
                     <tr>
                         <td>
-                            <a href="{% url 'manage:subscription:edit_subscriber' subscriber.slug %}">{{ subscriber.name }}</a>
+                            {{ subscriber.name }}
                         </td>
                         <td>
-                            {{ subscriber.status }}
+                            <a href="mailto:{{subscriber.subscription.primary_contact_email}}">
+                                {{ subscriber.subscription.primary_contact_first_name }} {{ subscriber.subscription.primary_contact_last_name }}
+                            </a>
+                        </td>
+                        <td>
+                            {{ subscriber.plan }}
+                        </td>
+                        <td>
+                            {% if subscriber.subscription %}
+                                <a href="{% url 'manage:subscription:edit_subscription' subscriber.slug %}">Manage Subscription</a>
+                                &middot;
+                            {% endif %}
+                            <a href="{% url 'manage:subscription:edit_subscriber' subscriber.slug %}">Manage Settings</a>
                         </td>
                     </tr>
                     {% endfor %}

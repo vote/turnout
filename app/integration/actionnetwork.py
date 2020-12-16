@@ -9,7 +9,7 @@ from django.db.models import Exists, OuterRef
 
 from absentee.models import BallotRequest
 from common.apm import tracer
-from common.enums import ExternalToolType
+from common.enums import ExternalToolType, SubscriberPlan
 from multi_tenant.models import Client, SubscriberIntegrationProperty
 from register.models import Registration
 from reminder.models import ReminderRequest
@@ -227,7 +227,8 @@ def post_person(info, form_id, api_key, slug):
 def sync_item(item):
     if settings.ACTIONNETWORK_SYNC and item.action:
         _sync_item(item, None)
-        _sync_item(item, item.subscriber_id)
+        if item.action.visible_to_subscriber:
+            _sync_item(item, item.subscriber_id)
 
 
 def _sync_item(item, subscriber_id):
@@ -368,24 +369,19 @@ def sync_subscriber(subscriber: Client) -> None:
     session = get_session(settings.ACTIONNETWORK_SUBSCRIBERS_KEY)
     form_id = get_form(session, "VoteAmerica Tool Users", "subscriber")
 
-    # This is a bit messy: we don't have clear owner information for a
-    # subscriber beyond the interest when they signed up.
-    interest = None
-    for sub in subscriber.subscription_set.all():
-        if sub.interest:
-            interest = sub.interest
-            break
-    if not interest:
-        logger.info(f"No Interest for subscriber {subscriber}")
+    if hasattr(subscriber, "subscription"):
+        subscription = subscriber.subscription
+    else:
+        logger.info(f"No Subscription for subscriber {subscriber}")
         return
 
     info = {
         "person": {
-            "given_name": interest.first_name,
-            "family_name": interest.last_name,
-            "email_addresses": [{"address": interest.email}],
+            "given_name": subscription.primary_contact_first_name,
+            "family_name": subscription.primary_contact_last_name,
+            "email_addresses": [{"address": subscription.primary_contact_email}],
             "custom_fields": {
-                "subscriber_is_c3": interest.nonprofit,
+                "subscriber_is_c3": subscription.plan == SubscriberPlan.NONPROFIT,
                 "subscriber_slug": subscriber.default_slug.slug,
             },
         },

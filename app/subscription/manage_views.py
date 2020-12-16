@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404, redirect
+from django.template.defaultfilters import slugify
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
@@ -8,9 +9,14 @@ from common import enums
 from manage.mixins import ManageViewMixin
 from multi_tenant.models import Client
 
-from .forms import ActivateInterestForm, RejectInterestForm, SubscriberAdminSettingsForm
+from .forms import (
+    ActivateInterestForm,
+    RejectInterestForm,
+    SubscriberAdminSettingsForm,
+    SubscriptionAdminSettingsForm,
+)
 from .mixins_manage_views import SubscriptionAdminView
-from .models import Interest
+from .models import Interest, Subscription
 
 
 class SubscribersListView(ManageViewMixin, SubscriptionAdminView, ListView):
@@ -39,6 +45,18 @@ class SubscriberUpdateView(ManageViewMixin, SubscriptionAdminView, UpdateView):
     def form_valid(self, form):
         form.instance.set_sms_mode(form.cleaned_data.pop("sms_mode"))
         return super().form_valid(form)
+
+
+class SubscriptionUpdateView(ManageViewMixin, SubscriptionAdminView, UpdateView):
+    form_class = SubscriptionAdminSettingsForm
+    template_name = "subscription/manage/subscription_edit.html"
+    success_url = reverse_lazy("manage:subscription:list_subscribers")
+    context_object_name = "subscription"
+
+    def get_object(self):
+        return get_object_or_404(
+            Subscription, subscriber__default_slug__slug=self.kwargs["subscriber_slug"]
+        )
 
 
 class InterestListView(ManageViewMixin, SubscriptionAdminView, ListView):
@@ -85,6 +103,7 @@ class InterestActivateView(
             "name": self.interest.organization_name,
             "initial_user": self.interest.email,
             "url": self.interest.website,
+            "slug": slugify(self.interest.organization_name),
         }
 
     def form_valid(self, form):

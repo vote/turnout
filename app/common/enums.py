@@ -291,3 +291,14 @@ class BlastType(Enum, metaclass=EnumMeta):
     class Labels:
         SMS = "SMS"
         MMS_MAP = "MMS map"
+
+
+class SubscriberPlan(Enum, metaclass=EnumMeta):
+    FREE = "free"
+    PREMIUM = "premium"
+    NONPROFIT = "nonprofit"
+
+    class Labels:
+        FREE = "Free"
+        PREMIUM = "Premium"
+        NONPROFIT = "Nonprofit"

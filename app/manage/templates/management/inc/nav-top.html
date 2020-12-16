@@ -17,6 +17,7 @@
             <nav class="nav navbar navbar-expand-lg">
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav">
+                        {% if user.active_client.plan_has_data_access %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__actions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Voters
@@ -27,17 +28,23 @@
                                 <a class="dropdown-item" href="{% url 'manage:verifier:lookup_list' user.active_client_slug %}">Verify</a>
                             </div>
                         </li>
+                        {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown__tools" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Tools
                             </a>
                             <div class="dropdown-menu" aria-labelledby="dropdown__tools">
-                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Code</a>
+                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:embed_code' user.active_client_slug %}">Embed Codes & Links</a>
+                                {% if user.active_client.plan_has_data_access %}
                                 <a class="dropdown-item" href="{% url 'manage:reporting:request' user.active_client_slug %}">Exports</a>
+                                {% endif %}
                                 <a class="dropdown-item" href="{% url 'manage:multi_tenant:manager_list' user.active_client_slug %}">Team</a>
-				{% if user.active_client.has_api_access %}
+                                {% if user.active_client.has_api_access %}
                                 <a class="dropdown-item" href="{% url 'manage:apikey:key_list' user.active_client_slug %}">API Keys</a>
-				{% endif %}
+                                {% endif %}
+                                {% if user.active_client.subscription %}
+                                <a class="dropdown-item" href="{% url 'manage:multi_tenant:subscription' user.active_client_slug %}">Subscription</a>
+                                {% endif %}
                                 <a class="dropdown-item" href="{% url 'manage:multi_tenant:settings' user.active_client_slug %}">Settings</a>
                             </div>
                         </li>

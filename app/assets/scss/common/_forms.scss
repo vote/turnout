@@ -55,3 +55,13 @@ form {
         font-style: italic;
     }
 }
+
+.premium-signup {
+    label {
+        line-height: inherit;
+    }
+
+    input[type=radio] {
+        margin-top: 0.6rem;
+    }
+}

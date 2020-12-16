@@ -29,7 +29,9 @@ class ActionSerializer(
         super().__init__(instance=instance, data=data, **kwargs)
 
     def create(self, validated_data: Dict[(str, Any)]) -> "Model":
-        validated_data["action"] = Action.objects.create()
+        validated_data["action"] = Action.objects.create(
+            visible_to_subscriber=self.request_subscriber().plan_has_data_access()
+        )
         return super().create(validated_data)
 
     @tracer.wrap()

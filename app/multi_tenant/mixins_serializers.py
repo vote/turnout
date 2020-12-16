@@ -19,8 +19,16 @@ logger = logging.getLogger("multi_tenant")
 
 class SubscriberSerializerMixin(_Base):
     subscriber = serializers.PrimaryKeyRelatedField(read_only=True, required=False)
+    _request_subscriber = None
 
     def create(self, validated_data: Dict[(str, Any)]) -> "Model":
+        validated_data["subscriber"] = self.request_subscriber()
+        return super().create(validated_data)
+
+    def request_subscriber(self) -> Client:
+        if self._request_subscriber:
+            return self._request_subscriber
+
         request = self.context.get("request")
         if request and "subscriber" in request.GET:
             try:
@@ -36,5 +44,5 @@ class SubscriberSerializerMixin(_Base):
         else:
             subscriber = Client.objects.first()
 
-        validated_data["subscriber"] = subscriber
-        return super().create(validated_data)
+        self._request_subscriber = subscriber
+        return subscriber
