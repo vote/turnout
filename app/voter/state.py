@@ -74,7 +74,7 @@ def lookup_ga(
     )
     if not addrs:
         logger.warning(
-            f"Unable to geocode {item} ({item.street1}, {item.city}, GA {item.zipcode})"
+            f"Unable to geocode {item} ({item.address1}, {item.city}, GA {item.zipcode})"
         )
         return None, None
 
