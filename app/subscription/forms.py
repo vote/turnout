@@ -97,13 +97,16 @@ class SubscriptionAdminSettingsForm(forms.ModelForm):
             "primary_contact_last_name",
             "primary_contact_email",
             "primary_contact_phone",
+            "ein",
             "plan",
             "internal_notes",
         ]
         widgets = {
             "primary_contact_first_name": forms.TextInput,
             "primary_contact_last_name": forms.TextInput,
+            "ein": forms.TextInput,
         }
+        labels = {"ein": "EIN"}
 
 
 class ActivateInterestForm(forms.ModelForm):

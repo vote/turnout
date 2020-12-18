@@ -89,6 +89,7 @@ class Interest(
             primary_contact_last_name=self.last_name,
             primary_contact_email=self.email,
             primary_contact_phone=self.phone,
+            ein=self.ein,
             interest=self,
         )
 
@@ -111,6 +112,7 @@ class Subscription(UUIDModel, TimestampModel):
     primary_contact_last_name = models.TextField(null=True)
     primary_contact_email = models.EmailField(null=True)
     primary_contact_phone = PhoneNumberField(blank=True, null=True)
+    ein = models.TextField(null=True, blank=True)
 
     internal_notes = models.TextField(null=True, blank=True)
 
