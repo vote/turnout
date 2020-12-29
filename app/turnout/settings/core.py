@@ -813,6 +813,17 @@ REGISTER_LOB_CONFIRM_NAG_SECONDS = env.int(
 )
 REGISTER_UPSELL_DELAY_SECONDS = env.int("REGISTER_UPSELL_DELAY_SECONDS", default=300)
 
+PA_COUNTIES_BUCKET = env.str("PA_COUNTIES_BUCKET", default=f"turnout{ENV}-public")
+PA_COUNTIES_SYNC = env.bool("PA_COUNTIES_SYNC", default=False)
+PA_COUNTIES_CRON_HOUR = env.str("PA_COUNTIES_CRON_HOUR", default="5")
+PA_COUNTIES_CRON_MINUTE = env.str("PA_COUNTIES_CRON_MINUTE", default="25")
+if PA_COUNTIES_SYNC:
+    CELERY_BEAT_SCHEDULE["publish-pa-counties"] = {
+        "task": "register.tasks.publish_pa_counties",
+        "schedule": crontab(minute=PA_COUNTIES_CRON_MINUTE, hour=PA_COUNTIES_CRON_HOUR),
+    }
+
+
 #### END REGISTER CONFIGURATION
 
 

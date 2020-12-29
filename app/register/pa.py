@@ -1,9 +1,11 @@
+import json
 import logging
 from typing import Optional
 
 import ovrlib
 from django.conf import settings
 
+from common.aws import s3_client
 from common.enums import (
     EventType,
     PoliticalParties,
@@ -201,3 +203,33 @@ def process_pa_registration(
             extra=registration.state_api_result,
         )
     return False
+
+
+def sync_counties_to_s3():
+    session = ovrlib.pa.PAOVRSession(
+        api_key=settings.PA_OVR_KEY, staging=settings.PA_OVR_STAGING
+    )
+
+    counties = session.fetch_counties_and_municipalities()
+    json_data = [
+        {
+            "county_id": county.county_id,
+            "county_name": county.county_name,
+            "municipalities": [
+                {
+                    "municipality_id": municipality.municipality_id,
+                    "municipality_name": municipality.municipality_name,
+                }
+                for municipality in county.municipalities
+            ],
+        }
+        for county in counties
+    ]
+
+    response = s3_client.put_object(
+        Bucket=settings.PA_COUNTIES_BUCKET,
+        Key="pa-counties/counties.json",
+        ACL="public-read",
+        Body=json.dumps(json_data),
+        CacheControl="max-age=3600, public",
+    )

@@ -135,3 +135,11 @@ def send_mail_chase(registration_pk: str, action_pk: str = None) -> None:
     registration = Registration.objects.select_related().get(pk=registration_pk)
     send_welcome_sms(str(registration.phone), "register")
     trigger_mail_chase(registration)
+
+
+@shared_task()
+@statsd.timed("turnout.register.publish_pa_counties")
+def publish_pa_counties() -> None:
+    from .pa import sync_counties_to_s3
+
+    sync_counties_to_s3()
