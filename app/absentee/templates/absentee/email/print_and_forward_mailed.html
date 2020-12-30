@@ -37,6 +37,6 @@ Your ballot request form must be <strong>{{ state_info.2020_vbm_request_deadline
 {% endif %}
 
 Happy voting,<br>
-{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+{{ subscriber.transactional_from_name }}
 
 {% endblock %}

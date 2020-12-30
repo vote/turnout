@@ -23,6 +23,6 @@ We are a small nonprofit and we don’t take any government funding.
 {% endif %}
 
 Happy voting,<br>
-{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+{{ subscriber.transactional_from_name }}
 
 {% endblock %}

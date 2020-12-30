@@ -64,7 +64,7 @@ def trigger_upsell(lookup: Lookup) -> None:
     if lookup.phone:
         try:
             n = Number.objects.get(phone=lookup.phone)
-            if lookup.subscriber.is_first_party:
+            if not lookup.action_was_embedded():
                 query_params = lookup.get_query_params()
                 reg_link = f"{settings.WWW_ORIGIN}/register-to-vote/?{query_params}"
                 vbm_link = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"

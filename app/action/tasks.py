@@ -90,7 +90,7 @@ def action_check_unfinished(action_pk: str) -> None:
                 return
 
             what = "requesting your absentee ballot"
-            if item.subscriber.is_first_party:
+            if not item.action_was_embedded():
                 query_params = item.get_query_params()
                 url = f"{settings.WWW_ORIGIN}/vote-by-mail/?{query_params}"
             else:

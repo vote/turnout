@@ -20,6 +20,6 @@ We're very sorry the letter was not delivered.  If the address above is incorrec
 <br><br>
 
 Happy voting,<br>
-{{ subscriber.name }}{% if not subscriber.is_first_party %} via VoteAmerica{% endif %}
+{{ subscriber.transactional_from_name }}
 
 {% endblock %}

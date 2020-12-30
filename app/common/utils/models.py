@@ -33,6 +33,9 @@ class TrackingModel(models.Model):
     email_referrer = models.TextField(null=True, blank=True)
     mobile_referrer = models.TextField(null=True, blank=True)
 
+    def action_was_embedded(self) -> bool:
+        return not self.embed_url.lower().startswith("https://www.voteamerica.com")
+
     class Meta(object):
         abstract = True
 

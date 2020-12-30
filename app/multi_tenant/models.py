@@ -76,8 +76,11 @@ class Client(UUIDModel, TimestampModel):
 
     @property
     def full_email_address(self) -> str:
-        clean_name = self.name.replace('"', "'")
-        return f'"{clean_name}" <{self.email}>'
+        if self.is_first_party:
+            return f'"VoteAmerica" <hello@voteamerica.com>'
+        else:
+            clean_name = self.name.replace('"', "'")
+            return f'"{clean_name}" <{self.email}>'
 
     @property
     def transactional_from_email_address(self) -> str:
@@ -85,6 +88,13 @@ class Client(UUIDModel, TimestampModel):
             return self.full_email_address
         clean_name = self.name.replace('"', "'")
         return f'"{clean_name} via VoteAmerica" <{settings.DEFAULT_EMAIL_FROM}>'
+
+    @property
+    def transactional_from_name(self) -> str:
+        if self.is_first_party:
+            return "VoteAmerica"
+        else:
+            return f"{self.name} via VoteAmerica"
 
     @property
     def stats(self):
