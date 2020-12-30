@@ -111,6 +111,9 @@ export SLACK_ALLOY_UPDATE_WEBHOOK=$(aws ssm get-parameter --region $REGION --wit
 export MAPBOX_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mapbox_key | jq '.Parameter["Value"]' -r)
 export MMS_ATTACHMENT_BUCKET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mms_attachment_bucket | jq '.Parameter["Value"]' -r)
 export CIVIC_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.civic_key | jq '.Parameter["Value"]' -r)
+export PA_OVR_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_key | jq '.Parameter["Value"]' -r)
+export PA_OVR_STAGING=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_ovr_staging | jq '.Parameter["Value"]' -r)
+export PA_COUNTIES_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pa_counties_sync | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -232,6 +235,9 @@ if [ "$2" ]; then
     -e MAPBOX_KEY \
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
+    -e PA_OVR_KEY \
+    -e PA_OVR_STAGING \
+    -e PA_COUNTIES_SYNC \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -328,6 +334,9 @@ else
     -e MAPBOX_KEY \
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
+    -e PA_OVR_KEY \
+    -e PA_OVR_STAGING \
+    -e PA_COUNTIES_SYNC \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
