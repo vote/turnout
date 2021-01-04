@@ -257,7 +257,7 @@ BULK_QUEUE_RATE_LIMITS = {
     "movers": 1 / 5,
     "geocode": 1 / 10,
     "lob-status-updates": 1 / 10,
-    "blast-mms": 1 / 28,
+    "blast-mms": 1 / 14,
     "blast-sms": 1 / 300,
 }
 
