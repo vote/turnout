@@ -54,10 +54,6 @@
         name: 'OVBM_SYNC',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_enabled',
-        name: 'UPTIME_ENABLED',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.file_purge_days',
         name: 'FILE_PURGE_DAYS',
       },
@@ -258,46 +254,6 @@
         name: 'DIGITALOCEAN_KEY',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_consumer_key',
-        name: 'UPTIME_TWITTER_CONSUMER_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_consumer_secret',
-        name: 'UPTIME_TWITTER_CONSUMER_SECRET',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_access_token',
-        name: 'UPTIME_TWITTER_ACCESS_TOKEN',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_twitter_access_token_secret',
-        name: 'UPTIME_TWITTER_ACCESS_TOKEN_SECRET',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.slack_uptime_webhook',
-        name: 'SLACK_UPTIME_WEBHOOK',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_key',
-        name: 'PROXY_SSH_KEY',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_pub',
-        name: 'PROXY_SSH_PUB',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_ssh_key_id',
-        name: 'PROXY_SSH_KEY_ID',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.proxy_tag',
-        name: 'PROXY_TAG',
-      },
-      {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.selenium_url',
-        name: 'SELENIUM_URL',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.register_resume_url',
         name: 'REGISTER_RESUME_URL',
       },
@@ -360,6 +316,18 @@
       {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.civic_key',
         name: 'CIVIC_KEY',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_url',
+        name: 'UPTIME_URL',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_user',
+        name: 'UPTIME_USER',
+      },
+      {
+        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_secret',
+        name: 'UPTIME_SECRET',
       },
     ],
 }

@@ -85,7 +85,7 @@ services:
   worker:
     image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,leouptime,usvf,tokens,high-pri
+    command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,usvf,tokens,high-pri
     volumes:
       - ./app:/app
     environment:
@@ -153,12 +153,6 @@ services:
   #     - redis
   #     - beat
   #     - rabbitmq
-
-  # selenium:
-  #   image: selenium/standalone-chrome:3.141.59-20200525
-  #   ports:
-  #     - "4444:4444"
-  #   shm_size: '2gb'
 
   client:
     image: voteamerica/turnout-ci-cache:latest

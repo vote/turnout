@@ -126,10 +126,6 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.ovbm_sync"
             },
             {
-               "name": "UPTIME_ENABLED",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_enabled"
-            },
-            {
                "name": "FILE_PURGE_DAYS",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.file_purge_days"
             },
@@ -330,46 +326,6 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.digitalocean_key"
             },
             {
-               "name": "UPTIME_TWITTER_CONSUMER_KEY",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_key"
-            },
-            {
-               "name": "UPTIME_TWITTER_CONSUMER_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_consumer_secret"
-            },
-            {
-               "name": "UPTIME_TWITTER_ACCESS_TOKEN",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token"
-            },
-            {
-               "name": "UPTIME_TWITTER_ACCESS_TOKEN_SECRET",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_twitter_access_token_secret"
-            },
-            {
-               "name": "SLACK_UPTIME_WEBHOOK",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.slack_uptime_webhook"
-            },
-            {
-               "name": "PROXY_SSH_KEY",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.proxy_ssh_key"
-            },
-            {
-               "name": "PROXY_SSH_PUB",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.proxy_ssh_pub"
-            },
-            {
-               "name": "PROXY_SSH_KEY_ID",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.proxy_ssh_key_id"
-            },
-            {
-               "name": "PROXY_TAG",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.proxy_tag"
-            },
-            {
-               "name": "SELENIUM_URL",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.selenium_url"
-            },
-            {
                "name": "REGISTER_RESUME_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.register_resume_url"
             },
@@ -432,6 +388,18 @@
             {
                "name": "CIVIC_KEY",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.civic_key"
+            },
+            {
+               "name": "UPTIME_URL",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_url"
+            },
+            {
+               "name": "UPTIME_USER",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_user"
+            },
+            {
+               "name": "UPTIME_SECRET",
+               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_secret"
             }
          ]
       },

@@ -11,7 +11,6 @@ nav:
         - 'WordPress': '/embed/wordpress/'
     - 'API':
         - 'Election Information API': '/api/'
-        - 'State Voter Tool Uptime API': '/api/leouptime/'
         - 'Action API': '/api/action/'
     - 'Tool Admin':
         - 'Introduction': '/admin/'

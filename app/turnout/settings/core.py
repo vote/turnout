@@ -133,7 +133,6 @@ FIRST_PARTY_APPS = [
     "subscription",
     "reminder",
     "apikey",
-    "leouptime",
     "celery_admin",
     "voter",
     "polling_place",
@@ -271,7 +270,6 @@ CELERY_TASK_QUEUES = {
     Queue("default", routing_key="task.#"),
     Queue("high-pri", routing_key="high-pri.#"),
     Queue("voter", routing_key="voter.#"),
-    Queue("leouptime", routing_key="leouptime.#"),
     Queue("movers", routing_key="movers.#"),
     Queue("geocode", routing_key="geocode.#"),
     Queue("actionnetwork", routing_key="actionnetwork.#"),
@@ -301,7 +299,6 @@ CELERY_TASK_ROUTES = {
     "register.tasks.send_mail_chase": {"queue": "high-pri"},
     "subscription.tasks.send_organization_welcome_notification": {"queue": "high-pri"},
     "verifier.tasks.external_tool_upsell": {"queue": "high-pri"},
-    "leouptime.tasks.*": {"queue": "leouptime"},
 }
 
 CELERY_BEAT_SCHEDULE = {
@@ -620,11 +617,6 @@ LOGGING = {
             "propagate": False,
         },
         "integration": {
-            "handlers": [handler],
-            "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
-            "propagate": False,
-        },
-        "leouptime": {
             "handlers": [handler],
             "level": env.str("DJANGO_LOGGING_LEVEL", default="INFO"),
             "propagate": False,
@@ -971,55 +963,14 @@ API_KEY_PEPPER = env.str("API_KEY_PEEPER", default="somepepper")
 
 #### UPTIME CONFIGURATION
 
-UPTIME_ENABLED = env.bool("UPTIME_ENABLED", default=False)
-UPTIME_CHECK_CRON_MINUTE = env.str("UPTIME_CHECK_CRON_MINUTE", default="*/15")
-UPTIME_CHECK_DOWN_CRON_MINUTE = env.str("UPTIME_CHECK_DOWN_CRON_MINUTE", default="*/5")
-UPTIME_TWITTER_CRON_MINUTE = env.str("UPTIME_TWITTER_CRON_MINUTE", default="*/5")
+UPTIME_URL = env.str("UPTIME_URL", default=None)
+UPTIME_USER = env.str("UPTIME_USER", default="turnout")
+UPTIME_SECRET = env.str("UPTIME_SECRET", default=None)
 
-UPTIME_TWITTER_CONSUMER_KEY = env.str("UPTIME_TWITTER_CONSUMER_KEY", default=None)
-UPTIME_TWITTER_CONSUMER_SECRET = env.str("UPTIME_TWITTER_CONSUMER_SECRET", default=None)
-UPTIME_TWITTER_ACCESS_TOKEN = env.str("UPTIME_TWITTER_ACCESS_TOKEN", default=None)
-UPTIME_TWITTER_ACCESS_TOKEN_SECRET = env.str(
-    "UPTIME_TWITTER_ACCESS_TOKEN_SECRET", default=None
-)
-
-DIGITALOCEAN_KEY = env.str("DIGITALOCEAN_KEY", default=None)
-
-PROXY_SSH_KEY = env.str("PROXY_SSH_KEY", default=None)
-PROXY_SSH_PUB = env.str("PROXY_SSH_PUB", default=None)
-PROXY_SSH_KEY_ID = env.int("PROXY_SSH_KEY_ID", default=None)
-PROXY_COUNT = env.int("PROXY_COUNT", 5)
-PROXY_TAG = env.str("PROXY_TAG", "env:dev")
-
-SELENIUM_URL = env.str("SELENIUM_URL", None)
-
-SLACK_UPTIME_WEBHOOK = env.str("SLACK_UPTIME_WEBHOOK", default=None)
-
-if UPTIME_ENABLED:
-    if UPTIME_CHECK_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-check-uptime"] = {
-            "task": "leouptime.tasks.check_uptime",
-            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-        }
-        CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
-            "task": "leouptime.tasks.check_proxies",
-            "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-        }
-    # if UPTIME_CHECK_DOWN_CRON_MINUTE:
-    #    CELERY_BEAT_SCHEDULE["trigger-check-uptime-downsites"] = {
-    #        "task": "leouptime.tasks.check_uptime_downsites",
-    #        "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-    #    }
-    if UPTIME_TWITTER_CRON_MINUTE:
-        CELERY_BEAT_SCHEDULE["trigger-tweet-uptime"] = {
-            "task": "leouptime.tasks.tweet_uptime",
-            "schedule": crontab(minute=UPTIME_TWITTER_CRON_MINUTE),
-        }
-elif DIGITALOCEAN_KEY:
-    CELERY_BEAT_SCHEDULE["trigger-check-proxies"] = {
-        "task": "leouptime.tasks.check_proxies",
-        "schedule": crontab(minute=UPTIME_CHECK_CRON_MINUTE),
-    }
+CELERY_BEAT_SCHEDULE["trigger-config-uptime"] = {
+    "task": "integration.tasks.config_uptime",
+    "schedule": crontab(minute=48, hour="*/6"),
+}
 
 #### END UPTIME CONFIGURATION
 

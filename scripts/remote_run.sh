@@ -34,7 +34,6 @@ export ACTIONNETWORK_SYNC=$(aws ssm get-parameter --region $REGION --with-decryp
 export ACTIONNETWORK_SYNC_DAILY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_daily | jq '.Parameter["Value"]' -r)
 export ACTIONNETWORK_SYNC_HOUR=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.actionnetwork_sync_hour | jq '.Parameter["Value"]' -r)
 export OVBM_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.ovbm_sync | jq '.Parameter["Value"]' -r)
-export UPTIME_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_enabled | jq '.Parameter["Value"]' -r)
 export FILE_PURGE_DAYS=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_purge_days | jq '.Parameter["Value"]' -r)
 export STATE_TOOL_REDIRECT_SYNC=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.state_tool_redirect_sync | jq '.Parameter["Value"]' -r)
 export TARGETSMART_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.targetsmart_key | jq '.Parameter["Value"]' -r)
@@ -85,16 +84,6 @@ export SLACK_SUBSCRIBER_INTEREST_ENABLED=$(aws ssm get-parameter --region $REGIO
 export SLACK_SUBSCRIBER_INTEREST_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_subscriber_interest_webhook | jq '.Parameter["Value"]' -r)
 export API_KEY_PEPPER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.api_key_pepper | jq '.Parameter["Value"]' -r)
 export DIGITALOCEAN_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.digitalocean_key | jq '.Parameter["Value"]' -r)
-export UPTIME_TWITTER_CONSUMER_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_key | jq '.Parameter["Value"]' -r)
-export UPTIME_TWITTER_CONSUMER_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_consumer_secret | jq '.Parameter["Value"]' -r)
-export UPTIME_TWITTER_ACCESS_TOKEN=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token | jq '.Parameter["Value"]' -r)
-export UPTIME_TWITTER_ACCESS_TOKEN_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_twitter_access_token_secret | jq '.Parameter["Value"]' -r)
-export SLACK_UPTIME_WEBHOOK=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.slack_uptime_webhook | jq '.Parameter["Value"]' -r)
-export PROXY_SSH_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_key | jq '.Parameter["Value"]' -r)
-export PROXY_SSH_PUB=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_pub | jq '.Parameter["Value"]' -r)
-export PROXY_SSH_KEY_ID=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_ssh_key_id | jq '.Parameter["Value"]' -r)
-export PROXY_TAG=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.proxy_tag | jq '.Parameter["Value"]' -r)
-export SELENIUM_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.selenium_url | jq '.Parameter["Value"]' -r)
 export REGISTER_RESUME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.register_resume_url | jq '.Parameter["Value"]' -r)
 export FILE_TOKEN_PURGED_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.file_token_purged_url | jq '.Parameter["Value"]' -r)
 export PDF_GENERATION_LAMBDA_ENABLED=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.pdf_generation_lambda_enabled | jq '.Parameter["Value"]' -r)
@@ -111,6 +100,9 @@ export SLACK_ALLOY_UPDATE_WEBHOOK=$(aws ssm get-parameter --region $REGION --wit
 export MAPBOX_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mapbox_key | jq '.Parameter["Value"]' -r)
 export MMS_ATTACHMENT_BUCKET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mms_attachment_bucket | jq '.Parameter["Value"]' -r)
 export CIVIC_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.civic_key | jq '.Parameter["Value"]' -r)
+export UPTIME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_url | jq '.Parameter["Value"]' -r)
+export UPTIME_USER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_user | jq '.Parameter["Value"]' -r)
+export UPTIME_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_secret | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
 
@@ -155,7 +147,6 @@ if [ "$2" ]; then
     -e ACTIONNETWORK_SYNC_DAILY \
     -e ACTIONNETWORK_SYNC_HOUR \
     -e OVBM_SYNC \
-    -e UPTIME_ENABLED \
     -e FILE_PURGE_DAYS \
     -e STATE_TOOL_REDIRECT_SYNC \
     -e TARGETSMART_KEY \
@@ -206,16 +197,6 @@ if [ "$2" ]; then
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
     -e API_KEY_PEPPER \
     -e DIGITALOCEAN_KEY \
-    -e UPTIME_TWITTER_CONSUMER_KEY \
-    -e UPTIME_TWITTER_CONSUMER_SECRET \
-    -e UPTIME_TWITTER_ACCESS_TOKEN \
-    -e UPTIME_TWITTER_ACCESS_TOKEN_SECRET \
-    -e SLACK_UPTIME_WEBHOOK \
-    -e PROXY_SSH_KEY \
-    -e PROXY_SSH_PUB \
-    -e PROXY_SSH_KEY_ID \
-    -e PROXY_TAG \
-    -e SELENIUM_URL \
     -e REGISTER_RESUME_URL \
     -e FILE_TOKEN_PURGED_URL \
     -e PDF_GENERATION_LAMBDA_ENABLED \
@@ -232,6 +213,9 @@ if [ "$2" ]; then
     -e MAPBOX_KEY \
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
+    -e UPTIME_URL \
+    -e UPTIME_USER \
+    -e UPTIME_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \
@@ -251,7 +235,6 @@ else
     -e ACTIONNETWORK_SYNC_DAILY \
     -e ACTIONNETWORK_SYNC_HOUR \
     -e OVBM_SYNC \
-    -e UPTIME_ENABLED \
     -e FILE_PURGE_DAYS \
     -e STATE_TOOL_REDIRECT_SYNC \
     -e TARGETSMART_KEY \
@@ -302,16 +285,6 @@ else
     -e SLACK_SUBSCRIBER_INTEREST_WEBHOOK \
     -e API_KEY_PEPPER \
     -e DIGITALOCEAN_KEY \
-    -e UPTIME_TWITTER_CONSUMER_KEY \
-    -e UPTIME_TWITTER_CONSUMER_SECRET \
-    -e UPTIME_TWITTER_ACCESS_TOKEN \
-    -e UPTIME_TWITTER_ACCESS_TOKEN_SECRET \
-    -e SLACK_UPTIME_WEBHOOK \
-    -e PROXY_SSH_KEY \
-    -e PROXY_SSH_PUB \
-    -e PROXY_SSH_KEY_ID \
-    -e PROXY_TAG \
-    -e SELENIUM_URL \
     -e REGISTER_RESUME_URL \
     -e FILE_TOKEN_PURGED_URL \
     -e PDF_GENERATION_LAMBDA_ENABLED \
@@ -328,6 +301,9 @@ else
     -e MAPBOX_KEY \
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
+    -e UPTIME_URL \
+    -e UPTIME_USER \
+    -e UPTIME_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
 $IMAGE \

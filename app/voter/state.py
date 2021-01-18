@@ -4,24 +4,13 @@ from typing import Dict, Tuple, Union
 import sentry_sdk
 
 from absentee.models import BallotRequest
-from common import enums
 from common.rollouts import get_feature_bool
-from leouptime.proxy import get_random_proxy
-from leouptime.uptime import NoProxyError
+from integration.uptime import get_random_proxy_str
 from register.models import Registration
 from reminder.models import ReminderRequest
 from verifier.models import Lookup
 
 logger = logging.getLogger("voter")
-
-
-def get_random_proxy_str_pair():
-    # use random proxy (if available)
-    try:
-        proxy = get_random_proxy()
-        return proxy, f"socks5://{proxy.address}"
-    except NoProxyError:
-        return None, None
 
 
 def lookup_wi(
@@ -32,7 +21,7 @@ def lookup_wi(
     tries = 1
     while tries <= 3:
         try:
-            proxy, proxy_str = get_random_proxy_str_pair()
+            proxy_str = get_random_proxy_str()
             logger.debug(f"lookup up WI {item} with proxy_str {proxy_str}")
 
             voters = wi.lookup_voter(
@@ -49,13 +38,8 @@ def lookup_wi(
             return None, None
         except Exception as e:
             logger.warning(f"Hit exception on WI state API: {e}")
-            if proxy:
+            if proxy_str:
                 tries += 1
-                proxy.failure_count += 1
-                if proxy.failure_count > 2:
-                    logger.warning(f"Marking {proxy} BURNED")
-                    proxy.state = enums.ProxyStatus.BURNED
-                proxy.save()
             else:
                 # don't bother trying again
                 break
@@ -91,7 +75,7 @@ def lookup_ga(
         logger.warning(f"Unable to geocode county for {item}: addrs {addrs}")
         return None, None
 
-    proxy, proxy_str = get_random_proxy_str_pair()
+    proxy_str = get_random_proxy_str()
     logger.debug(f"lookup up GA {item} with proxy_str {proxy_str}")
     voter = ga.lookup_voter(
         first_name=item.first_name,

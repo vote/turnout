@@ -19,6 +19,13 @@ from .models import Link, MoverLead
 logger = logging.getLogger("integration")
 
 
+@shared_task
+def config_uptime() -> None:
+    from .uptime import config_uptime
+
+    config_uptime()
+
+
 @shared_task(queue="actionnetwork")
 def sync_action_to_actionnetwork(pk: str) -> None:
     action = Action.objects.get(pk=pk)
