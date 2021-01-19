@@ -669,23 +669,6 @@ TARGETSMART_KEY = env.str("TARGETSMART_KEY", default=None)
 #### END TARGETSMART CONFIGURATION
 
 
-#### ALLOY CONFIGURATION
-
-ALLOY_KEY = env.str("ALLOY_KEY", default=None)
-ALLOY_SECRET = env.str("ALLOY_SECRET", default=None)
-
-# periodically check alloy about state data freshness
-ALLOY_UPDATE_CHECK_HOURS = env.int("ALLOY_UPDATE_CHECK_HOURS", default=3)
-
-if ALLOY_UPDATE_CHECK_HOURS:
-    CELERY_BEAT_SCHEDULE["trigger-refresh_alloy-dates"] = {
-        "task": "verifier.tasks.refresh_alloy_dates",
-        "schedule": crontab(minute=1, hour=ALLOY_UPDATE_CHECK_HOURS),
-    }
-
-#### END ALLOY CONFIGURATION
-
-
 #### ELECTION OFFICIALS CONFIGURATION
 
 USVOTEFOUNDATION_KEY = env.str("USVOTEFOUNDATION_KEY", default=None)

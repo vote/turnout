@@ -10,8 +10,6 @@ from action.models import Action
 from common.apm import tracer
 from common.rollouts import get_feature, get_feature_bool, get_feature_int
 from smsbot.models import Number
-from verifier.alloy import ALLOY_STATES_ENABLED, query_alloy
-from verifier.models import AlloyDataUpdate
 from verifier.targetsmart import query_targetsmart
 
 from .models import Voter
@@ -29,47 +27,6 @@ def lookup(item):
         "ReminderRequest",
     ]:
         return
-
-    # alloy
-    alloy_id = None
-    alloy_result = None
-    if item.state_id in ALLOY_STATES_ENABLED:
-        alloy = query_alloy(
-            {
-                "first_name": item.first_name,
-                "last_name": item.last_name,
-                "address1": item.address1,
-                "address2": item.address2,
-                "city": item.city,
-                "state": item.state_id,
-                "zipcode": item.zipcode,
-                "date_of_birth": item.date_of_birth,
-            }
-        )
-        if (
-            alloy
-            and not alloy.get("error")
-            and "data" in alloy
-            and alloy["data"]["registration_status"]
-        ):
-            alloy_result = alloy.get("data")
-            if (
-                alloy_result["registration_status"]
-                in [
-                    "Active",
-                    "Inactive",
-                    "Suspense",
-                    "Unregistered",
-                    "Cancelled",
-                    "Purged",
-                    "Pending",
-                    "Preregistered",
-                    "Rejected",
-                ]
-                and alloy_result.get("registration_date")
-                and alloy_result.get("alloy_person_id")
-            ):
-                alloy_id = alloy_result["alloy_person_id"]
 
     # targetsmart
     ts_id = None
@@ -95,7 +52,7 @@ def lookup(item):
     # add future voterfile lookups here...
 
     # link
-    if ts_id or alloy_id or state_voter_id:
+    if ts_id or state_voter_id:
         if item.phone:
             number, _ = Number.objects.get_or_create(phone=item.phone,)
         else:
@@ -110,13 +67,6 @@ def lookup(item):
                 ).first()
             except ObjectDoesNotExist:
                 pass
-        if alloy_id and not voter:
-            try:
-                voter = Voter.objects.filter(
-                    alloy_person_id=alloy_id, state=item.state
-                ).first()
-            except ObjectDoesNotExist:
-                pass
         if state_voter_id and not voter:
             try:
                 voter = Voter.objects.filter(
@@ -127,10 +77,7 @@ def lookup(item):
 
         if not voter:
             voter = Voter.objects.create(
-                ts_voterbase_id=ts_id,
-                alloy_person_id=alloy_id,
-                state_voter_id=state_voter_id,
-                state=item.state,
+                ts_voterbase_id=ts_id, state_voter_id=state_voter_id, state=item.state,
             )
             logger.info(f"Matched new {voter} from action {item}")
         else:
@@ -147,15 +94,6 @@ def lookup(item):
                 logger.info(f"Expanded {voter} match to include TS voterbase")
             voter.ts_voterbase_id = ts_id
 
-        if alloy_id:
-            if voter.alloy_person_id:
-                if voter.alloy_person_id != alloy_id:
-                    logger.warning(
-                        f"{voter} alloy_person_id {voter.alloy_person_id} -> {alloy_id}"
-                    )
-            else:
-                logger.info(f"Expanded {voter} match to include alloy")
-            voter.alloy_person_id = alloy_id
         if state_voter_id:
             if voter.state_voter_id:
                 if voter.state_voter_id != state_voter_id:
@@ -194,33 +132,6 @@ def lookup(item):
             voter.ts_result = ts_result
             voter.last_ts_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
 
-        if alloy_id:
-            now = datetime.datetime.now(tz=datetime.timezone.utc)
-            reg_date = datetime.datetime.strptime(
-                alloy_result["registration_date"], "%Y-%m-%dT%H:%M:%SZ",
-            ).replace(tzinfo=datetime.timezone.utc)
-            last_updated = datetime.datetime.strptime(
-                alloy_result["last_updated_date"], "%Y-%m-%dT%H:%M:%SZ",
-            ).replace(tzinfo=datetime.timezone.utc)
-            # allow registration dates a bit into the future (TX seems to set it about a month into the future)
-            if reg_date > last_updated and reg_date < now + datetime.timedelta(days=35):
-                logger.info(
-                    f"Adjusting bad last_updated from Alloy: reg date {reg_date} > last_updated {last_updated}"
-                )
-                last_updated = reg_date
-            if reg_date > last_updated:
-                logger.warning(
-                    f"Bad data from Alloy: reg date {reg_date} > last_updated {last_updated}: {alloy_result}"
-                )
-            else:
-                voter.refresh_registration_status(
-                    alloy_result["registration_status"] == "Active",
-                    reg_date,
-                    last_updated,
-                )
-            voter.alloy_result = alloy_result
-            voter.last_alloy_refresh = now
-
         if state_voter_id:
             voter.last_state_refresh = datetime.datetime.now(tz=datetime.timezone.utc)
             voter.refresh_registration_status(
@@ -238,13 +149,8 @@ def lookup(item):
             )
             voter.state_result = {k: str(v) for k, v in state_result.__dict__.items()}
 
-        # name (prefer alloy bc)
-        if alloy_id:
-            voter.first_name = alloy_result.get("first_name")
-            voter.middle_name = alloy_result.get("middle_name")
-            voter.last_name = alloy_result.get("last_name")
-            voter.suffix = alloy_result.get("suffix")
-        elif ts_id:
+        # name
+        if ts_id:
             voter.first_name = ts_result.get("vb.tsmart_first_name")
             voter.middle_name = ts_result.get("vb.tsmart_middle_name")
             voter.last_name = ts_result.get("vb.tsmart_last_name")
@@ -262,13 +168,6 @@ def lookup(item):
             voter.address_full = state_result.address
             voter.city = state_result.city
             voter.zipcode = state_result.zipcode
-        elif alloy_id:
-            voter.date_of_birth = datetime.datetime.strptime(
-                alloy_result.get("birth_date"), "%Y-%m-%d"
-            ).replace(tzinfo=datetime.timezone.utc)
-            voter.address_full = alloy_result.get("address")
-            voter.city = alloy_result.get("city")
-            voter.zipcode = alloy_result.get("zip")
         elif ts_id:
             voter.date_of_birth = datetime.datetime.strptime(
                 ts_result.get("vb.voterbase_dob"), "%Y%m%d"
@@ -372,7 +271,6 @@ def recheck_old_actions(
             logger.info("voter_action_check disabled or max_recheck==0")
             return
 
-    recheck_per_alloy(limit=limit, state=state, max_minutes=max_minutes)
     recheck_any(limit=limit, state=state, max_minutes=max_minutes)
 
 
@@ -505,41 +403,6 @@ def _recheck_old_actions(
                 break
 
     return checked
-
-
-@shared_task
-def recheck_per_alloy(limit: int = None, state: str = None, max_minutes: int = None):
-    if max_minutes is None:
-        max_minutes = get_feature_int(
-            "voter_action_check", "max_recheck_alloy_minutes"
-        ) or (settings.VOTER_CHECK_INTERVAL_MINUTES // 2)
-
-    if state:
-        updates = [
-            AlloyDataUpdate.objects.filter(state=state).order_by("-created_at").first()
-        ]
-    else:
-        saw_state = set()
-        updates = []
-        for update in AlloyDataUpdate.objects.order_by("-created_at"):
-            if update.state not in saw_state:
-                saw_state.add(update.state)
-                updates.append(update)
-
-    for update in updates:
-        logger.info(
-            f"State {update.state} update for {update.state_update_at} appeared at {update.created_at}"
-        )
-        checked = _recheck_old_actions(
-            limit=limit,
-            state=update.state,
-            since=update.created_at,
-            max_minutes=max_minutes,
-        )
-        if limit is not None and checked:
-            limit -= checked
-            if limit <= 0:
-                return
 
 
 @shared_task(queue="voter")

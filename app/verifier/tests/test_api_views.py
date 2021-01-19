@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-from base64 import b64encode
 from copy import copy
 from uuid import UUID
 
@@ -14,7 +13,6 @@ from common.enums import EventType, SubscriberStatus, VoterStatus
 from election.models import State
 from event_tracking.models import Event
 from multi_tenant.models import Client
-from verifier.alloy import ALLOY_ENDPOINT, query_alloy
 from verifier.models import Lookup
 from verifier.serializers import LookupSerializer
 from verifier.targetsmart import TARGETSMART_ENDPOINT, query_targetsmart
@@ -62,15 +60,6 @@ ALLOY_EXPECTED_QUERYSTRING = {
 TARGETSMART_RESPONSES_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "sample_targetsmart_responses/")
 )
-ALLOY_RESPONSES_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "sample_alloy_responses/")
-)
-
-
-def load_alloy(filename):
-    with open(os.path.join(ALLOY_RESPONSES_PATH, filename)) as json_file:
-        data = json.load(json_file)
-    return data
 
 
 def load_targetsmart(filename):
@@ -81,32 +70,17 @@ def load_targetsmart(filename):
 
 @pytest.fixture()
 def mock_apicalls(mocker):
-    mocker.patch("verifier.api_views.gevent.joinall", return_value=None)
-
-    def process_calls(alloy_data, targetsmart_data):
-        alloy_response = mocker.Mock()
-        alloy_response.value = alloy_data
-        targetsmart_response = mocker.Mock()
-        targetsmart_response.value = targetsmart_data
-        mocker.patch(
-            "verifier.api_views.gevent.spawn",
-            side_effect=[alloy_response, targetsmart_response],
+    def process_calls(targetsmart_data):
+        return mocker.patch(
+            "verifier.api_views.query_targetsmart", return_value=targetsmart_data
         )
 
     return process_calls
 
 
 @pytest.fixture(autouse=True)
-def mock_cache(mocker):
-    mocker.patch("verifier.alloy.cache.get", return_value=None)
-    mocker.patch("verifier.alloy.cache.set", return_value=None)
-
-
-@pytest.fixture(autouse=True)
 def apikey_override(settings):
     settings.TARGETSMART_KEY = "mytargetsmartkey"
-    settings.ALLOY_KEY = "myalloykey"
-    settings.ALLOY_SECRET = "myalloysecret"
     settings.ACTIONNETWORK_SYNC = False
 
 
@@ -144,23 +118,13 @@ def test_proper_api_calls(requests_mock):
     targetsmart_call = requests_mock.register_uri(
         "GET", TARGETSMART_ENDPOINT, json=targetsmart_data
     )
-    alloy_data = load_alloy("active.json")
-    alloy_call = requests_mock.register_uri("GET", ALLOY_ENDPOINT, json=alloy_data)
 
     serializer = LookupSerializer(data=VALID_LOOKUP)
     serializer.is_valid()
 
-    alloy_result = query_alloy(serializer.validated_data)
     targetsmart_result = query_targetsmart(serializer.validated_data)
 
-    assert alloy_result == alloy_data
     assert targetsmart_result == targetsmart_data
-
-    alloy_auth_string = (
-        "Basic " + b64encode("myalloykey:myalloysecret".encode()).decode()
-    )
-    assert alloy_call.last_request.headers["authorization"] == alloy_auth_string
-    assert alloy_call.last_request.qs == ALLOY_EXPECTED_QUERYSTRING
 
     assert targetsmart_call.last_request.headers["x-api-key"] == "mytargetsmartkey"
     assert targetsmart_call.last_request.qs == TARGETSMART_EXPECTED_QUERYSTRING
@@ -170,8 +134,7 @@ def test_proper_api_calls(requests_mock):
 def test_lookup_created(requests_mock, mock_finish, mock_apicalls):
     client = APIClient()
     targetsmart_response_data = load_targetsmart("active.json")
-    alloy_response_data = load_alloy("active.json")
-    mock_apicalls(alloy_response_data, targetsmart_response_data)
+    mock_apicalls(targetsmart_response_data)
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
@@ -187,8 +150,6 @@ def test_lookup_created(requests_mock, mock_finish, mock_apicalls):
     assert lookup.zipcode == "60657"
     assert lookup.phone.as_e164 == "+13129289292"
     assert lookup.sms_opt_in_subscriber == False
-    assert lookup.alloy_response == alloy_response_data
-    assert lookup.alloy_status == VoterStatus.ACTIVE
     assert lookup.targetsmart_response == targetsmart_response_data
     assert lookup.targetsmart_status == VoterStatus.ACTIVE
     action = Action.objects.first()
@@ -203,79 +164,25 @@ def test_lookup_created(requests_mock, mock_finish, mock_apicalls):
 
 
 @pytest.mark.django_db
-def test_mismatch_a_active_ts_not_found(mock_apicalls, mock_finish):
+def test_ts_too_many(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("not_found.json"))
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    lookup = Lookup.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
-    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
-    assert lookup.alloy_status == VoterStatus.ACTIVE
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.registered == True
-
-
-@pytest.mark.django_db
-def test_mismatch_ts_active_a_not_found(mock_apicalls, mock_finish):
-    client = APIClient()
-    mock_apicalls(load_alloy("not_found.json"), load_targetsmart("active.json"))
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    lookup = Lookup.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
-    assert lookup.targetsmart_status == VoterStatus.ACTIVE
-    assert lookup.alloy_status == VoterStatus.UNKNOWN
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.registered == True
-
-
-@pytest.mark.django_db
-def test_mismatch_ts_active_a_inactive(mock_apicalls, mock_finish):
-    client = APIClient()
-    mock_apicalls(load_alloy("inactive.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("too_many.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     lookup = Lookup.objects.first()
     assert response.json() == {"registered": False, "action_id": str(lookup.action.pk)}
-    assert lookup.targetsmart_status == VoterStatus.ACTIVE
-    assert lookup.alloy_status == VoterStatus.INACTIVE
-    assert lookup.voter_status == VoterStatus.INACTIVE
-    assert lookup.registered == False
-
-
-@pytest.mark.django_db
-def test_dual_match(mock_apicalls, mock_finish):
-    client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    lookup = Lookup.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
-    assert lookup.targetsmart_status == VoterStatus.ACTIVE
-    assert lookup.alloy_status == VoterStatus.ACTIVE
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.registered == True
-
-
-@pytest.mark.django_db
-def test_ts_too_many(mock_apicalls, mock_finish):
-    client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("too_many.json"))
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    lookup = Lookup.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
     assert lookup.targetsmart_status == VoterStatus.UNKNOWN
-    assert lookup.alloy_status == VoterStatus.ACTIVE
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.registered == True
+    assert lookup.voter_status == VoterStatus.UNKNOWN
+    assert lookup.registered == False
 
 
 @pytest.mark.django_db
 def test_not_found(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("not_found.json"), load_targetsmart("not_found.json"))
+    mock_apicalls(load_targetsmart("not_found.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     lookup = Lookup.objects.first()
     assert response.json() == {"registered": False, "action_id": str(lookup.action.pk)}
     assert lookup.targetsmart_status == VoterStatus.UNKNOWN
-    assert lookup.alloy_status == VoterStatus.UNKNOWN
     assert lookup.voter_status == VoterStatus.UNKNOWN
     assert lookup.registered == False
 
@@ -283,23 +190,9 @@ def test_not_found(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_ts_error(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(
-        load_alloy("active.json"), load_targetsmart("bad_character_error.json")
-    )
+    mock_apicalls(load_targetsmart("bad_character_error.json"))
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
-    lookup = Lookup.objects.first()
-    assert response.json() == {"registered": True, "action_id": str(lookup.action.pk)}
-    assert lookup.targetsmart_status == VoterStatus.UNKNOWN
-    assert lookup.alloy_status == VoterStatus.ACTIVE
-    assert lookup.voter_status == VoterStatus.ACTIVE
-    assert lookup.registered == True
-
-
-@pytest.mark.django_db
-def test_dual_error(mock_apicalls, mock_finish):
-    client = APIClient()
-    mock_apicalls({"error": "Boo"}, {"error": "No!!!"})
-    response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
+    Lookup.objects.first()
     assert response.status_code == 503
     assert response.json() == {"error": "Error from data providers"}
     assert Lookup.objects.count() == 0
@@ -308,7 +201,7 @@ def test_dual_error(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_finish(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
 
@@ -318,7 +211,7 @@ def test_finish(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_sourcing(mock_apicalls, mocker, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     response = client.post(LOOKUP_API_ENDPOINT, VALID_LOOKUP)
     assert response.status_code == 200
@@ -340,7 +233,7 @@ def test_sourcing(mock_apicalls, mocker, mock_finish):
 @pytest.mark.django_db
 def test_default_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     first_subscriber = Client.objects.first()
     baker.make_recipe("multi_tenant.client")
@@ -358,7 +251,7 @@ def test_default_subscriber(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_inactive_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     first_subscriber = Client.objects.first()
     second_subscriber = baker.make_recipe("multi_tenant.client")
@@ -369,7 +262,7 @@ def test_inactive_subscriber(mock_apicalls, mock_finish):
     )
     assert Client.objects.count() == 4
 
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     url = f"{LOOKUP_API_ENDPOINT}?subscriber=verifierslugtwo"
     response = client.post(url, VALID_LOOKUP)
@@ -384,7 +277,7 @@ def test_inactive_subscriber(mock_apicalls, mock_finish):
     second_subscriber.status = SubscriberStatus.DISABLED
     second_subscriber.save()
 
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     inactive_subscriber_response = client.post(url, VALID_LOOKUP)
     assert inactive_subscriber_response.status_code == 200
@@ -401,7 +294,7 @@ def test_inactive_subscriber(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_custom_subscriber(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     second_subscriber = baker.make_recipe("multi_tenant.client")
     baker.make_recipe(
@@ -424,7 +317,7 @@ def test_custom_subscriber(mock_apicalls, mock_finish):
 @pytest.mark.django_db
 def test_invalid_subscriber_key(mock_apicalls, mock_finish):
     client = APIClient()
-    mock_apicalls(load_alloy("active.json"), load_targetsmart("active.json"))
+    mock_apicalls(load_targetsmart("active.json"))
 
     first_subscriber = Client.objects.first()
     second_subscriber = baker.make_recipe("multi_tenant.client")
