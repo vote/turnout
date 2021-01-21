@@ -391,10 +391,6 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_url"
             },
             {
-               "name": "UPTIME_USER",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_user"
-            },
-            {
                "name": "UPTIME_SECRET",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_secret"
             }
@@ -791,10 +787,6 @@
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_url"
             },
             {
-               "name": "UPTIME_USER",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_user"
-            },
-            {
                "name": "UPTIME_SECRET",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_secret"
             }
@@ -1189,10 +1181,6 @@
             {
                "name": "UPTIME_URL",
                "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_url"
-            },
-            {
-               "name": "UPTIME_USER",
-               "valueFrom": "arn:aws:ssm:us-west-2:719108811834:parameter/turnout.dev.uptime_user"
             },
             {
                "name": "UPTIME_SECRET",

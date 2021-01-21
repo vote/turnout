@@ -322,10 +322,6 @@
         name: 'UPTIME_URL',
       },
       {
-        valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_user',
-        name: 'UPTIME_USER',
-      },
-      {
         valueFrom: 'arn:aws:ssm:us-west-2:719108811834:parameter/turnout.' + env + '.uptime_secret',
         name: 'UPTIME_SECRET',
       },

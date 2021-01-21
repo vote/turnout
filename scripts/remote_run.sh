@@ -101,7 +101,6 @@ export MAPBOX_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --n
 export MMS_ATTACHMENT_BUCKET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.mms_attachment_bucket | jq '.Parameter["Value"]' -r)
 export CIVIC_KEY=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.civic_key | jq '.Parameter["Value"]' -r)
 export UPTIME_URL=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_url | jq '.Parameter["Value"]' -r)
-export UPTIME_USER=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_user | jq '.Parameter["Value"]' -r)
 export UPTIME_SECRET=$(aws ssm get-parameter --region $REGION --with-decryption --name turnout.$ENVIRONMENT.uptime_secret | jq '.Parameter["Value"]' -r)
 
 echo "Parameters Acquired"
@@ -214,7 +213,6 @@ if [ "$2" ]; then
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
     -e UPTIME_URL \
-    -e UPTIME_USER \
     -e UPTIME_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
@@ -302,7 +300,6 @@ else
     -e MMS_ATTACHMENT_BUCKET \
     -e CIVIC_KEY \
     -e UPTIME_URL \
-    -e UPTIME_USER \
     -e UPTIME_SECRET \
 -e DEBUG=$DEBUG \
 -p 8000:8000 \
