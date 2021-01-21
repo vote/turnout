@@ -9,7 +9,7 @@ env:
 
 before_install:
   - touch .env
-  - docker pull $CACHE_IMAGE:latest || true
+  - docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS || true
 
 install:
   - docker-compose build
