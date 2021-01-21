@@ -7,9 +7,31 @@
 <div class="content-wrapper">
 
     <div class="col-md-12">
+        <details>
+            <summary>About This Tool</summary>
+            <p>
+                This tool allows us to add OVBM portals for individual regions.
+                It's a region-specific override to <tt>external_tool_vbm_application</tt>.
+            </p>
+            <p>
+                We use this for states where there's no statewide OVBM tool,
+                but individual counties or cities have set up their own tools,
+                or in cases where we'd rather send users to a region-specific
+                OVBM tool rather than the statewide for (for example, in 2020,
+                NYC had a specific OVBM portal that we directed users to instead
+                of the statewide New York portal).
+            </p>
+            <p>
+                Note that Florida does not have a statewide OVBM tool, but every
+                region in Florida has its own tool. These region-specific
+                overrides are not managed here -- they are automatically scraped
+                from <a href="https://fl.dems.vote/mail/">the FL Dems website</a>
+                nightly.
+            </p>
+        </details>
         <div class="card">
             <div class="card-header card-header-with-actions">
-                <div>LEO Contact Overrides</div>
+                <div>Per-Region OVBM Link Overrides</div>
                 <div class="card-header-actions">
                     <a title="New" href="{% url 'manage:absentee_region_ovbm:region_ovbm_link_create' %}">
                         <span class="mdi mdi-pencil"></span>

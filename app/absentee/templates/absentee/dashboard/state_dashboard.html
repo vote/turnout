@@ -7,6 +7,62 @@
 {% add_data "body-class" "esign_dashboard" %}
 <div class="content-wrapper">
     <div class="col-lg-10 offset-lg-1">
+        <details>
+            <summary>About This Tool</summary>
+            <p>
+                This tool managed e-signed absentee ballot applications. E-signed
+                applications are signed online by the voter using their manual
+                signature and our e-sign technology, and then submitted directly
+                to the Local Election Official using email or fax.
+            </p>
+            <h4>Viewing applications</h4>
+            <p>
+                This dashboard lists every state where e-sign is enabled. You
+                can click on the name of the state to see a list of all the
+                regions in that state, along with how applications are being
+                submitted in that region, and how many applications we've sent
+                to that region's LEO recently. "Print at Home" indicates that
+                e-sign is not available in that region, either because we've
+                turned it off for that region, or because we do not have email
+                or fax contact info for that region.
+            </p>
+            <p>
+                If you need to see a specific e-signed application, you can do
+                so by navigating to that state, and clicking "Applications"
+                for the region. This will show you a list of all e-signed
+                applications we have submitted to that region. You can then view
+                individual applications, which will show you the submitted PDF
+                (with any SSNs or driver's license numbers blanked). This feature
+                is only available for applications submitted in the past 60
+                days; after that the application and signature are automatically
+                purged from our systems. This is useful to triage feedback about
+                illegible or invalid signatures coming from LEOs.
+            </p>
+            <h4>Managing overrides</h4>
+            <p>
+                You can also manage "overrides" for regions. This allows you
+                to disable e-sign for that region, change the submission method
+                (e.g. force applications to be submitted by fax even if we
+                are using email for that state), or change the email address /
+                fax number we use.
+            </p>
+            <p>
+                To turn off e-sign for a specific region, create an override
+                for that region and set the submission method to "Print at Home".
+            </p>
+            <p>
+                To change the submission email or fax number, create an override
+                for that region and set the new email or fax number. If you're
+                creating this override because the USVF data is incorrect,
+                you should email USVF and submit the correct to them, then remove
+                our override once the USVF data is updated (usually in a day or
+                two). If you're creating this override because the region has
+                a specific email for submitted electronic applications that's
+                separate from the normal contact email, then you don't need to
+                contact USVF about that (they don't track electronic submission
+                addresses that are different from the contact addresses).
+            </p>
+        </details>
         <h1>E-Sign States</h1>
         <a href="{% url 'manage:absentee_dashboard:esign_application_list' %}">View Applications&raquo;</a>
         <!-- Table -->
