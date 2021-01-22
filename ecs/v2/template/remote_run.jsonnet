@@ -73,7 +73,7 @@ local docker_env_lines = [
   else
 
   echo "Building From Local"
-  docker build --cache-from voteamerica/turnout-ci-cache:latest --build-arg TAG_ARG=local --build-arg BUILD_ARG=0 -t turnout_full .
+  docker build --build-arg TAG_ARG=local --build-arg BUILD_ARG=0 -t turnout_full .
   IMAGE=turnout_full:latest
 
   fi

@@ -21,5 +21,5 @@ else
   aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 fi
 
-docker build --cache-from voteamerica/turnout-ci-cache:latest --build-arg TAG_ARG=dev --build-arg BUILD_ARG=${TAG_NAME} -t ${IMAGE} .
+docker build --build-arg TAG_ARG=dev --build-arg BUILD_ARG=${TAG_NAME} -t ${IMAGE} .
 docker push ${IMAGE}

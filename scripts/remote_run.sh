@@ -124,7 +124,7 @@ IMAGE=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$DOCKER_REPO_NAME:$1
 else
 
 echo "Building From Local"
-docker build --cache-from voteamerica/turnout-ci-cache:latest --build-arg TAG_ARG=local --build-arg BUILD_ARG=0 -t turnout_full .
+docker build --build-arg TAG_ARG=local --build-arg BUILD_ARG=0 -t turnout_full .
 IMAGE=turnout_full:latest
 
 fi

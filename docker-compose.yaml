@@ -32,9 +32,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-dev
-      cache_from:
-        - voteamerica/turnout-ci-cache:latest
-    image: voteamerica/turnout-ci-cache:latest
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --pattern=*.yml --recursive -- python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -49,7 +46,7 @@ services:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
-      - DD_AGENT_HOST=ddagent
+      - DD_AGENT_HOST=echo
       - DD_DOGSTATSD_PORT=3333
     env_file:
       - .env
@@ -60,7 +57,9 @@ services:
     restart: unless-stopped
 
   beat:
-    image: voteamerica/turnout-ci-cache:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --pattern=*.py --recursive -- python -m celery -A turnout.celery_beat beat --scheduler redbeat.RedBeatScheduler
     volumes:
@@ -73,7 +72,7 @@ services:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
-      - DD_AGENT_HOST=ddagent
+      - DD_AGENT_HOST=echo
       - DD_DOGSTATSD_PORT=3333
     env_file:
       - .env
@@ -83,7 +82,9 @@ services:
       - rabbitmq
 
   worker:
-    image: voteamerica/turnout-ci-cache:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
     command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q default,usvf,tokens,high-pri
     volumes:
@@ -96,7 +97,7 @@ services:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
       - ALLOWED_HOSTS=*
       - DEBUG=True
-      - DD_AGENT_HOST=ddagent
+      - DD_AGENT_HOST=echo
       - DD_DOGSTATSD_PORT=3333
     env_file:
       - .env
@@ -106,56 +107,10 @@ services:
       - beat
       - rabbitmq
 
-  # worker_bulk:
-  #   image: voteamerica/turnout-ci-cache:latest
-  #   entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-  #   command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q tokens
-  #   volumes:
-  #     - ./app:/app
-  #   environment:
-  #     - SECRET_KEY=abcd
-  #     - DJANGO_SETTINGS_MODULE=turnout.settings
-  #     - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
-  #     - REDIS_URL=redis://redis:6379
-  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
-  #     - ALLOWED_HOSTS=*
-  #     - DEBUG=True
-  #     - DD_AGENT_HOST=ddagent
-  #     - DD_DOGSTATSD_PORT=3333
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #     - beat
-  #     - rabbitmq
-
-  # worker_high_pri:
-  #   image: voteamerica/turnout-ci-cache:latest
-  #   entrypoint: wait-for-it -t 45 postgres:5432 redis:6379 rabbitmq:5672 --
-  #   command: watchmedo auto-restart --directory /app/ --patterns='*.py;*.yml' --recursive -- python -m celery -A turnout.celery_app worker -Q high-pri
-  #   volumes:
-  #     - ./app:/app
-  #   environment:
-  #     - SECRET_KEY=abcd
-  #     - DJANGO_SETTINGS_MODULE=turnout.settings
-  #     - DATABASE_URL=postgis://postgres:turnout@postgres:5432/turnout
-  #     - REDIS_URL=redis://redis:6379
-  #     - AMQP_URL=amqp://guest:guest@rabbitmq:5672/turnout
-  #     - ALLOWED_HOSTS=*
-  #     - DEBUG=True
-  #     - DD_AGENT_HOST=ddagent
-  #     - DD_DOGSTATSD_PORT=3333
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - postgres
-  #     - redis
-  #     - beat
-  #     - rabbitmq
-
   client:
-    image: voteamerica/turnout-ci-cache:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     command: npm run develop
     volumes:
       - ./app:/app
@@ -166,30 +121,14 @@ services:
       - .env
 
   echo:
-    image: voteamerica/turnout-ci-cache:latest
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     command: python -m echo
     volumes:
       - ./app/echo.py:/app/echo.py
     ports:
       - "3333:3333"
-
-  ddagent:
-    image: datadog/agent
-    environment:
-      - DD_APM_ENABLED=true
-      - DD_BIND_HOST=0.0.0.0
-      - DD_LOG_LEVEL=CRITICAL
-      - DATADOG_ENV=local
-      - DATADOG_SERVICE_NAME=local
-      - DD_TAGS='env:local'
-    expose:
-      - "8125/udp"
-      - "8126"
-    ports:
-      - "8125:8125/udp"
-      - "8126:8126"
-    env_file:
-      - .env
 
   # docs:
   #   build:

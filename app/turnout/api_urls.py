@@ -16,5 +16,4 @@ urlpatterns = [
     path("apikey/", include("apikey.api_urls")),
     path("integration/", include("integration.api_urls")),
     path("pollingplace/", include("polling_place.api_urls")),
-    path("common/", include("common.api_urls")),
 ]
