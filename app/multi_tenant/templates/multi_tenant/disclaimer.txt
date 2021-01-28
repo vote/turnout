@@ -1,7 +1,7 @@
-{% if subscriber.sms_enabled %}
+{% autoescape off %}{% if subscriber.sms_enabled %}
 {% if subscriber.sms_disclaimer %}
 {{ subscriber.sms_disclaimer }}
 {% else %}
 {% if subscriber.sms_checkbox %}By checking this box,{% else %}If you provide your cell phone number,{% endif %} you agree to receive occasional text messages from {{ subscriber.name }}. Message and data rates may apply. Message frequency varies. Text STOP to cancel or HELP for help.
 {% endif %}
-{% endif %}
+{% endif %}{% endautoescape %}
