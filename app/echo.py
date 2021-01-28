@@ -1,5 +1,5 @@
 # Fork of https://gitlab.com/n0r1sk/echo/
-# Copyright 2020 VoteAmerica
+# Copyright 2021 VoteAmerica
 # Copyright 2017 Rausch Bernhard and Kleinsasser Mario
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

@@ -264,22 +264,10 @@ def prepare_formdata(
             else:
                 raise RuntimeError(f"Invalid auto_field type: {auto_type}")
 
-    # 2020 vbm deadline
-    try:
-        state_mail_deadline_2020 = (
-            StateInformation.objects.only("field_type", "text")
-            .get(
-                state=ballot_request.state,
-                field_type__slug="2020_vbm_request_deadline_by_mail",
-            )
-            .text
-        )
-    except StateInformation.DoesNotExist:
-        state_mail_deadline_2020 = "mailed as soon as possible."
-    form_data["2020_state_deadline"] = state_mail_deadline_2020
+    form_data["2020_state_deadline"] = "mailed as soon as possible."
     form_data[
         "2020_state_deadline_full"
-    ] = f"Your form must be {state_mail_deadline_2020}"
+    ] = f"Your form should be mailed as soon as possible."
 
     # ballot tracker tool
     short_url = ""

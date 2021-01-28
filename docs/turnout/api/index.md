@@ -34,6 +34,10 @@ For the 2020 General Election, we provide fields with specific dates in addition
 |`vbm_deadline_online`|`2020_vbm_request_deadline_online`|
 |`vbm_voted_ballot_deadline_in_person`|`2020_ballot_return_deadline_in_person`|
 |`vbm_voted_ballot_deadline_mail`|`2020_ballot_return_deadline_by_mail`|
+|N/A, field was just for 2020|`2020_vbm_mailing_applications`|
+|N/A, field was just for 2020|`2020_vbm_anyone`|
+|N/A, field was just for 2020|`2020_vbm_changes`|
+|`ballot_curing_instructions`|`2020_ballot_curing_instructions`|
 
 ## GET `/election/state/{state}/`
 

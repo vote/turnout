@@ -46,7 +46,7 @@ Just a few more steps to request your absentee ballot.
 
 <hr><br>
 
-Your absentee ballot request form must be <strong>{{ state_info.2020_vbm_request_deadline_by_mail|markdownify }}</strong>.<br><br>
+Your absentee ballot request form must be <strong>{{ state_info.vbm_deadline_mail|markdownify }}</strong>.<br><br>
 
 {% if state_info.vbm_warnings %}
 {{ state_info.vbm_warnings | markdownify }}<br><br>

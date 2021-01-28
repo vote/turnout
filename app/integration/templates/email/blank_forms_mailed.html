@@ -48,16 +48,15 @@ visit <strong><a href="https://voteamerica.com/?refcode=integration_blank_forms_
 
 A few important dates:
 <ul>
-  <li>Voter registration deadline (by mail): <strong>{{ state_info.2020_registration_deadline_by_mail }}</strong></li>
-  <li>Voter registration deadline (in person): <strong>{{ state_info.2020_registration_deadline_in_person }}</strong></li>
+  <li>Voter registration deadline (by mail): <strong>{{ state_info.registration_deadline_mail }}</strong></li>
+  <li>Voter registration deadline (in person): <strong>{{ state_info.registration_deadline_in_person }}</strong></li>
   {% if state_info.external_tool_ovr %}
-  <li>Voter registration deadline (online): <strong>{{ state_info.2020_registration_deadline_online }}</strong></li>
+  <li>Voter registration deadline (online): <strong>{{ state_info.registration_deadline_online }}</strong></li>
   {% endif %}
   {% if state_info.early_voting_starts != 'N/A' %}
-  <li>Early voting starts: <strong>{{ state_info.2020_early_voting_starts }}</strong></li>
-  <li>Early voting ends: <strong>{{ state_info.2020_early_voting_ends }}</strong></li>
+  <li>Early voting starts: <strong>{{ state_info.early_voting_starts }}</strong></li>
+  <li>Early voting ends: <strong>{{ state_info.early_voting_ends }}</strong></li>
   {% endif %}
-  <li>Election day: <strong>November 3, 2020</strong></li>
 </ul>
 
 <br><br>

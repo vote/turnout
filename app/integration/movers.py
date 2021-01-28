@@ -287,23 +287,7 @@ def get_register_form_data(lead: MoverLead):
     def lower_first_letter(s):
         return s[0].lower() + s[1:]
 
-    dates = [
-        f"Deadline to register: {cap_first_letter(form_data['2020_registration_deadline_by_mail'])}",
-    ]
-    if (
-        form_data["2020_early_voting_starts"]
-        and form_data["2020_early_voting_starts"] != "N/A"
-    ):
-        dates.extend(
-            [
-                f"Early voting starts: {form_data['2020_early_voting_starts']}",
-                f"Early voting ends: {form_data['2020_early_voting_ends']}",
-            ]
-        )
-    dates.append(f"Election day: November 3, 2020")
-
     # no dates or other info for now.
-    # form_data["important_dates"] = "\n".join(dates)
     form_data["important_dates"] = ""
 
     # mangle the deadline a bit to accomodate mixed case (these strings all look something like

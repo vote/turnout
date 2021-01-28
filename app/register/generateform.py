@@ -117,22 +117,10 @@ def extract_formdata(registration, state_id_number, is_18_or_over):
         state_deadline = "Mail your form as soon as possible."
     form_data["state_deadlines"] = state_deadline
 
-    # 2020
-    try:
-        state_mail_deadline_2020 = (
-            StateInformation.objects.only("field_type", "text")
-            .get(
-                state=registration.state,
-                field_type__slug="2020_registration_deadline_by_mail",
-            )
-            .text
-        )
-    except StateInformation.DoesNotExist:
-        state_mail_deadline_2020 = "mailed as soon as possible."
-    form_data["2020_state_deadline"] = state_mail_deadline_2020
+    form_data["2020_state_deadline"] = "mailed as soon as possible."
     form_data[
         "2020_state_deadline_full"
-    ] = f"Your form must be {state_mail_deadline_2020}"
+    ] = f"Your form should be mailed as soon as possible."
 
     # Warnings
     try:
