@@ -4,6 +4,6 @@ All VoteAmerica tools can be embedded in other websites with a short snippet of 
 
 The tools have minimal branding, and the fonts and color scheme should work with any website design.
 
-For users who do not need access to the information collected by the tools, you can use our [free embed code](/embed/free/). For users who want the information collected in the tools, you can visit [https://premium.voteamerica.com/](https://premium.voteamerica.com/) for more information.
+For users who do not need access to the information collected by the tools, you can use our [free embed code](https://www.voteamerica.com/embeds/). For users who want the information collected in the tools, you can visit [https://premium.voteamerica.com/](https://premium.voteamerica.com/) for more information.
 
 Existing premium subscribers can access their custom embed code at [https://admin.voteamerica.com/](https://admin.voteamerica.com/).
