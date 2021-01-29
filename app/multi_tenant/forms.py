@@ -24,19 +24,15 @@ sms_mode_choice = forms.ChoiceField(
     choices=[
         (
             SubscriberSMSOption.BOX_UNCHECKED,
-            "We surface an SMS opt-in box that is unchecked by default. (Recommended for all tax-statuses.)",
+            "We surface an SMS opt-in box that is unchecked by default.",
         ),
         (
             SubscriberSMSOption.BOX_CHECKED,
             "We surface an SMS opt-in box that is checked by default.**",
         ),
         (
-            SubscriberSMSOption.AUTO_OPT_IN,
-            "We would like to automatically opt everyone into our SMS program, without providing a checkbox.**",
-        ),
-        (
             SubscriberSMSOption.NONE,
-            "We do not have an SMS program and do not require opt-in options.",
+            "We do not have an SMS program and would not like to collect SMS opt-ins.",
         ),
     ],
 )

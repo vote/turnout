@@ -25,11 +25,11 @@
                             <h3>SMS Program</h3>
                             <p>
                                 For premium and nonprofit subscribers, we can ask
-                                users for context to join your SMS program. Free users
+                                users for consent to join your SMS program. Free users
                                 can ignore this section.
                             </p>
                             {{ form.sms_mode|as_crispy_field }}
-                            <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
+                            <small class="form-text text-muted manual-help">**We strongly recommend consulting a TCPA attorney before selecting this option</small>
                             <button type="submit" class="btn btn-block btn-primary">Submit</button>
                             {% csrf_token %}
                         </form>

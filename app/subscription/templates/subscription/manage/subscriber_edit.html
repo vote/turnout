@@ -19,7 +19,7 @@
             <div class="card-body">
                 <form role="form" method="POST" action="" novalidate>
                     {{ form|crispy }}
-                    <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
+                    <small class="form-text text-muted manual-help">**We strongly recommend consulting a TCPA attorney before selecting this option</small>
                     <button type="submit" class="btn btn-block btn-primary">Edit</button>
                     {% csrf_token %}
                 </form>

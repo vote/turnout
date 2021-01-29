@@ -19,7 +19,14 @@
                     {% if user.active_client.plan_has_data_access %}
                     <h3>SMS Program</h3>
                     {{ form.sms_mode|as_crispy_field }}
-                    <small class="form-text text-muted manual-help">**Please consult a TCPA attorney before selecting this option.</small>
+                    <small class="form-text text-muted manual-help">
+                        If you choose to collect SMS opt-ins, we will show a checkbox to users
+                        on the first page of the tools saying &ldquo;By checking this box, you agree
+                        to receive text messages from {{ user.active_client }}. Message
+                        and data rates may apply. Message frequency varies. Text STOP to unsubscribe
+                        or HELP for more info.&rdquo; If you need custom opt-in language, email
+                        <a href="mailto:legal@voteamerica.com">legal@voteamerica.com</a>.
+                    </small>
                     <h3>Third Party Integrations</h3>
                     <p><small>Bluelink and TMC syncs happen nightly. Your VoteAmerica subscriber ID is <code><small>{{ user.active_client_slug }}</small></code>.</small></p>
                     {{ form.sync_bluelink|as_crispy_field }}
